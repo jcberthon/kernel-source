@@ -23,6 +23,8 @@
 
 %include %_sourcedir/kernel-spec-macros
 
+%(chmod +x %_sourcedir/{@SCRIPTS@})
+
 Name:           kernel-docs@VARIANT@
 Summary:        Kernel Documentation
 Version:        @RPMVERSION@
