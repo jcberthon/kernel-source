@@ -1,0 +1,78 @@
+From 66f842c4a19f7bd9add5a6a53a11d48e9d59207c Mon Sep 17 00:00:00 2001
+From: Mahesh Salgaonkar <mahesh@linux.vnet.ibm.com>
+Date: Wed, 30 Oct 2013 20:03:51 +0530
+Subject: [PATCH 08/21] powerpc/book3s: Split the common exception prolog logic
+ into two section.
+
+References: bsc#1094244
+Patch-mainline: v3.14-rc1
+Git-commit: b14a7253cf999412e5a0dd39d58b0a42d19fd73a
+
+This patch splits the common exception prolog logic into three parts to
+facilitate reuse of existing code in the next patch. This patch also
+re-arranges few instructions in such a way that the second part now deals
+with saving register values from paca save area to stack frame, and
+the third part deals with saving current register values to stack frame.
+
+The second and third part will be reused in the machine check exception
+routine in the subsequent patch.
+
+Please note that this patch does not introduce or change existing code
+logic. Instead it is just a code movement and instruction re-ordering.
+
+Patch Acked-by Paul. But made some minor modification (explained above) to
+address Paul's comment in the later patch(3).
+
+Signed-off-by: Mahesh Salgaonkar <mahesh@linux.vnet.ibm.com>
+Acked-by: Paul Mackerras <paulus@samba.org>
+Signed-off-by: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/include/asm/exception-64s.h | 17 ++++++++++++-----
+ 1 file changed, 12 insertions(+), 5 deletions(-)
+
+diff --git a/arch/powerpc/include/asm/exception-64s.h b/arch/powerpc/include/asm/exception-64s.h
+index 92dc761a31f7..24b4ce4491d9 100644
+--- a/arch/powerpc/include/asm/exception-64s.h
++++ b/arch/powerpc/include/asm/exception-64s.h
+@@ -300,9 +300,12 @@ do_kvm_##n:								\
+ 	beq	4f;			/* if from kernel mode		*/ \
+ 	ACCOUNT_CPU_USER_ENTRY(r9, r10);				   \
+ 	SAVE_PPR(area, r9, r10);					   \
+-4:	std	r2,GPR2(r1);		/* save r2 in stackframe	*/ \
+-	SAVE_4GPRS(3, r1);		/* save r3 - r6 in stackframe	*/ \
+-	SAVE_2GPRS(7, r1);		/* save r7, r8 in stackframe	*/ \
++4:	EXCEPTION_PROLOG_COMMON_2(area)					   \
++	EXCEPTION_PROLOG_COMMON_3(n)					   \
++	ACCOUNT_STOLEN_TIME
++
++/* Save original regs values from save area to stack frame. */
++#define EXCEPTION_PROLOG_COMMON_2(area)					   \
+ 	ld	r9,area+EX_R9(r13);	/* move r9, r10 to stackframe	*/ \
+ 	ld	r10,area+EX_R10(r13);					   \
+ 	std	r9,GPR9(r1);						   \
+@@ -317,6 +320,11 @@ do_kvm_##n:								\
+ 	ld	r10,area+EX_CFAR(r13);					   \
+ 	std	r10,ORIG_GPR3(r1);					   \
+ 	END_FTR_SECTION_NESTED(CPU_FTR_CFAR, CPU_FTR_CFAR, 66);		   \
++
++#define EXCEPTION_PROLOG_COMMON_3(n)					   \
++	std	r2,GPR2(r1);		/* save r2 in stackframe	*/ \
++	SAVE_4GPRS(3, r1);		/* save r3 - r6 in stackframe   */ \
++	SAVE_2GPRS(7, r1);		/* save r7, r8 in stackframe	*/ \
+ 	ld	r2,PACATOC(r13);	/* get kernel TOC into r2	*/ \
+ 	mflr	r9;			/* save LR in stackframe	*/ \
+ 	std	r9,_LINK(r1);						   \
+@@ -331,8 +339,7 @@ do_kvm_##n:								\
+ 	li	r10,0;							   \
+ 	ld	r11,exception_marker@toc(r2);				   \
+ 	std	r10,RESULT(r1);		/* clear regs->result		*/ \
+-	std	r11,STACK_FRAME_OVERHEAD-16(r1); /* mark the frame	*/ \
+-	ACCOUNT_STOLEN_TIME
++	std	r11,STACK_FRAME_OVERHEAD-16(r1); /* mark the frame	*/
+ 
+ /*
+  * Exception vectors.
+-- 
+2.13.7
+
