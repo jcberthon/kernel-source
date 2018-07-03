@@ -1,0 +1,101 @@
+From 7f0891bd1f55aee2e289576346c3af564f6e6058 Mon Sep 17 00:00:00 2001
+From: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Date: Thu, 1 Mar 2012 12:45:27 +1100
+Subject: [PATCH 02/21] powerpc: Rework runlatch code
+
+References: bsc#1094244
+Patch-mainline: v3.4-rc1
+Git-commit: fe1952fc0afb9a2e4c79f103c08aef5d13db1873 (exception macros only)
+
+This moves the inlines into system.h and changes the runlatch
+code to use the thread local flags (non-atomic) rather than
+the TIF flags (atomic) to keep track of the latch state.
+
+The code to turn it back on in an asynchronous interrupt is
+now simplified and partially inlined.
+
+Signed-off-by: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/include/asm/exception-64s.h | 57 ++++++++++++++------------------
+ 1 file changed, 25 insertions(+), 32 deletions(-)
+
+diff --git a/arch/powerpc/include/asm/exception-64s.h b/arch/powerpc/include/asm/exception-64s.h
+index 6fdfd9a3f061..6b42b5ff9ba9 100644
+--- a/arch/powerpc/include/asm/exception-64s.h
++++ b/arch/powerpc/include/asm/exception-64s.h
+@@ -410,46 +410,39 @@ END_FW_FTR_SECTION_IFSET(FW_FEATURE_ISERIES)
+ 	rlwimi	r11,r12,0,MSR_EE;		\
+ 	mtmsrd	r11,1
+ 
+-#define STD_EXCEPTION_COMMON(trap, label, hdlr)		\
+-	.align	7;					\
+-	.globl label##_common;				\
+-label##_common:						\
+-	EXCEPTION_PROLOG_COMMON(trap, PACA_EXGEN);	\
+-	DISABLE_INTS;					\
+-	bl	.save_nvgprs;				\
+-	addi	r3,r1,STACK_FRAME_OVERHEAD;		\
+-	bl	hdlr;					\
+-	b	.ret_from_except
++#define ADD_NVGPRS				\
++	bl	.save_nvgprs
++
++#define RUNLATCH_ON				\
++BEGIN_FTR_SECTION				\
++	bl	.ppc64_runlatch_on;		\
++END_FTR_SECTION_IFSET(CPU_FTR_CTRL)
++
++#define EXCEPTION_COMMON(trap, label, hdlr, ret, additions)	\
++	.align	7;						\
++	.globl label##_common;					\
++label##_common:							\
++	EXCEPTION_PROLOG_COMMON(trap, PACA_EXGEN);		\
++	additions;						\
++	addi	r3,r1,STACK_FRAME_OVERHEAD;			\
++	bl	hdlr;						\
++	b	ret
++
++#define STD_EXCEPTION_COMMON(trap, label, hdlr)			\
++	EXCEPTION_COMMON(trap, label, hdlr, ret_from_except,	\
++			 ADD_NVGPRS;DISABLE_INTS)
+ 
+ /*
+  * Like STD_EXCEPTION_COMMON, but for exceptions that can occur
+  * in the idle task and therefore need the special idle handling.
+  */
+ #define STD_EXCEPTION_COMMON_IDLE(trap, label, hdlr)	\
+-	.align	7;					\
+-	.globl label##_common;				\
+-label##_common:						\
+-	EXCEPTION_PROLOG_COMMON(trap, PACA_EXGEN);	\
+-	FINISH_NAP;					\
+-	DISABLE_INTS;					\
+-	bl	.save_nvgprs;				\
+-	addi	r3,r1,STACK_FRAME_OVERHEAD;		\
+-	bl	hdlr;					\
+-	b	.ret_from_except
++	EXCEPTION_COMMON(trap, label, hdlr, ret_from_except,	\
++			 FINISH_NAP;DISABLE_INTS;ADD_NVGPRS)
+ 
+ #define STD_EXCEPTION_COMMON_LITE(trap, label, hdlr)	\
+-	.align	7;					\
+-	.globl label##_common;				\
+-label##_common:						\
+-	EXCEPTION_PROLOG_COMMON(trap, PACA_EXGEN);	\
+-	FINISH_NAP;					\
+-	DISABLE_INTS;					\
+-BEGIN_FTR_SECTION					\
+-	bl	.ppc64_runlatch_on;			\
+-END_FTR_SECTION_IFSET(CPU_FTR_CTRL)			\
+-	addi	r3,r1,STACK_FRAME_OVERHEAD;		\
+-	bl	hdlr;					\
+-	b	.ret_from_except_lite
++	EXCEPTION_COMMON(trap, label, hdlr, ret_from_except_lite,	\
++			 FINISH_NAP;DISABLE_INTS;RUNLATCH_ON)
+ 
+ /*
+  * When the idle code in power4_idle puts the CPU into NAP mode,
+-- 
+2.13.7
+
