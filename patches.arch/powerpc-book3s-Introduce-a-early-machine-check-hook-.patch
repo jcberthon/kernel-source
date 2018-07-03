@@ -1,0 +1,66 @@
+From 6df5d4eee80a80b99aafbf8f390c86ddea0e5193 Mon Sep 17 00:00:00 2001
+From: Mahesh Salgaonkar <mahesh@linux.vnet.ibm.com>
+Date: Wed, 30 Oct 2013 20:04:40 +0530
+Subject: [PATCH 07/21] powerpc/book3s: Introduce a early machine check hook in
+ cpu_spec.
+
+References: bsc#1094244
+Patch-mainline: v3.14-rc1
+Git-commit: 4c703416efc0a23f83a282b9240bb92fbd9e0be9
+
+This patch adds the early machine check function pointer in cputable for
+CPU specific early machine check handling. The early machine handle routine
+will be called in real mode to handle SLB and TLB errors. We can not reuse
+the existing machine_check hook because it is always invoked in kernel
+virtual mode and we would already be in trouble if we get SLB or TLB errors.
+This patch just sets up a mechanism to invoke CPU specific handler. The
+subsequent patches will populate the function pointer.
+
+Signed-off-by: Mahesh Salgaonkar <mahesh@linux.vnet.ibm.com>
+Acked-by: Paul Mackerras <paulus@samba.org>
+Signed-off-by: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/include/asm/cputable.h | 7 +++++++
+ arch/powerpc/kernel/traps.c         | 7 +++++--
+ 2 files changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/arch/powerpc/include/asm/cputable.h b/arch/powerpc/include/asm/cputable.h
+index 0e31911a5fc0..5963c0c01030 100644
+--- a/arch/powerpc/include/asm/cputable.h
++++ b/arch/powerpc/include/asm/cputable.h
+@@ -132,6 +132,13 @@ struct cpu_spec {
+ 	 * if the error is fatal, 1 if it was fully recovered and 0 to
+ 	 * pass up (not CPU originated) */
+ 	int		(*machine_check)(struct pt_regs *regs);
++
++	/*
++	 * Processor specific early machine check handler which is
++	 * called in real mode to handle SLB and TLB errors.
++	 */
++	long		(*machine_check_early)(struct pt_regs *regs);
++
+ };
+ 
+ extern struct cpu_spec		*cur_cpu_spec;
+diff --git a/arch/powerpc/kernel/traps.c b/arch/powerpc/kernel/traps.c
+index f652f6039648..a0af422bb075 100644
+--- a/arch/powerpc/kernel/traps.c
++++ b/arch/powerpc/kernel/traps.c
+@@ -259,8 +259,11 @@ void system_reset_exception(struct pt_regs *regs)
+  */
+ long machine_check_early(struct pt_regs *regs)
+ {
+-	/* TODO: handle/decode machine check reason */
+-	return 0;
++	long handled = 0;
++
++	if (cur_cpu_spec && cur_cpu_spec->machine_check_early)
++		handled = cur_cpu_spec->machine_check_early(regs);
++	return handled;
+ }
+ 
+ #endif
+-- 
+2.13.7
+
