@@ -22,7 +22,7 @@ diff -urp a/arch/powerpc/include/asm/cputable.h b/arch/powerpc/include/asm/cputa
  #define CPU_FTRS_POWER4	(CPU_FTR_USE_TB | CPU_FTR_LWSYNC | \
  	    CPU_FTR_PPCAS_ARCH_V2 | CPU_FTR_CTRL | \
  	    CPU_FTR_MMCRA | CPU_FTR_CP_USE_DCBTZ | \
-@@ -459,11 +466,19 @@ extern const char *powerpc_base_platform
+@@ -460,11 +467,19 @@ extern const char *powerpc_base_platform
  #ifdef CONFIG_PPC_BOOK3E
  #define CPU_FTRS_POSSIBLE	(CPU_FTRS_E5500 | CPU_FTRS_A2)
  #else
@@ -42,7 +42,7 @@ diff -urp a/arch/powerpc/include/asm/cputable.h b/arch/powerpc/include/asm/cputa
  #else
  enum {
  	CPU_FTRS_POSSIBLE =
-@@ -507,11 +522,18 @@ enum {
+@@ -508,11 +523,18 @@ enum {
  #ifdef CONFIG_PPC_BOOK3E
  #define CPU_FTRS_ALWAYS		(CPU_FTRS_E5500 & CPU_FTRS_A2)
  #else
@@ -712,7 +712,7 @@ diff -urp a/arch/powerpc/include/asm/mmu-hash64.h b/arch/powerpc/include/asm/mmu
 diff -urp a/arch/powerpc/include/asm/paca.h b/arch/powerpc/include/asm/paca.h
 --- a/arch/powerpc/include/asm/paca.h
 +++ b/arch/powerpc/include/asm/paca.h
-@@ -73,6 +73,12 @@ struct paca_struct {
+@@ -93,6 +93,12 @@ struct paca_struct {
  	u64 kernel_toc;			/* Kernel TOC address */
  	u64 kernelbase;			/* Base address of kernel */
  	u64 kernel_msr;			/* MSR while running in kernel */
@@ -725,7 +725,7 @@ diff -urp a/arch/powerpc/include/asm/paca.h b/arch/powerpc/include/asm/paca.h
  	void *emergency_sp;		/* pointer to emergency stack */
  	u64 data_offset;		/* per cpu data offset */
  	s16 hw_cpu_id;			/* Physical processor number */
-@@ -98,7 +104,11 @@ struct paca_struct {
+@@ -126,7 +132,11 @@ struct paca_struct {
  	/* SLB related definitions */
  	u16 vmalloc_sllp;
  	u16 slb_cache_ptr;
@@ -737,7 +737,6 @@ diff -urp a/arch/powerpc/include/asm/paca.h b/arch/powerpc/include/asm/paca.h
  #endif /* CONFIG_PPC_STD_MMU_64 */
  
  #ifdef CONFIG_PPC_BOOK3E
-Only in a/arch/powerpc/include/asm: paca.h.orig
 diff -urp a/arch/powerpc/include/asm/page_64.h b/arch/powerpc/include/asm/page_64.h
 --- a/arch/powerpc/include/asm/page_64.h
 +++ b/arch/powerpc/include/asm/page_64.h
@@ -756,7 +755,6 @@ diff -urp a/arch/powerpc/include/asm/page_64.h b/arch/powerpc/include/asm/page_6
  struct mm_struct;
  
  extern unsigned long slice_get_unmapped_area(unsigned long addr,
-Only in a/arch/powerpc/include/asm: page_64.h.orig
 diff -urp a/arch/powerpc/include/asm/pgtable.h b/arch/powerpc/include/asm/pgtable.h
 --- a/arch/powerpc/include/asm/pgtable.h
 +++ b/arch/powerpc/include/asm/pgtable.h
@@ -1148,7 +1146,6 @@ diff -urp a/arch/powerpc/kernel/cputable.c b/arch/powerpc/kernel/cputable.c
  	{	/* Power4 */
  		.pvr_mask		= 0xffff0000,
  		.pvr_value		= 0x00350000,
-Only in a/arch/powerpc/kernel: cputable.c.orig
 diff -urp a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
 --- a/arch/powerpc/kernel/exceptions-64s.S
 +++ b/arch/powerpc/kernel/exceptions-64s.S
@@ -1187,8 +1184,8 @@ diff -urp a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exception
  
  	. = 0x380
  	.globl data_access_slb_pSeries
-@@ -301,6 +328,16 @@ masked_Hinterrupt:
- 	hrfid
+@@ -304,6 +331,16 @@ masked_Hinterrupt:
+ 	HRFI_TO_KERNEL
  	b	.
  
 +#ifndef CONFIG_BIGMEM
@@ -1204,7 +1201,7 @@ diff -urp a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exception
  #ifdef CONFIG_PPC_PSERIES
  /*
   * Vectors for the FWNMI option.  Share common code.
-@@ -837,6 +874,14 @@ _STATIC(do_hash_page)
+@@ -989,6 +1026,14 @@ _STATIC(do_hash_page)
  	bne-	handle_page_fault	/* if not, try to insert a HPTE */
  	andis.  r0,r4,DSISR_DABRMATCH@h
  	bne-    handle_dabr_fault
@@ -1219,7 +1216,7 @@ diff -urp a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exception
  	clrrdi	r11,r1,THREAD_SHIFT
  	lwz	r0,TI_PREEMPT(r11)	/* If we're in an "NMI" */
  	andis.	r0,r0,NMI_MASK@h	/* (i.e. an irq when soft-disabled) */
-@@ -969,6 +1014,101 @@ handle_page_fault:
+@@ -1121,6 +1166,101 @@ handle_page_fault:
  	bl	.bad_page_fault
  	b	.ret_from_except
  
@@ -1314,14 +1311,14 @@ diff -urp a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exception
 +	ld	r11,PACA_EXSLB+EX_R11(r13)
 +	ld	r12,PACA_EXSLB+EX_R12(r13)
 +	ld	r13,PACA_EXSLB+EX_R13(r13)
-+	rfid
++	rfid /* ignore this old power3 code */
 +	b	.	/* prevent speculative execution */
 +
 +#endif
  #ifdef CONFIG_PPC_PSERIES
  /*
   * Data area reserved for FWNMI option.
-@@ -1005,3 +1145,19 @@ xLparMap:
+@@ -1157,3 +1297,19 @@ xLparMap:
  #ifdef CONFIG_PPC_PSERIES
          . = 0x8000
  #endif /* CONFIG_PPC_PSERIES */
@@ -1929,7 +1926,7 @@ diff -urp a/arch/powerpc/mm/hash_native_64.c b/arch/powerpc/mm/hash_native_64.c
 +#endif
  		va |= ssize << 8;
  		asm volatile(ASM_FTR_IFCLR("tlbie %0,0", PPC_TLBIE(%1,%0), %2)
- 			     : : "r" (va), "r"(0), "i" (CPU_FTR_HVMODE_206)
+ 			     : : "r" (va), "r"(0), "i" (CPU_FTR_ARCH_206)
  			     : "memory");
  		break;
  	default:
@@ -2701,7 +2698,6 @@ diff -urp a/arch/powerpc/mm/hash_utils_64.c b/arch/powerpc/mm/hash_utils_64.c
  }
  
  void kernel_map_pages(struct page *page, int numpages, int enable)
-Only in a/arch/powerpc/mm: hash_utils_64.c.orig
 diff -urp a/arch/powerpc/mm/hugetlbpage-hash64.c b/arch/powerpc/mm/hugetlbpage-hash64.c
 --- a/arch/powerpc/mm/hugetlbpage-hash64.c
 +++ b/arch/powerpc/mm/hugetlbpage-hash64.c
@@ -2856,7 +2852,6 @@ diff -urp a/arch/powerpc/mm/mmu_context_hash64.c b/arch/powerpc/mm/mmu_context_h
  		spin_lock(&mmu_context_lock);
  		ida_remove(&mmu_context_ida, index);
  		spin_unlock(&mmu_context_lock);
-Only in a/arch/powerpc/mm: mmu_context_hash64.c.orig
 diff -urp a/arch/powerpc/mm/pgtable_64.c b/arch/powerpc/mm/pgtable_64.c
 --- a/arch/powerpc/mm/pgtable_64.c
 +++ b/arch/powerpc/mm/pgtable_64.c
@@ -4386,7 +4381,6 @@ diff -urp a/arch/powerpc/platforms/cell/beat_htab.c b/arch/powerpc/platforms/cel
  	pss = (psize == MMU_PAGE_4K) ? -1UL : mmu_psize_defs[psize].penc;
  
  	lpar_rc = beat_invalidate_htab_entry3(0, slot, want_v, pss);
-Only in a/arch/powerpc/platforms/cell: beat_htab.c.orig
 diff -urp a/arch/powerpc/platforms/ps3/htab.c b/arch/powerpc/platforms/ps3/htab.c
 --- a/arch/powerpc/platforms/ps3/htab.c
 +++ b/arch/powerpc/platforms/ps3/htab.c
@@ -4755,7 +4749,6 @@ diff -urp a/arch/powerpc/platforms/pseries/lpar.c b/arch/powerpc/platforms/pseri
  								ssize);
  				pix += 2;
  				if (pix == 8) {
-Only in a/arch/powerpc/platforms/pseries: lpar.c.orig
 diff -urp a/arch/powerpc/xmon/xmon.c b/arch/powerpc/xmon/xmon.c
 --- a/arch/powerpc/xmon/xmon.c
 +++ b/arch/powerpc/xmon/xmon.c
