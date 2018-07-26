@@ -1,4 +1,4 @@
-From d11e66b9812ccd87e4efa94c4524dcd1762117df Mon Sep 17 00:00:00 2001
+From de8b964fad74b3e67791664b4df5f4f032243fdd Mon Sep 17 00:00:00 2001
 From: Nicholas Piggin <npiggin@gmail.com>
 Date: Tue, 22 May 2018 09:00:00 +1000
 Subject: [PATCH] powerpc/64s: Add support for a store forwarding barrier at
@@ -48,7 +48,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  8 files changed, 345 insertions(+)
 
 diff --git a/arch/powerpc/include/asm/exception-64s.h b/arch/powerpc/include/asm/exception-64s.h
-index 639c3071d8ec..fbe67741126b 100644
+index 36a98035a280..f52f5fa6f331 100644
 --- a/arch/powerpc/include/asm/exception-64s.h
 +++ b/arch/powerpc/include/asm/exception-64s.h
 @@ -52,6 +52,27 @@
@@ -125,10 +125,10 @@ index 639c3071d8ec..fbe67741126b 100644
  	RFI_FLUSH_SLOT;							\
  	hrfid;								\
  	b	hrfi_flush_fallback
-@@ -164,6 +192,7 @@ END_FTR_SECTION_NESTED(CPU_FTR_HAS_PPR,CPU_FTR_HAS_PPR,943)
- 	mfspr	r10,SPRN_CFAR;						\
- 	std	r10,area+EX_CFAR(r13);					\
- 	END_FTR_SECTION_NESTED(CPU_FTR_CFAR, CPU_FTR_CFAR, 66);		\
+@@ -171,6 +199,7 @@ END_FTR_SECTION_NESTED(ftr,ftr,943)
+ #define __EXCEPTION_PROLOG_1(area, extra, vec)				\
+ 	OPT_SAVE_REG_TO_PACA(area+EX_PPR, r9, CPU_FTR_HAS_PPR);		\
+ 	OPT_SAVE_REG_TO_PACA(area+EX_CFAR, r10, CPU_FTR_CFAR);		\
 +	INTERRUPT_TO_KERNEL;						\
  	mfcr	r9;							\
  	extra(vec);							\
@@ -193,10 +193,10 @@ index fa4d2e1cf772..44989b22383c 100644
  {
  	powerpc_security_features |= feature;
 diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
-index c7e55a28005d..96b3def6f26a 100644
+index 6ba8862961db..ee9a2260b9a4 100644
 --- a/arch/powerpc/kernel/exceptions-64s.S
 +++ b/arch/powerpc/kernel/exceptions-64s.S
-@@ -199,6 +199,7 @@ BEGIN_FTR_SECTION
+@@ -204,6 +204,7 @@ BEGIN_FTR_SECTION
  END_FTR_SECTION_IFSET(CPU_FTR_REAL_LE)
  	mr	r9,r13
  	GET_PACA(r13)
@@ -204,7 +204,7 @@ index c7e55a28005d..96b3def6f26a 100644
  	mfspr	r11,SPRN_SRR0
  	mfspr	r12,SPRN_SRR1
  	ld	r10,PACAKBASE(r13)
-@@ -391,6 +392,22 @@ system_reset_fwnmi:
+@@ -414,6 +415,22 @@ system_reset_fwnmi:
  
  #endif /* CONFIG_PPC_PSERIES */
  
