@@ -1,0 +1,68 @@
+From 239f2e6c632723179c197ea81806e62d1ae20416 Mon Sep 17 00:00:00 2001
+From: Michael Neuling <mikey@neuling.org>
+Date: Mon, 5 Nov 2012 17:10:35 +1100
+Subject: [PATCH] powerpc: Make load_hander handle upto 64k offset
+
+References: bsc#1094244
+Patch-mainline: v3.8-rc1
+Git-commit: 61e2390ede3cea186cc01f5f3d0c9eb570c42c40
+
+If we change load_hander() to use an ori instead of addi, we can load handlers
+upto 64k away provided we are still 64k aligned.
+
+Signed-off-by: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/include/asm/exception-64s.h | 3 ++-
+ arch/powerpc/kernel/exceptions-64s.S     | 4 ++--
+ arch/powerpc/kernel/setup_64.c           | 5 +++++
+ 3 files changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/arch/powerpc/include/asm/exception-64s.h b/arch/powerpc/include/asm/exception-64s.h
+index 5e99c5754f3c..8f1a86484272 100644
+--- a/arch/powerpc/include/asm/exception-64s.h
++++ b/arch/powerpc/include/asm/exception-64s.h
+@@ -140,7 +140,8 @@
+  * word.
+  */
+ #define LOAD_HANDLER(reg, label)					\
+-	addi	reg,reg,(label)-_stext;	/* virt addr of handler ... */
++	/* Handlers must be within 64K of kbase, which must be 64k aligned */ \
++	ori	reg,reg,(label)-_stext;	/* virt addr of handler ... */
+ 
+ /* Exception register prefixes */
+ #define EXC_HV	H
+diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
+index 98ff438d4fb2..731432032469 100644
+--- a/arch/powerpc/kernel/exceptions-64s.S
++++ b/arch/powerpc/kernel/exceptions-64s.S
+@@ -663,8 +663,8 @@ __end_interrupts:
+  * Code from here down to __end_handlers is invoked from the
+  * exception prologs above.  Because the prologs assemble the
+  * addresses of these handlers using the LOAD_HANDLER macro,
+- * which uses an addi instruction, these handlers must be in
+- * the first 32k of the kernel image.
++ * which uses an ori instruction, these handlers must be in
++ * the first 64k of the kernel image.
+  */
+ 
+ /*** Common interrupt handlers ***/
+diff --git a/arch/powerpc/kernel/setup_64.c b/arch/powerpc/kernel/setup_64.c
+index d84aa73dc1b1..0d0ba0e6aaed 100644
+--- a/arch/powerpc/kernel/setup_64.c
++++ b/arch/powerpc/kernel/setup_64.c
+@@ -589,6 +589,11 @@ void __init setup_arch(char **cmdline_p)
+ 	/* Initialize the MMU context management stuff */
+ 	mmu_context_init();
+ 
++	/* Interrupt code needs to be 64K-aligned */
++	if ((unsigned long)_stext & 0xffff)
++		panic("Kernelbase not 64K-aligned (0x%lx)!\n",
++		      (unsigned long)_stext);
++
+ 	ppc64_boot_msg(0x15, "Setup Done");
+ }
+ 
+-- 
+2.13.7
+
