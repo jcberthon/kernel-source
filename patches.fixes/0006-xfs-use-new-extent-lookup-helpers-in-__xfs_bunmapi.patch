@@ -1,0 +1,128 @@
+From d5c20f5b1d2c835c2b3bf2fe793cfba3b82d3dfd Mon Sep 17 00:00:00 2001
+From: Christoph Hellwig <hch@lst.de>
+Date: Thu, 24 Nov 2016 11:39:44 +1100
+Subject: [PATCH 06/90] xfs: use new extent lookup helpers in __xfs_bunmapi
+Git-commit: 7efc794561f6bfe34d26c3724289108f6cda3a4d                            
+Patch-mainline: v4.10-rc1                                                       
+References: bsc#1095344
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+Signed-off-by: Dave Chinner <david@fromorbit.com>
+Acked-by: Nikolay Borisov <nborisov@suse.com>
+---
+ fs/xfs/libxfs/xfs_bmap.c | 40 +++++++++++++---------------------------
+ 1 file changed, 13 insertions(+), 27 deletions(-)
+
+diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
+index 87b666957cc7..065ae52433b0 100644
+--- a/fs/xfs/libxfs/xfs_bmap.c
++++ b/fs/xfs/libxfs/xfs_bmap.c
+@@ -5054,8 +5054,6 @@ xfs_bunmapi(
+ {
+ 	xfs_btree_cur_t		*cur;		/* bmap btree cursor */
+ 	xfs_bmbt_irec_t		del;		/* extent being deleted */
+-	int			eof;		/* is deleting at eof */
+-	xfs_bmbt_rec_host_t	*ep;		/* extent record pointer */
+ 	int			error;		/* error return value */
+ 	xfs_extnum_t		extno;		/* extent number in list */
+ 	xfs_bmbt_irec_t		got;		/* current extent record */
+@@ -5065,7 +5063,6 @@ xfs_bunmapi(
+ 	int			logflags;	/* transaction logging flags */
+ 	xfs_extlen_t		mod;		/* rt extent offset */
+ 	xfs_mount_t		*mp;		/* mount structure */
+-	xfs_bmbt_irec_t		prev;		/* previous extent record */
+ 	xfs_fileoff_t		start;		/* first file offset deleted */
+ 	int			tmp_logflags;	/* partial logging flags */
+ 	int			wasdel;		/* was a delayed alloc extent */
+@@ -5103,18 +5100,17 @@ xfs_bunmapi(
+ 	isrt = (whichfork == XFS_DATA_FORK) && XFS_IS_REALTIME_INODE(ip);
+ 	start = bno;
+ 	bno = start + len - 1;
+-	ep = xfs_bmap_search_extents(ip, bno, whichfork, &eof, &lastx, &got,
+-		&prev);
+ 
+ 	/*
+ 	 * Check to see if the given block number is past the end of the
+ 	 * file, back up to the last block if so...
+ 	 */
+-	if (eof) {
+-		ep = xfs_iext_get_ext(ifp, --lastx);
+-		xfs_bmbt_get_all(ep, &got);
++	if (!xfs_iext_lookup_extent(ip, ifp, bno, &lastx, &got)) {
++		ASSERT(lastx > 0);
++		xfs_iext_get_extent(ifp, --lastx, &got);
+ 		bno = got.br_startoff + got.br_blockcount - 1;
+ 	}
++
+ 	logflags = 0;
+ 	if (ifp->if_flags & XFS_IFBROOT) {
+ 		ASSERT(XFS_IFORK_FORMAT(ip, whichfork) == XFS_DINODE_FMT_BTREE);
+@@ -5143,8 +5139,7 @@ xfs_bunmapi(
+ 		if (got.br_startoff > bno) {
+ 			if (--lastx < 0)
+ 				break;
+-			ep = xfs_iext_get_ext(ifp, lastx);
+-			xfs_bmbt_get_all(ep, &got);
++			xfs_iext_get_extent(ifp, lastx, &got);
+ 		}
+ 		/*
+ 		 * Is the last block of this extent before the range
+@@ -5158,7 +5153,6 @@ xfs_bunmapi(
+ 		 * Then deal with the (possibly delayed) allocated space
+ 		 * we found.
+ 		 */
+-		ASSERT(ep != NULL);
+ 		del = got;
+ 		wasdel = isnullstartblock(del.br_startblock);
+ 		if (got.br_startoff < start) {
+@@ -5239,15 +5233,12 @@ xfs_bunmapi(
+ 				 */
+ 				ASSERT(bno >= del.br_blockcount);
+ 				bno -= del.br_blockcount;
+-				if (got.br_startoff > bno) {
+-					if (--lastx >= 0) {
+-						ep = xfs_iext_get_ext(ifp,
+-								      lastx);
+-						xfs_bmbt_get_all(ep, &got);
+-					}
+-				}
++				if (got.br_startoff > bno && --lastx >= 0)
++					xfs_iext_get_extent(ifp, lastx, &got);
+ 				continue;
+ 			} else if (del.br_state == XFS_EXT_UNWRITTEN) {
++				struct xfs_bmbt_irec	prev;
++
+ 				/*
+ 				 * This one is already unwritten.
+ 				 * It must have a written left neighbor.
+@@ -5255,8 +5246,7 @@ xfs_bunmapi(
+ 				 * try again.
+ 				 */
+ 				ASSERT(lastx > 0);
+-				xfs_bmbt_get_all(xfs_iext_get_ext(ifp,
+-						lastx - 1), &prev);
++				xfs_iext_get_extent(ifp, lastx - 1, &prev);
+ 				ASSERT(prev.br_state == XFS_EXT_NORM);
+ 				ASSERT(!isnullstartblock(prev.br_startblock));
+ 				ASSERT(del.br_startblock ==
+@@ -5344,13 +5334,9 @@ xfs_bunmapi(
+ 		 */
+ 		if (bno != (xfs_fileoff_t)-1 && bno >= start) {
+ 			if (lastx >= 0) {
+-				ep = xfs_iext_get_ext(ifp, lastx);
+-				if (xfs_bmbt_get_startoff(ep) > bno) {
+-					if (--lastx >= 0)
+-						ep = xfs_iext_get_ext(ifp,
+-								      lastx);
+-				}
+-				xfs_bmbt_get_all(ep, &got);
++				xfs_iext_get_extent(ifp, lastx, &got);
++				if (got.br_startoff > bno && --lastx >= 0)
++					xfs_iext_get_extent(ifp, lastx, &got);
+ 			}
+ 			extno++;
+ 		}
+-- 
+2.7.4
+
