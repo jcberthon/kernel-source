@@ -1,0 +1,87 @@
+From c9f2b03d0f11ab991d83fe0707771a236336328a Mon Sep 17 00:00:00 2001
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Thu, 20 Oct 2016 15:51:50 +1100
+Subject: [PATCH 16/90] xfs: add xfs_trim_extent
+Git-commit: 0a0af28cad9a43d90f13c2047bd8ee3d4cffb7f3                            
+Patch-mainline: v4.9-rc5                                                        
+References: bsc#1095344
+
+This helpers allows to trim an extent to a subset of it's original range
+while making sure the block numbers in it remain valid,
+
+In the future xfs_trim_extent and xfs_bmapi_trim_map should probably be
+merged in some form.
+
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+[hch: split from a previous patch from Darrick, moved around and added
+ support for "raw" delayed extents"]
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+Signed-off-by: Dave Chinner <david@fromorbit.com>
+Acked-by: Nikolay Borisov <nborisov@suse.com>
+---
+ fs/xfs/libxfs/xfs_bmap.c | 33 +++++++++++++++++++++++++++++++++
+ fs/xfs/libxfs/xfs_bmap.h |  2 ++
+ 2 files changed, 35 insertions(+)
+
+diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
+index 83101499ee2b..630f86b8379a 100644
+--- a/fs/xfs/libxfs/xfs_bmap.c
++++ b/fs/xfs/libxfs/xfs_bmap.c
+@@ -3908,6 +3908,39 @@ xfs_bmap_alloc(
+ 	return xfs_bmap_btalloc(ap);
+ }
+ 
++/* Trim extent to fit a logical block range. */
++void
++xfs_trim_extent(
++	struct xfs_bmbt_irec	*irec,
++	xfs_fileoff_t		bno,
++	xfs_filblks_t		len)
++{
++	xfs_fileoff_t		distance;
++	xfs_fileoff_t		end = bno + len;
++
++	if (irec->br_startoff + irec->br_blockcount <= bno ||
++	    irec->br_startoff >= end) {
++		irec->br_blockcount = 0;
++		return;
++	}
++
++	if (irec->br_startoff < bno) {
++		distance = bno - irec->br_startoff;
++		if (isnullstartblock(irec->br_startblock))
++			irec->br_startblock = DELAYSTARTBLOCK;
++		if (irec->br_startblock != DELAYSTARTBLOCK &&
++		    irec->br_startblock != HOLESTARTBLOCK)
++			irec->br_startblock += distance;
++		irec->br_startoff += distance;
++		irec->br_blockcount -= distance;
++	}
++
++	if (end < irec->br_startoff + irec->br_blockcount) {
++		distance = irec->br_startoff + irec->br_blockcount - end;
++		irec->br_blockcount -= distance;
++	}
++}
++
+ /*
+  * Trim the returned map to the required bounds
+  */
+diff --git a/fs/xfs/libxfs/xfs_bmap.h b/fs/xfs/libxfs/xfs_bmap.h
+index a160f8a5a3fc..1b27be964753 100644
+--- a/fs/xfs/libxfs/xfs_bmap.h
++++ b/fs/xfs/libxfs/xfs_bmap.h
+@@ -189,6 +189,8 @@ void	xfs_bmap_trace_exlist(struct xfs_inode *ip, xfs_extnum_t cnt,
+ #define	XFS_BMAP_TRACE_EXLIST(ip,c,w)
+ #endif
+ 
++void	xfs_trim_extent(struct xfs_bmbt_irec *irec, xfs_fileoff_t bno,
++		xfs_filblks_t len);
+ int	xfs_bmap_add_attrfork(struct xfs_inode *ip, int size, int rsvd);
+ void	xfs_bmap_local_to_extents_empty(struct xfs_inode *ip, int whichfork);
+ void	xfs_bmap_add_free(xfs_fsblock_t bno, xfs_filblks_t len,
+-- 
+2.7.4
+
