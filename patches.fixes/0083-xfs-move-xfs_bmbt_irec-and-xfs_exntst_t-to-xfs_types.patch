@@ -1,0 +1,78 @@
+From cf58c5fcd396b32aa474beb81b51f737755aad9f Mon Sep 17 00:00:00 2001
+From: Christoph Hellwig <hch@lst.de>
+Date: Fri, 3 Nov 2017 10:34:47 -0700
+Subject: [PATCH 83/90] xfs: move xfs_bmbt_irec and xfs_exntst_t to xfs_types.h
+Git-commit: 866d7826c966d0d17cb31eaf394728a163ad7227
+Patch-mainline: v4.15-rc1
+References: bsc#1095344
+
+Neither defines an on-disk format, so move them out of xfs_format.h.
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Acked-by: Nikolay Borisov <nborisov@suse.com>
+---
+ fs/xfs/libxfs/xfs_format.h | 22 +---------------------
+ fs/xfs/libxfs/xfs_types.h  | 13 +++++++++++++
+ 2 files changed, 14 insertions(+), 21 deletions(-)
+
+diff --git a/fs/xfs/libxfs/xfs_format.h b/fs/xfs/libxfs/xfs_format.h
+index beef309a841f..ee308b6594e0 100644
+--- a/fs/xfs/libxfs/xfs_format.h
++++ b/fs/xfs/libxfs/xfs_format.h
+@@ -1361,28 +1361,8 @@ static inline xfs_filblks_t startblockval(xfs_fsblock_t x)
+ 	return (xfs_filblks_t)((x) & ~STARTBLOCKMASK);
+ }
+ 
+-/*
+- * Possible extent states.
+- */
+-typedef enum {
+-	XFS_EXT_NORM, XFS_EXT_UNWRITTEN,
+-	XFS_EXT_DMAPI_OFFLINE, XFS_EXT_INVALID
+-} xfs_exntst_t;
+-
+-/*
+- * Incore version of above.
+- */
+-typedef struct xfs_bmbt_irec
+-{
+-	xfs_fileoff_t	br_startoff;	/* starting file offset */
+-	xfs_fsblock_t	br_startblock;	/* starting block number */
+-	xfs_filblks_t	br_blockcount;	/* number of blocks */
+-	xfs_exntst_t	br_state;	/* extent state */
+-} xfs_bmbt_irec_t;
+ 
+-/*
+- * Key structure for non-leaf levels of the tree.
+- */
++/* Key structure for non-leaf levels of the tree. */
+ typedef struct xfs_bmbt_key {
+ 	__be64		br_startoff;	/* starting file offset */
+ } xfs_bmbt_key_t, xfs_bmdr_key_t;
+diff --git a/fs/xfs/libxfs/xfs_types.h b/fs/xfs/libxfs/xfs_types.h
+index d9055c3b5732..9c0250756c19 100644
+--- a/fs/xfs/libxfs/xfs_types.h
++++ b/fs/xfs/libxfs/xfs_types.h
+@@ -138,4 +138,17 @@ struct xfs_iext_cursor {
+ 	int			pos;
+ };
+ 
++typedef enum {
++	XFS_EXT_NORM, XFS_EXT_UNWRITTEN,
++	XFS_EXT_INVALID
++} xfs_exntst_t;
++
++typedef struct xfs_bmbt_irec
++{
++	xfs_fileoff_t	br_startoff;	/* starting file offset */
++	xfs_fsblock_t	br_startblock;	/* starting block number */
++	xfs_filblks_t	br_blockcount;	/* number of blocks */
++	xfs_exntst_t	br_state;	/* extent state */
++} xfs_bmbt_irec_t;
++
+ #endif	/* __XFS_TYPES_H__ */
+-- 
+2.7.4
+
