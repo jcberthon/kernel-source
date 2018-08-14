@@ -1,0 +1,103 @@
+From 82ff6cc26e98f9bba8e2a10f727e335fa241cc47 Mon Sep 17 00:00:00 2001
+From: Brian Foster <bfoster@redhat.com>
+Date: Mon, 7 Mar 2016 08:22:22 +1100
+Subject: [PATCH] xfs: separate log head record discovery from verification
+Git-commit: 82ff6cc26e98f9bba8e2a10f727e335fa241cc47
+Patch-mainline: v4.5
+References: bsc#1095753
+
+The code that locates the log record at the head of the log is buried in
+the log head verification function. This is fine when torn write
+verification occurs unconditionally, but this behavior is problematic
+for filesystems that might be moved across systems with different
+architectures.
+
+In preparation for separating examination of the log head for unmount
+records from torn write detection, lift the record location logic out of
+the log verification function and into the caller. This patch does not
+change behavior.
+
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+Reviewed-by: Dave Chinner <dchinner@redhat.com>
+Signed-off-by: Dave Chinner <david@fromorbit.com>
+Acked-by: Jeff Mahoney <jeffm@suse.com>
+---
+ fs/xfs/xfs_log_recover.c | 42 ++++++++++++++++++++----------------------
+ 1 file changed, 20 insertions(+), 22 deletions(-)
+
+diff --git a/fs/xfs/xfs_log_recover.c b/fs/xfs/xfs_log_recover.c
+index da37beb76f6e..c2d04ff8876b 100644
+--- a/fs/xfs/xfs_log_recover.c
++++ b/fs/xfs/xfs_log_recover.c
+@@ -1109,27 +1109,10 @@ xlog_verify_head(
+ 	bool			tmp_wrapped;
+ 
+ 	/*
+-	 * Search backwards through the log looking for the log record header
+-	 * block. This wraps all the way back around to the head so something is
+-	 * seriously wrong if we can't find it.
+-	 */
+-	found = xlog_rseek_logrec_hdr(log, *head_blk, *head_blk, 1, bp, rhead_blk,
+-				      rhead, wrapped);
+-	if (found < 0)
+-		return found;
+-	if (!found) {
+-		xfs_warn(log->l_mp, "%s: couldn't find sync record", __func__);
+-		return -EIO;
+-	}
+-
+-	*tail_blk = BLOCK_LSN(be64_to_cpu((*rhead)->h_tail_lsn));
+-
+-	/*
+-	 * Now that we have a tail block, check the head of the log for torn
+-	 * writes. Search again until we hit the tail or the maximum number of
+-	 * log record I/Os that could have been in flight at one time. Use a
+-	 * temporary buffer so we don't trash the rhead/bp pointer from the
+-	 * call above.
++	 * Check the head of the log for torn writes. Search backwards from the
++	 * head until we hit the tail or the maximum number of log record I/Os
++	 * that could have been in flight at one time. Use a temporary buffer so
++	 * we don't trash the rhead/bp pointers from the caller.
+ 	 */
+ 	tmp_bp = xlog_get_bp(log, 1);
+ 	if (!tmp_bp)
+@@ -1254,6 +1237,7 @@ xlog_find_tail(
+ 	 */
+ 	if ((error = xlog_find_head(log, head_blk)))
+ 		return error;
++	ASSERT(*head_blk < INT_MAX);
+ 
+ 	bp = xlog_get_bp(log, 1);
+ 	if (!bp)
+@@ -1270,13 +1254,27 @@ xlog_find_tail(
+ 		}
+ 	}
+ 
++	/*
++	 * Search backwards through the log looking for the log record header
++	 * block. This wraps all the way back around to the head so something is
++	 * seriously wrong if we can't find it.
++	 */
++	error = xlog_rseek_logrec_hdr(log, *head_blk, *head_blk, 1, bp,
++				      &rhead_blk, &rhead, &wrapped);
++	if (error < 0)
++		return error;
++	if (!error) {
++		xfs_warn(log->l_mp, "%s: couldn't find sync record", __func__);
++		return -EIO;
++	}
++	*tail_blk = BLOCK_LSN(be64_to_cpu(rhead->h_tail_lsn));
++
+ 	/*
+ 	 * Trim the head block back to skip over torn records. We can have
+ 	 * multiple log I/Os in flight at any time, so we assume CRC failures
+ 	 * back through the previous several records are torn writes and skip
+ 	 * them.
+ 	 */
+-	ASSERT(*head_blk < INT_MAX);
+ 	error = xlog_verify_head(log, head_blk, tail_blk, bp, &rhead_blk,
+ 				 &rhead, &wrapped);
+ 	if (error)
+-- 
+2.16.4
+
