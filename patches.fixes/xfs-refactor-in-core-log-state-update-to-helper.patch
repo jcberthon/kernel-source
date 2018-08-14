@@ -1,0 +1,99 @@
+From 717bc0ebca0bce9cb3edfc31b49b384a1d55db1c Mon Sep 17 00:00:00 2001
+From: Brian Foster <bfoster@redhat.com>
+Date: Mon, 7 Mar 2016 08:22:22 +1100
+Subject: [PATCH] xfs: refactor in-core log state update to helper
+Git-commit: 717bc0ebca0bce9cb3edfc31b49b384a1d55db1c
+Patch-mainline: v4.5
+References: bsc#1095753
+
+Once the record at the head of the log is identified and verified, the
+in-core log state is updated based on the record. This includes
+information such as the current head block and cycle, the start block of
+the last record written to the log, the tail lsn, etc.
+
+Once torn write detection is conditional, this logic will need to be
+reused. Factor the code to update the in-core log data structures into a
+new helper function. This patch does not change behavior.
+
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+Reviewed-by: Dave Chinner <dchinner@redhat.com>
+Signed-off-by: Dave Chinner <david@fromorbit.com>
+Acked-by: Jeff Mahoney <jeffm@suse.com>
+---
+ fs/xfs/xfs_log_recover.c | 52 ++++++++++++++++++++++++++++++------------------
+ 1 file changed, 33 insertions(+), 19 deletions(-)
+
+diff --git a/fs/xfs/xfs_log_recover.c b/fs/xfs/xfs_log_recover.c
+index 1aae75608453..9ac8aa8dc38c 100644
+--- a/fs/xfs/xfs_log_recover.c
++++ b/fs/xfs/xfs_log_recover.c
+@@ -1276,6 +1276,37 @@ xlog_check_unmount_rec(
+ 	return 0;
+ }
+ 
++static void
++xlog_set_state(
++	struct xlog		*log,
++	xfs_daddr_t		head_blk,
++	struct xlog_rec_header	*rhead,
++	xfs_daddr_t		rhead_blk,
++	bool			bump_cycle)
++{
++	/*
++	 * Reset log values according to the state of the log when we
++	 * crashed.  In the case where head_blk == 0, we bump curr_cycle
++	 * one because the next write starts a new cycle rather than
++	 * continuing the cycle of the last good log record.  At this
++	 * point we have guaranteed that all partial log records have been
++	 * accounted for.  Therefore, we know that the last good log record
++	 * written was complete and ended exactly on the end boundary
++	 * of the physical log.
++	 */
++	log->l_prev_block = rhead_blk;
++	log->l_curr_block = (int)head_blk;
++	log->l_curr_cycle = be32_to_cpu(rhead->h_cycle);
++	if (bump_cycle)
++		log->l_curr_cycle++;
++	atomic64_set(&log->l_tail_lsn, be64_to_cpu(rhead->h_tail_lsn));
++	atomic64_set(&log->l_last_sync_lsn, be64_to_cpu(rhead->h_lsn));
++	xlog_assign_grant_head(&log->l_reserve_head.grant, log->l_curr_cycle,
++					BBTOB(log->l_curr_block));
++	xlog_assign_grant_head(&log->l_write_head.grant, log->l_curr_cycle,
++					BBTOB(log->l_curr_block));
++}
++
+ /*
+  * Find the sync block number or the tail of the log.
+  *
+@@ -1356,26 +1387,9 @@ xlog_find_tail(
+ 		goto done;
+ 
+ 	/*
+-	 * Reset log values according to the state of the log when we
+-	 * crashed.  In the case where head_blk == 0, we bump curr_cycle
+-	 * one because the next write starts a new cycle rather than
+-	 * continuing the cycle of the last good log record.  At this
+-	 * point we have guaranteed that all partial log records have been
+-	 * accounted for.  Therefore, we know that the last good log record
+-	 * written was complete and ended exactly on the end boundary
+-	 * of the physical log.
++	 * Set the log state based on the current head record.
+ 	 */
+-	log->l_prev_block = rhead_blk;
+-	log->l_curr_block = (int)*head_blk;
+-	log->l_curr_cycle = be32_to_cpu(rhead->h_cycle);
+-	if (wrapped)
+-		log->l_curr_cycle++;
+-	atomic64_set(&log->l_tail_lsn, be64_to_cpu(rhead->h_tail_lsn));
+-	atomic64_set(&log->l_last_sync_lsn, be64_to_cpu(rhead->h_lsn));
+-	xlog_assign_grant_head(&log->l_reserve_head.grant, log->l_curr_cycle,
+-					BBTOB(log->l_curr_block));
+-	xlog_assign_grant_head(&log->l_write_head.grant, log->l_curr_cycle,
+-					BBTOB(log->l_curr_block));
++	xlog_set_state(log, *head_blk, rhead, rhead_blk, wrapped);
+ 	tail_lsn = atomic64_read(&log->l_tail_lsn);
+ 
+ 	/*
+-- 
+2.16.4
+
