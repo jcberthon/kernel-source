@@ -1,0 +1,74 @@
+From: NeilBrown <neilb@suse.com>
+Subject: NFS - don't hang if xdr decoded username is bad.
+References: bsc#1105799
+Patch-mainline: never, upstream code has changed substantially.
+
+If the decoded username start with a nul, the lookup
+cannot get a reply that it will accept, so it will
+hang indefinitely.
+
+So check for that possibility and abort early.
+
+When this happens, fail the whole xdr decoding, as something is
+clearly wrong.
+
+Signed-off-by: NeilBrown <neilb@suse.com>
+
+--- a/fs/nfs/idmap.c
++++ b/fs/nfs/idmap.c
+@@ -526,6 +526,9 @@ nfs_idmap_id(struct idmap *idmap, struct
+ 	}
+ 	if (namelen >= IDMAP_NAMESZ)
+ 		return -EINVAL;
++	if (strnlen(name, IDMAP_NAMESZ) != namelen)
++		/* Embedded nuls cause problems */
++		return -EINVAL;
+ 
+ 	mutex_lock(&idmap->idmap_lock);
+ 	mutex_lock(&idmap->idmap_im_lock);
+--- a/fs/nfs/nfs4xdr.c
++++ b/fs/nfs/nfs4xdr.c
+@@ -3612,11 +3612,19 @@ static int decode_attr_owner(struct xdr_
+ 		if (!may_sleep) {
+ 			/* do nothing */
+ 		} else if (len < XDR_MAX_NETOBJ) {
+-			if (nfs_map_name_to_uid(server, (char *)p, len, uid) == 0)
++			switch (nfs_map_name_to_uid(server, (char *)p, len, uid)) {
++			case 0:
+ 				ret = NFS_ATTR_FATTR_OWNER;
+-			else
++				break;
++			case -EINVAL:
++				pr_warn_ratelimited("NFSv4 username in invalid\n");
++				/* Assume rest of reply is bad */
++				return -EIO;
++				break;
++			default:
+ 				dprintk("%s: nfs_map_name_to_uid failed!\n",
+ 						__func__);
++			}
+ 		} else
+ 			dprintk("%s: name too long (%u)!\n",
+ 					__func__, len);
+@@ -3650,11 +3658,19 @@ static int decode_attr_group(struct xdr_
+ 		if (!may_sleep) {
+ 			/* do nothing */
+ 		} else if (len < XDR_MAX_NETOBJ) {
+-			if (nfs_map_group_to_gid(server, (char *)p, len, gid) == 0)
++			switch (nfs_map_group_to_gid(server, (char *)p, len, gid)) {
++			case 0:
+ 				ret = NFS_ATTR_FATTR_GROUP;
+-			else
++				break;
++			case -EINVAL:
++				pr_warn_ratelimited("NFSv4 group name in invalid\n");
++				/* Assume rest of reply is bad */
++				return -EIO;
++				break;
++			default:
+ 				dprintk("%s: nfs_map_group_to_gid failed!\n",
+ 						__func__);
++			}
+ 		} else
+ 			dprintk("%s: name too long (%u)!\n",
+ 					__func__, len);
