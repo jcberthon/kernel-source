@@ -1,0 +1,49 @@
+From 9f6b14c082791c4b72636ba32b27e7182bdb7bdd Mon Sep 17 00:00:00 2001
+From: Vlastimil Babka <vbabka@suse.cz>
+Date: Tue, 14 Aug 2018 20:50:47 +0200
+Subject: [PATCH] x86/init: fix build with CONFIG_SWAP=n
+Git-commit: 792adb90fa724ce07c0171cbc96b9215af4b1045
+Patch-mainline: v4.19-rc1
+References: bsc#1105723
+
+mkoutny@suse.com:
+Moved #ifdef wrap from arch/x86/mm/init.c into arch/x86/kernel/bugs.c.
+
+The introduction of generic_max_swapfile_size and arch-specific versions has
+broken linking on x86 with CONFIG_SWAP=n due to undefined reference to
+'generic_max_swapfile_size'. Fix it by compiling the x86-specific
+max_swapfile_size() only with CONFIG_SWAP=y.
+
+Reported-by: Tomas Pruzina <pruzinat@gmail.com>
+Fixes: 377eeaa8e11f ("x86/speculation/l1tf: Limit swap file size to MAX_PA/2")
+Signed-off-by: Vlastimil Babka <vbabka@suse.cz>
+Cc: stable@vger.kernel.org
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Michal Koutný <mkoutny@suse.com>
+---
+ arch/x86/kernel/cpu/bugs.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/x86/kernel/cpu/bugs.c b/arch/x86/kernel/cpu/bugs.c
+index a61ca4e76c94..e0d7dbd45ae3 100644
+--- a/arch/x86/kernel/cpu/bugs.c
++++ b/arch/x86/kernel/cpu/bugs.c
+@@ -1041,6 +1041,7 @@ static void x86_amd_ssbd_disable(void)
+ }
+ 
+ 
++#ifdef CONFIG_SWAP
+ unsigned long max_swapfile_size(void)
+ {
+ 	unsigned long pages;
+@@ -1054,6 +1055,7 @@ unsigned long max_swapfile_size(void)
+ 	}
+ 	return pages;
+ }
++#endif
+ 
+ void x86_sync_spec_ctrl(void)
+ {
+-- 
+2.16.4
+
