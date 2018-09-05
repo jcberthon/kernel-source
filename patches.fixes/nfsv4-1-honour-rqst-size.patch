@@ -1,0 +1,37 @@
+From: NeilBrown <neilb@suse.com>
+Subject: NFSv4.1 - Don't leak IO size from one mount to another
+References: bsc#1103145
+Patch-mainline: v3.11
+Git-commit: 18aad3d552c73adf2652a34baf0fe766058018e4
+
+A single NFSv4.1 session can be shared by multiple nfs mounts.
+As the mounts could request different rsize/wsize, the session shouldn't
+be affected by this setting.
+So ignore rsize/wsize when requesting session parameters.
+
+Commit 18aad3d552c7 ("NFSv4.1 Refactor nfs4_init_session and nfs4_init_channel_attrs")
+in 3.11 included this change (buried in lots of other things).
+
+Signed-off-by: NeilBrown <neilb@suse.com>
+
+---
+ fs/nfs/nfs4proc.c |    8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+--- a/fs/nfs/nfs4proc.c
++++ b/fs/nfs/nfs4proc.c
+@@ -5619,12 +5619,8 @@ int nfs4_init_session(struct nfs_server
+ 	if (!test_and_clear_bit(NFS4_SESSION_INITING, &session->session_state))
+ 		return 0;
+ 
+-	rsize = server->rsize;
+-	if (rsize == 0)
+-		rsize = NFS_MAX_FILE_IO_SIZE;
+-	wsize = server->wsize;
+-	if (wsize == 0)
+-		wsize = NFS_MAX_FILE_IO_SIZE;
++	rsize = NFS_MAX_FILE_IO_SIZE;
++	wsize = NFS_MAX_FILE_IO_SIZE;
+ 
+ 	session->fc_attrs.max_rqst_sz = wsize + nfs41_maxwrite_overhead;
+ 	session->fc_attrs.max_resp_sz = rsize + nfs41_maxread_overhead;
