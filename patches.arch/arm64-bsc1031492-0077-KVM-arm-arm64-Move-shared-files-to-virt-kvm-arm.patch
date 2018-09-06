@@ -26,21 +26,21 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 ---
  arch/arm/kvm/Makefile     |    7 
  arch/arm/kvm/arm.c        | 1483 ----------------------------------
- arch/arm/kvm/mmio.c       |  217 -----
- arch/arm/kvm/mmu.c        | 1981 ----------------------------------------------
+ arch/arm/kvm/mmio.c       |  217 ----
+ arch/arm/kvm/mmu.c        | 2001 ----------------------------------------------
  arch/arm/kvm/perf.c       |   68 -
  arch/arm/kvm/psci.c       |  332 -------
  arch/arm/kvm/trace.h      |  247 -----
  arch/arm64/kvm/Makefile   |    5 
  virt/kvm/arm/arm.c        | 1483 ++++++++++++++++++++++++++++++++++
- virt/kvm/arm/mmio.c       |  217 +++++
- virt/kvm/arm/mmu.c        | 1981 ++++++++++++++++++++++++++++++++++++++++++++++
+ virt/kvm/arm/mmio.c       |  217 ++++
+ virt/kvm/arm/mmu.c        | 2001 ++++++++++++++++++++++++++++++++++++++++++++++
  virt/kvm/arm/perf.c       |   68 +
  virt/kvm/arm/psci.c       |  332 +++++++
  virt/kvm/arm/trace.h      |  246 +++++
  virt/kvm/arm/vgic/trace.h |   37 
  virt/kvm/arm/vgic/vgic.c  |    2 
- 16 files changed, 4361 insertions(+), 4345 deletions(-)
+ 16 files changed, 4381 insertions(+), 4365 deletions(-)
  delete mode 100644 arch/arm/kvm/arm.c
  delete mode 100644 arch/arm/kvm/mmio.c
  delete mode 100644 arch/arm/kvm/mmu.c
@@ -1778,7 +1778,7 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 -}
 --- a/arch/arm/kvm/mmu.c
 +++ /dev/null
-@@ -1,1981 +0,0 @@
+@@ -1,2001 +0,0 @@
 -/*
 - * Copyright (C) 2012 - Virtual Open Systems and Columbia University
 - * Author: Christoffer Dall <c.dall@virtualopensystems.com>
@@ -2674,19 +2674,35 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 -	pmd = stage2_get_pmd(kvm, cache, addr);
 -	VM_BUG_ON(!pmd);
 -
--	/*
--	 * Mapping in huge pages should only happen through a fault.  If a
--	 * page is merged into a transparent huge page, the individual
--	 * subpages of that huge page should be unmapped through MMU
--	 * notifiers before we get here.
--	 *
--	 * Merging of CompoundPages is not supported; they should become
--	 * splitting first, unmapped, merged, and mapped back in on-demand.
--	 */
--	VM_BUG_ON(pmd_present(*pmd) && pmd_pfn(*pmd) != pmd_pfn(*new_pmd));
--
 -	old_pmd = *pmd;
 -	if (pmd_present(old_pmd)) {
+-		/*
+-		 * Multiple vcpus faulting on the same PMD entry, can
+-		 * lead to them sequentially updating the PMD with the
+-		 * same value. Following the break-before-make
+-		 * (pmd_clear() followed by tlb_flush()) process can
+-		 * hinder forward progress due to refaults generated
+-		 * on missing translations.
+-		 *
+-		 * Skip updating the page table if the entry is
+-		 * unchanged.
+-		 */
+-		if (pmd_val(old_pmd) == pmd_val(*new_pmd))
+-			return 0;
+-
+-		/*
+-		 * Mapping in huge pages should only happen through a
+-		 * fault.  If a page is merged into a transparent huge
+-		 * page, the individual subpages of that huge page
+-		 * should be unmapped through MMU notifiers before we
+-		 * get here.
+-		 *
+-		 * Merging of CompoundPages is not supported; they
+-		 * should become splitting first, unmapped, merged,
+-		 * and mapped back in on-demand.
+-		 */
+-		VM_BUG_ON(pmd_pfn(old_pmd) != pmd_pfn(*new_pmd));
+-
 -		pmd_clear(pmd);
 -		kvm_tlb_flush_vmid_ipa(kvm, addr);
 -	} else {
@@ -2742,6 +2758,10 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 -	/* Create 2nd stage page table mapping - Level 3 */
 -	old_pte = *pte;
 -	if (pte_present(old_pte)) {
+-		/* Skip page table update if there is no change */
+-		if (pte_val(old_pte) == pte_val(*new_pte))
+-			return 0;
+-
 -		kvm_set_pte(pte, __pte(0));
 -		kvm_tlb_flush_vmid_ipa(kvm, addr);
 -	} else {
@@ -6163,7 +6183,7 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 +}
 --- /dev/null
 +++ b/virt/kvm/arm/mmu.c
-@@ -0,0 +1,1981 @@
+@@ -0,0 +1,2001 @@
 +/*
 + * Copyright (C) 2012 - Virtual Open Systems and Columbia University
 + * Author: Christoffer Dall <c.dall@virtualopensystems.com>
@@ -7059,19 +7079,35 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 +	pmd = stage2_get_pmd(kvm, cache, addr);
 +	VM_BUG_ON(!pmd);
 +
-+	/*
-+	 * Mapping in huge pages should only happen through a fault.  If a
-+	 * page is merged into a transparent huge page, the individual
-+	 * subpages of that huge page should be unmapped through MMU
-+	 * notifiers before we get here.
-+	 *
-+	 * Merging of CompoundPages is not supported; they should become
-+	 * splitting first, unmapped, merged, and mapped back in on-demand.
-+	 */
-+	VM_BUG_ON(pmd_present(*pmd) && pmd_pfn(*pmd) != pmd_pfn(*new_pmd));
-+
 +	old_pmd = *pmd;
 +	if (pmd_present(old_pmd)) {
++		/*
++		 * Multiple vcpus faulting on the same PMD entry, can
++		 * lead to them sequentially updating the PMD with the
++		 * same value. Following the break-before-make
++		 * (pmd_clear() followed by tlb_flush()) process can
++		 * hinder forward progress due to refaults generated
++		 * on missing translations.
++		 *
++		 * Skip updating the page table if the entry is
++		 * unchanged.
++		 */
++		if (pmd_val(old_pmd) == pmd_val(*new_pmd))
++			return 0;
++
++		/*
++		 * Mapping in huge pages should only happen through a
++		 * fault.  If a page is merged into a transparent huge
++		 * page, the individual subpages of that huge page
++		 * should be unmapped through MMU notifiers before we
++		 * get here.
++		 *
++		 * Merging of CompoundPages is not supported; they
++		 * should become splitting first, unmapped, merged,
++		 * and mapped back in on-demand.
++		 */
++		VM_BUG_ON(pmd_pfn(old_pmd) != pmd_pfn(*new_pmd));
++
 +		pmd_clear(pmd);
 +		kvm_tlb_flush_vmid_ipa(kvm, addr);
 +	} else {
@@ -7127,6 +7163,10 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 +	/* Create 2nd stage page table mapping - Level 3 */
 +	old_pte = *pte;
 +	if (pte_present(old_pte)) {
++		/* Skip page table update if there is no change */
++		if (pte_val(old_pte) == pte_val(*new_pte))
++			return 0;
++
 +		kvm_set_pte(pte, __pte(0));
 +		kvm_tlb_flush_vmid_ipa(kvm, addr);
 +	} else {

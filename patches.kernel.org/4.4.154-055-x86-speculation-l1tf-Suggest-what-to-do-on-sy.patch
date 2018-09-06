@@ -1,11 +1,12 @@
-From 6a012288d6906fee1dbc244050ade1dafe4a9c8d Mon Sep 17 00:00:00 2001
 From: Vlastimil Babka <vbabka@suse.cz>
 Date: Thu, 23 Aug 2018 16:21:29 +0200
 Subject: [PATCH] x86/speculation/l1tf: Suggest what to do on systems with too
  much RAM
+Patch-mainline: 4.4.154
+References: bnc#1012382 bnc#1105536
 Git-commit: 6a012288d6906fee1dbc244050ade1dafe4a9c8d
-Patch-mainline: 4.19-rc1
-References: bnc#1105536
+
+commit 6a012288d6906fee1dbc244050ade1dafe4a9c8d upstream.
 
 Two users have reported [1] that they have an "extremely unlikely" system
 with more than MAX_PA/2 memory and L1TF mitigation is not effective.
@@ -25,14 +26,17 @@ Cc: Andi Kleen <ak@linux.intel.com>
 Cc: Dave Hansen <dave.hansen@intel.com>
 Cc: stable@vger.kernel.org
 Link: https://lkml.kernel.org/r/966571f0-9d7f-43dc-92c6-a10eec7a1254@suse.cz
-
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- arch/x86/kernel/cpu/bugs.c |    4 ++++
+ arch/x86/kernel/cpu/bugs.c | 4 ++++
  1 file changed, 4 insertions(+)
 
+diff --git a/arch/x86/kernel/cpu/bugs.c b/arch/x86/kernel/cpu/bugs.c
+index 34e4aaaf03d2..b9e6b60df148 100644
 --- a/arch/x86/kernel/cpu/bugs.c
 +++ b/arch/x86/kernel/cpu/bugs.c
-@@ -758,6 +758,10 @@ static void __init l1tf_select_mitigatio
+@@ -654,6 +654,10 @@ static void __init l1tf_select_mitigation(void)
  	half_pa = (u64)l1tf_pfn_limit() << PAGE_SHIFT;
  	if (e820_any_mapped(half_pa, ULLONG_MAX - half_pa, E820_RAM)) {
  		pr_warn("System has more than MAX_PA/2 memory. L1TF mitigation not effective.\n");
@@ -43,3 +47,6 @@ Link: https://lkml.kernel.org/r/966571f0-9d7f-43dc-92c6-a10eec7a1254@suse.cz
  		return;
  	}
  
+-- 
+2.18.0
+

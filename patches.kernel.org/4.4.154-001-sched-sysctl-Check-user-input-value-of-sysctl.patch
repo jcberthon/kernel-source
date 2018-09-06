@@ -1,10 +1,11 @@
-From 5ccba44ba118a5000cccc50076b0344632459779 Mon Sep 17 00:00:00 2001
 From: Ethan Zhao <ethan.zhao@oracle.com>
 Date: Mon, 4 Sep 2017 13:59:34 +0800
 Subject: [PATCH] sched/sysctl: Check user input value of sysctl_sched_time_avg
+Patch-mainline: 4.4.154
+References: bnc#1012382 bsc#1100089
 Git-commit: 5ccba44ba118a5000cccc50076b0344632459779
-Patch-mainline: v4.14-rc3
-References: bsc#1100089
+
+commit 5ccba44ba118a5000cccc50076b0344632459779 upstream.
 
 System will hang if user set sysctl_sched_time_avg to 0:
 
@@ -63,15 +64,18 @@ Cc: mcgrof@kernel.org
 Cc: <stable@vger.kernel.org>
 Link: http://lkml.kernel.org/r/1504504774-18253-1-git-send-email-ethan.zhao@oracle.com
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Acked-by: Takashi Iwai <tiwai@suse.de>
-
+Cc: Steve Muckle <smuckle@google.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- kernel/sysctl.c |    3 ++-
+ kernel/sysctl.c | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
 
+diff --git a/kernel/sysctl.c b/kernel/sysctl.c
+index 17c59e78661b..66100d1bc3f7 100644
 --- a/kernel/sysctl.c
 +++ b/kernel/sysctl.c
-@@ -364,7 +364,8 @@ static struct ctl_table kern_table[] = {
+@@ -342,7 +342,8 @@ static struct ctl_table kern_table[] = {
  		.data		= &sysctl_sched_time_avg,
  		.maxlen		= sizeof(unsigned int),
  		.mode		= 0644,
@@ -81,3 +85,6 @@ Acked-by: Takashi Iwai <tiwai@suse.de>
  	},
  	{
  		.procname	= "sched_shares_window_ns",
+-- 
+2.18.0
+

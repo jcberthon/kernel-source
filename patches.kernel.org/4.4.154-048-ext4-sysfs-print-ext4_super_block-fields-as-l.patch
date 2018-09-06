@@ -1,10 +1,11 @@
-From a4d2aadca184ece182418950d45ba4ffc7b652d2 Mon Sep 17 00:00:00 2001
 From: Arnd Bergmann <arnd@arndb.de>
 Date: Sun, 29 Jul 2018 15:48:00 -0400
 Subject: [PATCH] ext4: sysfs: print ext4_super_block fields as little-endian
+Patch-mainline: 4.4.154
+References: bnc#1012382 bsc#1106229
 Git-commit: a4d2aadca184ece182418950d45ba4ffc7b652d2
-Patch-mainline: v4.19-rc1
-References: bsc#1106229
+
+commit a4d2aadca184ece182418950d45ba4ffc7b652d2 upstream.
 
 While working on extended rand for last_error/first_error timestamps,
 I noticed that the endianess is wrong; we access the little-endian
@@ -21,15 +22,17 @@ Fixes: 52c198c6820f ("ext4: add sysfs entry showing whether the fs contains erro
 Reviewed-by: Andreas Dilger <adilger@dilger.ca>
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-Acked-by: Jan Kara <jack@suse.cz>
-
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- fs/ext4/sysfs.c |   13 ++++++++++---
+ fs/ext4/sysfs.c | 13 ++++++++++---
  1 file changed, 10 insertions(+), 3 deletions(-)
 
+diff --git a/fs/ext4/sysfs.c b/fs/ext4/sysfs.c
+index c2ee23acf359..ae9929d678d6 100644
 --- a/fs/ext4/sysfs.c
 +++ b/fs/ext4/sysfs.c
-@@ -277,8 +277,12 @@ static ssize_t ext4_attr_show(struct kob
+@@ -277,8 +277,12 @@ static ssize_t ext4_attr_show(struct kobject *kobj,
  	case attr_pointer_ui:
  		if (!ptr)
  			return 0;
@@ -44,7 +47,7 @@ Acked-by: Jan Kara <jack@suse.cz>
  	case attr_pointer_atomic:
  		if (!ptr)
  			return 0;
-@@ -311,7 +315,10 @@ static ssize_t ext4_attr_store(struct ko
+@@ -311,7 +315,10 @@ static ssize_t ext4_attr_store(struct kobject *kobj,
  		ret = kstrtoul(skip_spaces(buf), 0, &t);
  		if (ret)
  			return ret;
@@ -56,3 +59,6 @@ Acked-by: Jan Kara <jack@suse.cz>
  		return len;
  	case attr_inode_readahead:
  		return inode_readahead_blks_store(a, sbi, buf, len);
+-- 
+2.18.0
+

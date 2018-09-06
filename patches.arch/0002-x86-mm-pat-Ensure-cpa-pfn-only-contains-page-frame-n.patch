@@ -42,9 +42,9 @@ Link: http://lkml.kernel.org/r/1448658575-17029-3-git-send-email-matt@codebluepr
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Acked-by: Lee, Chun-Yi <jlee@suse.com>
 ---
- arch/x86/mm/pageattr.c         |   13 ++++---------
+ arch/x86/mm/pageattr.c         |   15 +++++----------
  arch/x86/platform/efi/efi_64.c |   16 ++++++++++------
- 2 files changed, 14 insertions(+), 15 deletions(-)
+ 2 files changed, 15 insertions(+), 16 deletions(-)
 
 --- a/arch/x86/mm/pageattr.c
 +++ b/arch/x86/mm/pageattr.c
@@ -66,7 +66,12 @@ Acked-by: Lee, Chun-Yi <jlee@suse.com>
  		pte++;
  	}
  }
-@@ -1010,7 +1005,7 @@ static int populate_pmd(struct cpa_data
+@@ -1006,11 +1001,11 @@ static int populate_pmd(struct cpa_data
+ 
+ 		pmd = pmd_offset(pud, start);
+ 
+-		set_pmd(pmd, pmd_mkhuge(pfn_pmd(cpa->pfn >> PAGE_SHIFT,
++		set_pmd(pmd, pmd_mkhuge(pfn_pmd(cpa->pfn,
  					canon_pgprot(pmd_pgprot))));
  
  		start	  += PMD_SIZE;

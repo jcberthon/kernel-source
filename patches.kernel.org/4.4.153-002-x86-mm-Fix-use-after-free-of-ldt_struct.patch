@@ -1,9 +1,11 @@
 From: Eric Biggers <ebiggers@google.com>
 Date: Thu, 24 Aug 2017 10:50:29 -0700
-Subject: x86/mm: Fix use-after-free of ldt_struct
+Subject: [PATCH] x86/mm: Fix use-after-free of ldt_struct
+Patch-mainline: 4.4.153
+References: bnc#1012382 bsc#1055963
 Git-commit: ccd5b3235180eef3cfec337df1c8554ab151b5cc
-Patch-mainline: v4.13-rc7
-References: bsc#1055963
+
+commit ccd5b3235180eef3cfec337df1c8554ab151b5cc upstream.
 
 The following commit:
 
@@ -151,21 +153,27 @@ Cc: linux-mm@kvack.org
 Fixes: 39a0526fb3f7 ("x86/mm: Factor out LDT init from context init")
 Link: http://lkml.kernel.org/r/20170824175029.76040-1-ebiggers3@gmail.com
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Acked-by: Joerg Roedel <jroedel@suse.de>
+Cc: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- arch/x86/include/asm/mmu_context.h | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ arch/x86/include/asm/mmu_context.h | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
+diff --git a/arch/x86/include/asm/mmu_context.h b/arch/x86/include/asm/mmu_context.h
+index effc12767cbf..d8d19fe99e45 100644
 --- a/arch/x86/include/asm/mmu_context.h
 +++ b/arch/x86/include/asm/mmu_context.h
-@@ -116,9 +116,7 @@ static inline int init_new_context(struc
- 		mm->context.execute_only_pkey = -1;
- 	}
- 	#endif
+@@ -109,8 +109,7 @@ static inline int init_new_context(struct task_struct *tsk,
+ 				   struct mm_struct *mm)
+ {
+ 	mm->context.ctx_id = atomic64_inc_return(&last_mm_ctx_id);
 -	init_new_context_ldt(tsk, mm);
--
 -	return 0;
 +	return init_new_context_ldt(tsk, mm);
  }
  static inline void destroy_context(struct mm_struct *mm)
  {
+-- 
+2.18.0
+
