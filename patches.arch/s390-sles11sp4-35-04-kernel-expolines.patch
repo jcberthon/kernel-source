@@ -1,0 +1,109 @@
+From: Martin Schwidefsky <schwidefsky@de.ibm.com>
+Subject: s390/kernel: use expoline for indirect branches
+Patch-mainline: v4.17-rc6
+Git-commit: c50c84c3ac4d5db683904bdb3257798b6ef980ae
+References: bnc#1106930, LTC#171029
+
+Description:  kernel: improve spectre mitigation
+Symptom:      -
+Problem:      The upstream kernel has a few more spectre related updates
+              and fixes which are relevant for the various distribution
+              targets as well. The most notable improvement is the
+              etoken support.
+Solution:     Backport upstream patches
+Reproduction: -
+
+Upstream-Description:
+
+              s390/kernel: use expoline for indirect branches
+
+              The assember code in arch/s390/kernel uses a few more indirect branches
+              which need to be done with execute trampolines for CONFIG_EXPOLINE=y.
+
+              Cc: stable@vger.kernel.org # 4.16
+              Fixes: f19fbd5ed6 ("s390: introduce execute-trampolines for branches")
+              Reviewed-by: Hendrik Brueckner <brueckner@linux.vnet.ibm.com>
+              Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+
+
+Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
+---
+ arch/s390/kernel/base.S    |   18 +++++++++++-------
+ arch/s390/kernel/reipl64.S |    5 ++++-
+ 2 files changed, 15 insertions(+), 8 deletions(-)
+
+--- a/arch/s390/kernel/base.S
++++ b/arch/s390/kernel/base.S
+@@ -8,20 +8,24 @@
+ 
+ #include <linux/linkage.h>
+ #include <asm/asm-offsets.h>
++#include <asm/nospec-insn.h>
+ #include <asm/ptrace.h>
+ 
+ #ifdef CONFIG_64BIT
+ 
++	GEN_BR_THUNK %r9
++	GEN_BR_THUNK %r14
++
+ 	.globl	s390_base_mcck_handler
+ s390_base_mcck_handler:
+ 	basr	%r13,0
+ 0:	lg	%r15,__LC_PANIC_STACK	# load panic stack
+ 	aghi	%r15,-STACK_FRAME_OVERHEAD
+ 	larl	%r1,s390_base_mcck_handler_fn
+-	lg	%r1,0(%r1)
+-	ltgr	%r1,%r1
++	lg	%r9,0(%r1)
++	ltgr	%r9,%r9
+ 	jz	1f
+-	basr	%r14,%r1
++	BASR_EX	%r14,%r9
+ 1:	la	%r1,4095
+ 	lmg	%r0,%r15,__LC_GPREGS_SAVE_AREA-4095(%r1)
+ 	lpswe	__LC_MCK_OLD_PSW
+@@ -38,10 +42,10 @@ s390_base_ext_handler:
+ 	basr	%r13,0
+ 0:	aghi	%r15,-STACK_FRAME_OVERHEAD
+ 	larl	%r1,s390_base_ext_handler_fn
+-	lg	%r1,0(%r1)
+-	ltgr	%r1,%r1
++	lg	%r9,0(%r1)
++	ltgr	%r9,%r9
+ 	jz	1f
+-	basr	%r14,%r1
++	BASR_EX	%r14,%r9
+ 1:	lmg	%r0,%r15,__LC_SAVE_AREA
+ 	ni	__LC_EXT_OLD_PSW+1,0xfd	# clear wait state bit
+ 	lpswe	__LC_EXT_OLD_PSW
+@@ -109,7 +113,7 @@ ENTRY(diag308_reset)
+ 	larl	%r4,.Lcontinue_psw	# Restore PSW flags
+ 	lpswe	0(%r4)
+ .Lcontinue:
+-	br	%r14
++	BR_EX	%r14
+ .align 16
+ .Lrestart_psw:
+ 	.long	0x00080000,0x80000000 + .Lrestart_part2
+--- a/arch/s390/kernel/reipl64.S
++++ b/arch/s390/kernel/reipl64.S
+@@ -6,6 +6,9 @@
+ 
+ #include <linux/linkage.h>
+ #include <asm/asm-offsets.h>
++#include <asm/nospec-insn.h>
++
++	GEN_BR_THUNK %r14
+ 
+ #
+ # store_status
+@@ -61,7 +64,7 @@ ENTRY(store_status)
+ 	st	%r3,__LC_PSW_SAVE_AREA-SAVE_AREA_BASE + 4(%r1)
+ 	larl	%r2,store_status
+ 	stg	%r2,__LC_PSW_SAVE_AREA-SAVE_AREA_BASE + 8(%r1)
+-	br	%r14
++	BR_EX	%r14
+ 
+ 	.section .bss
+ 	.align	8

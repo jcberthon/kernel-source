@@ -1,0 +1,50 @@
+From: Martin Schwidefsky <schwidefsky@de.ibm.com>
+Subject: s390: remove indirect branch from do_softirq_own_stack
+Patch-mainline: v4.17-rc6
+Git-commit: 9f18fff63cfd6f559daa1eaae60640372c65f84b
+References: bnc#1106930, LTC#171029
+
+Description:  kernel: improve spectre mitigation
+Symptom:      -
+Problem:      The upstream kernel has a few more spectre related updates
+              and fixes which are relevant for the various distribution
+              targets as well. The most notable improvement is the
+              etoken support.
+Solution:     Backport upstream patches
+Reproduction: -
+
+Upstream-Description:
+
+              s390: remove indirect branch from do_softirq_own_stack
+
+              The inline assembly to call __do_softirq on the irq stack uses
+              an indirect branch. This can be replaced with a normal relative
+              branch.
+
+              Cc: stable@vger.kernel.org # 4.16
+              Fixes: f19fbd5ed6 ("s390: introduce execute-trampolines for branches")
+              Reviewed-by: Hendrik Brueckner <brueckner@linux.vnet.ibm.com>
+              Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+
+
+Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
+---
+ arch/s390/kernel/irq.c |    5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+--- a/arch/s390/kernel/irq.c
++++ b/arch/s390/kernel/irq.c
+@@ -124,10 +124,9 @@ asmlinkage void do_softirq(void)
+ 			((struct stack_frame *) new)->back_chain = old;
+ 
+ 			asm volatile("   la    15,0(%0)\n"
+-				     "   basr  14,%2\n"
++				     "   brasl 14,__do_softirq\n"
+ 				     "   la    15,0(%1)\n"
+-				     : : "a" (new), "a" (old),
+-				         "a" (__do_softirq)
++				     : : "a" (new), "a" (old)
+ 				     : "0", "1", "2", "3", "4", "5", "14",
+ 				       "cc", "memory" );
+ 		} else

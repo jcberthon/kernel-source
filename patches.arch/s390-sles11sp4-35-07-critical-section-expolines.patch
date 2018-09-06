@@ -1,0 +1,51 @@
+From: Martin Schwidefsky <schwidefsky@de.ibm.com>
+Subject: s390: Correct register corruption in critical section cleanup
+Patch-mainline: v4.18-rc4
+Git-commit: 891f6a726cacbb87e5b06076693ffab53bd378d7
+References: bnc#1106930, LTC#171029
+
+Description:  kernel: improve spectre mitigation
+Symptom:      -
+Problem:      The upstream kernel has a few more spectre related updates
+              and fixes which are relevant for the various distribution
+              targets as well. The most notable improvement is the
+              etoken support.
+Solution:     Backport upstream patches
+Reproduction: -
+
+Upstream-Description:
+
+              s390: Correct register corruption in critical section cleanup
+
+              In the critical section cleanup we must not mess with r1.  For march=z9
+              or older, larl + ex (instead of exrl) are used with r1 as a temporary
+              register. This can clobber r1 in several interrupt handlers. Fix this by
+              using r11 as a temp register.  r11 is being saved by all callers of
+              cleanup_critical.
+
+              Fixes: 6dd85fbb87 ("s390: move expoline assembler macros to a header")
+              Cc: stable@vger.kernel.org #v4.16
+              Reported-by: Oliver Kurz <okurz@suse.com>
+              Reported-by: Petr Tesařík <ptesarik@suse.com>
+              Signed-off-by: Christian Borntraeger <borntraeger@de.ibm.com>
+              Reviewed-by: Hendrik Brueckner <brueckner@linux.ibm.com>
+              Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+
+
+Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
+---
+ arch/s390/kernel/entry64.S |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/arch/s390/kernel/entry64.S
++++ b/arch/s390/kernel/entry64.S
+@@ -1123,7 +1123,7 @@ cleanup_critical:
+ 	clc	8(8,%r12),BASED(cleanup_table_io_restore+8)
+ 	jl	cleanup_io_restore
+ 0:
+-	BR_EX	%r14
++	BR_EX	%r14,%r13
+ 
+ cleanup_table_system_call:
+ 	.quad	system_call, sysc_do_svc
