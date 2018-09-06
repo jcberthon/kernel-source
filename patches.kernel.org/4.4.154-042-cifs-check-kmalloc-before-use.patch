@@ -1,10 +1,11 @@
-From 126c97f4d0d1b5b956e8b0740c81a2b2a2ae548c Mon Sep 17 00:00:00 2001
 From: Nicholas Mc Guire <hofrat@osadl.org>
 Date: Thu, 23 Aug 2018 12:24:02 +0200
 Subject: [PATCH] cifs: check kmalloc before use
-Patch-mainline: v4.19-rc1
+Patch-mainline: 4.4.154
+References: bnc#1012382 bsc#1012382
 Git-commit: 126c97f4d0d1b5b956e8b0740c81a2b2a2ae548c
-References: bsc#1012382
+
+commit 126c97f4d0d1b5b956e8b0740c81a2b2a2ae548c upstream.
 
 The kmalloc was not being checked - if it fails issue a warning
 and return -ENOMEM to the caller.
@@ -14,13 +15,14 @@ Fixes: b8da344b74c8 ("cifs: dynamic allocation of ntlmssp blob")
 Signed-off-by: Steve French <stfrench@microsoft.com>
 Reviewed-by: Pavel Shilovsky <pshilov@microsoft.com>
 cc: Stable <stable@vger.kernel.org>`
-Signed-off-by: Paulo Alcantara <palcantara@suse.de>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  fs/cifs/sess.c | 6 ++++++
  1 file changed, 6 insertions(+)
 
 diff --git a/fs/cifs/sess.c b/fs/cifs/sess.c
-index 8b0502cd39af..aa23c00367ec 100644
+index a035d1a95882..9bc7a29f88d6 100644
 --- a/fs/cifs/sess.c
 +++ b/fs/cifs/sess.c
 @@ -398,6 +398,12 @@ int build_ntlmssp_auth_blob(unsigned char **pbuffer,

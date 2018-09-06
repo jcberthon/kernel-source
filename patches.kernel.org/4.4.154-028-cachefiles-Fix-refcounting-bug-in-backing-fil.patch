@@ -1,10 +1,12 @@
 From: Kiran Kumar Modukuri <kiran.modukuri@gmail.com>
 Date: Tue, 18 Jul 2017 16:25:49 -0700
-Subject: [PATCH 2/5] cachefiles: Fix refcounting bug in backing-file read
+Subject: [PATCH] cachefiles: Fix refcounting bug in backing-file read
  monitoring
+Patch-mainline: 4.4.154
+References: bnc#1012382 bsc#1099858
 Git-commit: 934140ab028713a61de8bca58c05332416d037d1
-Patch-mainline: v4.18
-References: bsc#1099858
+
+[ Upstream commit 934140ab028713a61de8bca58c05332416d037d1 ]
 
 cachefiles_read_waiter() has the right to access a 'monitor' object by
 virtue of being called under the waitqueue lock for one of the pages in its
@@ -71,15 +73,18 @@ Reported-by: Daniel Axtens <dja@axtens.net>
 Reported-by: Kiran Kumar Modukuri <kiran.modukuri@gmail.com>
 Signed-off-by: David Howells <dhowells@redhat.com>
 Reviewed-by: Daniel Axtens <dja@axtens.net>
-Acked-by: NeilBrown <neilb@suse.com>
-
+Signed-off-by: Sasha Levin <alexander.levin@microsoft.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- fs/cachefiles/rdwr.c |   17 ++++++++++++-----
+ fs/cachefiles/rdwr.c | 17 ++++++++++++-----
  1 file changed, 12 insertions(+), 5 deletions(-)
 
+diff --git a/fs/cachefiles/rdwr.c b/fs/cachefiles/rdwr.c
+index c0f3da3926a0..5b68cf526887 100644
 --- a/fs/cachefiles/rdwr.c
 +++ b/fs/cachefiles/rdwr.c
-@@ -27,6 +27,7 @@ static int cachefiles_read_waiter(wait_q
+@@ -27,6 +27,7 @@ static int cachefiles_read_waiter(wait_queue_t *wait, unsigned mode,
  	struct cachefiles_one_read *monitor =
  		container_of(wait, struct cachefiles_one_read, monitor);
  	struct cachefiles_object *object;
@@ -87,7 +92,7 @@ Acked-by: NeilBrown <neilb@suse.com>
  	struct wait_bit_key *key = _key;
  	struct page *page = wait->private;
  
-@@ -51,16 +52,22 @@ static int cachefiles_read_waiter(wait_q
+@@ -51,16 +52,22 @@ static int cachefiles_read_waiter(wait_queue_t *wait, unsigned mode,
  	list_del(&wait->task_list);
  
  	/* move onto the action list and queue for FS-Cache thread pool */
@@ -115,3 +120,6 @@ Acked-by: NeilBrown <neilb@suse.com>
  	return 0;
  }
  
+-- 
+2.18.0
+

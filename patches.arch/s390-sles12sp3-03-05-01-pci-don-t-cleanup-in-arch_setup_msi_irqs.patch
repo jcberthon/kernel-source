@@ -48,7 +48,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	unsigned long	*dma_table;
 --- a/arch/s390/pci/pci.c
 +++ b/arch/s390/pci/pci.c
-@@ -382,22 +382,21 @@ int arch_setup_msi_irqs(struct pci_dev *
+@@ -383,22 +383,21 @@ int arch_setup_msi_irqs(struct pci_dev *
  	struct msi_msg msg;
  	int rc, irq;
  
@@ -74,8 +74,8 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  
  	/* Wire up shortcut pointer */
  	zpci_aibv[aisb] = zdev->aibv;
-@@ -408,10 +407,10 @@ int arch_setup_msi_irqs(struct pci_dev *
- 		rc = -EIO;
+@@ -411,10 +410,10 @@ int arch_setup_msi_irqs(struct pci_dev *
+ 			break;
  		irq = irq_alloc_desc(0);	/* Alloc irq on node 0 */
  		if (irq < 0)
 -			goto out_msi;
@@ -87,7 +87,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		irq_set_chip_and_handler(irq, &zpci_irq_chip,
  					 handle_simple_irq);
  		msg.data = hwirq;
-@@ -425,27 +424,9 @@ int arch_setup_msi_irqs(struct pci_dev *
+@@ -428,27 +427,9 @@ int arch_setup_msi_irqs(struct pci_dev *
  	/* Enable adapter interrupts */
  	rc = zpci_set_airq(zdev);
  	if (rc)
@@ -116,7 +116,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  }
  
  void arch_teardown_msi_irqs(struct pci_dev *pdev)
-@@ -461,6 +442,8 @@ void arch_teardown_msi_irqs(struct pci_d
+@@ -464,6 +445,8 @@ void arch_teardown_msi_irqs(struct pci_d
  
  	/* Release MSI interrupts */
  	for_each_pci_msi_entry(msi, pdev) {
@@ -125,7 +125,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		if (msi->msi_attrib.is_msix)
  			__pci_msix_desc_mask_irq(msi, 1);
  		else
-@@ -473,9 +456,15 @@ void arch_teardown_msi_irqs(struct pci_d
+@@ -476,9 +459,15 @@ void arch_teardown_msi_irqs(struct pci_d
  		msi->irq = 0;
  	}
  

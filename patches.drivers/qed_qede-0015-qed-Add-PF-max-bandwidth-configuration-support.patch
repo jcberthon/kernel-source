@@ -120,8 +120,8 @@ Acked-by: Cho, Yu-Chen <acho@suse.com>
  
  	p_link = &p_hwfn->mcp_info->link_output;
  	memset(p_link, 0, sizeof(*p_link));
-@@ -527,17 +528,15 @@ static void qed_mcp_handle_link_change(s
- 		p_link->speed = 0;
+@@ -528,17 +529,15 @@ static void qed_mcp_handle_link_change(s
+ 		p_link->link_up = 0;
  	}
  
 +	if (p_link->link_up && p_link->speed)
@@ -146,7 +146,7 @@ Acked-by: Cho, Yu-Chen <acho@suse.com>
  
  	p_link->an = !!(status & LINK_STATUS_AUTO_NEGOTIATE_ENABLED);
  	p_link->an_complete = !!(status &
-@@ -648,6 +647,76 @@ int qed_mcp_set_link(struct qed_hwfn *p_
+@@ -649,6 +648,76 @@ int qed_mcp_set_link(struct qed_hwfn *p_
  	return 0;
  }
  
@@ -223,7 +223,7 @@ Acked-by: Cho, Yu-Chen <acho@suse.com>
  int qed_mcp_handle_events(struct qed_hwfn *p_hwfn,
  			  struct qed_ptt *p_ptt)
  {
-@@ -679,6 +748,9 @@ int qed_mcp_handle_events(struct qed_hwf
+@@ -680,6 +749,9 @@ int qed_mcp_handle_events(struct qed_hwf
  		case MFW_DRV_MSG_TRANSCEIVER_STATE_CHANGE:
  			qed_mcp_handle_transceiver_change(p_hwfn, p_ptt);
  			break;
@@ -233,7 +233,7 @@ Acked-by: Cho, Yu-Chen <acho@suse.com>
  		default:
  			DP_NOTICE(p_hwfn, "Unimplemented MFW message %d\n", i);
  			rc = -EINVAL;
-@@ -758,28 +830,6 @@ int qed_mcp_get_media_type(struct qed_de
+@@ -759,28 +831,6 @@ int qed_mcp_get_media_type(struct qed_de
  	return 0;
  }
  
@@ -262,7 +262,7 @@ Acked-by: Cho, Yu-Chen <acho@suse.com>
  static int
  qed_mcp_get_shmem_proto(struct qed_hwfn *p_hwfn,
  			struct public_func *p_info,
-@@ -818,26 +868,7 @@ int qed_mcp_fill_shmem_func_info(struct
+@@ -819,26 +869,7 @@ int qed_mcp_fill_shmem_func_info(struct
  		return -EINVAL;
  	}
  
@@ -290,7 +290,7 @@ Acked-by: Cho, Yu-Chen <acho@suse.com>
  
  	if (shmem_info.mac_upper || shmem_info.mac_lower) {
  		info->mac[0] = (u8)(shmem_info.mac_upper >> 8);
-@@ -938,9 +969,10 @@ qed_mcp_send_drv_version(struct qed_hwfn
+@@ -939,9 +970,10 @@ qed_mcp_send_drv_version(struct qed_hwfn
  
  	p_drv_version = &union_data.drv_version;
  	p_drv_version->version = p_ver->version;
