@@ -1,0 +1,39 @@
+From: "Michael S. Tsirkin" <mst@redhat.com>
+Date: Wed, 29 Mar 2017 23:22:04 +0300
+Subject: virtio_console: fix uninitialized variable use
+Git-commit: 2055997f983c6db7b5c3940ce5f8f822657d5bc3
+Patch-mainline: v4.11-rc7
+References: git-fixes
+
+We try to disable callbacks on c_ivq even without multiport
+even though that vq is not initialized in this configuration.
+
+Fixes: c743d09dbd01 ("virtio: console: Disable callbacks for virtqueues at start of S4 freeze")
+Suggested-by: Mike Galbraith <efault@gmx.de>
+Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/char/virtio_console.c |    6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+--- a/drivers/char/virtio_console.c
++++ b/drivers/char/virtio_console.c
+@@ -2195,14 +2195,16 @@ static int virtcons_freeze(struct virtio
+ 
+ 	vdev->config->reset(vdev);
+ 
+-	virtqueue_disable_cb(portdev->c_ivq);
++	if (use_multiport(portdev))
++		virtqueue_disable_cb(portdev->c_ivq);
+ 	cancel_work_sync(&portdev->control_work);
+ 	cancel_work_sync(&portdev->config_work);
+ 	/*
+ 	 * Once more: if control_work_handler() was running, it would
+ 	 * enable the cb as the last step.
+ 	 */
+-	virtqueue_disable_cb(portdev->c_ivq);
++	if (use_multiport(portdev))
++		virtqueue_disable_cb(portdev->c_ivq);
+ 	remove_controlq_data(portdev);
+ 
+ 	list_for_each_entry(port, &portdev->ports, list) {
