@@ -1,7 +1,8 @@
 From: "Aneesh Kumar K.V" <aneesh.kumar@linux.ibm.com>
 Subject: mm/hugetlb: filter out hugetlb pages if HUGEPAGE migration is not supported.
-Patch-mainline: not yet (in mmotm tree)
+Git-commit: 464c7ffbcb164b2e5cebfa406b7fc6cdb7945344
 References: bnc#1106697
+Patch-mainline: v4.19-rc3
 
 When scanning for movable pages, filter out Hugetlb pages if hugepage
 migration is not supported.  Without this we hit infinte loop in
