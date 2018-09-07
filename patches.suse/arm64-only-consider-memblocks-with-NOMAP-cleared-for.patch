@@ -16,25 +16,21 @@ Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: Will Deacon <will.deacon@arm.com>
 Signed-off-by: Matt Fleming <mfleming@suse.de>
 ---
- arch/arm64/mm/init.c | 2 +-
- arch/arm64/mm/mmu.c  | 2 ++
+ arch/arm64/mm/init.c |    2 +-
+ arch/arm64/mm/mmu.c  |    2 ++
  2 files changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
-index 439fffe..58b103a 100644
 --- a/arch/arm64/mm/init.c
 +++ b/arch/arm64/mm/init.c
-@@ -138,7 +138,7 @@ static void __init zone_sizes_init(unsigned long min, unsigned long max)
- #ifdef CONFIG_HAVE_ARCH_PFN_VALID
- int pfn_valid(unsigned long pfn)
- {
--	return memblock_is_memory(pfn << PAGE_SHIFT);
-+	return memblock_is_map_memory(pfn << PAGE_SHIFT);
+@@ -142,7 +142,7 @@ int pfn_valid(unsigned long pfn)
+ 
+ 	if ((addr >> PAGE_SHIFT) != pfn)
+ 		return 0;
+-	return memblock_is_memory(addr);
++	return memblock_is_map_memory(addr);
  }
  EXPORT_SYMBOL(pfn_valid);
  #endif
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 2257f2d..e23aa1a 100644
 --- a/arch/arm64/mm/mmu.c
 +++ b/arch/arm64/mm/mmu.c
 @@ -383,6 +383,8 @@ static void __init map_mem(pgd_t *pgd)
@@ -46,6 +42,3 @@ index 2257f2d..e23aa1a 100644
  
  		__map_memblock(pgd, start, end);
  	}
--- 
-2.7.3
-
