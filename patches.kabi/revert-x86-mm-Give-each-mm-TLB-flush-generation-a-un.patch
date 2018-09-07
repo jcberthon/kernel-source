@@ -12,13 +12,11 @@ for now.
 
 Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- arch/x86/include/asm/mmu.h         | 15 ++-------------
- arch/x86/include/asm/mmu_context.h |  4 ----
- arch/x86/mm/tlb.c                  |  2 --
+ arch/x86/include/asm/mmu.h         |   15 ++-------------
+ arch/x86/include/asm/mmu_context.h |    4 ----
+ arch/x86/mm/tlb.c                  |    2 --
  3 files changed, 2 insertions(+), 19 deletions(-)
 
-diff --git a/arch/x86/include/asm/mmu.h b/arch/x86/include/asm/mmu.h
-index 3359dfedc7ee..7680b76adafc 100644
 --- a/arch/x86/include/asm/mmu.h
 +++ b/arch/x86/include/asm/mmu.h
 @@ -3,18 +3,12 @@
@@ -54,8 +52,6 @@ index 3359dfedc7ee..7680b76adafc 100644
  void leave_mm(int cpu);
  
  #endif /* _ASM_X86_MMU_H */
-diff --git a/arch/x86/include/asm/mmu_context.h b/arch/x86/include/asm/mmu_context.h
-index effc12767cbf..1c4794f861d7 100644
 --- a/arch/x86/include/asm/mmu_context.h
 +++ b/arch/x86/include/asm/mmu_context.h
 @@ -11,9 +11,6 @@
@@ -68,16 +64,14 @@ index effc12767cbf..1c4794f861d7 100644
  #ifndef CONFIG_PARAVIRT
  static inline void paravirt_activate_mm(struct mm_struct *prev,
  					struct mm_struct *next)
-@@ -108,7 +105,6 @@ static inline void enter_lazy_tlb(struct mm_struct *mm, struct task_struct *tsk)
+@@ -108,7 +105,6 @@ static inline void enter_lazy_tlb(struct
  static inline int init_new_context(struct task_struct *tsk,
  				   struct mm_struct *mm)
  {
 -	mm->context.ctx_id = atomic64_inc_return(&last_mm_ctx_id);
- 	init_new_context_ldt(tsk, mm);
- 	return 0;
+ 	return init_new_context_ldt(tsk, mm);
  }
-diff --git a/arch/x86/mm/tlb.c b/arch/x86/mm/tlb.c
-index efec198d271a..7cad01af6dcd 100644
+ static inline void destroy_context(struct mm_struct *mm)
 --- a/arch/x86/mm/tlb.c
 +++ b/arch/x86/mm/tlb.c
 @@ -29,8 +29,6 @@
@@ -89,6 +83,3 @@ index efec198d271a..7cad01af6dcd 100644
  struct flush_tlb_info {
  	struct mm_struct *flush_mm;
  	unsigned long flush_start;
--- 
-2.18.0
-

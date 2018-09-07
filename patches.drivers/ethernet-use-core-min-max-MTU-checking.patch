@@ -433,9 +433,9 @@ Acked-by: David Chang <dchang@suse.com>
  	return 0;
 --- a/drivers/net/ethernet/cisco/enic/enic_main.c
 +++ b/drivers/net/ethernet/cisco/enic/enic_main.c
-@@ -1843,9 +1843,6 @@ static int enic_change_mtu(struct net_de
+@@ -1869,9 +1869,6 @@ static int enic_change_mtu(struct net_de
+ {
  	struct enic *enic = netdev_priv(netdev);
- 	int running = netif_running(netdev);
  
 -	if (new_mtu < ENIC_MIN_MTU || new_mtu > ENIC_MAX_MTU)
 -		return -EINVAL;
@@ -443,7 +443,7 @@ Acked-by: David Chang <dchang@suse.com>
  	if (enic_is_dynamic(enic) || enic_is_sriov_vf(enic))
  		return -EOPNOTSUPP;
  
-@@ -2751,6 +2748,10 @@ static int enic_probe(struct pci_dev *pd
+@@ -2732,6 +2729,10 @@ static int enic_probe(struct pci_dev *pd
  
  	netdev->priv_flags |= IFF_UNICAST_FLT;
  
@@ -478,7 +478,7 @@ Acked-by: David Chang <dchang@suse.com>
  	dev->netdev_ops = &gfar_netdev_ops;
  	dev->ethtool_ops = &gfar_ethtool_ops;
  
-@@ -2596,12 +2599,6 @@ static int gfar_set_mac_address(struct n
+@@ -2598,12 +2601,6 @@ static int gfar_set_mac_address(struct n
  static int gfar_change_mtu(struct net_device *dev, int new_mtu)
  {
  	struct gfar_private *priv = netdev_priv(dev);
@@ -779,7 +779,7 @@ Acked-by: David Chang <dchang@suse.com>
  #define QCAFRM_ETHMINLEN (QCAFRM_ETHMINMTU + ETH_HLEN)
 --- a/drivers/net/ethernet/qualcomm/qca_spi.c
 +++ b/drivers/net/ethernet/qualcomm/qca_spi.c
-@@ -780,24 +780,12 @@ qcaspi_netdev_uninit(struct net_device *
+@@ -785,24 +785,12 @@ qcaspi_netdev_uninit(struct net_device *
  		dev_kfree_skb(qca->rx_skb);
  }
  
@@ -804,7 +804,7 @@ Acked-by: David Chang <dchang@suse.com>
  	.ndo_set_mac_address = eth_mac_addr,
  	.ndo_tx_timeout = qcaspi_netdev_tx_timeout,
  	.ndo_validate_addr = eth_validate_addr,
-@@ -814,6 +802,10 @@ qcaspi_netdev_setup(struct net_device *d
+@@ -819,6 +807,10 @@ qcaspi_netdev_setup(struct net_device *d
  	dev->priv_flags &= ~IFF_TX_SKB_SHARING;
  	dev->tx_queue_len = 100;
  
@@ -850,7 +850,7 @@ Acked-by: David Chang <dchang@suse.com>
  	/* Enable TCP segmentation offload for all DMA channels */
 --- a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
 +++ b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
-@@ -2366,27 +2366,11 @@ static void stmmac_set_rx_mode(struct ne
+@@ -2372,27 +2372,11 @@ static void stmmac_set_rx_mode(struct ne
   */
  static int stmmac_change_mtu(struct net_device *dev, int new_mtu)
  {
@@ -878,7 +878,7 @@ Acked-by: David Chang <dchang@suse.com>
  	dev->mtu = new_mtu;
  	netdev_update_features(dev);
  
-@@ -2921,6 +2905,15 @@ int stmmac_dvr_probe(struct device *devi
+@@ -2927,6 +2911,15 @@ int stmmac_dvr_probe(struct device *devi
  #endif
  	priv->msg_enable = netif_msg_init(debug, default_msg_level);
  
