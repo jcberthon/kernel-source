@@ -181,7 +181,7 @@ index c4e09846d1de..af8c4b38b746 100644
  		 skb, ATM_SKB(skb)->vcc, ATM_SKB(skb)->vcc->dev);
  	ret = ATM_SKB(skb)->vcc->send(ATM_SKB(skb)->vcc, skb)
 diff --git a/net/atm/raw.c b/net/atm/raw.c
-index 2e17e97a7a8b..d5f416a46ad8 100644
+index 2e17e97a7a8b..8090f8bd4910 100644
 --- a/net/atm/raw.c
 +++ b/net/atm/raw.c
 @@ -34,8 +34,8 @@ static void atm_pop_raw(struct atm_vcc *vcc, struct sk_buff *skb)
@@ -191,7 +191,7 @@ index 2e17e97a7a8b..d5f416a46ad8 100644
 -		 vcc->vci, sk_wmem_alloc_get(sk), skb->truesize);
 -	atomic_sub(skb->truesize, &sk->sk_wmem_alloc);
 +		 vcc->vci, sk_wmem_alloc_get(sk), ATM_SKB(skb)->acct_truesize);
-+	atomic_sub_and_test(ATM_SKB(skb)->acct_truesize, &sk->sk_wmem_alloc);
++	atomic_sub(ATM_SKB(skb)->acct_truesize, &sk->sk_wmem_alloc);
  	dev_kfree_skb_any(skb);
  	sk->sk_write_space(sk);
  }
