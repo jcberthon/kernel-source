@@ -1,7 +1,7 @@
 From: Scott Bauer <scott.bauer@intel.com>
 Date: Thu, 26 Apr 2018 11:51:08 -0600
 Subject: [PATCH] cdrom: Fix info leak/OOB read in cdrom_ioctl_drive_status
-References: bnc#1012382
+References: bnc#1012382,CVE-2018-16658,bsc#1107689
 Patch-mainline: 4.4.154
 Git-commit: 8f3fafc9c2f0ece10832c25f7ffcb07c97a32ad4
 
