@@ -1,12 +1,14 @@
 From: Dave Airlie <airlied@redhat.com>
 Date: Mon, 24 Oct 2016 15:37:48 +1000
-Subject: drm/drivers: add support for using the arch wc mapping API.
+Subject: [PATCH] drm/drivers: add support for using the arch wc mapping API.
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
+Patch-mainline: 4.4.155
+References: bnc#1012382 git-fixes
 Git-commit: 7cf321d118a825c1541b43ca45294126fd474efa
-Patch-mainline: v4.9-rc3
-References: git-fixes
+
+commit 7cf321d118a825c1541b43ca45294126fd474efa upstream.
 
 This fixes a regression in all these drivers since the cache
 mode tracking was fixed for mixed mappings. It uses the new
@@ -16,19 +18,23 @@ tables.
 Fixes: 87744ab3832 (mm: fix cache mode tracking in vm_insert_mixed())
 Reviewed-by: Christian König <christian.koenig@amd.com>.
 Signed-off-by: Dave Airlie <airlied@redhat.com>
+Cc: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- drivers/gpu/drm/amd/amdgpu/amdgpu_object.c |    5 +++++
- drivers/gpu/drm/ast/ast_ttm.c              |    6 ++++++
- drivers/gpu/drm/cirrus/cirrus_ttm.c        |    7 +++++++
- drivers/gpu/drm/mgag200/mgag200_ttm.c      |    7 +++++++
- drivers/gpu/drm/nouveau/nouveau_ttm.c      |    8 ++++++++
- drivers/gpu/drm/radeon/radeon_object.c     |    5 +++++
+ drivers/gpu/drm/amd/amdgpu/amdgpu_object.c | 5 +++++
+ drivers/gpu/drm/ast/ast_ttm.c              | 6 ++++++
+ drivers/gpu/drm/cirrus/cirrus_ttm.c        | 7 +++++++
+ drivers/gpu/drm/mgag200/mgag200_ttm.c      | 7 +++++++
+ drivers/gpu/drm/nouveau/nouveau_ttm.c      | 8 ++++++++
+ drivers/gpu/drm/radeon/radeon_object.c     | 5 +++++
  6 files changed, 38 insertions(+)
 
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_object.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_object.c
+index 73628c7599e7..3aca9a9011fb 100644
 --- a/drivers/gpu/drm/amd/amdgpu/amdgpu_object.c
 +++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_object.c
-@@ -492,6 +492,10 @@ void amdgpu_bo_force_delete(struct amdgp
+@@ -492,6 +492,10 @@ void amdgpu_bo_force_delete(struct amdgpu_device *adev)
  
  int amdgpu_bo_init(struct amdgpu_device *adev)
  {
@@ -39,7 +45,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	/* Add an MTRR for the VRAM */
  	adev->mc.vram_mtrr = arch_phys_wc_add(adev->mc.aper_base,
  					      adev->mc.aper_size);
-@@ -507,6 +511,7 @@ void amdgpu_bo_fini(struct amdgpu_device
+@@ -507,6 +511,7 @@ void amdgpu_bo_fini(struct amdgpu_device *adev)
  {
  	amdgpu_ttm_fini(adev);
  	arch_phys_wc_del(adev->mc.vram_mtrr);
@@ -47,6 +53,8 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  }
  
  int amdgpu_bo_fbdev_mmap(struct amdgpu_bo *bo,
+diff --git a/drivers/gpu/drm/ast/ast_ttm.c b/drivers/gpu/drm/ast/ast_ttm.c
+index 08f82eae6939..ac12f74e6b32 100644
 --- a/drivers/gpu/drm/ast/ast_ttm.c
 +++ b/drivers/gpu/drm/ast/ast_ttm.c
 @@ -275,6 +275,8 @@ int ast_mm_init(struct ast_private *ast)
@@ -74,9 +82,11 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  }
  
  void ast_ttm_placement(struct ast_bo *bo, int domain)
+diff --git a/drivers/gpu/drm/cirrus/cirrus_ttm.c b/drivers/gpu/drm/cirrus/cirrus_ttm.c
+index dfffd528517a..393967025043 100644
 --- a/drivers/gpu/drm/cirrus/cirrus_ttm.c
 +++ b/drivers/gpu/drm/cirrus/cirrus_ttm.c
-@@ -275,6 +275,9 @@ int cirrus_mm_init(struct cirrus_device
+@@ -275,6 +275,9 @@ int cirrus_mm_init(struct cirrus_device *cirrus)
  		return ret;
  	}
  
@@ -86,7 +96,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	cirrus->fb_mtrr = arch_phys_wc_add(pci_resource_start(dev->pdev, 0),
  					   pci_resource_len(dev->pdev, 0));
  
-@@ -284,6 +287,8 @@ int cirrus_mm_init(struct cirrus_device
+@@ -284,6 +287,8 @@ int cirrus_mm_init(struct cirrus_device *cirrus)
  
  void cirrus_mm_fini(struct cirrus_device *cirrus)
  {
@@ -95,7 +105,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	if (!cirrus->mm_inited)
  		return;
  
-@@ -293,6 +298,8 @@ void cirrus_mm_fini(struct cirrus_device
+@@ -293,6 +298,8 @@ void cirrus_mm_fini(struct cirrus_device *cirrus)
  
  	arch_phys_wc_del(cirrus->fb_mtrr);
  	cirrus->fb_mtrr = 0;
@@ -104,9 +114,11 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  }
  
  void cirrus_ttm_placement(struct cirrus_bo *bo, int domain)
+diff --git a/drivers/gpu/drm/mgag200/mgag200_ttm.c b/drivers/gpu/drm/mgag200/mgag200_ttm.c
+index 05108b505fbf..d9df8d32fc35 100644
 --- a/drivers/gpu/drm/mgag200/mgag200_ttm.c
 +++ b/drivers/gpu/drm/mgag200/mgag200_ttm.c
-@@ -274,6 +274,9 @@ int mgag200_mm_init(struct mga_device *m
+@@ -274,6 +274,9 @@ int mgag200_mm_init(struct mga_device *mdev)
  		return ret;
  	}
  
@@ -116,7 +128,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	mdev->fb_mtrr = arch_phys_wc_add(pci_resource_start(dev->pdev, 0),
  					 pci_resource_len(dev->pdev, 0));
  
-@@ -282,10 +285,14 @@ int mgag200_mm_init(struct mga_device *m
+@@ -282,10 +285,14 @@ int mgag200_mm_init(struct mga_device *mdev)
  
  void mgag200_mm_fini(struct mga_device *mdev)
  {
@@ -131,9 +143,11 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	arch_phys_wc_del(mdev->fb_mtrr);
  	mdev->fb_mtrr = 0;
  }
+diff --git a/drivers/gpu/drm/nouveau/nouveau_ttm.c b/drivers/gpu/drm/nouveau/nouveau_ttm.c
+index d2e7d209f651..9835327a3214 100644
 --- a/drivers/gpu/drm/nouveau/nouveau_ttm.c
 +++ b/drivers/gpu/drm/nouveau/nouveau_ttm.c
-@@ -397,6 +397,9 @@ nouveau_ttm_init(struct nouveau_drm *drm
+@@ -397,6 +397,9 @@ nouveau_ttm_init(struct nouveau_drm *drm)
  	/* VRAM init */
  	drm->gem.vram_available = drm->device.info.ram_user;
  
@@ -143,7 +157,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	ret = ttm_bo_init_mm(&drm->ttm.bdev, TTM_PL_VRAM,
  			      drm->gem.vram_available >> PAGE_SHIFT);
  	if (ret) {
-@@ -429,6 +432,8 @@ nouveau_ttm_init(struct nouveau_drm *drm
+@@ -429,6 +432,8 @@ nouveau_ttm_init(struct nouveau_drm *drm)
  void
  nouveau_ttm_fini(struct nouveau_drm *drm)
  {
@@ -152,7 +166,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	ttm_bo_clean_mm(&drm->ttm.bdev, TTM_PL_VRAM);
  	ttm_bo_clean_mm(&drm->ttm.bdev, TTM_PL_TT);
  
-@@ -438,4 +443,7 @@ nouveau_ttm_fini(struct nouveau_drm *drm
+@@ -438,4 +443,7 @@ nouveau_ttm_fini(struct nouveau_drm *drm)
  
  	arch_phys_wc_del(drm->ttm.mtrr);
  	drm->ttm.mtrr = 0;
@@ -160,9 +174,11 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 +				device->func->resource_size(device, 1));
 +
  }
+diff --git a/drivers/gpu/drm/radeon/radeon_object.c b/drivers/gpu/drm/radeon/radeon_object.c
+index 83aee9e814ba..18ec38d0d3f5 100644
 --- a/drivers/gpu/drm/radeon/radeon_object.c
 +++ b/drivers/gpu/drm/radeon/radeon_object.c
-@@ -447,6 +447,10 @@ void radeon_bo_force_delete(struct radeo
+@@ -447,6 +447,10 @@ void radeon_bo_force_delete(struct radeon_device *rdev)
  
  int radeon_bo_init(struct radeon_device *rdev)
  {
@@ -173,7 +189,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	/* Add an MTRR for the VRAM */
  	if (!rdev->fastfb_working) {
  		rdev->mc.vram_mtrr = arch_phys_wc_add(rdev->mc.aper_base,
-@@ -464,6 +468,7 @@ void radeon_bo_fini(struct radeon_device
+@@ -464,6 +468,7 @@ void radeon_bo_fini(struct radeon_device *rdev)
  {
  	radeon_ttm_fini(rdev);
  	arch_phys_wc_del(rdev->mc.vram_mtrr);
@@ -181,3 +197,6 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  }
  
  /* Returns how many bytes TTM can move per IB.
+-- 
+2.18.0
+

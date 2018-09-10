@@ -1,11 +1,12 @@
-From 6cd31196774e477fb397653c9d681b894a3697dd Mon Sep 17 00:00:00 2001
 From: Dave Airlie <airlied@redhat.com>
 Date: Mon, 24 Oct 2016 15:27:59 +1000
-Subject: [PATCH 5/7] x86/io: add interface to reserve io memtype for a
- resource range. (v1.1)
+Subject: [PATCH] x86/io: add interface to reserve io memtype for a resource
+ range. (v1.1)
+Patch-mainline: 4.4.155
+References: FATE#321223 bnc#1012382
 Git-commit: 8ef4227615e158faa4ee85a1d6466782f7e22f2f
-Patch-mainline: v4.9-rc3
-References: fate#321223
+
+commit 8ef4227615e158faa4ee85a1d6466782f7e22f2f upstream.
 
 A recent change to the mm code in:
 87744ab3832b mm: fix cache mode tracking in vm_insert_mixed()
@@ -44,7 +45,9 @@ Cc: Dan Williams <dan.j.williams@intel.com>
 Acked-by: Ingo Molnar <mingo@kernel.org>
 Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
 Signed-off-by: Dave Airlie <airlied@redhat.com>
-Signed-off-by: Patrik Jakobsson <pjakobsson@suse.de>
+Cc: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  arch/x86/include/asm/io.h |  6 ++++++
  arch/x86/mm/pat.c         | 14 ++++++++++++++
@@ -52,7 +55,7 @@ Signed-off-by: Patrik Jakobsson <pjakobsson@suse.de>
  3 files changed, 42 insertions(+)
 
 diff --git a/arch/x86/include/asm/io.h b/arch/x86/include/asm/io.h
-index de25aad07853..d34bd370074b 100644
+index 9016b4b70375..6c5020163db0 100644
 --- a/arch/x86/include/asm/io.h
 +++ b/arch/x86/include/asm/io.h
 @@ -351,4 +351,10 @@ extern void arch_phys_wc_del(int handle);
@@ -67,10 +70,10 @@ index de25aad07853..d34bd370074b 100644
 +
  #endif /* _ASM_X86_IO_H */
 diff --git a/arch/x86/mm/pat.c b/arch/x86/mm/pat.c
-index 188e3e07eeeb..33b7795f4f60 100644
+index 3146b1da6d72..5ff0cb74de55 100644
 --- a/arch/x86/mm/pat.c
 +++ b/arch/x86/mm/pat.c
-@@ -686,6 +686,20 @@ void io_free_memtype(resource_size_t start, resource_size_t end)
+@@ -726,6 +726,20 @@ void io_free_memtype(resource_size_t start, resource_size_t end)
  	free_memtype(start, end);
  }
  
@@ -123,5 +126,5 @@ index de64c1e53612..8ab45611fc35 100644
 +
  #endif /* _LINUX_IO_H */
 -- 
-2.12.0
+2.18.0
 

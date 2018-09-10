@@ -57,14 +57,12 @@ Reviewed-by: Mahesh J Salgaonkar <mahesh@linux.vnet.ibm.com>
 Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
 Acked-by: Michal Suchanek <msuchanek@suse.de>
 ---
- arch/powerpc/kernel/fadump.c | 15 +++++++++++++--
+ arch/powerpc/kernel/fadump.c |   15 +++++++++++++--
  1 file changed, 13 insertions(+), 2 deletions(-)
 
-diff --git a/arch/powerpc/kernel/fadump.c b/arch/powerpc/kernel/fadump.c
-index 12837d52e84a..08e00448a355 100644
 --- a/arch/powerpc/kernel/fadump.c
 +++ b/arch/powerpc/kernel/fadump.c
-@@ -878,8 +878,19 @@ static void fadump_setup_crash_memory_ranges(void)
+@@ -917,8 +917,19 @@ static int fadump_setup_crash_memory_ran
  	for_each_memblock(memory, reg) {
  		start = (unsigned long long)reg->base;
  		end = start + (unsigned long long)reg->size;
@@ -85,7 +83,4 @@ index 12837d52e84a..08e00448a355 100644
 +		}
  
  		/* add this range excluding the reserved dump area. */
- 		fadump_exclude_reserved_area(start, end);
--- 
-2.10.2
-
+ 		ret = fadump_exclude_reserved_area(start, end);
