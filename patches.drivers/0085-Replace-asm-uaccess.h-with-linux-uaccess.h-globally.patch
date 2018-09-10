@@ -3620,8 +3620,8 @@ Signed-off-by: Coly Li <colyli@suse.de>
 -#include <asm/uaccess.h>
 +#include <linux/uaccess.h>
  
- 
- int patch_instruction(unsigned int *addr, unsigned int instr)
+ static inline bool in_init_section(unsigned int *patch_addr)
+ {
 --- a/arch/powerpc/lib/sstep.c
 +++ b/arch/powerpc/lib/sstep.c
 @@ -14,7 +14,7 @@
