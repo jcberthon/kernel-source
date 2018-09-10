@@ -1,11 +1,12 @@
-From 3943b040f11ed0cc6d4585fd286a623ca8634547 Mon Sep 17 00:00:00 2001
 From: Shan Hai <shan.hai@oracle.com>
 Date: Thu, 23 Aug 2018 02:02:56 +0800
 Subject: [PATCH] bcache: release dc->writeback_lock properly in
  bch_writeback_thread()
+Patch-mainline: 4.4.155
+References: bnc#1012382 bsc#1064232
 Git-commit: 3943b040f11ed0cc6d4585fd286a623ca8634547
-Patch-mainline: v4.19-rc1
-References: bsc#1064232
+
+commit 3943b040f11ed0cc6d4585fd286a623ca8634547 upstream.
 
 The writeback thread would exit with a lock held when the cache device
 is detached via sysfs interface, fix it by releasing the held lock
@@ -17,16 +18,17 @@ Signed-off-by: Coly Li <colyli@suse.de>
 Tested-by: Shenghui Wang <shhuiw@foxmail.com>
 Cc: stable@vger.kernel.org #4.17+
 Signed-off-by: Jens Axboe <axboe@kernel.dk>
-
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  drivers/md/bcache/writeback.c | 4 +++-
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/md/bcache/writeback.c b/drivers/md/bcache/writeback.c
-index 6be05bd7ca67..08c3a9f9676c 100644
+index f2c0000de613..95a6ae053714 100644
 --- a/drivers/md/bcache/writeback.c
 +++ b/drivers/md/bcache/writeback.c
-@@ -685,8 +685,10 @@ static int bch_writeback_thread(void *arg)
+@@ -462,8 +462,10 @@ static int bch_writeback_thread(void *arg)
  			 * data on cache. BCACHE_DEV_DETACHING flag is set in
  			 * bch_cached_dev_detach().
  			 */
@@ -39,5 +41,5 @@ index 6be05bd7ca67..08c3a9f9676c 100644
  
  		up_write(&dc->writeback_lock);
 -- 
-2.16.4
+2.18.0
 
