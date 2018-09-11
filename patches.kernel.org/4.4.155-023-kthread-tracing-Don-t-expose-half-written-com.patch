@@ -1,11 +1,12 @@
-From 3e536e222f2930534c252c1cc7ae799c725c5ff9 Mon Sep 17 00:00:00 2001
 From: Snild Dolkow <snild@sony.com>
 Date: Thu, 26 Jul 2018 09:15:39 +0200
 Subject: [PATCH] kthread, tracing: Don't expose half-written comm when
  creating kthreads
+Patch-mainline: 4.4.155
+References: bnc#1012382 bsc#1104897
 Git-commit: 3e536e222f2930534c252c1cc7ae799c725c5ff9
-Patch-mainline: v4.18-rc7
-References: bsc#1104897
+
+commit 3e536e222f2930534c252c1cc7ae799c725c5ff9 upstream.
 
 There is a window for racing when printing directly to task->comm,
 allowing other threads to see a non-terminated string. The vsnprintf
@@ -54,30 +55,35 @@ Fixes: bc0c38d139ec7 ("ftrace: latency tracer infrastructure")
 Reviewed-by: Steven Rostedt (VMware) <rostedt@goodmis.org>
 Signed-off-by: Snild Dolkow <snild@sony.com>
 Signed-off-by: Steven Rostedt (VMware) <rostedt@goodmis.org>
-Acked-by: Petr Mladek <pmladek@suse.com>
-
+[backported to 3.18 / 4.4 by Snild]
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- kernel/kthread.c |    8 +++++++-
+ kernel/kthread.c | 8 +++++++-
  1 file changed, 7 insertions(+), 1 deletion(-)
 
+diff --git a/kernel/kthread.c b/kernel/kthread.c
+index 850b255649a2..ac6849ee3057 100644
 --- a/kernel/kthread.c
 +++ b/kernel/kthread.c
-@@ -330,11 +330,17 @@ struct task_struct *kthread_create_on_no
- 	}
+@@ -313,10 +313,16 @@ struct task_struct *kthread_create_on_node(int (*threadfn)(void *data),
  	task = create->result;
  	if (!IS_ERR(task)) {
+ 		static const struct sched_param param = { .sched_priority = 0 };
 +		char name[TASK_COMM_LEN];
  		va_list args;
  
+ 		va_start(args, namefmt);
+-		vsnprintf(task->comm, sizeof(task->comm), namefmt, args);
 +		/*
 +		 * task is already visible to other tasks, so updating
 +		 * COMM must be protected.
 +		 */
- 		va_start(args, namefmt);
--		vsnprintf(task->comm, sizeof(task->comm), namefmt, args);
 +		vsnprintf(name, sizeof(name), namefmt, args);
- 		va_end(args);
 +		set_task_comm(task, name);
+ 		va_end(args);
  		/*
  		 * root may have changed our (kthreadd's) priority or CPU mask.
- 		 * The kernel thread should not inherit these properties.
+-- 
+2.18.0
+
