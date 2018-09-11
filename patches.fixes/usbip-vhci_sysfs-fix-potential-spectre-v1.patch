@@ -1,0 +1,81 @@
+From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Date: Fri, 18 May 2018 20:13:42 -0500
+Subject: usbip: vhci_sysfs: fix potential Spectre v1
+Git-commit: a0d6ec88090d7b1b008429c44532a388e29bb1bd
+Patch-mainline: v4.18-rc1
+References: bsc#1096547
+
+pdev_nr and rhport can be controlled by user-space, hence leading to
+a potential exploitation of the Spectre variant 1 vulnerability.
+
+This issue was detected with the help of Smatch:
+drivers/usb/usbip/vhci_sysfs.c:238 detach_store() warn: potential spectre issue 'vhcis'
+drivers/usb/usbip/vhci_sysfs.c:328 attach_store() warn: potential spectre issue 'vhcis'
+drivers/usb/usbip/vhci_sysfs.c:338 attach_store() warn: potential spectre issue 'vhci->vhci_hcd_ss->vdev'
+drivers/usb/usbip/vhci_sysfs.c:340 attach_store() warn: potential spectre issue 'vhci->vhci_hcd_hs->vdev'
+
+Fix this by sanitizing pdev_nr and rhport before using them to index
+vhcis and vhci->vhci_hcd_ss->vdev respectively.
+
+Notice that given that speculation windows are large, the policy is
+to kill the speculation on the first load and not worry if it can be
+completed with a dependent load/store [1].
+
+[1] https://marc.info/?l=linux-kernel&m=152449131114778&w=2
+
+Cc: stable@vger.kernel.org
+Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+Acked-by: Shuah Khan (Samsung OSG) <shuah@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/staging/usbip/vhci_sysfs.c |   13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+--- a/drivers/staging/usbip/vhci_sysfs.c
++++ b/drivers/staging/usbip/vhci_sysfs.c
+@@ -20,6 +20,9 @@
+ #include <linux/kthread.h>
+ #include <linux/net.h>
+ 
++/* Hardening for Spectre-v1 */
++#include <linux/nospec.h>
++
+ #include "usbip_common.h"
+ #include "vhci.h"
+ 
+@@ -120,6 +123,7 @@ static ssize_t store_detach(struct devic
+ 		dev_err(dev, "invalid port %u\n", rhport);
+ 		return -EINVAL;
+ 	}
++	rhport = array_index_nospec(rhport, VHCI_NPORTS);
+ 
+ 	err = vhci_port_disconnect(rhport);
+ 	if (err < 0)
+@@ -132,13 +136,14 @@ static ssize_t store_detach(struct devic
+ static DEVICE_ATTR(detach, S_IWUSR, NULL, store_detach);
+ 
+ /* Sysfs entry to establish a virtual connection */
+-static int valid_args(__u32 rhport, enum usb_device_speed speed)
++static int valid_args(__u32 *rhport, enum usb_device_speed speed)
+ {
+ 	/* check rhport */
+-	if ((rhport < 0) || (rhport >= VHCI_NPORTS)) {
+-		pr_err("port %u\n", rhport);
++	if ((*rhport < 0) || (*rhport >= VHCI_NPORTS)) {
++		pr_err("port %u\n", *rhport);
+ 		return -EINVAL;
+ 	}
++	*rhport = array_index_nospec(*rhport, VHCI_NPORTS);
+ 
+ 	/* check speed */
+ 	switch (speed) {
+@@ -186,7 +191,7 @@ static ssize_t store_attach(struct devic
+ 			     rhport, sockfd, devid, speed);
+ 
+ 	/* check received parameters */
+-	if (valid_args(rhport, speed) < 0)
++	if (valid_args(&rhport, speed) < 0)
+ 		return -EINVAL;
+ 
+ 	/* check sockfd */
