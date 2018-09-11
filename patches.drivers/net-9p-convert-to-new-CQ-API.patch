@@ -12,11 +12,9 @@ Acked-by: Dominique Martinet <dominique.martinet@cea.fr>
 Signed-off-by: Doug Ledford <dledford@redhat.com>
 Acked-by: Hannes Reinecke <hare@suse.de>
 ---
- net/9p/trans_rdma.c | 86 +++++++++++++++++++----------------------------------
+ net/9p/trans_rdma.c |   86 ++++++++++++++++++----------------------------------
  1 file changed, 31 insertions(+), 55 deletions(-)
 
-diff --git a/net/9p/trans_rdma.c b/net/9p/trans_rdma.c
-index 52b4a2f..1852e38 100644
 --- a/net/9p/trans_rdma.c
 +++ b/net/9p/trans_rdma.c
 @@ -109,14 +109,13 @@ struct p9_trans_rdma {
@@ -35,7 +33,7 @@ index 52b4a2f..1852e38 100644
  	dma_addr_t busa;
  	union {
  		struct p9_req_t *req;
-@@ -284,9 +283,12 @@ p9_cm_event_handler(struct rdma_cm_id *id, struct rdma_cm_event *event)
+@@ -284,9 +283,12 @@ p9_cm_event_handler(struct rdma_cm_id *i
  }
  
  static void
@@ -50,7 +48,7 @@ index 52b4a2f..1852e38 100644
  	struct p9_req_t *req;
  	int err = 0;
  	int16_t tag;
-@@ -295,7 +297,7 @@ handle_recv(struct p9_client *client, struct p9_trans_rdma *rdma,
+@@ -295,7 +297,7 @@ handle_recv(struct p9_client *client, st
  	ib_dma_unmap_single(rdma->cm_id->device, c->busa, client->msize,
  							 DMA_FROM_DEVICE);
  
@@ -59,7 +57,7 @@ index 52b4a2f..1852e38 100644
  		goto err_out;
  
  	err = p9_parse_header(c->rc, NULL, NULL, &tag, 1);
-@@ -316,21 +318,32 @@ handle_recv(struct p9_client *client, struct p9_trans_rdma *rdma,
+@@ -316,21 +318,32 @@ handle_recv(struct p9_client *client, st
  	req->rc = c->rc;
  	p9_client_cb(client, req, REQ_STATUS_RCVD);
  
@@ -95,7 +93,7 @@ index 52b4a2f..1852e38 100644
  }
  
  static void qp_event_handler(struct ib_event *event, void *context)
-@@ -339,42 +352,6 @@ static void qp_event_handler(struct ib_event *event, void *context)
+@@ -339,42 +352,6 @@ static void qp_event_handler(struct ib_e
  		 event->event, context);
  }
  
@@ -138,7 +136,7 @@ index 52b4a2f..1852e38 100644
  static void rdma_destroy_trans(struct p9_trans_rdma *rdma)
  {
  	if (!rdma)
-@@ -387,7 +364,7 @@ static void rdma_destroy_trans(struct p9_trans_rdma *rdma)
+@@ -387,7 +364,7 @@ static void rdma_destroy_trans(struct p9
  		ib_dealloc_pd(rdma->pd);
  
  	if (rdma->cq && !IS_ERR(rdma->cq))
@@ -147,7 +145,7 @@ index 52b4a2f..1852e38 100644
  
  	if (rdma->cm_id && !IS_ERR(rdma->cm_id))
  		rdma_destroy_id(rdma->cm_id);
-@@ -408,13 +385,14 @@ post_recv(struct p9_client *client, struct p9_rdma_context *c)
+@@ -408,13 +385,14 @@ post_recv(struct p9_client *client, stru
  	if (ib_dma_mapping_error(rdma->cm_id->device, c->busa))
  		goto error;
  
@@ -181,15 +179,15 @@ index 52b4a2f..1852e38 100644
  	wr.opcode = IB_WR_SEND;
  	wr.send_flags = IB_SEND_SIGNALED;
  	wr.sg_list = &sge;
-@@ -642,7 +621,6 @@ rdma_create_trans(struct p9_client *client, const char *addr, char *args)
+@@ -642,7 +621,6 @@ rdma_create_trans(struct p9_client *clie
  	struct p9_trans_rdma *rdma;
  	struct rdma_conn_param conn_param;
  	struct ib_qp_init_attr qp_attr;
 -	struct ib_cq_init_attr cq_attr = {};
  
- 	/* Parse the transport specific mount options */
- 	err = parse_opts(args, &opts);
-@@ -695,13 +673,11 @@ rdma_create_trans(struct p9_client *client, const char *addr, char *args)
+ 	if (addr == NULL)
+ 		return -EINVAL;
+@@ -698,13 +676,11 @@ rdma_create_trans(struct p9_client *clie
  		goto error;
  
  	/* Create the Completion Queue */
@@ -206,6 +204,3 @@ index 52b4a2f..1852e38 100644
  
  	/* Create the Protection Domain */
  	rdma->pd = ib_alloc_pd(rdma->cm_id->device);
--- 
-1.8.5.6
-

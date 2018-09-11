@@ -42,9 +42,9 @@ Link: http://lkml.kernel.org/r/1448658575-17029-3-git-send-email-matt@codebluepr
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Acked-by: Lee, Chun-Yi <jlee@suse.com>
 ---
- arch/x86/mm/pageattr.c         |   15 +++++----------
+ arch/x86/mm/pageattr.c         |   17 ++++++-----------
  arch/x86/platform/efi/efi_64.c |   16 ++++++++++------
- 2 files changed, 15 insertions(+), 16 deletions(-)
+ 2 files changed, 16 insertions(+), 17 deletions(-)
 
 --- a/arch/x86/mm/pageattr.c
 +++ b/arch/x86/mm/pageattr.c
@@ -80,7 +80,12 @@ Acked-by: Lee, Chun-Yi <jlee@suse.com>
  		cur_pages += PMD_SIZE >> PAGE_SHIFT;
  	}
  
-@@ -1083,7 +1078,7 @@ static int populate_pud(struct cpa_data
+@@ -1079,11 +1074,11 @@ static int populate_pud(struct cpa_data
+ 	 * Map everything starting from the Gb boundary, possibly with 1G pages
+ 	 */
+ 	while (end - start >= PUD_SIZE) {
+-		set_pud(pud, pud_mkhuge(pfn_pud(cpa->pfn >> PAGE_SHIFT,
++		set_pud(pud, pud_mkhuge(pfn_pud(cpa->pfn,
  				   canon_pgprot(pud_pgprot))));
  
  		start	  += PUD_SIZE;

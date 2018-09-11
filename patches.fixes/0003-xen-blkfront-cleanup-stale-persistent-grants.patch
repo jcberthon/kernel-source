@@ -15,11 +15,11 @@ Signed-off-by: Juergen Gross <jgross@suse.com>
 Reviewed-by: Roger Pau Monné <roger.pau@citrix.com>
 Signed-off-by: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
 ---
- drivers/block/xen-blkfront.c | 88 ++++++++++++++++++++++++++++++++++--
- 1 file changed, 84 insertions(+), 4 deletions(-)
+ drivers/block/xen-blkfront.c | 86 ++++++++++++++++++++++++++++++++++--
+ 1 file changed, 82 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/block/xen-blkfront.c b/drivers/block/xen-blkfront.c
-index 8c0c64b3ac73..e1242fa1c7dd 100644
+index 8c0c64b3ac73..2551411e9274 100644
 --- a/drivers/block/xen-blkfront.c
 +++ b/drivers/block/xen-blkfront.c
 @@ -46,6 +46,7 @@
@@ -126,14 +126,12 @@ index 8c0c64b3ac73..e1242fa1c7dd 100644
  	}
  
  out:
-@@ -2312,6 +2338,56 @@ static struct xenbus_driver blkfront_driver = {
+@@ -2312,6 +2338,54 @@ static struct xenbus_driver blkfront_driver = {
  	.is_ready = blkfront_is_ready,
  };
  
 +static void purge_persistent_grants(struct blkfront_info *info)
 +{
-+	unsigned long flags;
-+
 +	struct grant *gnt_list_entry, *tmp;
 +
 +	spin_lock_irq(&info->io_lock);
@@ -183,7 +181,7 @@ index 8c0c64b3ac73..e1242fa1c7dd 100644
  static int __init xlblk_init(void)
  {
  	int ret;
-@@ -2337,6 +2413,8 @@ static int __init xlblk_init(void)
+@@ -2337,6 +2411,8 @@ static int __init xlblk_init(void)
  		return -ENODEV;
  	}
  
@@ -192,7 +190,7 @@ index 8c0c64b3ac73..e1242fa1c7dd 100644
  	ret = xenbus_register_frontend(&blkfront_driver);
  	if (ret) {
  		unregister_blkdev(XENVBD_MAJOR, DEV_NAME);
-@@ -2350,6 +2428,8 @@ module_init(xlblk_init);
+@@ -2350,6 +2426,8 @@ module_init(xlblk_init);
  
  static void __exit xlblk_exit(void)
  {

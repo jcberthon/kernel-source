@@ -14,12 +14,15 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
 
 --- a/arch/x86/include/asm/processor.h
 +++ b/arch/x86/include/asm/processor.h
-@@ -139,8 +139,10 @@ struct cpuinfo_x86 {
+@@ -139,11 +139,13 @@ struct cpuinfo_x86 {
  	/* Index into per_cpu list: */
  	u16			cpu_index;
  	u32			microcode;
 +#ifndef __GENKSYMS__
- 	/* Address space bits used by the cache internally */
+ 	/*
+ 	 * Address space bits used by the cache internally
+ 	 * NOTE: only to be used for l1tf mitigation
+ 	 */
  	u8			x86_cache_bits;
 +#endif
  };

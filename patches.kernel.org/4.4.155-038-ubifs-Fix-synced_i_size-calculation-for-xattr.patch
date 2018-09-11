@@ -1,10 +1,11 @@
-From 59965593205fa4044850d35ee3557cf0b7edcd14 Mon Sep 17 00:00:00 2001
 From: Richard Weinberger <richard@nod.at>
 Date: Tue, 12 Jun 2018 00:52:28 +0200
 Subject: [PATCH] ubifs: Fix synced_i_size calculation for xattr inodes
+Patch-mainline: 4.4.155
+References: bnc#1012382 bsc#1106275
 Git-commit: 59965593205fa4044850d35ee3557cf0b7edcd14
-Patch-mainline: v4.19-rc1
-References: bsc#1106275
+
+commit 59965593205fa4044850d35ee3557cf0b7edcd14 upstream.
 
 In ubifs_jnl_update() we sync parent and child inodes to the flash,
 in case of xattrs, the parent inode (AKA host inode) has a non-zero
@@ -18,17 +19,17 @@ UBIFS error (ubi0:0 pid 1896): dbg_check_synced_i_size: i_ino 65, i_mode 0x81a4,
 Cc: <stable@vger.kernel.org>
 Fixes: 1e51764a3c2a ("UBIFS: add new flash file system")
 Signed-off-by: Richard Weinberger <richard@nod.at>
-Acked-by: Jan Kara <jack@suse.cz>
-
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  fs/ubifs/journal.c | 5 +++++
  1 file changed, 5 insertions(+)
 
 diff --git a/fs/ubifs/journal.c b/fs/ubifs/journal.c
-index 07b4956e0425..c83041891cef 100644
+index 9887c03a631b..539fa934ed93 100644
 --- a/fs/ubifs/journal.c
 +++ b/fs/ubifs/journal.c
-@@ -664,6 +664,11 @@ int ubifs_jnl_update(struct ubifs_info *c, const struct inode *dir,
+@@ -661,6 +661,11 @@ int ubifs_jnl_update(struct ubifs_info *c, const struct inode *dir,
  	spin_lock(&ui->ui_lock);
  	ui->synced_i_size = ui->ui_size;
  	spin_unlock(&ui->ui_lock);
@@ -41,5 +42,5 @@ index 07b4956e0425..c83041891cef 100644
  	mark_inode_clean(c, host_ui);
  	return 0;
 -- 
-2.16.4
+2.18.0
 
