@@ -183,8 +183,6 @@ remotes = (
     Head(RepoURL("tip/tip.git")),
     Head(RepoURL("shli/md.git"), "for-next"),
     Head(RepoURL("dhowells/linux-fs.git"), "keys-uefi"),
-    Head(RepoURL("git://git.infradead.org/nvme.git"), "nvme-4.16"),
-    Head(RepoURL("git://git.infradead.org/nvme.git"), "nvme-4.17"),
     Head(RepoURL("tytso/ext4.git"), "dev"),
     Head(RepoURL("s390/linux.git"), "for-linus"),
     Head(RepoURL("tj/libata.git"), "for-next"),
@@ -198,45 +196,22 @@ remotes = (
     Head(RepoURL("horms/ipvs-next.git")),
     Head(RepoURL("klassert/ipsec.git")),
     Head(RepoURL("klassert/ipsec-next.git")),
-    Head(RepoURL("mkp/scsi.git"), "4.15/scsi-fixes"),
-    Head(RepoURL("mkp/scsi.git"), "4.16/scsi-fixes"),
-    Head(RepoURL("mkp/scsi.git"), "4.17/scsi-queue"),
-    Head(RepoURL("mkp/scsi.git"), "queue"),
+    Head(RepoURL("mkp/scsi.git"), "4.19/scsi-queue"),
     Head(RepoURL("git://git.kernel.dk/linux-block.git"), "for-next"),
     Head(RepoURL("git://git.kernel.org/pub/scm/virt/kvm/kvm.git"), "queue"),
-    Head(RepoURL("git://git.infradead.org/nvme.git"), "nvme-4.16-rc"),
+    Head(RepoURL("git://git.infradead.org/nvme.git"), "nvme-4.18"),
+    Head(RepoURL("git://git.infradead.org/nvme.git"), "nvme-4.19"),
     Head(RepoURL("dhowells/linux-fs.git")),
     Head(RepoURL("herbert/cryptodev-2.6.git")),
     Head(RepoURL("helgaas/pci.git"), "next"),
     Head(RepoURL("viro/vfs.git"), "for-linus"),
+    Head(RepoURL("jeyu/linux.git"), "modules-next"),
+    Head(RepoURL("nvdimm/nvdimm.git"), "libnvdimm-for-next"),
 )
 
 
 remote_index = dict(zip(remotes, list(range(len(remotes)))))
 oot = Head(RepoURL(None), "out-of-tree patches")
-
-remote_match = re.compile("remote\..+\.url")
-
-
-def config_keys(repo):
-    """
-    With libgit < 0.27, pygit2's Config.__iter__() elements are str.
-    With libgit 0.27, the same elements are ConfigEntry instances.
-
-    This function is an adaptation layer to support both interfaces.
-    """
-    try:
-        first = repo.config.__iter__().next()
-    except StopIteration:
-        return
-
-    if isinstance(first, pygit2.config.ConfigEntry):
-        transform = lambda config_entry: config_entry.name
-    else:
-        transform = lambda name: name
-
-    for entry in repo.config:
-        yield transform(entry)
 
 
 def get_heads(repo):
@@ -246,28 +221,38 @@ def get_heads(repo):
         sha1
     """
     result = collections.OrderedDict()
-    repo_remotes = collections.OrderedDict([
-        (RepoURL(repo.config[name]), ".".join(name.split(".")[1:-1]))
-        for name in config_keys(repo)
-        if remote_match.match(name)])
+    repo_remotes = collections.OrderedDict(
+        ((RepoURL(remote.url), remote,) for remote in repo.remotes))
 
     for head in remotes:
         if head in result:
             raise GSException("head \"%s\" is not unique." % (head,))
 
         try:
-            remote_name = repo_remotes[head.repo_url]
+            remote = repo_remotes[head.repo_url]
         except KeyError:
             continue
 
-        rev = "remotes/%s/%s" % (remote_name, head.rev,)
+        lhs = "refs/heads/%s" % (head.rev,)
+        rhs = None
+        nb = len(remote.fetch_refspecs)
+        if nb == 0:
+            # `git clone --bare` case
+            rhs = lhs
+        else:
+            for i in range(nb):
+                r = remote.get_refspec(i)
+                if r.src_matches(lhs):
+                    rhs = r.transform(lhs)
+                    break
+        if rhs is None:
+            raise GSError("No matching fetch refspec for head \"%s\"." %
+                          (head,))
         try:
-            commit = repo.revparse_single(rev)
+            commit = repo.revparse_single(rhs)
         except KeyError:
-            raise GSError(
-                "Could not read revision \"%s\". Perhaps you need to "
-                "fetch from remote \"%s\", ie. `git fetch %s`." % (
-                    rev, remote_name, remote_name,))
+            raise GSError("Could not read revision \"%s\". Perhaps you need "
+                          "to fetch from remote \"%s\"" % (rhs, remote.name,))
         result[head] = str(commit.id)
 
     if len(result) == 0 or list(result.keys())[0] != remotes[0]:
@@ -579,28 +564,6 @@ class SortIndex(object):
                 return IndexedCommit(head, index)
 
         raise GSKeyError
-
-
-    def sort(self, mapping):
-        """
-        Returns an OrderedDict
-        result[Head][]
-            sorted values from the mapping which are found in Head
-        """
-        result = collections.OrderedDict([(head, [],) for head in self.history])
-        for commit in list(mapping.keys()):
-            try:
-                ic = self.lookup(commit)
-            except GSKeyError:
-                continue
-            else:
-                result[ic.head].append((ic.index, mapping.pop(commit),))
-
-        for head, entries in result.items():
-            entries.sort(key=operator.itemgetter(0))
-            result[head] = [e[1] for e in entries]
-
-        return result
 
 
     def describe(self, index):
