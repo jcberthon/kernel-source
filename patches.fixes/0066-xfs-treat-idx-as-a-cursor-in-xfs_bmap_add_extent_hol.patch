@@ -1,0 +1,57 @@
+From 4b7e6cb9f89deb2701a90b3cd147b6697c2d5990 Mon Sep 17 00:00:00 2001
+From: Christoph Hellwig <hch@lst.de>
+Date: Fri, 3 Nov 2017 10:34:40 -0700
+Subject: [PATCH 66/90] xfs: treat idx as a cursor in
+ xfs_bmap_add_extent_hole_real
+Git-commit: 1d2e0089e16642928c76f032c1dbd0eb6da22935                            
+Patch-mainline: v4.15-rc1                                                       
+References: bsc#1095344
+
+Stop poking before and after the index and just increment or decrement
+it while doing our operations on it to prepare for a new extent list
+implementation.
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Acked-by: Nikolay Borisov <nborisov@suse.com>
+---
+ fs/xfs/libxfs/xfs_bmap.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
+index 355ded4c6cc2..c5eda6cd3f84 100644
+--- a/fs/xfs/libxfs/xfs_bmap.c
++++ b/fs/xfs/libxfs/xfs_bmap.c
+@@ -2843,11 +2843,12 @@ xfs_bmap_add_extent_hole_real(
+ 		 * left and on the right.
+ 		 * Merge all three into a single extent record.
+ 		 */
+-		--bma->idx;
+ 		left.br_blockcount += new->br_blockcount + right.br_blockcount;
++
++		xfs_iext_remove(bma->ip, bma->idx, 1, state);
++		--bma->idx;
+ 		xfs_iext_update_extent(bma->ip, state, bma->idx, &left);
+ 
+-		xfs_iext_remove(bma->ip, bma->idx + 1, 1, state);
+ 
+ 		XFS_IFORK_NEXT_SET(bma->ip, whichfork,
+ 			XFS_IFORK_NEXTENTS(bma->ip, whichfork) - 1);
+@@ -2879,9 +2880,11 @@ xfs_bmap_add_extent_hole_real(
+ 		 * on the left.
+ 		 * Merge the new allocation with the left neighbor.
+ 		 */
+-		--bma->idx;
+ 		old = left;
++
+ 		left.br_blockcount += new->br_blockcount;
++
++		--bma->idx;
+ 		xfs_iext_update_extent(bma->ip, state, bma->idx, &left);
+ 
+ 		if (bma->cur == NULL) {
+-- 
+2.7.4
+

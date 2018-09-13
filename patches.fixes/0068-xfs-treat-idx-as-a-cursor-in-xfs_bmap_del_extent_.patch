@@ -1,0 +1,52 @@
+From ebcc108515e0909e4cdb3537ac2e215324c02815 Mon Sep 17 00:00:00 2001
+From: Christoph Hellwig <hch@lst.de>
+Date: Fri, 3 Nov 2017 10:34:41 -0700
+Subject: [PATCH 68/90] xfs: treat idx as a cursor in xfs_bmap_del_extent_*
+Git-commit: 657fcb23362c9e8a72593b3e4755135f003a7a74
+Patch-mainline: v4.15-rc1
+References: bsc#1095344
+
+Stop poking before and after the index and just increment or decrement
+it while doing our operations on it to prepare for a new extent list
+implementation.
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Acked-by: Nikolay Borisov <nborisov@suse.com>
+---
+ fs/xfs/libxfs/xfs_bmap.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
+index 7a0f68b7c724..39cfc10e5dc0 100644
+--- a/fs/xfs/libxfs/xfs_bmap.c
++++ b/fs/xfs/libxfs/xfs_bmap.c
+@@ -4743,12 +4743,12 @@ xfs_bmap_del_extent_delay(
+ 						       del->br_blockcount);
+ 
+ 		got->br_startblock = nullstartblock((int)got_indlen);
+-		xfs_iext_update_extent(ip, state, *idx, got);
+ 
+ 		new.br_startoff = del_endoff;
+ 		new.br_state = got->br_state;
+ 		new.br_startblock = nullstartblock((int)new_indlen);
+ 
++		xfs_iext_update_extent(ip, state, *idx, got);
+ 		++*idx;
+ 		xfs_iext_insert(ip, *idx, 1, &new, state);
+ 
+@@ -4974,8 +4974,8 @@ xfs_bmap_del_extent_real(
+ 			flags |= xfs_ilog_fext(whichfork);
+ 		XFS_IFORK_NEXT_SET(ip, whichfork,
+ 			XFS_IFORK_NEXTENTS(ip, whichfork) + 1);
+-		xfs_iext_insert(ip, *idx + 1, 1, &new, state);
+ 		++*idx;
++		xfs_iext_insert(ip, *idx, 1, &new, state);
+ 		break;
+ 	}
+ 	/*
+-- 
+2.7.4
+
