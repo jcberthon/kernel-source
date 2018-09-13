@@ -1,0 +1,64 @@
+From 1253280d56fc8fbfec0960320cf486581dd45e87 Mon Sep 17 00:00:00 2001
+From: Christoph Hellwig <hch@lst.de>
+Date: Tue, 17 Oct 2017 14:16:22 -0700
+Subject: [PATCH 30/90] xfs: use correct state defines in
+ xfs_bmap_del_extent_{cow,delay}
+Git-commit: 0173c689ff4c0855e24ceb898274af1339b5db48                            
+Patch-mainline: v4.15-rc1                                                       
+References: bsc#1095344
+
+Use the _FILLING values to match the usage in the xfs_bmap_add_extent_*
+helpers.  No change in behavior, just better naming in the code and
+tracepoint output.
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reported-by: Brian Foster <bfoster@redhat.com>
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Acked-by: Nikolay Borisov <nborisov@suse.com>
+---
+ fs/xfs/libxfs/xfs_bmap.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
+index 5236cfbb48e4..737619b0a384 100644
+--- a/fs/xfs/libxfs/xfs_bmap.c
++++ b/fs/xfs/libxfs/xfs_bmap.c
+@@ -4886,19 +4886,19 @@ xfs_bmap_del_extent_delay(
+ 	ip->i_delayed_blks -= del->br_blockcount;
+ 
+ 	if (got->br_startoff == del->br_startoff)
+-		state |= BMAP_LEFT_CONTIG;
++		state |= BMAP_LEFT_FILLING;
+ 	if (got_endoff == del_endoff)
+-		state |= BMAP_RIGHT_CONTIG;
++		state |= BMAP_RIGHT_FILLING;
+ 
+-	switch (state & (BMAP_LEFT_CONTIG | BMAP_RIGHT_CONTIG)) {
+-	case BMAP_LEFT_CONTIG | BMAP_RIGHT_CONTIG:
++	switch (state & (BMAP_LEFT_FILLING | BMAP_RIGHT_FILLING)) {
++	case BMAP_LEFT_FILLING | BMAP_RIGHT_FILLING:
+ 		/*
+ 		 * Matches the whole extent.  Delete the entry.
+ 		 */
+ 		xfs_iext_remove(ip, *idx, 1, state);
+ 		--*idx;
+ 		break;
+-	case BMAP_LEFT_CONTIG:
++	case BMAP_LEFT_FILLING:
+ 		/*
+ 		 * Deleting the first part of the extent.
+ 		 */
+@@ -4911,7 +4911,7 @@ xfs_bmap_del_extent_delay(
+ 		xfs_iext_update_extent(ifp, *idx, got);
+ 		trace_xfs_bmap_post_update(ip, *idx, state, _THIS_IP_);
+ 		break;
+-	case BMAP_RIGHT_CONTIG:
++	case BMAP_RIGHT_FILLING:
+ 		/*
+ 		 * Deleting the last part of the extent.
+ 		 */
+-- 
+2.7.4
+

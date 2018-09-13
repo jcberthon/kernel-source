@@ -1,0 +1,134 @@
+From ce62f587d96d4c433cc3e76c7a22b249dc5f27b0 Mon Sep 17 00:00:00 2001
+From: Christoph Hellwig <hch@lst.de>
+Date: Tue, 17 Oct 2017 14:16:24 -0700
+Subject: [PATCH 34/90] xfs: refactor xfs_bmap_add_extent_hole_real
+Git-commit: 1abb9e55326c19bb41a9a2fd1179ed635e8af38c                            
+Patch-mainline: v4.15-rc1                                                       
+References: bsc#1095344
+
+Use xfs_iext_update_extent to update entries in the in-core extent list.
+This isolates the function from the detailed layout of the extent list,
+and generally makes the code a lot more readable.
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Acked-by: Nikolay Borisov <nborisov@suse.com>
+---
+ fs/xfs/libxfs/xfs_bmap.c | 48 +++++++++++++++++++++---------------------------
+ 1 file changed, 21 insertions(+), 27 deletions(-)
+
+diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
+index 99970aa53d44..49326dfe9e8f 100644
+--- a/fs/xfs/libxfs/xfs_bmap.c
++++ b/fs/xfs/libxfs/xfs_bmap.c
+@@ -2947,6 +2947,7 @@ xfs_bmap_add_extent_hole_real(
+ 	int			rval=0;	/* return value (logging flags) */
+ 	int			state;	/* state bits, accessed thru macros */
+ 	struct xfs_mount	*mp;
++	struct xfs_bmbt_irec	old;
+ 
+ 	mp = bma->tp ? bma->tp->t_mountp : NULL;
+ 	ifp = XFS_IFORK_PTR(bma->ip, whichfork);
+@@ -3018,9 +3019,8 @@ xfs_bmap_add_extent_hole_real(
+ 		 */
+ 		--bma->idx;
+ 		trace_xfs_bmap_pre_update(bma->ip, bma->idx, state, _THIS_IP_);
+-		xfs_bmbt_set_blockcount(xfs_iext_get_ext(ifp, bma->idx),
+-			left.br_blockcount + new->br_blockcount +
+-			right.br_blockcount);
++		left.br_blockcount += new->br_blockcount + right.br_blockcount;
++		xfs_iext_update_extent(ifp, bma->idx, &left);
+ 		trace_xfs_bmap_post_update(bma->ip, bma->idx, state, _THIS_IP_);
+ 
+ 		xfs_iext_remove(bma->ip, bma->idx + 1, 1, state);
+@@ -3047,10 +3047,7 @@ xfs_bmap_add_extent_hole_real(
+ 			XFS_WANT_CORRUPTED_GOTO(mp, i == 1, done);
+ 			error = xfs_bmbt_update(bma->cur, left.br_startoff,
+ 					left.br_startblock,
+-					left.br_blockcount +
+-						new->br_blockcount +
+-						right.br_blockcount,
+-					left.br_state);
++					left.br_blockcount, left.br_state);
+ 			if (error)
+ 				goto done;
+ 		}
+@@ -3063,26 +3060,25 @@ xfs_bmap_add_extent_hole_real(
+ 		 * Merge the new allocation with the left neighbor.
+ 		 */
+ 		--bma->idx;
++		old = left;
+ 		trace_xfs_bmap_pre_update(bma->ip, bma->idx, state, _THIS_IP_);
+-		xfs_bmbt_set_blockcount(xfs_iext_get_ext(ifp, bma->idx),
+-			left.br_blockcount + new->br_blockcount);
++		left.br_blockcount += new->br_blockcount;
++		xfs_iext_update_extent(ifp, bma->idx, &left);
+ 		trace_xfs_bmap_post_update(bma->ip, bma->idx, state, _THIS_IP_);
+ 
+ 		if (bma->cur == NULL) {
+ 			rval = xfs_ilog_fext(whichfork);
+ 		} else {
+ 			rval = 0;
+-			error = xfs_bmbt_lookup_eq(bma->cur, left.br_startoff,
+-					left.br_startblock, left.br_blockcount,
++			error = xfs_bmbt_lookup_eq(bma->cur, old.br_startoff,
++					old.br_startblock, old.br_blockcount,
+ 					&i);
+ 			if (error)
+ 				goto done;
+ 			XFS_WANT_CORRUPTED_GOTO(mp, i == 1, done);
+ 			error = xfs_bmbt_update(bma->cur, left.br_startoff,
+ 					left.br_startblock,
+-					left.br_blockcount +
+-						new->br_blockcount,
+-					left.br_state);
++					left.br_blockcount, left.br_state);
+ 			if (error)
+ 				goto done;
+ 		}
+@@ -3094,29 +3090,27 @@ xfs_bmap_add_extent_hole_real(
+ 		 * on the right.
+ 		 * Merge the new allocation with the right neighbor.
+ 		 */
++		old = right;
+ 		trace_xfs_bmap_pre_update(bma->ip, bma->idx, state, _THIS_IP_);
+-		xfs_bmbt_set_allf(xfs_iext_get_ext(ifp, bma->idx),
+-			new->br_startoff, new->br_startblock,
+-			new->br_blockcount + right.br_blockcount,
+-			right.br_state);
++		right.br_startoff = new->br_startoff;
++		right.br_startblock = new->br_startblock;
++		right.br_blockcount += new->br_blockcount;
++		xfs_iext_update_extent(ifp, bma->idx, &right);
+ 		trace_xfs_bmap_post_update(bma->ip, bma->idx, state, _THIS_IP_);
+ 
+ 		if (bma->cur == NULL) {
+ 			rval = xfs_ilog_fext(whichfork);
+ 		} else {
+ 			rval = 0;
+-			error = xfs_bmbt_lookup_eq(bma->cur,
+-					right.br_startoff,
+-					right.br_startblock,
+-					right.br_blockcount, &i);
++			error = xfs_bmbt_lookup_eq(bma->cur, old.br_startoff,
++					old.br_startblock, old.br_blockcount,
++					&i);
+ 			if (error)
+ 				goto done;
+ 			XFS_WANT_CORRUPTED_GOTO(mp, i == 1, done);
+-			error = xfs_bmbt_update(bma->cur, new->br_startoff,
+-					new->br_startblock,
+-					new->br_blockcount +
+-						right.br_blockcount,
+-					right.br_state);
++			error = xfs_bmbt_update(bma->cur, right.br_startoff,
++					right.br_startblock,
++					right.br_blockcount, right.br_state);
+ 			if (error)
+ 				goto done;
+ 		}
+-- 
+2.7.4
+

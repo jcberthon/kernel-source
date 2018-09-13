@@ -1,0 +1,127 @@
+From 1c892013e9ad214c78f5fde06dc617a252c16c94 Mon Sep 17 00:00:00 2001
+From: Christoph Hellwig <hch@lst.de>
+Date: Tue, 29 Aug 2017 15:44:14 -0700
+Subject: [PATCH 14/90] xfs: rewrite xfs_bmap_count_leaves using
+ xfs_iext_get_extent
+Git-commit: e17a5c6f0e3609da83270f42698b1dfedde86f44                            
+Patch-mainline: v4.14-rc1                                                       
+References: bsc#1095344
+
+This avoids poking into the internals of the extent list.  Also return
+the number of extents as the return value instead of an additional
+by reference argument, and make it available to callers outside of
+xfs_bmap_util.c
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Acked-by: Nikolay Borisov <nborisov@suse.com>
+---
+ fs/xfs/xfs_bmap_util.c | 32 +++++++++++++++++---------------
+ fs/xfs/xfs_bmap_util.h |  3 ++-
+ 2 files changed, 19 insertions(+), 16 deletions(-)
+
+diff --git a/fs/xfs/xfs_bmap_util.c b/fs/xfs/xfs_bmap_util.c
+index c8e5b6c545a5..2501b6e42d87 100644
+--- a/fs/xfs/xfs_bmap_util.c
++++ b/fs/xfs/xfs_bmap_util.c
+@@ -304,19 +304,21 @@ xfs_bmap_eof(
+ /*
+  * Count leaf blocks given a range of extent records.
+  */
+-STATIC void
++xfs_extnum_t
+ xfs_bmap_count_leaves(
+-	xfs_ifork_t		*ifp,
+-	xfs_extnum_t		idx,
+-	int			numrecs,
+-	int			*count)
++	struct xfs_ifork	*ifp,
++	xfs_filblks_t		*count)
+ {
+-	int		b;
++	struct xfs_bmbt_irec	got;
++	xfs_extnum_t		numrecs = 0, i = 0;
+ 
+-	for (b = 0; b < numrecs; b++) {
+-		xfs_bmbt_rec_host_t *frp = xfs_iext_get_ext(ifp, idx + b);
+-		*count += xfs_bmbt_get_blockcount(frp);
++	while (xfs_iext_get_extent(ifp, i++, &got)) {
++		if (!isnullstartblock(got.br_startblock)) {
++			*count += got.br_blockcount;
++			numrecs++;
++		}
+ 	}
++	return numrecs;
+ }
+ 
+ /*
+@@ -328,7 +330,7 @@ xfs_bmap_disk_count_leaves(
+ 	struct xfs_mount	*mp,
+ 	struct xfs_btree_block	*block,
+ 	int			numrecs,
+-	int			*count)
++	xfs_filblks_t		*count)
+ {
+ 	int		b;
+ 	xfs_bmbt_rec_t	*frp;
+@@ -350,7 +352,7 @@ xfs_bmap_count_tree(
+ 	xfs_ifork_t	*ifp,		/* inode fork pointer */
+ 	xfs_fsblock_t   blockno,	/* file system block number */
+ 	int             levelin,	/* level in btree */
+-	int		*count)		/* Count of blocks */
++	xfs_filblks_t	*count)		/* Count of blocks */
+ {
+ 	int			error;
+ 	xfs_buf_t		*bp, *nbp;
+@@ -424,7 +426,7 @@ xfs_bmap_count_blocks(
+ 	xfs_trans_t		*tp,		/* transaction pointer */
+ 	xfs_inode_t		*ip,		/* incore inode */
+ 	int			whichfork,	/* data or attr fork */
+-	int			*count)		/* out: count of blocks */
++	xfs_filblks_t		*count)		/* out: count of blocks */
+ {
+ 	struct xfs_btree_block	*block;	/* current btree block */
+ 	xfs_fsblock_t		bno;	/* block # of "block" */
+@@ -437,7 +439,7 @@ xfs_bmap_count_blocks(
+ 	mp = ip->i_mount;
+ 	ifp = XFS_IFORK_PTR(ip, whichfork);
+ 	if ( XFS_IFORK_FORMAT(ip, whichfork) == XFS_DINODE_FMT_EXTENTS ) {
+-		xfs_bmap_count_leaves(ifp, 0, xfs_iext_count(ifp), count);
++		xfs_bmap_count_leaves(ifp, count);
+ 		return 0;
+ 	}
+ 
+@@ -1799,8 +1801,8 @@ xfs_swap_extents(
+ 	xfs_extnum_t	nextents;
+ 	int		src_log_flags, target_log_flags;
+ 	int		error = 0;
+-	int		aforkblks = 0;
+-	int		taforkblks = 0;
++	xfs_filblks_t	aforkblks = 0;
++	xfs_filblks_t	taforkblks = 0;
+ 	__uint64_t	tmp;
+ 	int		lock_flags;
+ 
+diff --git a/fs/xfs/xfs_bmap_util.h b/fs/xfs/xfs_bmap_util.h
+index 82f709d23e16..73ec496eabae 100644
+--- a/fs/xfs/xfs_bmap_util.h
++++ b/fs/xfs/xfs_bmap_util.h
+@@ -32,7 +32,7 @@ int	xfs_bmap_rtalloc(struct xfs_bmalloca *ap);
+ int	xfs_bmap_eof(struct xfs_inode *ip, xfs_fileoff_t endoff,
+ 		     int whichfork, int *eof);
+ int	xfs_bmap_count_blocks(struct xfs_trans *tp, struct xfs_inode *ip,
+-			      int whichfork, int *count);
++			      int whichfork, xfs_filblks_t *count);
+ int	xfs_bmap_punch_delalloc_range(struct xfs_inode *ip,
+ 		xfs_fileoff_t start_fsb, xfs_fileoff_t length);
+ 
+@@ -79,4 +79,5 @@ int	xfs_swap_extents(struct xfs_inode *ip, struct xfs_inode *tip,
+ 
+ xfs_daddr_t xfs_fsb_to_db(struct xfs_inode *ip, xfs_fsblock_t fsb);
+ 
++xfs_extnum_t xfs_bmap_count_leaves(struct xfs_ifork *ifp, xfs_filblks_t *count);
+ #endif	/* __XFS_BMAP_UTIL_H__ */
+-- 
+2.7.4
+
