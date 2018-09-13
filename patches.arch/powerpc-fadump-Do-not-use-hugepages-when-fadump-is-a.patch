@@ -1,0 +1,108 @@
+From d641a84781f72bd38ab2a2bd4a348ff4dd0b2511 Mon Sep 17 00:00:00 2001
+From: Hari Bathini <hbathini@linux.vnet.ibm.com>
+Date: Tue, 10 Apr 2018 19:11:31 +0530
+Subject: [PATCH] powerpc/fadump: Do not use hugepages when fadump is active
+
+References: bsc#1092772, bsc#1107650
+Patch-mainline: queued
+Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/powerpc/linux.git
+Git-commit: 8597538712ebd90bc83dfb0b3b40398a0c53ad5b
+
+FADump capture kernel boots in restricted memory environment preserving
+the context of previous kernel to save vmcore. Supporting hugepages in
+such environment makes things unnecessarily complicated, as hugepages
+need memory set aside for them. This means most of the capture kernel's
+memory is used in supporting hugepages. In most cases, this results in
+out-of-memory issues while booting FADump capture kernel. But hugepages
+are not of much use in capture kernel whose only job is to save vmcore.
+So, disabling hugepages support, when fadump is active, is a reliable
+solution for the out of memory issues. Introducing a flag variable to
+disable HugeTLB support when fadump is active.
+
+Signed-off-by: Hari Bathini <hbathini@linux.vnet.ibm.com>
+Reviewed-by: Mahesh Salgaonkar <mahesh@linux.vnet.ibm.com>
+Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/include/asm/page_64.h | 1 +
+ arch/powerpc/kernel/fadump.c       | 8 ++++++++
+ arch/powerpc/mm/hash_utils_64.c    | 6 ++++--
+ arch/powerpc/mm/hugetlbpage.c      | 7 +++++++
+ 4 files changed, 20 insertions(+), 2 deletions(-)
+
+diff --git a/arch/powerpc/include/asm/page_64.h b/arch/powerpc/include/asm/page_64.h
+index 2bdf6aa803be..7d74f7f0bd80 100644
+--- a/arch/powerpc/include/asm/page_64.h
++++ b/arch/powerpc/include/asm/page_64.h
+@@ -66,6 +66,7 @@ extern u64 ppc64_pft_size;
+ 
+ /* Large pages size */
+ #ifdef CONFIG_HUGETLB_PAGE
++extern bool hugetlb_disabled;
+ extern unsigned int HPAGE_SHIFT;
+ #else
+ #define HPAGE_SHIFT PAGE_SHIFT
+diff --git a/arch/powerpc/kernel/fadump.c b/arch/powerpc/kernel/fadump.c
+index 32de82a7b238..0168a76dc7ba 100644
+--- a/arch/powerpc/kernel/fadump.c
++++ b/arch/powerpc/kernel/fadump.c
+@@ -378,6 +378,14 @@ int __init fadump_reserve_mem(void)
+ 	if (fw_dump.dump_active) {
+ 		pr_info("Firmware-assisted dump is active.\n");
+ 
++#ifdef CONFIG_HUGETLB_PAGE
++		/*
++		 * FADump capture kernel doesn't care much about hugepages.
++		 * In fact, handling hugepages in capture kernel is asking for
++		 * trouble. So, disable HugeTLB support when fadump is active.
++		 */
++		hugetlb_disabled = true;
++#endif
+ 		/*
+ 		 * If last boot has crashed then reserve all the memory
+ 		 * above boot_memory_size so that we don't touch it until
+diff --git a/arch/powerpc/mm/hash_utils_64.c b/arch/powerpc/mm/hash_utils_64.c
+index 334e35c31e1b..5f914eca9c40 100644
+--- a/arch/powerpc/mm/hash_utils_64.c
++++ b/arch/powerpc/mm/hash_utils_64.c
+@@ -502,8 +502,10 @@ static void __init htab_init_page_sizes(void)
+ 	       );
+ 
+ #ifdef CONFIG_HUGETLB_PAGE
+-	/* Reserve 16G huge page memory sections for huge pages */
+-	of_scan_flat_dt(htab_dt_scan_hugepage_blocks, NULL);
++	if (!hugetlb_disabled) {
++		/* Reserve 16G huge page memory sections for huge pages */
++		of_scan_flat_dt(htab_dt_scan_hugepage_blocks, NULL);
++	}
+ #endif /* CONFIG_HUGETLB_PAGE */
+ }
+ 
+diff --git a/arch/powerpc/mm/hugetlbpage.c b/arch/powerpc/mm/hugetlbpage.c
+index fcc2651822fb..121a41bb7d54 100644
+--- a/arch/powerpc/mm/hugetlbpage.c
++++ b/arch/powerpc/mm/hugetlbpage.c
+@@ -19,6 +19,8 @@
+ #define PAGE_SHIFT_16M	24
+ #define PAGE_SHIFT_16G	34
+ 
++bool hugetlb_disabled = false;
++
+ #define MAX_NUMBER_GPAGES	1024
+ 
+ /* Tracks the 16G pages after the device tree is scanned and before the
+@@ -541,6 +543,11 @@ static int __init hugetlbpage_init(void)
+ {
+ 	int psize;
+ 
++	if (hugetlb_disabled) {
++		pr_info("HugeTLB support is disabled!\n");
++		return 0;
++	}
++
+ 	if (!mmu_has_feature(MMU_FTR_16M_PAGE))
+ 		return -ENODEV;
+ 
+-- 
+2.13.7
+
