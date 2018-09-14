@@ -1,0 +1,74 @@
+From af10b54fde15e45d653b52025ffd066c0611182e Mon Sep 17 00:00:00 2001
+From: Christoph Hellwig <hch@lst.de>
+Date: Thu, 24 Nov 2016 11:39:44 +1100
+Subject: [PATCH 07/90] xfs: remove prev argument to xfs_bmapi_reserve_delalloc
+Git-commit: 65c5f419788d623a0410eca1866134f5e4628594                            
+Patch-mainline: v4.10-rc1                                                       
+References: bsc#1095344
+
+We can easily lookup the previous extent for the cases where we need it,
+which saves the callers from looking it up for us later in the series.
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+Signed-off-by: Dave Chinner <david@fromorbit.com>
+Acked-by: Nikolay Borisov <nborisov@suse.com>
+---
+ fs/xfs/libxfs/xfs_bmap.c | 13 ++++++++-----
+ 1 file changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
+index 065ae52433b0..8cdda26d248c 100644
+--- a/fs/xfs/libxfs/xfs_bmap.c
++++ b/fs/xfs/libxfs/xfs_bmap.c
+@@ -4099,7 +4099,6 @@ xfs_bmapi_reserve_delalloc(
+ 	xfs_fileoff_t		aoff,
+ 	xfs_filblks_t		len,
+ 	struct xfs_bmbt_irec	*got,
+-	struct xfs_bmbt_irec	*prev,
+ 	xfs_extnum_t		*lastx,
+ 	int			eof)
+ {
+@@ -4118,7 +4117,12 @@ xfs_bmapi_reserve_delalloc(
+ 	/* Figure out the extent size, adjust alen */
+ 	extsz = xfs_get_extsz_hint(ip);
+ 	if (extsz) {
+-		error = xfs_bmap_extsize_align(mp, got, prev, extsz, rt, eof,
++		struct xfs_bmbt_irec	prev;
++
++		if (!xfs_iext_get_extent(ifp, *lastx - 1, &prev))
++			prev.br_startoff = NULLFILEOFF;
++
++		error = xfs_bmap_extsize_align(mp, got, &prev, extsz, rt, eof,
+ 					       1, 0, &aoff, &alen);
+ 		ASSERT(!error);
+ 	}
+@@ -4204,7 +4208,7 @@ xfs_bmapi_delay(
+ 	struct xfs_mount	*mp = ip->i_mount;
+ 	struct xfs_ifork	*ifp = XFS_IFORK_PTR(ip, XFS_DATA_FORK);
+ 	struct xfs_bmbt_irec	got;	/* current file extent record */
+-	struct xfs_bmbt_irec	prev;	/* previous file extent record */
++	struct xfs_bmbt_irec	prev;	/* previous file extent record, unused */
+ 	xfs_fileoff_t		obno;	/* old block number (offset) */
+ 	xfs_fileoff_t		end;	/* end of mapped file region */
+ 	xfs_extnum_t		lastx;	/* last useful extent number */
+@@ -4243,7 +4247,7 @@ xfs_bmapi_delay(
+ 	while (bno < end && n < *nmap) {
+ 		if (eof || got.br_startoff > bno) {
+ 			error = xfs_bmapi_reserve_delalloc(ip, bno, len, &got,
+-							   &prev, &lastx, eof);
++							   &lastx, eof);
+ 			if (error) {
+ 				if (n == 0) {
+ 					*nmap = 0;
+@@ -4262,7 +4266,6 @@ xfs_bmapi_delay(
+ 			break;
+ 
+ 		/* Else go on to the next record. */
+-		prev = got;
+ 		if (++lastx < ifp->if_bytes / sizeof(xfs_bmbt_rec_t))
+ 			xfs_bmbt_get_all(xfs_iext_get_ext(ifp, lastx), &got);
+ 		else
+-- 
+2.7.4
+

@@ -1,0 +1,181 @@
+From 54fa64a50684be0a0153d47a16eb715afd3586fe Mon Sep 17 00:00:00 2001
+From: Christoph Hellwig <hch@lst.de>
+Date: Tue, 17 Oct 2017 14:16:20 -0700
+Subject: [PATCH 25/90] xfs: use xfs_iext_get_extent instead of open coding it
+Git-commit: e3f0f7563e8a2589e3acc26a41f7a7867a33536d                            
+Patch-mainline: v4.15-rc1                                                       
+References: bsc#1095344
+
+This avoids exposure to details of the extent list implementation.
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Acked-by: Nikolay Borisov <nborisov@suse.com>
+---
+ fs/xfs/libxfs/xfs_bmap.c | 36 ++++++++++++++++--------------------
+ fs/xfs/xfs_trace.h       |  2 +-
+ 2 files changed, 17 insertions(+), 21 deletions(-)
+
+diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
+index 276537a87fd7..188fad5af15b 100644
+--- a/fs/xfs/libxfs/xfs_bmap.c
++++ b/fs/xfs/libxfs/xfs_bmap.c
+@@ -1593,7 +1593,7 @@ xfs_bmap_last_extent(
+ 		return 0;
+ 	}
+ 
+-	xfs_bmbt_get_all(xfs_iext_get_ext(ifp, nextents - 1), rec);
++	xfs_iext_get_extent(ifp, nextents - 1, rec);
+ 	*is_empty = 0;
+ 	return 0;
+ }
+@@ -1679,7 +1679,6 @@ xfs_bmap_one_block(
+ 	xfs_inode_t	*ip,		/* incore inode */
+ 	int		whichfork)	/* data or attr fork */
+ {
+-	xfs_bmbt_rec_host_t *ep;	/* ptr to fork's extent */
+ 	xfs_ifork_t	*ifp;		/* inode fork pointer */
+ 	int		rval;		/* return value */
+ 	xfs_bmbt_irec_t	s;		/* internal version of extent */
+@@ -1694,8 +1693,7 @@ xfs_bmap_one_block(
+ 		return 0;
+ 	ifp = XFS_IFORK_PTR(ip, whichfork);
+ 	ASSERT(ifp->if_flags & XFS_IFEXTENTS);
+-	ep = xfs_iext_get_ext(ifp, 0);
+-	xfs_bmbt_get_all(ep, &s);
++	xfs_iext_get_extent(ifp, 0, &s);
+ 	rval = s.br_startoff == 0 && s.br_blockcount == 1;
+ 	if (rval && whichfork == XFS_DATA_FORK)
+ 		ASSERT(XFS_ISIZE(ip) == ip->i_mount->m_sb.sb_blocksize);
+@@ -1773,7 +1771,7 @@ xfs_bmap_add_extent_delay_real(
+ 	 */
+ 	if (bma->idx > 0) {
+ 		state |= BMAP_LEFT_VALID;
+-		xfs_bmbt_get_all(xfs_iext_get_ext(ifp, bma->idx - 1), &LEFT);
++		xfs_iext_get_extent(ifp, bma->idx - 1, &LEFT);
+ 
+ 		if (isnullstartblock(LEFT.br_startblock))
+ 			state |= BMAP_LEFT_DELAY;
+@@ -1793,7 +1791,7 @@ xfs_bmap_add_extent_delay_real(
+ 	 */
+ 	if (bma->idx < xfs_iext_count(&bma->ip->i_df) - 1) {
+ 		state |= BMAP_RIGHT_VALID;
+-		xfs_bmbt_get_all(xfs_iext_get_ext(ifp, bma->idx + 1), &RIGHT);
++		xfs_iext_get_extent(ifp, bma->idx + 1, &RIGHT);
+ 
+ 		if (isnullstartblock(RIGHT.br_startblock))
+ 			state |= BMAP_RIGHT_DELAY;
+@@ -2330,7 +2328,7 @@ xfs_bmap_add_extent_unwritten_real(
+ 	 */
+ 	if (*idx > 0) {
+ 		state |= BMAP_LEFT_VALID;
+-		xfs_bmbt_get_all(xfs_iext_get_ext(ifp, *idx - 1), &LEFT);
++		xfs_iext_get_extent(ifp, *idx - 1, &LEFT);
+ 
+ 		if (isnullstartblock(LEFT.br_startblock))
+ 			state |= BMAP_LEFT_DELAY;
+@@ -2350,7 +2348,7 @@ xfs_bmap_add_extent_unwritten_real(
+ 	 */
+ 	if (*idx < xfs_iext_count(&ip->i_df) - 1) {
+ 		state |= BMAP_RIGHT_VALID;
+-		xfs_bmbt_get_all(xfs_iext_get_ext(ifp, *idx + 1), &RIGHT);
++		xfs_iext_get_extent(ifp, *idx + 1, &RIGHT);
+ 		if (isnullstartblock(RIGHT.br_startblock))
+ 			state |= BMAP_RIGHT_DELAY;
+ 	}
+@@ -2810,7 +2808,7 @@ xfs_bmap_add_extent_hole_delay(
+ 	 */
+ 	if (*idx > 0) {
+ 		state |= BMAP_LEFT_VALID;
+-		xfs_bmbt_get_all(xfs_iext_get_ext(ifp, *idx - 1), &left);
++		xfs_iext_get_extent(ifp, *idx - 1, &left);
+ 
+ 		if (isnullstartblock(left.br_startblock))
+ 			state |= BMAP_LEFT_DELAY;
+@@ -2822,7 +2820,7 @@ xfs_bmap_add_extent_hole_delay(
+ 	 */
+ 	if (*idx < xfs_iext_count(&ip->i_df)) {
+ 		state |= BMAP_RIGHT_VALID;
+-		xfs_bmbt_get_all(xfs_iext_get_ext(ifp, *idx), &right);
++		xfs_iext_get_extent(ifp, *idx, &right);
+ 
+ 		if (isnullstartblock(right.br_startblock))
+ 			state |= BMAP_RIGHT_DELAY;
+@@ -2969,7 +2967,7 @@ xfs_bmap_add_extent_hole_real(
+ 	 */
+ 	if (bma->idx > 0) {
+ 		state |= BMAP_LEFT_VALID;
+-		xfs_bmbt_get_all(xfs_iext_get_ext(ifp, bma->idx - 1), &left);
++		xfs_iext_get_extent(ifp, bma->idx - 1, &left);
+ 		if (isnullstartblock(left.br_startblock))
+ 			state |= BMAP_LEFT_DELAY;
+ 	}
+@@ -2980,7 +2978,7 @@ xfs_bmap_add_extent_hole_real(
+ 	 */
+ 	if (bma->idx < xfs_iext_count(ifp)) {
+ 		state |= BMAP_RIGHT_VALID;
+-		xfs_bmbt_get_all(xfs_iext_get_ext(ifp, bma->idx), &right);
++		xfs_iext_get_extent(ifp, bma->idx, &right);
+ 		if (isnullstartblock(right.br_startblock))
+ 			state |= BMAP_RIGHT_DELAY;
+ 	}
+@@ -4338,10 +4336,8 @@ xfs_bmapi_allocate(
+ 	if (bma->wasdel) {
+ 		bma->length = (xfs_extlen_t)bma->got.br_blockcount;
+ 		bma->offset = bma->got.br_startoff;
+-		if (bma->idx != NULLEXTNUM && bma->idx) {
+-			xfs_bmbt_get_all(xfs_iext_get_ext(ifp, bma->idx - 1),
+-					 &bma->prev);
+-		}
++		if (bma->idx != NULLEXTNUM && bma->idx)
++			xfs_iext_get_extent(ifp, bma->idx - 1, &bma->prev);
+ 	} else {
+ 		bma->length = XFS_FILBLKS_MIN(bma->length, MAXEXTLEN);
+ 		if (!bma->eof)
+@@ -4426,7 +4422,7 @@ xfs_bmapi_allocate(
+ 	 * or xfs_bmap_add_extent_hole_real might have merged it into one of
+ 	 * the neighbouring ones.
+ 	 */
+-	xfs_bmbt_get_all(xfs_iext_get_ext(ifp, bma->idx), &bma->got);
++	xfs_iext_get_extent(ifp, bma->idx, &bma->got);
+ 
+ 	ASSERT(bma->got.br_startoff <= bma->offset);
+ 	ASSERT(bma->got.br_startoff + bma->got.br_blockcount >=
+@@ -4504,7 +4500,7 @@ xfs_bmapi_convert_unwritten(
+ 	 * xfs_bmap_add_extent_unwritten_real might have merged it into one
+ 	 * of the neighbouring ones.
+ 	 */
+-	xfs_bmbt_get_all(xfs_iext_get_ext(ifp, bma->idx), &bma->got);
++	xfs_iext_get_extent(ifp, bma->idx, &bma->got);
+ 
+ 	/*
+ 	 * We may have combined previously unwritten space with written space,
+@@ -5446,8 +5442,8 @@ xfs_bunmapi(
+ 					del.br_blockcount : mod;
+ 				if (bno < got.br_startoff) {
+ 					if (--lastx >= 0)
+-						xfs_bmbt_get_all(xfs_iext_get_ext(
+-							ifp, lastx), &got);
++						xfs_iext_get_extent(ifp, lastx,
++								&got);
+ 				}
+ 				continue;
+ 			}
+diff --git a/fs/xfs/xfs_trace.h b/fs/xfs/xfs_trace.h
+index 3a0a2b23ae17..d821cf438219 100644
+--- a/fs/xfs/xfs_trace.h
++++ b/fs/xfs/xfs_trace.h
+@@ -271,7 +271,7 @@ DECLARE_EVENT_CLASS(xfs_bmap_class,
+ 						ip->i_afp : &ip->i_df;
+ 		struct xfs_bmbt_irec	r;
+ 
+-		xfs_bmbt_get_all(xfs_iext_get_ext(ifp, idx), &r);
++		xfs_iext_get_extent(ifp, idx, &r);
+ 		__entry->dev = VFS_I(ip)->i_sb->s_dev;
+ 		__entry->ino = ip->i_ino;
+ 		__entry->idx = idx;
+-- 
+2.7.4
+

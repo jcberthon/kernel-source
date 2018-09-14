@@ -1,0 +1,175 @@
+From ebe68e57c29b724679b71eec3e8174a70880ebb5 Mon Sep 17 00:00:00 2001
+From: Christoph Hellwig <hch@lst.de>
+Date: Thu, 19 Oct 2017 11:06:29 -0700
+Subject: [PATCH 47/90] xfs: remove XFS_BMAP_TRACE_EXLIST
+Git-commit: e8e0e170e2e17b601b86edb86f58dbf7c599e4b3                            
+Patch-mainline: v4.15-rc1                                                       
+References: bsc#1095344
+
+Instead of looping over all extents in some debug-only helper just
+insert trace points into the loops that already exist in the calling
+functions.
+
+Also split the xfs_extlist trace point into one each for reading and
+writing extents from disk.
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Acked-by: Nikolay Borisov <nborisov@suse.com>
+---
+ fs/xfs/libxfs/xfs_bmap.c       | 23 ++---------------------
+ fs/xfs/libxfs/xfs_bmap.h       |  9 ---------
+ fs/xfs/libxfs/xfs_inode_fork.c | 10 +++++++---
+ fs/xfs/xfs_trace.h             |  3 ++-
+ 4 files changed, 11 insertions(+), 34 deletions(-)
+
+diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
+index d03de10adb59..4eb1673984ff 100644
+--- a/fs/xfs/libxfs/xfs_bmap.c
++++ b/fs/xfs/libxfs/xfs_bmap.c
+@@ -479,26 +479,6 @@ xfs_bmap_check_leaf_extents(
+ }
+ 
+ /*
+- * Add bmap trace insert entries for all the contents of the extent records.
+- */
+-void
+-xfs_bmap_trace_exlist(
+-	xfs_inode_t	*ip,		/* incore inode pointer */
+-	xfs_extnum_t	cnt,		/* count of entries in the list */
+-	int		whichfork,	/* data or attr fork */
+-	unsigned long	caller_ip)
+-{
+-	xfs_extnum_t	idx;		/* extent record index */
+-	xfs_ifork_t	*ifp;		/* inode fork pointer */
+-	int		state = xfs_bmap_fork_to_state(whichfork);
+-
+-	ifp = XFS_IFORK_PTR(ip, whichfork);
+-	ASSERT(cnt == xfs_iext_count(ifp));
+-	for (idx = 0; idx < cnt; idx++)
+-		trace_xfs_extlist(ip, idx, whichfork, caller_ip);
+-}
+-
+-/*
+  * Validate that the bmbt_irecs being returned from bmapi are valid
+  * given the caller's original parameters.  Specifically check the
+  * ranges of the returned irecs to ensure that they only extend beyond
+@@ -1247,6 +1227,7 @@ xfs_bmap_read_extents(
+ 	__be64			*pp;	/* pointer to block address */
+ 	/* REFERENCED */
+ 	xfs_extnum_t		room;	/* number of entries there's room for */
++	int			state = xfs_bmap_fork_to_state(whichfork);
+ 
+ 	bno = NULLFSBLOCK;
+ 	mp = ip->i_mount;
+@@ -1336,6 +1317,7 @@ xfs_bmap_read_extents(
+ 						 ip->i_mount);
+ 				goto error0;
+ 			}
++			trace_xfs_read_extent(ip, i, state, _THIS_IP_);
+ 		}
+ 		xfs_trans_brelse(tp, bp);
+ 		bno = nextbno;
+@@ -1352,7 +1334,6 @@ xfs_bmap_read_extents(
+ 	}
+ 	ASSERT(i == xfs_iext_count(ifp));
+ 	ASSERT(i == XFS_IFORK_NEXTENTS(ip, whichfork));
+-	XFS_BMAP_TRACE_EXLIST(ip, i, whichfork);
+ 	return 0;
+ error0:
+ 	xfs_trans_brelse(tp, bp);
+diff --git a/fs/xfs/libxfs/xfs_bmap.h b/fs/xfs/libxfs/xfs_bmap.h
+index 5fbc8163fde7..546526a34adc 100644
+--- a/fs/xfs/libxfs/xfs_bmap.h
++++ b/fs/xfs/libxfs/xfs_bmap.h
+@@ -180,15 +180,6 @@ enum shift_direction {
+ 	SHIFT_RIGHT,
+ };
+ 
+-#ifdef DEBUG
+-void	xfs_bmap_trace_exlist(struct xfs_inode *ip, xfs_extnum_t cnt,
+-		int whichfork, unsigned long caller_ip);
+-#define	XFS_BMAP_TRACE_EXLIST(ip,c,w)	\
+-	xfs_bmap_trace_exlist(ip,c,w, _THIS_IP_)
+-#else
+-#define	XFS_BMAP_TRACE_EXLIST(ip,c,w)
+-#endif
+-
+ void	xfs_trim_extent(struct xfs_bmbt_irec *irec, xfs_fileoff_t bno,
+ 		xfs_filblks_t len);
+ int	xfs_bmap_add_attrfork(struct xfs_inode *ip, int size, int rsvd);
+diff --git a/fs/xfs/libxfs/xfs_inode_fork.c b/fs/xfs/libxfs/xfs_inode_fork.c
+index 22b1fbefd436..5027fe2a3660 100644
+--- a/fs/xfs/libxfs/xfs_inode_fork.c
++++ b/fs/xfs/libxfs/xfs_inode_fork.c
+@@ -311,11 +311,12 @@ xfs_iformat_extents(
+ 	xfs_dinode_t	*dip,
+ 	int		whichfork)
+ {
+-	xfs_bmbt_rec_t	*dp;
++	xfs_bmbt_rec_t  *dp;
+ 	xfs_ifork_t	*ifp;
+ 	int		nex;
+ 	int		size;
+ 	int		i;
++	int		state = xfs_bmap_fork_to_state(whichfork);
+ 
+ 	ifp = XFS_IFORK_PTR(ip, whichfork);
+ 	nex = XFS_DFORK_NEXTENTS(dip, whichfork);
+@@ -350,8 +351,8 @@ xfs_iformat_extents(
+ 			xfs_bmbt_rec_host_t *ep = xfs_iext_get_ext(ifp, i);
+ 			ep->l0 = get_unaligned_be64(&dp->l0);
+ 			ep->l1 = get_unaligned_be64(&dp->l1);
++			trace_xfs_read_extent(ip, i, state, _THIS_IP_);
+ 		}
+-		XFS_BMAP_TRACE_EXLIST(ip, nex, whichfork);
+ 		if (whichfork != XFS_DATA_FORK ||
+ 			XFS_EXTFMT_INODE(ip) == XFS_EXTFMT_NOSTATE)
+ 				if (unlikely(xfs_check_nostate_extents(
+@@ -756,6 +757,7 @@ xfs_iextents_copy(
+ 	xfs_bmbt_rec_t		*dp,
+ 	int			whichfork)
+ {
++	int			state = xfs_bmap_fork_to_state(whichfork);
+ 	int			copied;
+ 	int			i;
+ 	xfs_ifork_t		*ifp;
+@@ -767,7 +769,6 @@ xfs_iextents_copy(
+ 	ASSERT(ifp->if_bytes > 0);
+ 
+ 	nrecs = xfs_iext_count(ifp);
+-	XFS_BMAP_TRACE_EXLIST(ip, nrecs, whichfork);
+ 	ASSERT(nrecs > 0);
+ 
+ 	/*
+@@ -787,9 +788,12 @@ xfs_iextents_copy(
+ 			continue;
+ 		}
+ 
++		trace_xfs_write_extent(ip, i, state, _RET_IP_);
++
+ 		/* Translate to on disk format */
+ 		put_unaligned_be64(ep->l0, &dp->l0);
+ 		put_unaligned_be64(ep->l1, &dp->l1);
++
+ 		dp++;
+ 		copied++;
+ 	}
+diff --git a/fs/xfs/xfs_trace.h b/fs/xfs/xfs_trace.h
+index d821cf438219..5b39d703fe1b 100644
+--- a/fs/xfs/xfs_trace.h
++++ b/fs/xfs/xfs_trace.h
+@@ -303,7 +303,8 @@ DEFINE_EVENT(xfs_bmap_class, name, \
+ DEFINE_BMAP_EVENT(xfs_iext_remove);
+ DEFINE_BMAP_EVENT(xfs_bmap_pre_update);
+ DEFINE_BMAP_EVENT(xfs_bmap_post_update);
+-DEFINE_BMAP_EVENT(xfs_extlist);
++DEFINE_BMAP_EVENT(xfs_read_extent);
++DEFINE_BMAP_EVENT(xfs_write_extent);
+ 
+ DECLARE_EVENT_CLASS(xfs_buf_class,
+ 	TP_PROTO(struct xfs_buf *bp, unsigned long caller_ip),
+-- 
+2.7.4
+

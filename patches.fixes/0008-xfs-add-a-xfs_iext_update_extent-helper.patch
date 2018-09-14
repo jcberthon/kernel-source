@@ -1,0 +1,61 @@
+From daea225d7035140945ec3cc7d7b154613f66e083 Mon Sep 17 00:00:00 2001
+From: Christoph Hellwig <hch@lst.de>
+Date: Tue, 29 Aug 2017 15:44:11 -0700
+Subject: [PATCH 08/90] xfs: add a xfs_iext_update_extent helper
+Git-commit: 67e4e69cb2a7afbffdefd1a0a23a94d1d706c38f                            
+Patch-mainline: v4.14-rc1                                                       
+References: bsc#1095344
+
+This helper is used to update an extent record based on the extent index,
+and can be used to provide a level of abstractions between callers that
+want to modify in-core extent records and the details of the extent list
+implementation.
+
+Also switch all users of the xfs_bmbt_set_all(xfs_iext_get_ext(...))
+pattern to this new helper.
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Acked-by: Nikolay Borisov <nborisov@suse.com>
+---
+ fs/xfs/libxfs/xfs_inode_fork.c | 12 ++++++++++++
+ fs/xfs/libxfs/xfs_inode_fork.h |  2 ++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/fs/xfs/libxfs/xfs_inode_fork.c b/fs/xfs/libxfs/xfs_inode_fork.c
+index e48e0dba2385..ee3df429c819 100644
+--- a/fs/xfs/libxfs/xfs_inode_fork.c
++++ b/fs/xfs/libxfs/xfs_inode_fork.c
+@@ -1966,3 +1966,15 @@ xfs_iext_get_extent(
+ 	xfs_bmbt_get_all(xfs_iext_get_ext(ifp, idx), gotp);
+ 	return true;
+ }
++
++void
++xfs_iext_update_extent(
++	struct xfs_ifork	*ifp,
++	xfs_extnum_t		idx,
++	struct xfs_bmbt_irec	*gotp)
++{
++	ASSERT(idx >= 0);
++	ASSERT(idx < xfs_iext_count(ifp));
++
++	xfs_bmbt_set_all(xfs_iext_get_ext(ifp, idx), gotp);
++}
+diff --git a/fs/xfs/libxfs/xfs_inode_fork.h b/fs/xfs/libxfs/xfs_inode_fork.h
+index 061986428032..db6380f6350a 100644
+--- a/fs/xfs/libxfs/xfs_inode_fork.h
++++ b/fs/xfs/libxfs/xfs_inode_fork.h
+@@ -172,6 +172,8 @@ bool		xfs_iext_lookup_extent(struct xfs_inode *ip,
+ 			xfs_extnum_t *idxp, struct xfs_bmbt_irec *gotp);
+ bool		xfs_iext_get_extent(struct xfs_ifork *ifp, xfs_extnum_t idx,
+ 			struct xfs_bmbt_irec *gotp);
++void		xfs_iext_update_extent(struct xfs_ifork *ifp, xfs_extnum_t idx,
++			struct xfs_bmbt_irec *gotp);
+ 
+ extern struct kmem_zone	*xfs_ifork_zone;
+ 
+-- 
+2.7.4
+

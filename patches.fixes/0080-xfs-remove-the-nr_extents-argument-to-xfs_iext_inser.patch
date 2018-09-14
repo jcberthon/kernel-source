@@ -1,0 +1,231 @@
+From fdd5bf48e16d997ae09101c435424bf9db15239a Mon Sep 17 00:00:00 2001
+From: Christoph Hellwig <hch@lst.de>
+Date: Fri, 3 Nov 2017 10:34:46 -0700
+Subject: [PATCH 80/90] xfs: remove the nr_extents argument to xfs_iext_insert
+Git-commit: 0254c2f253d6fe11ea2ce5046ed6acfddbe4ee17
+Patch-mainline: v4.15-rc1
+References: bsc#1095344
+
+We only have two places that insert 2 extents at the same time, so unroll
+the loop there.
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Acked-by: Nikolay Borisov <nborisov@suse.com>
+---
+ fs/xfs/libxfs/xfs_bmap.c       | 29 +++++++++++++++--------------
+ fs/xfs/libxfs/xfs_iext_tree.c  | 31 ++++++++-----------------------
+ fs/xfs/libxfs/xfs_inode_fork.c |  2 +-
+ fs/xfs/libxfs/xfs_inode_fork.h |  2 +-
+ 4 files changed, 25 insertions(+), 39 deletions(-)
+
+diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
+index d8c9a4b21b60..4ace9465ef45 100644
+--- a/fs/xfs/libxfs/xfs_bmap.c
++++ b/fs/xfs/libxfs/xfs_bmap.c
+@@ -935,7 +935,7 @@ xfs_bmap_local_to_extents(
+ 	rec.br_blockcount = 1;
+ 	rec.br_state = XFS_EXT_NORM;
+ 	xfs_iext_first(ifp, &icur);
+-	xfs_iext_insert(ip, &icur, 1, &rec, 0);
++	xfs_iext_insert(ip, &icur, &rec, 0);
+ 
+ 	trace_xfs_bmap_post_update(ip, 0, xfs_bmap_fork_to_state(whichfork),
+ 			_THIS_IP_);
+@@ -1304,7 +1304,7 @@ xfs_iread_extents(
+ 				goto out_brelse;
+ 			}
+ 			xfs_bmbt_disk_get_all(frp, &new);
+-			xfs_iext_insert(ip, &icur, 1, &new, state);
++			xfs_iext_insert(ip, &icur, &new, state);
+ 			trace_xfs_read_extent(ip, &icur, state, _THIS_IP_);
+ 			xfs_iext_next(ifp, &icur);
+ 		}
+@@ -1854,7 +1854,7 @@ xfs_bmap_add_extent_delay_real(
+ 		PREV.br_blockcount = temp;
+ 		PREV.br_startblock = nullstartblock(da_new);
+ 		xfs_iext_next(ifp, &bma->icur);
+-		xfs_iext_insert(bma->ip, &bma->icur, 1, &PREV, state);
++		xfs_iext_insert(bma->ip, &bma->icur, &PREV, state);
+ 		xfs_iext_prev(ifp, &bma->icur);
+ 		break;
+ 
+@@ -1930,7 +1930,7 @@ xfs_bmap_add_extent_delay_real(
+ 
+ 		PREV.br_startblock = nullstartblock(da_new);
+ 		PREV.br_blockcount = temp;
+-		xfs_iext_insert(bma->ip, &bma->icur, 1, &PREV, state);
++		xfs_iext_insert(bma->ip, &bma->icur, &PREV, state);
+ 		xfs_iext_next(ifp, &bma->icur);
+ 		break;
+ 
+@@ -1976,9 +1976,9 @@ xfs_bmap_add_extent_delay_real(
+ 					PREV.br_blockcount));
+ 		xfs_iext_update_extent(bma->ip, state, &bma->icur, &PREV);
+ 
+-		/* insert LEFT (r[0]) and RIGHT (r[1]) at the same time */
+ 		xfs_iext_next(ifp, &bma->icur);
+-		xfs_iext_insert(bma->ip, &bma->icur, 2, &LEFT, state);
++		xfs_iext_insert(bma->ip, &bma->icur, &RIGHT, state);
++		xfs_iext_insert(bma->ip, &bma->icur, &LEFT, state);
+ 		bma->ip->i_d.di_nextents++;
+ 
+ 		if (bma->cur == NULL)
+@@ -2332,7 +2332,7 @@ xfs_bmap_add_extent_unwritten_real(
+ 		PREV.br_blockcount -= new->br_blockcount;
+ 
+ 		xfs_iext_update_extent(ip, state, icur, &PREV);
+-		xfs_iext_insert(ip, icur, 1, new, state);
++		xfs_iext_insert(ip, icur, new, state);
+ 		ip->i_d.di_nextents++;
+ 		if (cur == NULL)
+ 			rval = XFS_ILOG_CORE | XFS_ILOG_DEXT;
+@@ -2398,7 +2398,7 @@ xfs_bmap_add_extent_unwritten_real(
+ 
+ 		xfs_iext_update_extent(ip, state, icur, &PREV);
+ 		xfs_iext_next(ifp, icur);
+-		xfs_iext_insert(ip, icur, 1, new, state);
++		xfs_iext_insert(ip, icur, new, state);
+ 
+ 		ip->i_d.di_nextents++;
+ 		if (cur == NULL)
+@@ -2440,7 +2440,8 @@ xfs_bmap_add_extent_unwritten_real(
+ 
+ 		xfs_iext_update_extent(ip, state, icur, &PREV);
+ 		xfs_iext_next(ifp, icur);
+-		xfs_iext_insert(ip, icur, 2, &r[0], state);
++		xfs_iext_insert(ip, icur, &r[1], state);
++		xfs_iext_insert(ip, icur, &r[0], state);
+ 
+ 		ip->i_d.di_nextents += 2;
+ 		if (cur == NULL)
+@@ -2641,7 +2642,7 @@ xfs_bmap_add_extent_hole_delay(
+ 		 * Insert a new entry.
+ 		 */
+ 		oldlen = newlen = 0;
+-		xfs_iext_insert(ip, icur, 1, new, state);
++		xfs_iext_insert(ip, icur, new, state);
+ 		break;
+ 	}
+ 	if (oldlen != newlen) {
+@@ -2820,7 +2821,7 @@ xfs_bmap_add_extent_hole_real(
+ 		 * real allocation.
+ 		 * Insert a new entry.
+ 		 */
+-		xfs_iext_insert(bma->ip, &bma->icur, 1, new, state);
++		xfs_iext_insert(bma->ip, &bma->icur, new, state);
+ 		XFS_IFORK_NEXT_SET(bma->ip, whichfork,
+ 			XFS_IFORK_NEXTENTS(bma->ip, whichfork) + 1);
+ 		if (bma->cur == NULL) {
+@@ -4632,7 +4633,7 @@ xfs_bmap_del_extent_delay(
+ 
+ 		xfs_iext_update_extent(ip, state, icur, got);
+ 		xfs_iext_next(ifp, icur);
+-		xfs_iext_insert(ip, icur, 1, &new, state);
++		xfs_iext_insert(ip, icur, &new, state);
+ 
+ 		da_new = got_indlen + new_indlen - stolen;
+ 		del->br_blockcount -= stolen;
+@@ -4855,7 +4856,7 @@ xfs_bmap_del_extent_real(
+ 		XFS_IFORK_NEXT_SET(ip, whichfork,
+ 			XFS_IFORK_NEXTENTS(ip, whichfork) + 1);
+ 		xfs_iext_next(ifp, icur);
+-		xfs_iext_insert(ip, icur, 1, &new, state);
++		xfs_iext_insert(ip, icur, &new, state);
+ 		break;
+ 	}
+ 	/*
+@@ -5629,7 +5630,7 @@ xfs_bmap_split_extent_at(
+ 
+ 	/* Add new extent */
+ 	xfs_iext_next(ifp, &icur);
+-	xfs_iext_insert(ip, &icur, 1, &new, 0);
++	xfs_iext_insert(ip, &icur, &new, 0);
+ 	XFS_IFORK_NEXT_SET(ip, whichfork,
+ 			   XFS_IFORK_NEXTENTS(ip, whichfork) + 1);
+ 
+diff --git a/fs/xfs/libxfs/xfs_iext_tree.c b/fs/xfs/libxfs/xfs_iext_tree.c
+index b15f85b80d92..3b5280ec7967 100644
+--- a/fs/xfs/libxfs/xfs_iext_tree.c
++++ b/fs/xfs/libxfs/xfs_iext_tree.c
+@@ -619,16 +619,20 @@ xfs_iext_realloc_root(
+ 	cur->leaf = new;
+ }
+ 
+-static void
+-__xfs_iext_insert(
+-	struct xfs_ifork	*ifp,
++void
++xfs_iext_insert(
++	struct xfs_inode	*ip,
+ 	struct xfs_iext_cursor	*cur,
+-	struct xfs_bmbt_irec	*irec)
++	struct xfs_bmbt_irec	*irec,
++	int			state)
+ {
++	struct xfs_ifork	*ifp = xfs_iext_state_to_fork(ip, state);
+ 	xfs_fileoff_t		offset = irec->br_startoff;
+ 	struct xfs_iext_leaf	*new = NULL;
+ 	int			nr_entries, i;
+ 
++	trace_xfs_iext_insert(ip, cur, state, _RET_IP_);
++
+ 	if (ifp->if_height == 0)
+ 		xfs_iext_alloc_root(ifp, cur);
+ 	else if (ifp->if_height == 1)
+@@ -656,25 +660,6 @@ __xfs_iext_insert(
+ 		xfs_iext_insert_node(ifp, xfs_iext_leaf_key(new, 0), new, 2);
+ }
+ 
+-void
+-xfs_iext_insert(
+-	struct xfs_inode	*ip,
+-	struct xfs_iext_cursor	*cur,
+-	xfs_extnum_t		nr_extents,
+-	struct xfs_bmbt_irec	*new,
+-	int			state)
+-{
+-	struct xfs_ifork	*ifp = xfs_iext_state_to_fork(ip, state);
+-	int			i;
+-
+-	ASSERT(nr_extents > 0);
+-
+-	for (i = nr_extents - 1; i >= 0; i--) {
+-		__xfs_iext_insert(ifp, cur, new + i);
+-		trace_xfs_iext_insert(ip, cur, state, _RET_IP_);
+-	}
+-}
+-
+ static struct xfs_iext_node *
+ xfs_iext_rebalance_node(
+ 	struct xfs_iext_node	*parent,
+diff --git a/fs/xfs/libxfs/xfs_inode_fork.c b/fs/xfs/libxfs/xfs_inode_fork.c
+index a2b4e33a30c6..0e9da65e1d7f 100644
+--- a/fs/xfs/libxfs/xfs_inode_fork.c
++++ b/fs/xfs/libxfs/xfs_inode_fork.c
+@@ -322,7 +322,7 @@ xfs_iformat_extents(
+ 			}
+ 
+ 			xfs_bmbt_disk_get_all(dp, &new);
+-			xfs_iext_insert(ip, &icur, 1, &new, state);
++			xfs_iext_insert(ip, &icur, &new, state);
+ 			trace_xfs_read_extent(ip, &icur, state, _THIS_IP_);
+ 			xfs_iext_next(ifp, &icur);
+ 		}
+diff --git a/fs/xfs/libxfs/xfs_inode_fork.h b/fs/xfs/libxfs/xfs_inode_fork.h
+index 062a3d7c419b..7e4720a243ce 100644
+--- a/fs/xfs/libxfs/xfs_inode_fork.h
++++ b/fs/xfs/libxfs/xfs_inode_fork.h
+@@ -103,7 +103,7 @@ void		xfs_init_local_fork(struct xfs_inode *, int, const void *, int);
+ 
+ xfs_extnum_t	xfs_iext_count(struct xfs_ifork *ifp);
+ void		xfs_iext_insert(struct xfs_inode *, struct xfs_iext_cursor *cur,
+-			xfs_extnum_t, struct xfs_bmbt_irec *, int);
++			struct xfs_bmbt_irec *, int);
+ void		xfs_iext_remove(struct xfs_inode *, struct xfs_iext_cursor *,
+ 			int, int);
+ void		xfs_iext_destroy(struct xfs_ifork *);
+-- 
+2.7.4
+
