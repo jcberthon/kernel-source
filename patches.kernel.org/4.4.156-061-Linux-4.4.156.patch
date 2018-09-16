@@ -1,0 +1,27 @@
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Date: Sat, 15 Sep 2018 09:40:42 +0200
+Subject: [PATCH] Linux 4.4.156
+References: bnc#1012382
+Patch-mainline: 4.4.156
+Git-commit: c40a7b3592b3b7519eadc130c5583db2aaf70f68
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 2d9f89ec8397..6dd5924a7ea5 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,6 +1,6 @@
+ VERSION = 4
+ PATCHLEVEL = 4
+-SUBLEVEL = 155
++SUBLEVEL = 156
+ EXTRAVERSION =
+ NAME = Blurry Fish Butt
+ 
+-- 
+2.19.0
+
