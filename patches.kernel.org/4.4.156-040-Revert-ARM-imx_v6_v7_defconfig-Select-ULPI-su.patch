@@ -1,0 +1,44 @@
+From: Fabio Estevam <fabio.estevam@nxp.com>
+Date: Mon, 3 Sep 2018 10:39:48 -0300
+Subject: [PATCH] Revert "ARM: imx_v6_v7_defconfig: Select ULPI support"
+References: bnc#1012382
+Patch-mainline: 4.4.156
+Git-commit: a37c70426caa22b59e82c598e9795bead06fd9a9
+
+This reverts commit 0d0af17ae83d6feb29d676c72423461419df5110.
+
+This commit causes reboot to fail on imx6 wandboard, so let's
+revert it.
+
+Cc: <stable@vger.kernel.org> #4.4
+Reported-by: Rasmus Villemoes <rasmus.villemoes@prevas.dk>
+Signed-off-by: Fabio Estevam <fabio.estevam@nxp.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ arch/arm/configs/imx_v6_v7_defconfig | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/arch/arm/configs/imx_v6_v7_defconfig b/arch/arm/configs/imx_v6_v7_defconfig
+index b3490c1c49d1..4187f69f6630 100644
+--- a/arch/arm/configs/imx_v6_v7_defconfig
++++ b/arch/arm/configs/imx_v6_v7_defconfig
+@@ -261,7 +261,6 @@ CONFIG_USB_STORAGE=y
+ CONFIG_USB_CHIPIDEA=y
+ CONFIG_USB_CHIPIDEA_UDC=y
+ CONFIG_USB_CHIPIDEA_HOST=y
+-CONFIG_USB_CHIPIDEA_ULPI=y
+ CONFIG_USB_SERIAL=m
+ CONFIG_USB_SERIAL_GENERIC=y
+ CONFIG_USB_SERIAL_FTDI_SIO=m
+@@ -288,7 +287,6 @@ CONFIG_USB_G_NCM=m
+ CONFIG_USB_GADGETFS=m
+ CONFIG_USB_MASS_STORAGE=m
+ CONFIG_USB_G_SERIAL=m
+-CONFIG_USB_ULPI_BUS=y
+ CONFIG_MMC=y
+ CONFIG_MMC_SDHCI=y
+ CONFIG_MMC_SDHCI_PLTFM=y
+-- 
+2.19.0
+

@@ -16,11 +16,10 @@ Acked-by: Aurelien Aptel <aaptel@suse.com>
 Acked-by: David Mulder <dmulder@suse.com>
 
 ---
- fs/cifs/smb2pdu.c | 50 ++++++++++++++++++++++++++++++--------------------
- fs/cifs/smb2pdu.h |  5 +++++
+ fs/cifs/smb2pdu.c |   50 ++++++++++++++++++++++++++++++--------------------
+ fs/cifs/smb2pdu.h |    5 +++++
  2 files changed, 35 insertions(+), 20 deletions(-)
 
-diff --git a/fs/cifs/smb2pdu.c b/fs/cifs/smb2pdu.c
 --- a/fs/cifs/smb2pdu.c
 +++ b/fs/cifs/smb2pdu.c
 @@ -79,25 +79,9 @@ static const int smb2_req_struct_sizes[N
@@ -58,7 +57,7 @@ diff --git a/fs/cifs/smb2pdu.c b/fs/cifs/smb2pdu.c
  	return;
  }
  
-@@ -282,6 +265,26 @@ out:
+@@ -288,6 +271,26 @@ out:
  	return rc;
  }
  
@@ -85,7 +84,7 @@ diff --git a/fs/cifs/smb2pdu.c b/fs/cifs/smb2pdu.c
  /*
   * Allocate and return pointer to an SMB request hdr, and set basic
   * SMB information in the SMB header. If the return code is zero, this
-@@ -291,7 +294,9 @@ static int
+@@ -297,7 +300,9 @@ static int
  small_smb2_init(__le16 smb2_command, struct cifs_tcon *tcon,
  		void **request_buf)
  {
@@ -96,7 +95,7 @@ diff --git a/fs/cifs/smb2pdu.c b/fs/cifs/smb2pdu.c
  
  	rc = smb2_reconnect(smb2_command, tcon);
  	if (rc)
-@@ -304,7 +309,12 @@ small_smb2_init(__le16 smb2_command, str
+@@ -310,7 +315,12 @@ small_smb2_init(__le16 smb2_command, str
  		return -ENOMEM;
  	}
  
@@ -109,8 +108,7 @@ diff --git a/fs/cifs/smb2pdu.c b/fs/cifs/smb2pdu.c
 +	pdu->hdr.smb2_buf_length = cpu_to_be32(total_len);
  
  	if (tcon != NULL) {
- #ifdef CONFIG_CIFS_STATS2
-diff --git a/fs/cifs/smb2pdu.h b/fs/cifs/smb2pdu.h
+ #ifdef CONFIG_CIFS_STATS
 --- a/fs/cifs/smb2pdu.h
 +++ b/fs/cifs/smb2pdu.h
 @@ -115,6 +115,11 @@ struct smb2_sync_hdr {

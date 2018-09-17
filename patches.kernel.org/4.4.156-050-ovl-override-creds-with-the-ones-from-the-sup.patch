@@ -1,10 +1,14 @@
-From 3fe6e52f062643676eb4518d68cee3bc1272091b Mon Sep 17 00:00:00 2001
 From: Antonio Murdaca <amurdaca@redhat.com>
 Date: Thu, 7 Apr 2016 15:48:25 +0200
 Subject: [PATCH] ovl: override creds with the ones from the superblock mounter
-References: bsc#1099993
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Patch-mainline: 4.4.156
+References: bnc#1012382 bsc#1099993
 Git-commit: 3fe6e52f062643676eb4518d68cee3bc1272091b
-Patch-mainline: v4.7-rc1
+
+commit 3fe6e52f062643676eb4518d68cee3bc1272091b upstream.
 
 In user namespace the whiteout creation fails with -EPERM because the
 current process isn't capable(CAP_SYS_ADMIN) when setting xattr.
@@ -51,29 +55,30 @@ struct and correctly set with ovl_set_attr().
 
 Signed-off-by: Antonio Murdaca <runcom@redhat.com>
 Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
-Acked-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
-
+Signed-off-by: SZ Lin (林上智) <sz.lin@moxa.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- fs/overlayfs/copy_up.c   | 26 +------------------
- fs/overlayfs/dir.c       | 67 ++++--------------------------------------------
+ fs/overlayfs/copy_up.c   | 26 +---------------
+ fs/overlayfs/dir.c       | 67 +++-------------------------------------
  fs/overlayfs/overlayfs.h |  1 +
- fs/overlayfs/readdir.c   | 13 ++--------
- fs/overlayfs/super.c     | 18 ++++++++++++-
- 5 files changed, 26 insertions(+), 99 deletions(-)
+ fs/overlayfs/readdir.c   | 14 ++-------
+ fs/overlayfs/super.c     | 18 ++++++++++-
+ 5 files changed, 27 insertions(+), 99 deletions(-)
 
 diff --git a/fs/overlayfs/copy_up.c b/fs/overlayfs/copy_up.c
-index 762f2eb246d9..65fe6d2deb00 100644
+index 63a0d0ba36de..64c5386d0c1b 100644
 --- a/fs/overlayfs/copy_up.c
 +++ b/fs/overlayfs/copy_up.c
-@@ -318,7 +318,6 @@ int ovl_copy_up_one(struct dentry *parent, struct dentry *dentry,
+@@ -317,7 +317,6 @@ int ovl_copy_up_one(struct dentry *parent, struct dentry *dentry,
  	struct dentry *upperdir;
  	struct dentry *upperdentry;
  	const struct cred *old_cred;
 -	struct cred *override_cred;
  	char *link = NULL;
- 	struct dentry *d, *ancestor = NULL;
  
-@@ -341,28 +340,7 @@ int ovl_copy_up_one(struct dentry *parent, struct dentry *dentry,
+ 	if (WARN_ON(!workdir))
+@@ -336,28 +335,7 @@ int ovl_copy_up_one(struct dentry *parent, struct dentry *dentry,
  			return PTR_ERR(link);
  	}
  
@@ -102,8 +107,8 @@ index 762f2eb246d9..65fe6d2deb00 100644
 +	old_cred = ovl_override_creds(dentry->d_sb);
  
  	err = -EIO;
- 
-@@ -387,9 +365,7 @@ int ovl_copy_up_one(struct dentry *parent, struct dentry *dentry,
+ 	if (lock_rename(workdir, upperdir) != NULL) {
+@@ -380,9 +358,7 @@ int ovl_copy_up_one(struct dentry *parent, struct dentry *dentry,
  out_unlock:
  	unlock_rename(workdir, upperdir);
  	revert_creds(old_cred);
@@ -114,10 +119,10 @@ index 762f2eb246d9..65fe6d2deb00 100644
  		free_page((unsigned long) link);
  
 diff --git a/fs/overlayfs/dir.c b/fs/overlayfs/dir.c
-index 0c2451b135da..1ead1cbd1c19 100644
+index 327177df03a5..f8aa54272121 100644
 --- a/fs/overlayfs/dir.c
 +++ b/fs/overlayfs/dir.c
-@@ -422,28 +422,13 @@ static int ovl_create_or_link(struct dentry *dentry, int mode, dev_t rdev,
+@@ -408,28 +408,13 @@ static int ovl_create_or_link(struct dentry *dentry, int mode, dev_t rdev,
  		err = ovl_create_upper(dentry, inode, &stat, link, hardlink);
  	} else {
  		const struct cred *old_cred;
@@ -147,7 +152,7 @@ index 0c2451b135da..1ead1cbd1c19 100644
  	}
  
  	if (!err)
-@@ -673,32 +658,11 @@ static int ovl_do_remove(struct dentry *dentry, bool is_dir)
+@@ -659,32 +644,11 @@ static int ovl_do_remove(struct dentry *dentry, bool is_dir)
  	if (OVL_TYPE_PURE_UPPER(type)) {
  		err = ovl_remove_upper(dentry, is_dir);
  	} else {
@@ -181,7 +186,7 @@ index 0c2451b135da..1ead1cbd1c19 100644
  	}
  out_drop_write:
  	ovl_drop_write(dentry);
-@@ -737,7 +701,6 @@ static int ovl_rename2(struct inode *olddir, struct dentry *old,
+@@ -723,7 +687,6 @@ static int ovl_rename2(struct inode *olddir, struct dentry *old,
  	bool new_is_dir = false;
  	struct dentry *opaquedir = NULL;
  	const struct cred *old_cred = NULL;
@@ -189,7 +194,7 @@ index 0c2451b135da..1ead1cbd1c19 100644
  
  	err = -EINVAL;
  	if (flags & ~(RENAME_EXCHANGE | RENAME_NOREPLACE))
-@@ -806,26 +769,8 @@ static int ovl_rename2(struct inode *olddir, struct dentry *old,
+@@ -792,26 +755,8 @@ static int ovl_rename2(struct inode *olddir, struct dentry *old,
  	old_opaque = !OVL_TYPE_PURE_UPPER(old_type);
  	new_opaque = !OVL_TYPE_PURE_UPPER(new_type);
  
@@ -218,7 +223,7 @@ index 0c2451b135da..1ead1cbd1c19 100644
  
  	if (overwrite && OVL_TYPE_MERGE_OR_LOWER(new_type) && new_is_dir) {
  		opaquedir = ovl_check_empty_and_clear(new);
-@@ -956,10 +901,8 @@ out_dput_old:
+@@ -942,10 +887,8 @@ static int ovl_rename2(struct inode *olddir, struct dentry *old,
  out_unlock:
  	unlock_rename(new_upperdir, old_upperdir);
  out_revert_creds:
@@ -231,31 +236,39 @@ index 0c2451b135da..1ead1cbd1c19 100644
  	ovl_drop_write(old);
  out:
 diff --git a/fs/overlayfs/overlayfs.h b/fs/overlayfs/overlayfs.h
-index 5cd41b095f3e..255ae187d437 100644
+index 28316b292b8a..6d01bd46880c 100644
 --- a/fs/overlayfs/overlayfs.h
 +++ b/fs/overlayfs/overlayfs.h
-@@ -153,6 +153,7 @@ void ovl_drop_write(struct dentry *dentry);
+@@ -150,6 +150,7 @@ void ovl_drop_write(struct dentry *dentry);
  bool ovl_dentry_is_opaque(struct dentry *dentry);
  void ovl_dentry_set_opaque(struct dentry *dentry, bool opaque);
- bool ovl_is_whiteout(struct dentry *dentry, struct dentry *ovl_dir);
+ bool ovl_is_whiteout(struct dentry *dentry);
 +const struct cred *ovl_override_creds(struct super_block *sb);
  void ovl_dentry_update(struct dentry *dentry, struct dentry *upperdentry);
  struct dentry *ovl_lookup(struct inode *dir, struct dentry *dentry,
  			  unsigned int flags);
 diff --git a/fs/overlayfs/readdir.c b/fs/overlayfs/readdir.c
-index f20a90bd4096..3bdafb303ef5 100644
+index 42f2612bfd98..7613041231fc 100644
 --- a/fs/overlayfs/readdir.c
 +++ b/fs/overlayfs/readdir.c
-@@ -208,17 +208,8 @@ static int ovl_check_whiteouts(struct dentry *dir, struct ovl_readdir_data *rdd)
+@@ -36,6 +36,7 @@ struct ovl_dir_cache {
+ 
+ struct ovl_readdir_data {
+ 	struct dir_context ctx;
++	struct dentry *dentry;
+ 	bool is_lowest;
+ 	struct rb_root root;
+ 	struct list_head *list;
+@@ -206,17 +207,8 @@ static int ovl_check_whiteouts(struct dentry *dir, struct ovl_readdir_data *rdd)
  	struct ovl_cache_entry *p;
  	struct dentry *dentry;
  	const struct cred *old_cred;
 -	struct cred *override_cred;
- 
+-
 -	override_cred = prepare_creds();
 -	if (!override_cred)
 -		return -ENOMEM;
--
+ 
 -	/*
 -	 * CAP_DAC_OVERRIDE for lookup
 -	 */
@@ -265,7 +278,7 @@ index f20a90bd4096..3bdafb303ef5 100644
  
  	err = mutex_lock_killable(&dir->d_inode->i_mutex);
  	if (!err) {
-@@ -235,7 +226,6 @@ static int ovl_check_whiteouts(struct dentry *dir, struct ovl_readdir_data *rdd)
+@@ -232,7 +224,6 @@ static int ovl_check_whiteouts(struct dentry *dir, struct ovl_readdir_data *rdd)
  		mutex_unlock(&dir->d_inode->i_mutex);
  	}
  	revert_creds(old_cred);
@@ -273,28 +286,28 @@ index f20a90bd4096..3bdafb303ef5 100644
  
  	return err;
  }
-@@ -291,6 +281,7 @@ static int ovl_dir_read_merged(struct dentry *dentry, struct list_head *list)
+@@ -288,6 +279,7 @@ static int ovl_dir_read_merged(struct dentry *dentry, struct list_head *list)
  	struct path realpath;
  	struct ovl_readdir_data rdd = {
  		.ctx.actor = ovl_fill_merge,
 +		.dentry = dentry,
  		.list = list,
  		.root = RB_ROOT,
- 		.is_merge = false,
+ 		.is_lowest = false,
 diff --git a/fs/overlayfs/super.c b/fs/overlayfs/super.c
-index 00bf03a1f081..f85e73f49543 100644
+index 0035cb80ecd1..e9a382b94a23 100644
 --- a/fs/overlayfs/super.c
 +++ b/fs/overlayfs/super.c
-@@ -44,6 +44,8 @@ struct ovl_fs {
+@@ -42,6 +42,8 @@ struct ovl_fs {
  	long lower_namelen;
  	/* pathnames of lower and upper dirs, for show_options */
  	struct ovl_config config;
 +	/* creds of process who forced instantiation of super block */
 +	const struct cred *creator_cred;
- 	bool compat;
  };
  
-@@ -279,6 +281,13 @@ bool ovl_is_whiteout(struct dentry *dentry, struct dentry *ovl_dir)
+ struct ovl_dir_cache;
+@@ -246,6 +248,13 @@ bool ovl_is_whiteout(struct dentry *dentry)
  	return inode && IS_WHITEOUT(inode);
  }
  
@@ -308,7 +321,7 @@ index 00bf03a1f081..f85e73f49543 100644
  static bool ovl_is_opaquedir(struct dentry *dentry)
  {
  	int res;
-@@ -620,6 +629,7 @@ static void ovl_put_super(struct super_block *sb)
+@@ -587,6 +596,7 @@ static void ovl_put_super(struct super_block *sb)
  	kfree(ufs->config.lowerdir);
  	kfree(ufs->config.upperdir);
  	kfree(ufs->config.workdir);
@@ -316,7 +329,7 @@ index 00bf03a1f081..f85e73f49543 100644
  	kfree(ufs);
  }
  
-@@ -1172,10 +1182,14 @@ static int ovl_fill_super(struct super_block *sb, void *data, int silent)
+@@ -1107,10 +1117,14 @@ static int ovl_fill_super(struct super_block *sb, void *data, int silent)
  	else
  		sb->s_d_op = &ovl_dentry_operations;
  
@@ -332,7 +345,7 @@ index 00bf03a1f081..f85e73f49543 100644
  
  	root_dentry = d_make_root(ovl_new_inode(sb, S_IFDIR, oe));
  	if (!root_dentry)
-@@ -1211,6 +1225,8 @@ static int ovl_fill_super(struct super_block *sb, void *data, int silent)
+@@ -1143,6 +1157,8 @@ static int ovl_fill_super(struct super_block *sb, void *data, int silent)
  
  out_free_oe:
  	kfree(oe);
@@ -342,5 +355,5 @@ index 00bf03a1f081..f85e73f49543 100644
  	for (i = 0; i < ufs->numlower; i++)
  		mntput(ufs->lower_mnt[i]);
 -- 
-2.16.4
+2.19.0
 
