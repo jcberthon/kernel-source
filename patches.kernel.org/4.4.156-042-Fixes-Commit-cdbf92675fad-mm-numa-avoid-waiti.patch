@@ -1,0 +1,44 @@
+From: Chas Williams <chas3@att.com>
+Date: Thu, 6 Sep 2018 11:11:27 -0400
+Subject: [PATCH] Fixes: Commit cdbf92675fad ("mm: numa: avoid waiting on freed
+ migrated pages")
+References: bnc#1012382
+Patch-mainline: 4.4.156
+Git-commit: e72977e87482759dba7181e0ec210c2db00c6124
+
+Commit cdbf92675fad ("mm: numa: avoid waiting on freed migrated pages")
+was an incomplete backport of the upstream commit.  It is necessary to
+always reset page_nid before attempting any early exit.
+
+The original commit conflicted due to lack of commit 82b0f8c39a38
+("mm: join struct fault_env and vm_fault") in 4.9 so it wasn't a clean
+application, and the change must have just gotten lost in the noise.
+
+Signed-off-by: Chas Williams <chas3@att.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ mm/huge_memory.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mm/huge_memory.c b/mm/huge_memory.c
+index 0127b788272f..c4ea57ee2fd1 100644
+--- a/mm/huge_memory.c
++++ b/mm/huge_memory.c
+@@ -1393,12 +1393,12 @@ int do_huge_pmd_numa_page(struct mm_struct *mm, struct vm_area_struct *vma,
+ 
+ 	/* Migration could have started since the pmd_trans_migrating check */
+ 	if (!page_locked) {
++		page_nid = -1;
+ 		if (!get_page_unless_zero(page))
+ 			goto out_unlock;
+ 		spin_unlock(ptl);
+ 		wait_on_page_locked(page);
+ 		put_page(page);
+-		page_nid = -1;
+ 		goto out;
+ 	}
+ 
+-- 
+2.19.0
+

@@ -1,8 +1,9 @@
 From: Tyler Hicks <tyhicks@canonical.com>
-Date: Wed, 29 Aug 2018 16:39:29 +0000
-Subject: irda: Fix memory leak caused by repeated binds of irda socket
-Patch-mainline: Never, driver dropped in mainline (4.17-rc1)
-References: CVE-2018-6554 bsc#1106509
+Date: Tue, 4 Sep 2018 15:24:04 +0000
+Subject: [PATCH] irda: Fix memory leak caused by repeated binds of irda socket
+References: bnc#1012382 CVE-2018-6554 bsc#1106509
+Patch-mainline: 4.4.156
+Git-commit: 4a7811bb3ae10d76d9e76c2b0ce7b27bc02a9370
 
 The irda_bind() function allocates memory for self->ias_obj without
 checking to see if the socket is already bound. A userspace process
@@ -17,11 +18,14 @@ Fixes: 1da177e4c3f4 ("Linux-2.6.12-rc2")
 Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
 Reviewed-by: Seth Arnold <seth.arnold@canonical.com>
 Reviewed-by: Stefan Bader <stefan.bader@canonical.com>
-Acked-by: Michal Kubecek <mkubecek@suse.cz>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  net/irda/af_irda.c | 7 +++++++
  1 file changed, 7 insertions(+)
 
+diff --git a/net/irda/af_irda.c b/net/irda/af_irda.c
+index 4a116d766c15..82e632b2c5a1 100644
 --- a/net/irda/af_irda.c
 +++ b/net/irda/af_irda.c
 @@ -774,6 +774,13 @@ static int irda_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
@@ -38,3 +42,6 @@ Acked-by: Michal Kubecek <mkubecek@suse.cz>
  #ifdef CONFIG_IRDA_ULTRA
  	/* Special care for Ultra sockets */
  	if ((sk->sk_type == SOCK_DGRAM) &&
+-- 
+2.19.0
+

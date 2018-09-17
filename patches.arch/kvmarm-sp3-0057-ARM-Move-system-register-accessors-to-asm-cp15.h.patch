@@ -29,13 +29,11 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 Conflicts: arch/arm/include/asm/arch_gicv3.h
 
 ---
- arch/arm/include/asm/arch_gicv3.h | 28 ++++++++++++----------------
- arch/arm/include/asm/cp15.h       | 15 +++++++++++++++
- arch/arm/include/asm/kvm_hyp.h    | 15 +--------------
- 3 files changed, 28 insertions(+), 30 deletions(-)
+ arch/arm/include/asm/arch_gicv3.h |   27 +++++++++++----------------
+ arch/arm/include/asm/cp15.h       |   15 +++++++++++++++
+ arch/arm/include/asm/kvm_hyp.h    |   15 +--------------
+ 3 files changed, 27 insertions(+), 30 deletions(-)
 
-diff --git a/arch/arm/include/asm/arch_gicv3.h b/arch/arm/include/asm/arch_gicv3.h
-index be99f6f..fb4f1a4 100644
 --- a/arch/arm/include/asm/arch_gicv3.h
 +++ b/arch/arm/include/asm/arch_gicv3.h
 @@ -22,9 +22,7 @@
@@ -49,7 +47,7 @@ index be99f6f..fb4f1a4 100644
  
  #define ICC_EOIR1			__ACCESS_CP15(c12, 0, c12, 1)
  #define ICC_DIR				__ACCESS_CP15(c12, 0, c11, 1)
-@@ -103,57 +101,55 @@
+@@ -103,58 +101,55 @@
  
  static inline void gic_write_eoir(u32 irq)
  {
@@ -69,10 +67,10 @@ index be99f6f..fb4f1a4 100644
  {
 -	u32 irqstat;
 +	u32 irqstat = read_sysreg(ICC_IAR1);
-+
-+	dsb(sy);
  
 -	asm volatile("mrc " __stringify(ICC_IAR1) : "=r" (irqstat));
+ 	dsb(sy);
++
  	return irqstat;
  }
  
@@ -118,8 +116,6 @@ index be99f6f..fb4f1a4 100644
  	isb();
  }
  
-diff --git a/arch/arm/include/asm/cp15.h b/arch/arm/include/asm/cp15.h
-index c3f1152..dbdbce1 100644
 --- a/arch/arm/include/asm/cp15.h
 +++ b/arch/arm/include/asm/cp15.h
 @@ -49,6 +49,21 @@
@@ -144,8 +140,6 @@ index c3f1152..dbdbce1 100644
  extern unsigned long cr_alignment;	/* defined in entry-armv.S */
  
  static inline unsigned long get_cr(void)
-diff --git a/arch/arm/include/asm/kvm_hyp.h b/arch/arm/include/asm/kvm_hyp.h
-index 8b5ae0c..e2acd82 100644
 --- a/arch/arm/include/asm/kvm_hyp.h
 +++ b/arch/arm/include/asm/kvm_hyp.h
 @@ -20,28 +20,15 @@
@@ -178,6 +172,3 @@ index 8b5ae0c..e2acd82 100644
  #define write_special(v, r)					\
  	asm volatile("msr " __stringify(r) ", %0" : : "r" (v))
  #define read_special(r) ({					\
--- 
-1.8.5.6
-
