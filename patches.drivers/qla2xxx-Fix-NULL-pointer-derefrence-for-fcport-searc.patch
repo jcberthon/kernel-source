@@ -2,7 +2,8 @@ From: Chuck Anderson <chuck.anderson@oracle.com>
 Date: Mon, 2 Jul 2018 13:02:00 -0700
 Subject: [PATCH] qla2xxx: Fix NULL pointer derefrence for fcport search
 References: bsc#1085657
-Patch-Mainline: submitted to linux-scsi
+Patch-Mainline: v4.18
+Git-commit: 36eb8ff672faee83ccce60c191f0fef07c6adce6
 
 Crash dump shows following instructions
 
