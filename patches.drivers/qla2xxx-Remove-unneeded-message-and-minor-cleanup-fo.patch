@@ -1,17 +1,21 @@
-From: Himanshu Madhani <himanshu.madhani@cavium.com>
-Date: Mon, 12 Mar 2018 11:16:38 -0700
-Subject: [PATCH] qla2xxx: Remove unneeded message and minor cleanup for FC-NVMe
-Patch-Mainline: submitted linux-scsi 2018/03/12
+From: "himanshu.madhani@cavium.com" <himanshu.madhani@cavium.com>
+Date: Tue, 20 Mar 2018 23:09:30 -0700
+Subject: [PATCH] scsi: qla2xxx: Remove unneeded message and minor cleanup for FC-NVMe
+Git-commit: 1d4614e1e6cbaeac1fdbf4aef3cca222320d3d92
+Patch-Mainline: v4.17-rc1
 References: bsc#1084427
 
 Signed-off-by: Himanshu Madhani <himanshu.madhani@cavium.com>
+Reviewed-by: Hannes Reinecke <hare@suse.com>
+Reviewed-by: Johannes Thumshirn <jthumshirn@suse.de>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 Acked-by: Hannes Reinecke <hare@suse.com>
 ---
  drivers/scsi/qla2xxx/qla_nvme.c | 11 +++--------
  1 file changed, 3 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/scsi/qla2xxx/qla_nvme.c b/drivers/scsi/qla2xxx/qla_nvme.c
-index 6b33a1f24f56..162a523b985e 100644
+index 7a292421a7d7..91f8b3c2afb6 100644
 --- a/drivers/scsi/qla2xxx/qla_nvme.c
 +++ b/drivers/scsi/qla2xxx/qla_nvme.c
 @@ -113,8 +113,6 @@ static int qla_nvme_alloc_queue(struct nvme_fc_local_port *lport,
@@ -59,5 +63,5 @@ index 6b33a1f24f56..162a523b985e 100644
  	}
  
 -- 
-2.12.3
+2.16.4
 

@@ -1,11 +1,15 @@
 From: Darren Trapp <darren.trapp@cavium.com>
-Date: Mon, 12 Mar 2018 11:16:46 -0700
-Subject: [PATCH] qla2xxx: Fix retry for PRLI RJT with reason of BUSY
-Patch-Mainline: submitted linux-scsi 2018/03/12
+Date: Tue, 20 Mar 2018 23:09:37 -0700
+Subject: [PATCH] scsi: qla2xxx: Fix retry for PRLI RJT with reason of BUSY
+Git-commit: 1cbc0efcd9bee74670d0b637f53e67c47373f544
+Patch-Mainline: v4.17-rc1
 References: bsc#1084427
 
 Signed-off-by: Darren Trapp <darren.trapp@cavium.com>
 Signed-off-by: Himanshu Madhani <himanshu.madhani@cavium.com>
+Reviewed-by: Hannes Reinecke <hare@suse.com>
+Reviewed-by: Johannes Thumshirn <jthumshirn@suse.de>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 Acked-by: Hannes Reinecke <hare@suse.com>
 ---
  drivers/scsi/qla2xxx/qla_dbg.c  |  2 +-
@@ -14,7 +18,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  3 files changed, 18 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/scsi/qla2xxx/qla_dbg.c b/drivers/scsi/qla2xxx/qla_dbg.c
-index 3e9dc54b89a3..30ceb08ddbe7 100644
+index 7e9d8f08b9d5..1abc8a9064b3 100644
 --- a/drivers/scsi/qla2xxx/qla_dbg.c
 +++ b/drivers/scsi/qla2xxx/qla_dbg.c
 @@ -60,7 +60,7 @@
@@ -27,10 +31,10 @@ index 3e9dc54b89a3..30ceb08ddbe7 100644
   * |                              |                    | 0xd214-0xd2fe	|
   * | Target Mode		  |	  0xe081       |		|
 diff --git a/drivers/scsi/qla2xxx/qla_init.c b/drivers/scsi/qla2xxx/qla_init.c
-index d375b9b0c2e5..7d30ad376bb7 100644
+index 33823d74c782..15a96dc205d0 100644
 --- a/drivers/scsi/qla2xxx/qla_init.c
 +++ b/drivers/scsi/qla2xxx/qla_init.c
-@@ -892,7 +892,6 @@ qla24xx_async_prli(struct scsi_qla_host *vha, fc_port_t *fcport)
+@@ -880,7 +880,6 @@ qla24xx_async_prli(struct scsi_qla_host *vha, fc_port_t *fcport)
  		return rval;
  
  	if (fcport->fw_login_state == DSC_LS_PLOGI_PEND ||
@@ -38,7 +42,7 @@ index d375b9b0c2e5..7d30ad376bb7 100644
  	    fcport->fw_login_state == DSC_LS_PRLI_PEND)
  		return rval;
  
-@@ -1258,6 +1257,11 @@ int qla24xx_fcport_handle_login(struct scsi_qla_host *vha, fc_port_t *fcport)
+@@ -1238,6 +1237,11 @@ int qla24xx_fcport_handle_login(struct scsi_qla_host *vha, fc_port_t *fcport)
  		qla2x00_post_async_adisc_work(vha, fcport, data);
  		break;
  
@@ -50,7 +54,7 @@ index d375b9b0c2e5..7d30ad376bb7 100644
  	default:
  		break;
  	}
-@@ -1661,6 +1665,13 @@ qla24xx_handle_prli_done_event(struct scsi_qla_host *vha, struct event_arg *ea)
+@@ -1640,6 +1644,13 @@ qla24xx_handle_prli_done_event(struct scsi_qla_host *vha, struct event_arg *ea)
  		qla24xx_post_gpdb_work(vha, ea->fcport, 0);
  		break;
  	default:
@@ -65,7 +69,7 @@ index d375b9b0c2e5..7d30ad376bb7 100644
  			ql_dbg(ql_dbg_disc, vha, 0x2118,
  				"%s %d %8phC post fc4 prli\n",
 diff --git a/drivers/scsi/qla2xxx/qla_mbx.c b/drivers/scsi/qla2xxx/qla_mbx.c
-index 18633f2a1286..186f4e5b26fa 100644
+index 735079ba691c..c9a134ae0d2b 100644
 --- a/drivers/scsi/qla2xxx/qla_mbx.c
 +++ b/drivers/scsi/qla2xxx/qla_mbx.c
 @@ -1025,9 +1025,12 @@ qla2x00_get_fw_version(scsi_qla_host_t *vha)
@@ -84,5 +88,5 @@ index 18633f2a1286..186f4e5b26fa 100644
  
  	if (IS_QLA27XX(ha)) {
 -- 
-2.12.3
+2.16.4
 

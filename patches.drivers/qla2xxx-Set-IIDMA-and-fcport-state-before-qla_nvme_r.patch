@@ -1,21 +1,25 @@
 From: Darren Trapp <darren.trapp@cavium.com>
-Date: Mon, 12 Mar 2018 11:16:39 -0700
-Subject: [PATCH] qla2xxx: Set IIDMA and fcport state before qla_nvme_register_remote()
-Patch-Mainline: submitted linux-scsi 2018/03/12
+Date: Tue, 20 Mar 2018 23:09:31 -0700
+Subject: [PATCH] scsi: qla2xxx: Set IIDMA and fcport state before qla_nvme_register_remote()
+Git-commit: dbe18018e3ad60fc5abfe999b49c4b37f8e7bb32
+Patch-Mainline: v4.17-rc1
 References: bsc#1084427
 
 Signed-off-by: Darren Trapp <darren.trapp@cavium.com>
 Signed-off-by: Himanshu Madhani <himanshu.madhani@cavium.com>
+Reviewed-by: Hannes Reinecke <hare@suse.com>
+Reviewed-by: Johannes Thumshirn <jthumshirn@suse.de>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 Acked-by: Hannes Reinecke <hare@suse.com>
 ---
  drivers/scsi/qla2xxx/qla_init.c | 5 +++--
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/scsi/qla2xxx/qla_init.c b/drivers/scsi/qla2xxx/qla_init.c
-index fda0eac07a98..4d2e52b57e01 100644
+index 590aa904fdef..1878a6f24ddb 100644
 --- a/drivers/scsi/qla2xxx/qla_init.c
 +++ b/drivers/scsi/qla2xxx/qla_init.c
-@@ -5128,13 +5128,14 @@ qla2x00_update_fcport(scsi_qla_host_t *vha, fc_port_t *fcport)
+@@ -5107,13 +5107,14 @@ qla2x00_update_fcport(scsi_qla_host_t *vha, fc_port_t *fcport)
  	fcport->deleted = 0;
  	fcport->logout_on_delete = 1;
  
@@ -33,5 +37,5 @@ index fda0eac07a98..4d2e52b57e01 100644
  
  reg_port:
 -- 
-2.12.3
+2.16.4
 
