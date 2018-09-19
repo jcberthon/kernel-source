@@ -40,7 +40,9 @@ Group:          Documentation/Man
 Provides:       %name = %version-%source_rel
 BuildArch:      noarch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-Source:         kernel-spec-macros
++@SOURCES@
++# These files are found in the kernel-source package:
++@NOSOURCE@
 
 %description
 These are the PDF documents and man pages (section 9) built from
