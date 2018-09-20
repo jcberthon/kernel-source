@@ -1,0 +1,108 @@
+From 90b6c0387652d6711098e5f737b53711e95528ed Mon Sep 17 00:00:00 2001
+From: Michael Ellerman <mpe@ellerman.id.au>
+Date: Tue, 8 Aug 2017 16:39:24 +1000
+Subject: [PATCH 14/24] powerpc/mce: Move 64-bit machine check code into mce.c
+
+References: bsc#1094244
+Patch-mainline: v4.14-rc1
+Git-commit: ccd3cd361341b71ae2afa596f6b470fcb32a916e
+
+We already have mce.c which is built for 64bit and contains other parts
+of the machine check code, so move these bits in there too.
+
+Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/kernel/mce.c   | 29 +++++++++++++++++++++++++++++
+ arch/powerpc/kernel/traps.c | 26 --------------------------
+ 2 files changed, 29 insertions(+), 26 deletions(-)
+
+diff --git a/arch/powerpc/kernel/mce.c b/arch/powerpc/kernel/mce.c
+index e8bb2566a501..419b8b552b2f 100644
+--- a/arch/powerpc/kernel/mce.c
++++ b/arch/powerpc/kernel/mce.c
+@@ -22,11 +22,14 @@
+ #undef DEBUG
+ #define pr_fmt(fmt) "mce: " fmt
+ 
++#include <linux/hardirq.h>
+ #include <linux/types.h>
+ #include <linux/ptrace.h>
+ #include <linux/percpu.h>
+ #include <linux/export.h>
+ #include <linux/irq_work.h>
++
++#include <asm/machdep.h>
+ #include <asm/mce.h>
+ 
+ static DEFINE_PER_CPU(int, mce_nest_count);
+@@ -352,3 +355,29 @@ uint64_t get_mce_fault_addr(struct machine_check_event *evt)
+ 	return 0;
+ }
+ EXPORT_SYMBOL(get_mce_fault_addr);
++
++/*
++ * This function is called in real mode. Strictly no printk's please.
++ *
++ * regs->nip and regs->msr contains srr0 and ssr1.
++ */
++long machine_check_early(struct pt_regs *regs)
++{
++	long handled = 0;
++
++	__this_cpu_inc(irq_stat.mce_exceptions);
++
++	if (cur_cpu_spec && cur_cpu_spec->machine_check_early)
++		handled = cur_cpu_spec->machine_check_early(regs);
++	return handled;
++}
++
++long hmi_exception_realmode(struct pt_regs *regs)
++{
++	__this_cpu_inc(irq_stat.hmi_exceptions);
++
++	if (ppc_md.hmi_exception_early)
++		ppc_md.hmi_exception_early(regs);
++
++	return 0;
++}
+diff --git a/arch/powerpc/kernel/traps.c b/arch/powerpc/kernel/traps.c
+index c0c36833533a..8eab84cb7d66 100644
+--- a/arch/powerpc/kernel/traps.c
++++ b/arch/powerpc/kernel/traps.c
+@@ -302,32 +302,6 @@ out:
+ 	/* What should we do here? We could issue a shutdown or hard reset. */
+ }
+ 
+-/*
+- * This function is called in real mode. Strictly no printk's please.
+- *
+- * regs->nip and regs->msr contains srr0 and ssr1.
+- */
+-long machine_check_early(struct pt_regs *regs)
+-{
+-	long handled = 0;
+-
+-	__this_cpu_inc(irq_stat.mce_exceptions);
+-
+-	if (cur_cpu_spec && cur_cpu_spec->machine_check_early)
+-		handled = cur_cpu_spec->machine_check_early(regs);
+-	return handled;
+-}
+-
+-long hmi_exception_realmode(struct pt_regs *regs)
+-{
+-	__this_cpu_inc(irq_stat.hmi_exceptions);
+-
+-	if (ppc_md.hmi_exception_early)
+-		ppc_md.hmi_exception_early(regs);
+-
+-	return 0;
+-}
+-
+ #endif
+ 
+ /*
+-- 
+2.13.7
+

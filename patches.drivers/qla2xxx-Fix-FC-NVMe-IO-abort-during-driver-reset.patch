@@ -1,11 +1,15 @@
 From: Darren Trapp <darren.trapp@cavium.com>
-Date: Mon, 12 Mar 2018 11:16:47 -0700
-Subject: [PATCH] qla2xxx: Fix FC-NVMe IO abort during driver reset
-Patch-Mainline: submitted linux-scsi 2018/03/12
+Date: Tue, 20 Mar 2018 23:09:38 -0700
+Subject: [PATCH] scsi: qla2xxx: Fix FC-NVMe IO abort during driver reset
+Git-commit: 623ee824e579d234b9f68c7b28ff5ab43f7c78e5
+Patch-Mainline: v4.17-rc1
 References: bsc#1084427
 
 Signed-off-by: Darren Trapp <darren.trapp@cavium.com>
 Signed-off-by: Himanshu Madhani <himanshu.madhani@cavium.com>
+Reviewed-by: Hannes Reinecke <hare@suse.com>
+Reviewed-by: Johannes Thumshirn <jthumshirn@suse.de>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 Acked-by: Hannes Reinecke <hare@suse.com>
 ---
  drivers/scsi/qla2xxx/qla_nvme.c | 17 ++++++++++++-----
@@ -65,10 +69,10 @@ index 8df379478269..816854ada654 100644
      struct req_que *);
  void qla24xx_async_gffid_sp_done(void *, int);
 diff --git a/drivers/scsi/qla2xxx/qla_os.c b/drivers/scsi/qla2xxx/qla_os.c
-index ba54766ed206..a8c64b276f51 100644
+index bd37a243c0bd..54f93f9cba48 100644
 --- a/drivers/scsi/qla2xxx/qla_os.c
 +++ b/drivers/scsi/qla2xxx/qla_os.c
-@@ -1735,7 +1735,7 @@ __qla2x00_abort_all_cmds(struct qla_qpair *qp, int res)
+@@ -1734,7 +1734,7 @@ __qla2x00_abort_all_cmds(struct qla_qpair *qp, int res)
  					sp_get(sp);
  					spin_unlock_irqrestore(qp->qp_lock_ptr,
  					    flags);
@@ -78,5 +82,5 @@ index ba54766ed206..a8c64b276f51 100644
  					    flags);
  				} else if (GET_CMD_SP(sp) &&
 -- 
-2.12.3
+2.16.4
 
