@@ -1,7 +1,8 @@
 From: Darren Trapp <darren.trapp@cavium.com>
-Date: Mon, 12 Mar 2018 11:16:40 -0700
-Subject: [PATCH] qla2xxx: Add changes for devloss timeout in driver
-Patch-Mainline: submitted linux-scsi 2018/03/12
+Date: Tue, 20 Mar 2018 23:09:32 -0700
+Subject: [PATCH] scsi: qla2xxx: Add changes for devloss timeout in driver
+Git-commit: 9dd9686b14199a1c3e668e1cca124cd1c74b77e1
+Patch-Mainline: v4.17-rc1
 References: bsc#1084427
 
 Add support for error recovery within devloss timeout, now that
@@ -9,6 +10,9 @@ FC-NVMe transport support devloss timeout.
 
 Signed-off-by: Darren Trapp <darren.trapp@cavium.com>
 Signed-off-by: Himanshu Madhani <himanshu.madhani@cavium.com>
+Reviewed-by: Hannes Reinecke <hare@suse.com>
+Reviewed-by: Johannes Thumshirn <jthumshirn@suse.de>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 Acked-by: Hannes Reinecke <hare@suse.com>
 ---
  drivers/scsi/qla2xxx/qla_def.h    |   1 +
@@ -21,10 +25,10 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  7 files changed, 87 insertions(+), 90 deletions(-)
 
 diff --git a/drivers/scsi/qla2xxx/qla_def.h b/drivers/scsi/qla2xxx/qla_def.h
-index c9689f97c307..737492048d8a 100644
+index be7d6824581a..56f78dce4d3c 100644
 --- a/drivers/scsi/qla2xxx/qla_def.h
 +++ b/drivers/scsi/qla2xxx/qla_def.h
-@@ -2356,6 +2356,7 @@ typedef struct fc_port {
+@@ -2355,6 +2355,7 @@ typedef struct fc_port {
  #define NVME_PRLI_SP_DISCOVERY  BIT_3
  	uint8_t nvme_flag;
  #define NVME_FLAG_REGISTERED 4
@@ -33,10 +37,10 @@ index c9689f97c307..737492048d8a 100644
  	struct fc_port *conflict;
  	unsigned char logout_completed;
 diff --git a/drivers/scsi/qla2xxx/qla_init.c b/drivers/scsi/qla2xxx/qla_init.c
-index 4d2e52b57e01..7e6d673c7910 100644
+index 1878a6f24ddb..7f8bfa0454d2 100644
 --- a/drivers/scsi/qla2xxx/qla_init.c
 +++ b/drivers/scsi/qla2xxx/qla_init.c
-@@ -5538,6 +5538,14 @@ qla2x00_find_all_fabric_devs(scsi_qla_host_t *vha)
+@@ -5517,6 +5517,14 @@ qla2x00_find_all_fabric_devs(scsi_qla_host_t *vha)
  			break;
  		}
  
@@ -52,10 +56,10 @@ index 4d2e52b57e01..7e6d673c7910 100644
  			spin_unlock_irqrestore(&vha->hw->tgt.sess_lock, flags);
  			continue;
 diff --git a/drivers/scsi/qla2xxx/qla_isr.c b/drivers/scsi/qla2xxx/qla_isr.c
-index 631d0565b348..5151b687d049 100644
+index 16c43bd9bb83..93f2f1df7168 100644
 --- a/drivers/scsi/qla2xxx/qla_isr.c
 +++ b/drivers/scsi/qla2xxx/qla_isr.c
-@@ -1911,7 +1911,7 @@ qla24xx_nvme_iocb_entry(scsi_qla_host_t *vha, struct req_que *req, void *tsk)
+@@ -1910,7 +1910,7 @@ qla24xx_nvme_iocb_entry(scsi_qla_host_t *vha, struct req_que *req, void *tsk)
  	} else  {
  		switch (le16_to_cpu(sts->comp_status)) {
  			case CS_COMPLETE:
@@ -64,7 +68,7 @@ index 631d0565b348..5151b687d049 100644
  			break;
  
  			case CS_ABORTED:
-@@ -1923,7 +1923,8 @@ qla24xx_nvme_iocb_entry(scsi_qla_host_t *vha, struct req_que *req, void *tsk)
+@@ -1922,7 +1922,8 @@ qla24xx_nvme_iocb_entry(scsi_qla_host_t *vha, struct req_que *req, void *tsk)
  				"NVME-%s ERR Handling - hdl=%x completion status(%x) resid=%x  ox_id=%x\n",
  				sp->name, sp->handle, sts->comp_status,
  				le32_to_cpu(sts->residual_len), sts->ox_id);
@@ -75,7 +79,7 @@ index 631d0565b348..5151b687d049 100644
  			break;
  
 diff --git a/drivers/scsi/qla2xxx/qla_nvme.c b/drivers/scsi/qla2xxx/qla_nvme.c
-index 162a523b985e..a8e81fc14c44 100644
+index 91f8b3c2afb6..5ee447680ddd 100644
 --- a/drivers/scsi/qla2xxx/qla_nvme.c
 +++ b/drivers/scsi/qla2xxx/qla_nvme.c
 @@ -16,15 +16,13 @@ static void qla_nvme_unregister_remote_port(struct work_struct *);
@@ -240,7 +244,7 @@ index 162a523b985e..a8e81fc14c44 100644
  	spin_lock_irqsave(&qpair->qp_lock, flags);
  	qla24xx_process_response_queue(vha, qpair->rsp);
  	spin_unlock_irqrestore(&qpair->qp_lock, flags);
-@@ -495,6 +486,7 @@ static int qla_nvme_post_cmd(struct nvme_fc_local_port *lport,
+@@ -490,6 +481,7 @@ static int qla_nvme_post_cmd(struct nvme_fc_local_port *lport,
  	srb_t *sp;
  	struct qla_qpair *qpair = hw_queue_handle;
  	struct nvme_private *priv;
@@ -248,7 +252,7 @@ index 162a523b985e..a8e81fc14c44 100644
  
  	if (!fd) {
  		ql_log(ql_log_warn, NULL, 0x2134, "NO NVMe FCP request\n");
-@@ -502,14 +494,14 @@ static int qla_nvme_post_cmd(struct nvme_fc_local_port *lport,
+@@ -497,14 +489,14 @@ static int qla_nvme_post_cmd(struct nvme_fc_local_port *lport,
  	}
  
  	priv = fd->private;
@@ -265,7 +269,7 @@ index 162a523b985e..a8e81fc14c44 100644
  		return -EBUSY;
  
  	/* Alloc SRB structure */
-@@ -552,22 +544,27 @@ static void qla_nvme_localport_delete(struct nvme_fc_local_port *lport)
+@@ -547,22 +539,27 @@ static void qla_nvme_localport_delete(struct nvme_fc_local_port *lport)
  static void qla_nvme_remoteport_delete(struct nvme_fc_remote_port *rport)
  {
  	fc_port_t *fcport;
@@ -299,7 +303,7 @@ index 162a523b985e..a8e81fc14c44 100644
  	ql_log(ql_log_info, fcport->vha, 0x2110,
  	    "remoteport_delete of %p completed.\n", fcport);
  }
-@@ -587,7 +584,7 @@ static struct nvme_fc_port_template qla_nvme_fc_transport = {
+@@ -582,7 +579,7 @@ static struct nvme_fc_port_template qla_nvme_fc_transport = {
  	.max_dif_sgl_segments = 64,
  	.dma_boundary = 0xFFFFFFFF,
  	.local_priv_sz  = 8,
@@ -308,7 +312,7 @@ index 162a523b985e..a8e81fc14c44 100644
  	.lsrqst_priv_sz = sizeof(struct nvme_private),
  	.fcprqst_priv_sz = sizeof(struct nvme_private),
  };
-@@ -606,22 +603,6 @@ static int qla_nvme_wait_on_command(srb_t *sp)
+@@ -601,22 +598,6 @@ static int qla_nvme_wait_on_command(srb_t *sp)
  	return ret;
  }
  
@@ -331,7 +335,7 @@ index 162a523b985e..a8e81fc14c44 100644
  void qla_nvme_abort(struct qla_hw_data *ha, struct srb *sp)
  {
  	int rval;
-@@ -636,7 +617,7 @@ static void qla_nvme_unregister_remote_port(struct work_struct *work)
+@@ -631,7 +612,7 @@ static void qla_nvme_unregister_remote_port(struct work_struct *work)
  {
  	struct fc_port *fcport = container_of(work, struct fc_port,
  	    nvme_del_work);
@@ -340,7 +344,7 @@ index 162a523b985e..a8e81fc14c44 100644
  
  	if (!IS_ENABLED(CONFIG_NVME_FC))
  		return;
-@@ -644,51 +625,52 @@ static void qla_nvme_unregister_remote_port(struct work_struct *work)
+@@ -639,51 +620,52 @@ static void qla_nvme_unregister_remote_port(struct work_struct *work)
  	ql_log(ql_log_warn, NULL, 0x2112,
  	    "%s: unregister remoteport on %p\n",__func__, fcport);
  
@@ -432,10 +436,10 @@ index 7f05fa1c77db..7becfc1b3e69 100644
  	struct fc_port *fcport;
  };
 diff --git a/drivers/scsi/qla2xxx/qla_target.c b/drivers/scsi/qla2xxx/qla_target.c
-index b23643896cf0..f86a852314a5 100644
+index 41863a056c9a..ead6813ea9b3 100644
 --- a/drivers/scsi/qla2xxx/qla_target.c
 +++ b/drivers/scsi/qla2xxx/qla_target.c
-@@ -960,7 +960,7 @@ qlt_send_first_logo(struct scsi_qla_host *vha, qlt_port_logo_t *logo)
+@@ -961,7 +961,7 @@ qlt_send_first_logo(struct scsi_qla_host *vha, qlt_port_logo_t *logo)
  	    logo->cmd_count, res);
  }
  
@@ -444,7 +448,7 @@ index b23643896cf0..f86a852314a5 100644
  {
  	struct fc_port *sess = container_of(work, struct fc_port,
  	    free_work);
-@@ -1168,11 +1168,14 @@ void qlt_unreg_sess(struct fc_port *sess)
+@@ -1169,11 +1169,14 @@ void qlt_unreg_sess(struct fc_port *sess)
  	sess->last_rscn_gen = sess->rscn_gen;
  	sess->last_login_gen = sess->login_gen;
  
@@ -477,5 +481,5 @@ index bb67b5a284a8..728ce74358e7 100644
   * This macro is used during early initializations when host->active_mode
   * is not set. Right now, ha value is ignored.
 -- 
-2.12.3
+2.16.4
 

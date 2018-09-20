@@ -1,11 +1,14 @@
 From: Darren Trapp <darren.trapp@cavium.com>
-Date: Mon, 12 Mar 2018 11:16:45 -0700
-Subject: [PATCH] qla2xxx: Remove nvme_done_list
-Patch-Mainline: submitted linux-scsi 2018/03/12
+Date: Tue, 20 Mar 2018 23:09:36 -0700
+Subject: [PATCH] scsi: qla2xxx: Remove nvme_done_list
+Git-commit: 2e4c5d2ef76b6f04a3cb7a15bc0fee0ab029dedf
+Patch-Mainline: v4.17-rc1
 References: bsc#1084427
 
 Signed-off-by: Darren Trapp <darren.trapp@cavium.com>
 Signed-off-by: Himanshu Madhani <himanshu.madhani@cavium.com>
+Reviewed-by: Johannes Thumshirn <jthumshirn@suse.de>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 Acked-by: Hannes Reinecke <hare@suse.com>
 ---
  drivers/scsi/qla2xxx/qla_def.h  |  1 -
@@ -17,10 +20,10 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  6 files changed, 2 insertions(+), 22 deletions(-)
 
 diff --git a/drivers/scsi/qla2xxx/qla_def.h b/drivers/scsi/qla2xxx/qla_def.h
-index 944626cc84d9..576b72bef01d 100644
+index 59c449b141cd..6aae126add0c 100644
 --- a/drivers/scsi/qla2xxx/qla_def.h
 +++ b/drivers/scsi/qla2xxx/qla_def.h
-@@ -3465,7 +3465,6 @@ struct qla_qpair {
+@@ -3464,7 +3464,6 @@ struct qla_qpair {
  	struct work_struct q_work;
  	struct list_head qp_list_elem; /* vha->qp_list */
  	struct list_head hints_list;
@@ -29,7 +32,7 @@ index 944626cc84d9..576b72bef01d 100644
  	struct qla_tgt_counters tgt_counters;
  };
 diff --git a/drivers/scsi/qla2xxx/qla_gbl.h b/drivers/scsi/qla2xxx/qla_gbl.h
-index 67ceeb48a2c8..07f262a3c341 100644
+index e9295398050c..19f44e12926b 100644
 --- a/drivers/scsi/qla2xxx/qla_gbl.h
 +++ b/drivers/scsi/qla2xxx/qla_gbl.h
 @@ -896,6 +896,4 @@ void qlt_update_host_map(struct scsi_qla_host *, port_id_t);
@@ -40,10 +43,10 @@ index 67ceeb48a2c8..07f262a3c341 100644
 -
  #endif /* _QLA_GBL_H */
 diff --git a/drivers/scsi/qla2xxx/qla_init.c b/drivers/scsi/qla2xxx/qla_init.c
-index 7e6d673c7910..d375b9b0c2e5 100644
+index 7f8bfa0454d2..33823d74c782 100644
 --- a/drivers/scsi/qla2xxx/qla_init.c
 +++ b/drivers/scsi/qla2xxx/qla_init.c
-@@ -8426,7 +8426,6 @@ struct qla_qpair *qla2xxx_create_qpair(struct scsi_qla_host *vha, int qos,
+@@ -8405,7 +8405,6 @@ struct qla_qpair *qla2xxx_create_qpair(struct scsi_qla_host *vha, int qos,
  		qpair->vp_idx = vp_idx;
  		qpair->fw_started = ha->flags.fw_started;
  		INIT_LIST_HEAD(&qpair->hints_list);
@@ -52,7 +55,7 @@ index 7e6d673c7910..d375b9b0c2e5 100644
  		qpair->enable_class_2 = ha->base_qpair->enable_class_2;
  		qpair->enable_explicit_conf =
 diff --git a/drivers/scsi/qla2xxx/qla_mid.c b/drivers/scsi/qla2xxx/qla_mid.c
-index fb404287e942..c0c2d76a61f7 100644
+index e965b16f21e3..da85cd89639f 100644
 --- a/drivers/scsi/qla2xxx/qla_mid.c
 +++ b/drivers/scsi/qla2xxx/qla_mid.c
 @@ -778,18 +778,12 @@ static void qla_do_work(struct work_struct *work)
@@ -106,10 +109,10 @@ index adeda6a4e4fd..8c05df30c083 100644
  	return;
  }
 diff --git a/drivers/scsi/qla2xxx/qla_os.c b/drivers/scsi/qla2xxx/qla_os.c
-index 498a30337137..ba54766ed206 100644
+index 12ee6e02d146..bd37a243c0bd 100644
 --- a/drivers/scsi/qla2xxx/qla_os.c
 +++ b/drivers/scsi/qla2xxx/qla_os.c
-@@ -398,7 +398,6 @@ static void qla_init_base_qpair(struct scsi_qla_host *vha, struct req_que *req,
+@@ -397,7 +397,6 @@ static void qla_init_base_qpair(struct scsi_qla_host *vha, struct req_que *req,
  	ha->base_qpair->use_shadow_reg = IS_SHADOW_REG_CAPABLE(ha) ? 1 : 0;
  	ha->base_qpair->msix = &ha->msix_entries[QLA_MSIX_RSP_Q];
  	INIT_LIST_HEAD(&ha->base_qpair->hints_list);
@@ -118,5 +121,5 @@ index 498a30337137..ba54766ed206 100644
  	/* init qpair to this cpu. Will adjust at run time. */
  	qla_cpu_update(rsp->qpair, raw_smp_processor_id());
 -- 
-2.12.3
+2.16.4
 
