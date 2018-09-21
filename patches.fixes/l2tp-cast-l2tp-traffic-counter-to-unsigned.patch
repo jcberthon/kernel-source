@@ -1,0 +1,48 @@
+From 9b3dc0a17d7388c4fb83736ca45253a93e994ce4 Mon Sep 17 00:00:00 2001
+From: Dominik Heidler <dheidler@suse.de>
+Date: Fri, 9 Jun 2017 16:29:47 +0200
+Subject: [PATCH] l2tp: cast l2tp traffic counter to unsigned
+Git-commit: 9b3dc0a17d7388c4fb83736ca45253a93e994ce4
+Patch-mainline: v4.12-rc6
+References: bsc#1099810
+
+This fixes a counter problem on 32bit systems:
+When the rx_bytes counter reached 2 GiB, it jumpd to (2^64 Bytes - 2GiB) Bytes.
+
+rtnl_link_stats64 has __u64 type and atomic_long_read returns
+atomic_long_t which is signed. Due to the conversation
+we get an incorrect value on 32bit systems if the MSB of
+the atomic_long_t value is set.
+
+Cc: Tom Parkin <tparkin@katalix.com>
+Fixes: 7b7c0719cd7a ("l2tp: avoid deadlock in l2tp stats update")
+Signed-off-by: Dominik Heidler <dheidler@suse.de>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Acked-by: Takashi Iwai <tiwai@suse.de>
+
+---
+ net/l2tp/l2tp_eth.c |   13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
+
+--- a/net/l2tp/l2tp_eth.c
++++ b/net/l2tp/l2tp_eth.c
+@@ -111,12 +111,13 @@ static void l2tp_eth_get_stats64(struct
+ {
+ 	struct l2tp_eth *priv = netdev_priv(dev);
+ 
+-	stats->tx_bytes   = atomic_long_read(&priv->tx_bytes);
+-	stats->tx_packets = atomic_long_read(&priv->tx_packets);
+-	stats->tx_dropped = atomic_long_read(&priv->tx_dropped);
+-	stats->rx_bytes   = atomic_long_read(&priv->rx_bytes);
+-	stats->rx_packets = atomic_long_read(&priv->rx_packets);
+-	stats->rx_errors  = atomic_long_read(&priv->rx_errors);
++	stats->tx_bytes   = (unsigned long) atomic_long_read(&priv->tx_bytes);
++	stats->tx_packets = (unsigned long) atomic_long_read(&priv->tx_packets);
++	stats->tx_dropped = (unsigned long) atomic_long_read(&priv->tx_dropped);
++	stats->rx_bytes   = (unsigned long) atomic_long_read(&priv->rx_bytes);
++	stats->rx_packets = (unsigned long) atomic_long_read(&priv->rx_packets);
++	stats->rx_errors  = (unsigned long) atomic_long_read(&priv->rx_errors);
++
+ }
+ 
+ 
