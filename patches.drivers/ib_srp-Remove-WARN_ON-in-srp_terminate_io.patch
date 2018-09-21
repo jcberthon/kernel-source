@@ -1,0 +1,35 @@
+From: Hannes Reinecke <hare@suse.de>
+Date: Fri, 21 Sep 2018 14:09:06 +0200
+Subject: [PATCH] ib_srp: Remove WARN_ON in srp_terminate_io()
+References: bsc#1094562
+Patch-Mainline: submitted linux-scsi 2018/09/21
+
+The WARN_ON() is pointless as the rport is placed in SDEV_TRANSPORT_OFFLINE
+at that time, so no new commands can be submitted via srp_queuecomment().
+
+Signed-off-by: Hannes Reinecke <hare@suse.com>
+---
+ drivers/infiniband/ulp/srp/ib_srp.c | 7 -------
+ 1 file changed, 7 deletions(-)
+
+diff --git a/drivers/infiniband/ulp/srp/ib_srp.c b/drivers/infiniband/ulp/srp/ib_srp.c
+index 1615bc61b5a7..7675ad941163 100644
+--- a/drivers/infiniband/ulp/srp/ib_srp.c
++++ b/drivers/infiniband/ulp/srp/ib_srp.c
+@@ -1179,13 +1179,6 @@ static void srp_terminate_io(struct srp_rport *rport)
+ 	struct scsi_device *sdev;
+ 	int i, j;
+ 
+-	/*
+-	 * Invoking srp_terminate_io() while srp_queuecommand() is running
+-	 * is not safe. Hence the warning statement below.
+-	 */
+-	shost_for_each_device(sdev, shost)
+-		WARN_ON_ONCE(sdev->request_queue->request_fn_active);
+-
+ 	for (i = 0; i < target->ch_count; i++) {
+ 		ch = &target->ch[i];
+ 
+-- 
+2.16.4
+
