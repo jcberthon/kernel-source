@@ -3614,14 +3614,14 @@ Signed-off-by: Coly Li <colyli@suse.de>
 --- a/arch/powerpc/lib/code-patching.c
 +++ b/arch/powerpc/lib/code-patching.c
 @@ -13,7 +13,7 @@
- #include <linux/mm.h>
- #include <asm/page.h>
+ #include <asm/setup.h>
+ #include <asm/sections.h>
  #include <asm/code-patching.h>
 -#include <asm/uaccess.h>
 +#include <linux/uaccess.h>
  
- static inline bool in_init_section(unsigned int *patch_addr)
- {
+ 
+ int patch_instruction(unsigned int *addr, unsigned int instr)
 --- a/arch/powerpc/lib/sstep.c
 +++ b/arch/powerpc/lib/sstep.c
 @@ -14,7 +14,7 @@
