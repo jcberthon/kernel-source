@@ -1,0 +1,119 @@
+From c100ec49fdd2222836ff8a17c7bfcc7611d2ee2b Mon Sep 17 00:00:00 2001
+From: Mike Snitzer <snitzer@redhat.com>
+Date: Mon, 8 Jan 2018 20:03:04 -0500
+Subject: [PATCH] dm: fix incomplete request_queue initialization
+References: bsc#1047027
+Git-commit: c100ec49fdd2222836ff8a17c7bfcc7611d2ee2b
+Patch-mainline: v4.16-rc1
+
+DM is no longer prone to having its request_queue be improperly
+initialized.
+
+Summary of changes:
+
+- defer DM's blk_register_queue() from add_disk()-time until
+  dm_setup_md_queue() by using add_disk_no_queue_reg() in alloc_dev().
+
+- dm_setup_md_queue() is updated to fully initialize DM's request_queue
+  (_after_ all table loads have occurred and the request_queue's type,
+  features and limits are known).
+
+A very welcome side-effect of these changes is DM no longer needs to:
+1) backfill the "mq" sysfs entry (because historically DM didn't
+initialize the request_queue to use blk-mq until _after_
+blk_register_queue() was called via add_disk()).
+2) call elv_register_queue() to get .request_fn request-based DM
+device's "iosched" exposed in syfs.
+
+In addition, blk-mq debugfs support is now made available because
+request-based DM's blk-mq request_queue is now properly initialized
+before dm_setup_md_queue() calls blk_register_queue().
+
+These changes also stave off the need to introduce new DM-specific
+workarounds in block core, e.g. this proposal:
+https://patchwork.kernel.org/patch/10067961/
+
+In the end DM devices should be less unicorn in nature (relative to
+initialization and availability of block core infrastructure provided by
+the request_queue).
+
+[tabraham@suse.com: handled backport]
+Signed-off-by: Mike Snitzer <snitzer@redhat.com>
+Tested-by: Ming Lei <ming.lei@redhat.com>
+Signed-off-by: Jens Axboe <axboe@kernel.dk>
+Signed-off-by: Thomas Abraham <tabraham@suse.com>
+
+diff --git a/drivers/md/dm-ioctl.c b/drivers/md/dm-ioctl.c
+index 62e78ec4219c..984f4b81eaed 100644
+--- a/drivers/md/dm-ioctl.c
++++ b/drivers/md/dm-ioctl.c
+@@ -1289,7 +1289,7 @@ static int table_load(struct dm_ioctl *param, size_t param_size)
+ 	}
+ 
+ 	/* setup md->queue to reflect md's type (may block) */
+-	r = dm_setup_md_queue(md);
++	r = dm_setup_md_queue(md, t);
+ 	if (r) {
+ 		DMWARN("unable to set up device queue for new table.");
+ 		dm_table_destroy(t);
+diff --git a/drivers/md/dm.c b/drivers/md/dm.c
+index 2b22da4f6743..dec7310b8c38 100644
+--- a/drivers/md/dm.c
++++ b/drivers/md/dm.c
+@@ -2022,7 +2022,7 @@ static struct mapped_device *alloc_dev(int minor)
+ 	md->disk->queue = md->queue;
+ 	md->disk->private_data = md;
+ 	sprintf(md->disk->disk_name, "dm-%d", minor);
+-	add_disk(md->disk);
++	add_disk_no_queue_reg(md->disk);
+ 	format_dev_t(md->name, MKDEV(_major, minor));
+ 
+ 	md->wq = alloc_workqueue("kdmflush",
+@@ -2340,22 +2340,31 @@ static int dm_init_request_based_queue(struct mapped_device *md)
+ 	blk_queue_prep_rq(md->queue, dm_prep_fn);
+ 	blk_queue_lld_busy(md->queue, dm_lld_busy);
+ 
+-	elv_register_queue(md->queue);
+-
+ 	return 1;
+ }
+ 
+ /*
+  * Setup the DM device's queue based on md's type
+  */
+-int dm_setup_md_queue(struct mapped_device *md)
++int dm_setup_md_queue(struct mapped_device *md, struct dm_table *t)
+ {
++	int r;
++	struct queue_limits limits;
++
+ 	if ((dm_get_md_type(md) == DM_TYPE_REQUEST_BASED) &&
+ 	    !dm_init_request_based_queue(md)) {
+ 		DMWARN("Cannot initialize queue for request-based mapped device");
+ 		return -EINVAL;
+ 	}
+ 
++	r = dm_calculate_queue_limits(t, &limits);
++	if (r) {
++		DMERR("Cannot calculate initial queue limits");
++		return r;
++	}
++	dm_table_set_restrictions(t, md->queue, &limits);
++	blk_register_queue(md->disk);
++
+ 	return 0;
+ }
+ 
+diff --git a/drivers/md/dm.h b/drivers/md/dm.h
+index 678c5bc420fc..709b3539ba8c 100644
+--- a/drivers/md/dm.h
++++ b/drivers/md/dm.h
+@@ -81,7 +81,7 @@ void dm_set_md_type(struct mapped_device *md, unsigned type);
+ unsigned dm_get_md_type(struct mapped_device *md);
+ struct target_type *dm_get_immutable_target_type(struct mapped_device *md);
+ 
+-int dm_setup_md_queue(struct mapped_device *md);
++int dm_setup_md_queue(struct mapped_device *md, struct dm_table *t);
+ 
+ /*
+  * To check the return value from dm_table_find_target().
