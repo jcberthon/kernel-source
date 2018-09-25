@@ -1,0 +1,87 @@
+From: Nicolai Stange <nstange@suse.de>
+Subject: [PATCH] x86/fpu: fix signal handling with eager FPU switching (ia32)
+Patch-mainline: Never, SUSE-specific implementation
+References: bsc#1108227
+
+This patch fixes two closely related issues in the ia32 signal handling
+code wrt. eager FPU switching.
+
+1.) The FPU state gets saved away in save_i387_xstate_ia32() only after
+    drop_init_fpu() has wiped it already().
+
+2.) The FPU state never gets actually restored into hardware in
+    restore_i387_xstate_ia32().
+
+Signed-off-by: Nicolai Stange <nstange@suse.de>
+---
+ arch/x86/kernel/i387.c |   38 +++++++++++++++++++++++++++++++++++---
+ 1 file changed, 35 insertions(+), 3 deletions(-)
+
+--- a/arch/x86/kernel/i387.c
++++ b/arch/x86/kernel/i387.c
+@@ -585,7 +585,8 @@ int save_i387_xstate_ia32(void __user *b
+ 	 * This will cause a "finit" to be triggered by the next
+ 	 * attempted FPU operation by the 'current' process.
+ 	 */
+-	drop_init_fpu(tsk);
++	if (!use_eager_fpu())
++		clear_used_math();
+ 
+ 	if (!HAVE_HWFP) {
+ 		return fpregs_soft_get(current, NULL,
+@@ -602,6 +603,8 @@ int save_i387_xstate_ia32(void __user *b
+                 __save_init_fpu(tsk);
+ 		if (!use_eager_fpu())
+ 	                __thread_fpu_end(tsk);
++		else
++			drop_init_fpu(tsk);
+         } else
+                 tsk->fpu_counter = 0;
+ 
+@@ -689,8 +692,19 @@ int restore_i387_xstate_ia32(void __user
+ 	struct task_struct *tsk = current;
+ 	struct _fpstate_ia32 __user *fp = (struct _fpstate_ia32 __user *) buf;
+ 
+-	if (HAVE_HWFP)
+-		clear_fpu(tsk);
++	if (HAVE_HWFP) {
++		if (!use_eager_fpu()) {
++			clear_fpu(tsk);
++		} else {
++			/*
++			 * Unlike clear_fpu(), keep FPU ownership, but
++			 * clear any pending exceptions from user space.
++			 */
++			asm volatile("1: fwait\n"
++				     "2:\n"
++				     _ASM_EXTABLE(1b, 2b));
++		}
++	}
+ 
+ 	if (!buf) {
+ 		drop_init_fpu(tsk);
+@@ -714,6 +728,24 @@ int restore_i387_xstate_ia32(void __user
+ 							   i387_fxsave_struct));
+ 		else
+ 			err = restore_i387_fsave(fp);
++
++		if (use_eager_fpu()) {
++			/*
++			 * Should be the case already, but better be
++			 * on the safe side: the init_fpu() from above
++			 * should never get called in eager mode, but
++			 * who knows?
++			 */
++			if (WARN_ON_ONCE(!__thread_has_fpu(tsk)))
++				__thread_set_has_fpu(tsk);
++
++			/* copied from math_state_restore */
++			if(unlikely(restore_fpu_checking(tsk))) {
++				drop_init_fpu(tsk);
++				return -EACCES;
++			}
++		}
++
+ 	} else {
+ 		err = fpregs_soft_set(current, NULL,
+ 				      0, sizeof(struct user_i387_ia32_struct),
