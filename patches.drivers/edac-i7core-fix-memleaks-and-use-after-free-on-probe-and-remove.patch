@@ -3,7 +3,7 @@ Date: Tue, 12 Jun 2018 14:43:35 +0200
 Subject: EDAC, i7core: Fix memleaks and use-after-free on probe and remove
 Git-commit: 6c974d4dfafe5e9ee754f2a6fba0eb1864f1649e
 Patch-mainline: v4.19-rc1
-References: 1109441
+References: bsc#1109441
 
 Make sure to free and deregister the addrmatch and chancounts devices
 allocated during probe in all error paths. Also fix use-after-free in a
