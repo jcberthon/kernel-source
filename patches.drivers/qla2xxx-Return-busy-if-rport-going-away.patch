@@ -1,14 +1,18 @@
 From: Darren Trapp <darren.trapp@cavium.com>
-Date: Mon, 12 Mar 2018 11:16:44 -0700
-Subject: [PATCH] qla2xxx: Return busy if rport going away
-Patch-Mainline: submitted linux-scsi 2018/03/12
+Date: Tue, 20 Mar 2018 23:09:35 -0700
+Subject: [PATCH] scsi: qla2xxx: Return busy if rport going away
+Git-commit: 870fe24f3c0b2cf40998f8ab21d4cf4e4e9cf619
+Patch-Mainline: v4.17-rc1
 References: bsc#1084427
 
-This patch adds mechanism to retur EBUSY if rport is going away
+This patch adds mechanism to return EBUSY if rport is going away
 to prevent exhausting FC-NVMe layer's retry counter.
 
 Signed-off-by: Darren Trapp <darren.trapp@cavium.com>
 Signed-off-by: Himanshu Madhani <himanshu.madhani@cavium.com>
+Reviewed-by: Hannes Reinecke <hare@suse.com>
+Reviewed-by: Johannes Thumshirn <jthumshirn@suse.de>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 Acked-by: Hannes Reinecke <hare@suse.com>
 ---
  drivers/scsi/qla2xxx/qla_def.h  |  1 +
@@ -17,10 +21,10 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  3 files changed, 24 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/scsi/qla2xxx/qla_def.h b/drivers/scsi/qla2xxx/qla_def.h
-index 745e6414b496..944626cc84d9 100644
+index cba749d27154..59c449b141cd 100644
 --- a/drivers/scsi/qla2xxx/qla_def.h
 +++ b/drivers/scsi/qla2xxx/qla_def.h
-@@ -2357,6 +2357,7 @@ typedef struct fc_port {
+@@ -2356,6 +2356,7 @@ typedef struct fc_port {
  	uint8_t nvme_flag;
  #define NVME_FLAG_REGISTERED 4
  #define NVME_FLAG_DELETING 2
@@ -29,10 +33,10 @@ index 745e6414b496..944626cc84d9 100644
  	struct fc_port *conflict;
  	unsigned char logout_completed;
 diff --git a/drivers/scsi/qla2xxx/qla_isr.c b/drivers/scsi/qla2xxx/qla_isr.c
-index 38947a349d0a..3dfdd5129d7e 100644
+index 913cd6cf5907..bc2c7ded6949 100644
 --- a/drivers/scsi/qla2xxx/qla_isr.c
 +++ b/drivers/scsi/qla2xxx/qla_isr.c
-@@ -1911,9 +1911,11 @@ qla24xx_nvme_iocb_entry(scsi_qla_host_t *vha, struct req_que *req, void *tsk)
+@@ -1910,9 +1910,11 @@ qla24xx_nvme_iocb_entry(scsi_qla_host_t *vha, struct req_que *req, void *tsk)
  				ret = QLA_SUCCESS;
  			break;
  
@@ -140,5 +144,5 @@ index 951fbbab961f..adeda6a4e4fd 100644
  
  	return rval;
 -- 
-2.12.3
+2.16.4
 

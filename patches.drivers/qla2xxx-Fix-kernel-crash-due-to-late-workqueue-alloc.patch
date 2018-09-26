@@ -2,7 +2,8 @@ From: Himanshu Madhani <himanshu.madhani@cavium.com>
 Date: Mon, 2 Jul 2018 13:01:59 -0700
 Subject: [PATCH] qla2xxx: Fix kernel crash due to late workqueue allocation
 References: bsc#1085657
-Patch-Mainline: submitted to linux-scsi
+Patch-Mainline: v4.18
+Git-commit: d48cc67cd4406d589fdbfa8c7d51c86532f86feb
 
 This patch fixes crash for FCoE adapter. Once driver initialization
 is complete, firmware will start posting Asynchronous Event, However

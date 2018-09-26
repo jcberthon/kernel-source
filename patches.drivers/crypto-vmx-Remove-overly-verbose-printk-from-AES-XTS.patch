@@ -1,0 +1,38 @@
+From 5cd49feb4900ade23e62270960e12b7cd45f9fa2 Mon Sep 17 00:00:00 2001
+From: Michael Ellerman <mpe@ellerman.id.au>
+Date: Thu, 3 May 2018 22:29:30 +1000
+Subject: [PATCH] crypto: vmx - Remove overly verbose printk from AES XTS init
+
+References: FATE#321642, git-fixes
+Patch-mainline: v4.18-rc1
+Git-commit: 730f23b66095a700e2f0786abda6bca011b31558
+
+In p8_aes_xts_init() we do a printk(KERN_INFO ...) to report the
+fallback implementation we're using. However with a slow console this
+can significantly affect the speed of crypto operations. So remove it.
+
+Fixes: c07f5d3da643 ("crypto: vmx - Adding support for XTS")
+Cc: stable@vger.kernel.org # v4.8+
+Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ drivers/crypto/vmx/aes_xts.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/crypto/vmx/aes_xts.c b/drivers/crypto/vmx/aes_xts.c
+index c3e14c61ce4e..b131e5fefe76 100644
+--- a/drivers/crypto/vmx/aes_xts.c
++++ b/drivers/crypto/vmx/aes_xts.c
+@@ -57,8 +57,6 @@ static int p8_aes_xts_init(struct crypto_tfm *tfm)
+ 			alg, PTR_ERR(fallback));
+ 		return PTR_ERR(fallback);
+ 	}
+-	printk(KERN_INFO "Using '%s' as fallback implementation.\n",
+-		crypto_tfm_alg_driver_name((struct crypto_tfm *) fallback));
+ 
+ 	crypto_blkcipher_set_flags(
+ 		fallback,
+-- 
+2.13.7
+

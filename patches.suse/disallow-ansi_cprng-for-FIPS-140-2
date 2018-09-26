@@ -1,4 +1,4 @@
-From: Stephan Müller <smueller@atsec.com>
+From: Stephan MÃ¼ller <smueller@atsec.com>
 Subject: FIPS: remove .fips_allowed = 1 for ansi_cprng
 Patch-mainline: Not yet, apply early in 2015 for strict FIPS 140-2 compliance
 References: bnc#875853
@@ -11,7 +11,7 @@ Pulling this flag disallows its use in FIPS mode.
 Note, I do not recommend to upstream this change (yet) as for revalidations,
 ANSI X9.31 is allowed till the end of this year.
 
-Signed-off-by: Stephan Müller <smueller@atsec.com>
+Signed-off-by: Stephan MÃ¼ller <smueller@atsec.com>
 Acked-by: Torsten Duwe <duwe@suse.de>
 
 ---

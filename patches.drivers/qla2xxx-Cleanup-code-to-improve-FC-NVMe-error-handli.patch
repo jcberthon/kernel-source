@@ -1,11 +1,21 @@
 From: Darren Trapp <darren.trapp@cavium.com>
-Date: Mon, 12 Mar 2018 11:16:48 -0700
-Subject: [PATCH] qla2xxx: Cleanup code to improve FC-NVMe error handling
-Patch-Mainline: submitted linux-scsi 2018/03/12
+Date: Tue, 20 Mar 2018 23:09:39 -0700
+Subject: [PATCH] scsi: qla2xxx: Cleanup code to improve FC-NVMe error handling
+Git-commit: 60dd6e8e42077a4c25f221cf124e8ba038b86e2e
+Patch-Mainline: v4.17-rc1
 References: bsc#1084427
+
+This patch cleans up ABTS handling for FC-NVMe by
+
+- Removing allocation of sp, instead pass the sp pointer for abort IOCB
+- Fix error handling from Trasport failure
+- set outstanding_cmds array to NULL for nvme completion
 
 Signed-off-by: Darren Trapp <darren.trapp@cavium.com>
 Signed-off-by: Himanshu Madhani <himanshu.madhani@cavium.com>
+Reviewed-by: Hannes Reinecke <hare@suse.com>
+Reviewed-by: Johannes Thumshirn <jthumshirn@suse.de>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 Acked-by: Hannes Reinecke <hare@suse.com>
 ---
  drivers/scsi/qla2xxx/qla_isr.c  | 78 +++++++++++++++--------------------------
@@ -13,10 +23,10 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  2 files changed, 29 insertions(+), 51 deletions(-)
 
 diff --git a/drivers/scsi/qla2xxx/qla_isr.c b/drivers/scsi/qla2xxx/qla_isr.c
-index 3dfdd5129d7e..35d910151683 100644
+index bc2c7ded6949..5fbb8f4b4dc7 100644
 --- a/drivers/scsi/qla2xxx/qla_isr.c
 +++ b/drivers/scsi/qla2xxx/qla_isr.c
-@@ -1838,31 +1838,23 @@ qla24xx_tm_iocb_entry(scsi_qla_host_t *vha, struct req_que *req, void *tsk)
+@@ -1837,31 +1837,23 @@ qla24xx_tm_iocb_entry(scsi_qla_host_t *vha, struct req_que *req, void *tsk)
  	sp->done(sp, 0);
  }
  
@@ -51,7 +61,7 @@ index 3dfdd5129d7e..35d910151683 100644
  		atomic_dec(&sp->vha->hw->nvme_active_aen_cnt);
  
  	/*
-@@ -1896,45 +1888,30 @@ qla24xx_nvme_iocb_entry(scsi_qla_host_t *vha, struct req_que *req, void *tsk)
+@@ -1895,45 +1887,30 @@ qla24xx_nvme_iocb_entry(scsi_qla_host_t *vha, struct req_que *req, void *tsk)
  	fd->transferred_length = fd->payload_length -
  	    le32_to_cpu(sts->residual_len);
  
@@ -144,5 +154,5 @@ index 57275bc9fe14..c5a963c2c86e 100644
  	unsigned long   flags;
  	uint32_t        *clr_ptr;
 -- 
-2.12.3
+2.16.4
 
