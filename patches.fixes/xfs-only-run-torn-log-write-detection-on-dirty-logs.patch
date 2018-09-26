@@ -1,0 +1,103 @@
+From: Brian Foster <bfoster@redhat.com>
+Date: Mon, 7 Mar 2016 08:22:22 +1100
+Subject: [PATCH] xfs: only run torn log write detection on dirty logs
+Patch-mainline: v4.5
+Git-commit: 7f6aff3a29b08fc4234c8136eb1ac31b4897522c
+References: bsc#1095753
+
+XFS uses CRC verification over a sub-range of the head of the log to
+detect and handle torn writes. This torn log write detection currently
+runs unconditionally at mount time, regardless of whether the log is
+dirty or clean. This is problematic in cases where a filesystem might
+end up being moved across different, incompatible (i.e., opposite
+byte-endianness) architectures.
+
+The problem lies in the fact that log data is not necessarily written in
+an architecture independent format. For example, certain bits of data
+are written in native endian format. Further, the size of certain log
+data structures differs (i.e., struct xlog_rec_header) depending on the
+word size of the cpu. This leads to false positive crc verification
+errors and ultimately failed mounts when a cleanly unmounted filesystem
+is mounted on a system with an incompatible architecture from data that
+was written near the head of the log.
+
+Update the log head/tail discovery code to run torn write detection only
+when the log is not clean. This means something other than an unmount
+record resides at the head of the log and log recovery is imminent. It
+is a requirement to run log recovery on the same type of host that had
+written the content of the dirty log and therefore CRC failures are
+legitimate corruptions in that scenario.
+
+Reported-by: Jan Beulich <JBeulich@suse.com>
+Tested-by: Jan Beulich <JBeulich@suse.com>
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+Reviewed-by: Dave Chinner <dchinner@redhat.com>
+Signed-off-by: Dave Chinner <david@fromorbit.com>
+Acked-by: Jeff Mahoney <jeffm@suse.com>
+---
+ fs/xfs/xfs_log_recover.c | 42 +++++++++++++++++++++++++++++++-----------
+ 1 file changed, 31 insertions(+), 11 deletions(-)
+
+diff --git a/fs/xfs/xfs_log_recover.c b/fs/xfs/xfs_log_recover.c
+index 9ac8aa8dc38c..e7aa82faa3d5 100644
+--- a/fs/xfs/xfs_log_recover.c
++++ b/fs/xfs/xfs_log_recover.c
+@@ -1376,17 +1376,6 @@ xlog_find_tail(
+ 	*tail_blk = BLOCK_LSN(be64_to_cpu(rhead->h_tail_lsn));
+ 
+ 	/*
+-	 * Trim the head block back to skip over torn records. We can have
+-	 * multiple log I/Os in flight at any time, so we assume CRC failures
+-	 * back through the previous several records are torn writes and skip
+-	 * them.
+-	 */
+-	error = xlog_verify_head(log, head_blk, tail_blk, bp, &rhead_blk,
+-				 &rhead, &wrapped);
+-	if (error)
+-		goto done;
+-
+-	/*
+ 	 * Set the log state based on the current head record.
+ 	 */
+ 	xlog_set_state(log, *head_blk, rhead, rhead_blk, wrapped);
+@@ -1402,6 +1391,37 @@ xlog_find_tail(
+ 		goto done;
+ 
+ 	/*
++	 * Verify the log head if the log is not clean (e.g., we have anything
++	 * but an unmount record at the head). This uses CRC verification to
++	 * detect and trim torn writes. If discovered, CRC failures are
++	 * considered torn writes and the log head is trimmed accordingly.
++	 *
++	 * Note that we can only run CRC verification when the log is dirty
++	 * because there's no guarantee that the log data behind an unmount
++	 * record is compatible with the current architecture.
++	 */
++	if (!clean) {
++		xfs_daddr_t	orig_head = *head_blk;
++
++		error = xlog_verify_head(log, head_blk, tail_blk, bp,
++					 &rhead_blk, &rhead, &wrapped);
++		if (error)
++			goto done;
++
++		/* update in-core state again if the head changed */
++		if (*head_blk != orig_head) {
++			xlog_set_state(log, *head_blk, rhead, rhead_blk,
++				       wrapped);
++			tail_lsn = atomic64_read(&log->l_tail_lsn);
++			error = xlog_check_unmount_rec(log, head_blk, tail_blk,
++						       rhead, rhead_blk, bp,
++						       &clean);
++			if (error)
++				goto done;
++		}
++	}
++
++	/*
+ 	 * Note that the unmount was clean. If the unmount was not clean, we
+ 	 * need to know this to rebuild the superblock counters from the perag
+ 	 * headers if we have a filesystem using non-persistent counters.
+-- 
+2.12.3
+

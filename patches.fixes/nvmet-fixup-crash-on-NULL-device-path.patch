@@ -1,0 +1,56 @@
+From: Hannes Reinecke <hare@suse.de>
+Date: Wed, 25 Jul 2018 08:35:17 +0200
+Subject: [PATCH] nvmet: fixup crash on NULL device path
+References: bsc#1082979
+Git-commit: 5613d31214eb4c5c04cdfce4966bb661c8b43191
+Patch-mainline: v4.18-rc7
+
+When writing an empty string into the device_path attribute the kernel
+will crash with
+
+nvmet: failed to open block device (null): (-22)
+BUG: unable to handle kernel NULL pointer dereference at 0000000000000000
+
+This patch sanitizes the error handling for invalid device path settings.
+
+Fixes: a07b4970 ("nvmet: add a generic NVMe target")
+Signed-off-by: Hannes Reinecke <hare@suse.com>
+Reviewed-by: Chaitanya Kulkarni <chaitanya.kulkarni@wdc.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Hannes Reinecke <hare@suse.de>
+---
+ drivers/nvme/target/configfs.c | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/nvme/target/configfs.c b/drivers/nvme/target/configfs.c
+index b4e03f3923cc..7276c5c38d69 100644
+--- a/drivers/nvme/target/configfs.c
++++ b/drivers/nvme/target/configfs.c
+@@ -281,6 +281,7 @@ static ssize_t nvmet_ns_device_path_store(struct config_item *item,
+ {
+ 	struct nvmet_ns *ns = to_nvmet_ns(item);
+ 	struct nvmet_subsys *subsys = ns->subsys;
++	size_t len;
+ 	int ret;
+ 
+ 	mutex_lock(&subsys->lock);
+@@ -288,10 +289,14 @@ static ssize_t nvmet_ns_device_path_store(struct config_item *item,
+ 	if (ns->enabled)
+ 		goto out_unlock;
+ 
+-	kfree(ns->device_path);
++	ret = -EINVAL;
++	len = strcspn(page, "\n");
++	if (!len)
++		goto out_unlock;
+ 
++	kfree(ns->device_path);
+ 	ret = -ENOMEM;
+-	ns->device_path = kstrdup(page, GFP_KERNEL);
++	ns->device_path = kstrndup(page, len, GFP_KERNEL);
+ 	if (!ns->device_path)
+ 		goto out_unlock;
+ 
+-- 
+2.16.4
+
