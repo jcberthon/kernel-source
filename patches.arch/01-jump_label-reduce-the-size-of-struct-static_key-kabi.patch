@@ -3,7 +3,7 @@ Date: Fri, 3 Feb 2017 15:42:24 -0500
 Subject: jump_label: Reduce the size of struct static_key
 Git-commit: 3821fd35b58dba449bd894014fbf4e1c43c9e951
 Patch-mainline: v4.11-rc1
-References: bsc#1105271
+References: bsc#1105271 bsc#1108803
 
 The static_key->next field goes mostly unused. The field is used for
 associating module uses with a static key. Most uses of struct static_key
@@ -51,8 +51,8 @@ Acked-by: Borislav Petkov <bp@suse.de>
 ---
  Documentation/static-keys.txt |    4 -
  include/linux/jump_label.h    |    7 +-
- kernel/jump_label.c           |  131 +++++++++++++++++++++++++++++++++---------
- 3 files changed, 113 insertions(+), 29 deletions(-)
+ kernel/jump_label.c           |  136 ++++++++++++++++++++++++++++++++++--------
+ 3 files changed, 118 insertions(+), 29 deletions(-)
 
 --- a/Documentation/static-keys.txt
 +++ b/Documentation/static-keys.txt
@@ -109,21 +109,26 @@ Acked-by: Borislav Petkov <bp@suse.de>
  }
  
  static inline struct static_key *jump_entry_key(struct jump_entry *entry)
-@@ -254,6 +269,13 @@ static bool jump_entry_branch(struct jum
+@@ -254,6 +269,18 @@ static bool jump_entry_branch(struct jum
  	return (unsigned long)entry->key & 1UL;
  }
  
 +static void static_key_set_entries(struct static_key *key,
 +                                  struct jump_entry *entries)
 +{
++	unsigned long e;
++
 +	WARN_ON_ONCE((unsigned long)entries & JUMP_TYPE_MASK);
-+	key->entries = entries;
++
++	/* transfer previous JUMP_TYPE_MASK bits */
++	e = (unsigned long)key->entries & JUMP_TYPE_MASK;
++	key->entries = (struct jump_entry *)((unsigned long)entries | e);
 +}
 +
  static enum jump_label_type jump_label_type(struct jump_entry *entry)
  {
  	struct static_key *key = jump_entry_key(entry);
-@@ -313,13 +335,7 @@ void __init jump_label_init(void)
+@@ -313,13 +340,7 @@ void __init jump_label_init(void)
  			continue;
  
  		key = iterk;
@@ -138,7 +143,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  	}
  	static_key_initialized = true;
  	jump_label_unlock();
-@@ -343,6 +359,23 @@ struct static_key_mod {
+@@ -343,6 +364,23 @@ struct static_key_mod {
  	struct module *mod;
  };
  
@@ -162,7 +167,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  static int __jump_label_mod_text_reserved(void *start, void *end)
  {
  	struct module *mod;
-@@ -362,11 +395,23 @@ static void __jump_label_mod_update(stru
+@@ -362,11 +400,23 @@ static void __jump_label_mod_update(stru
  {
  	struct static_key_mod *mod;
  
@@ -171,16 +176,16 @@ Acked-by: Borislav Petkov <bp@suse.de>
 +	for (mod = static_key_mod(key); mod; mod = mod->next) {
 +		struct jump_entry *stop;
 +		struct module *m;
- 
--		__jump_label_update(key, mod->entries,
--				    m->jump_entries + m->num_jump_entries);
++
 +		/*
 +		 * NULL if the static_key is defined in a module
 +		 * that does not use it
 +		 */
 +		if (!mod->entries)
 +			continue;
-+
+ 
+-		__jump_label_update(key, mod->entries,
+-				    m->jump_entries + m->num_jump_entries);
 +		m = mod->mod;
 +		if (!m)
 +			stop = __stop___jump_table;
@@ -190,7 +195,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  	}
  }
  
-@@ -401,7 +446,7 @@ static int jump_label_add_module(struct
+@@ -401,7 +451,7 @@ static int jump_label_add_module(struct
  	struct jump_entry *iter_stop = iter_start + mod->num_jump_entries;
  	struct jump_entry *iter;
  	struct static_key *key = NULL;
@@ -199,7 +204,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  
  	/* if the module doesn't have jump label entries, just return */
  	if (iter_start == iter_stop)
-@@ -418,20 +463,32 @@ static int jump_label_add_module(struct
+@@ -418,20 +468,32 @@ static int jump_label_add_module(struct
  
  		key = iterk;
  		if (within_module(iter->key, mod)) {
@@ -239,7 +244,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  
  		/* Only update if we've changed from our initial state */
  		if (jump_label_type(iter) != jump_label_init_type(iter))
-@@ -458,16 +515,34 @@ static void jump_label_del_module(struct
+@@ -458,16 +520,34 @@ static void jump_label_del_module(struct
  		if (within_module(iter->key, mod))
  			continue;
  
@@ -276,7 +281,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  			kfree(jlm);
  		}
  	}
-@@ -496,8 +571,10 @@ jump_label_module_notify(struct notifier
+@@ -496,8 +576,10 @@ jump_label_module_notify(struct notifier
  	case MODULE_STATE_COMING:
  		jump_label_lock();
  		ret = jump_label_add_module(mod);
@@ -288,7 +293,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  		jump_label_unlock();
  		break;
  	case MODULE_STATE_GOING:
-@@ -558,11 +635,14 @@ int jump_label_text_reserved(void *start
+@@ -558,11 +640,14 @@ int jump_label_text_reserved(void *start
  static void jump_label_update(struct static_key *key)
  {
  	struct jump_entry *stop = __stop___jump_table;
@@ -305,7 +310,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  
  	preempt_disable();
  	mod = __module_address((unsigned long)key);
-@@ -570,6 +650,7 @@ static void jump_label_update(struct sta
+@@ -570,6 +655,7 @@ static void jump_label_update(struct sta
  		stop = mod->jump_entries + mod->num_jump_entries;
  	preempt_enable();
  #endif
