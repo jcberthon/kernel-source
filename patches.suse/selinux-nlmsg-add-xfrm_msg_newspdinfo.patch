@@ -1,0 +1,30 @@
+From: Nicolas Dichtel <nicolas.dichtel@6wind.com>
+Subject: selinux/nlmsg: add XFRM_MSG_NEWSPDINFO
+Git-commit: 2b7834d3e1b828429faa5dc41a480919e52d3f31
+Patch-mainline: v4.1-rc1
+References: bsc#1109941  Git-fixes
+
+This new command is missing.
+
+Fixes: 880a6fab8f6b ("xfrm: configure policy hash table thresholds by netlink")
+Reported-by: Christophe Gouault <christophe.gouault@6wind.com>
+Signed-off-by: Nicolas Dichtel <nicolas.dichtel@6wind.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Acked-by: Jeff Mahoney <jeffm@suse.com>
+---
+ security/selinux/nlmsgtab.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/security/selinux/nlmsgtab.c b/security/selinux/nlmsgtab.c
+index c8cee0766b60..4bc90c2aaea2 100644
+--- a/security/selinux/nlmsgtab.c
++++ b/security/selinux/nlmsgtab.c
+@@ -103,6 +103,7 @@ static struct nlmsg_perm nlmsg_xfrm_perms[] =
+ 	{ XFRM_MSG_FLUSHPOLICY,	NETLINK_XFRM_SOCKET__NLMSG_WRITE },
+ 	{ XFRM_MSG_NEWAE,	NETLINK_XFRM_SOCKET__NLMSG_WRITE },
+ 	{ XFRM_MSG_GETAE,	NETLINK_XFRM_SOCKET__NLMSG_READ  },
++	{ XFRM_MSG_NEWSPDINFO,	NETLINK_XFRM_SOCKET__NLMSG_WRITE },
+ };
+ 
+ static struct nlmsg_perm nlmsg_audit_perms[] =
+
