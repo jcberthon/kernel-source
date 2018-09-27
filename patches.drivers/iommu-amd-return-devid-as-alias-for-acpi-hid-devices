@@ -1,0 +1,44 @@
+From: Arindam Nath <arindam.nath@amd.com>
+Date: Tue, 18 Sep 2018 15:40:58 +0530
+Subject: iommu/amd: Return devid as alias for ACPI HID devices
+Git-commit: 5ebb1bc2d63d90dd204169e21fd7a0b4bb8c776e
+Patch-mainline: v3.20-rc1
+References: bsc#1106105
+
+ACPI HID devices do not actually have an alias for
+them in the IVRS. But dev_data->alias is still used
+for indexing into the IOMMU device table for devices
+being handled by the IOMMU. So for ACPI HID devices,
+we simply return the corresponding devid as an alias,
+as parsed from IVRS table.
+
+Signed-off-by: Arindam Nath <arindam.nath@amd.com>
+Fixes: 2bf9a0a12749 ('iommu/amd: Add iommu support for ACPI HID devices')
+Signed-off-by: Joerg Roedel <jroedel@suse.de>
+---
+ drivers/iommu/amd_iommu.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+--- a/drivers/iommu/amd_iommu.c
++++ b/drivers/iommu/amd_iommu.c
+@@ -312,16 +312,16 @@ static int __last_alias(struct pci_dev *
+ 
+ static u16 get_alias(struct device *dev)
+ {
++	struct pci_dev *pdev = to_pci_dev(dev);
+ 	u16 devid, ivrs_alias, pci_alias;
+-	struct pci_dev *pdev;
+ 
+ 	devid = get_device_id(dev);
+-	ivrs_alias = amd_iommu_alias_table[devid];
+ 
++	/* For ACPI HID devices, we simply return the devid as such */
+ 	if (!dev_is_pci(dev))
+-		return ivrs_alias;
++		return devid;
+ 
+-	pdev = to_pci_dev(dev);
++	ivrs_alias = amd_iommu_alias_table[devid];
+ 
+ 	pci_for_each_dma_alias(pdev, __last_alias, &pci_alias);
+ 
