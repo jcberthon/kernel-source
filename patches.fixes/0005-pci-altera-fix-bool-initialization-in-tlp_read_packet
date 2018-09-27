@@ -1,0 +1,33 @@
+From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Date: Fri, 19 Jan 2018 21:26:51 -0600
+Subject: PCI: altera: Fix bool initialization in tlp_read_packet()
+Git-commit: db89ed14a2f2fcaa157a57fe3dd32cdb48459e2b
+Patch-mainline: v4.17-rc1
+References: bsc#1109806
+
+Bool variables should be initialized only through true and false
+values; update tlp_read_packet() code to comply.
+
+Detected using the Coccinelle tool.
+
+Fixes: eaa6111b70a7 ("PCI: altera: Add Altera PCIe host controller driver")
+Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+[lorenzo.pieralisi@arm.com: updated commit log]
+Signed-off-by: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
+Acked-by: Ley Foon Tan <ley.foon.tan@intel.com>
+Acked-by: Joerg Roedel <jroedel@suse.de>
+---
+ drivers/pci/host/pcie-altera.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/drivers/pci/host/pcie-altera.c
++++ b/drivers/pci/host/pcie-altera.c
+@@ -169,7 +169,7 @@ static bool altera_pcie_valid_config(str
+ static int tlp_read_packet(struct altera_pcie *pcie, u32 *value)
+ {
+ 	int i;
+-	bool sop = 0;
++	bool sop = false;
+ 	u32 ctrl;
+ 	u32 reg0, reg1;
+ 	u32 comp_status = 1;
