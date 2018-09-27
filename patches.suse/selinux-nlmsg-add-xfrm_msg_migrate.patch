@@ -1,0 +1,30 @@
+From: Nicolas Dichtel <nicolas.dichtel@6wind.com>
+Subject: selinux/nlmsg: add XFRM_MSG_MIGRATE
+Git-commit: 8d465bb777179c4bea731b828ec484088cc9fbc1
+Patch-mainline: v4.1-rc1
+References: bsc#1109946  Git-fixes
+
+This command is missing.
+
+Fixes: 5c79de6e79cd ("[XFRM]: User interface for handling XFRM_MSG_MIGRATE")
+Reported-by: Stephen Smalley <sds@tycho.nsa.gov>
+Signed-off-by: Nicolas Dichtel <nicolas.dichtel@6wind.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Acked-by: Jeff Mahoney <jeffm@suse.com>
+---
+ security/selinux/nlmsgtab.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/security/selinux/nlmsgtab.c b/security/selinux/nlmsgtab.c
+index 7d49312b30e1..9bd7f93109a1 100644
+--- a/security/selinux/nlmsgtab.c
++++ b/security/selinux/nlmsgtab.c
+@@ -104,6 +104,7 @@ static struct nlmsg_perm nlmsg_xfrm_perms[] =
+ 	{ XFRM_MSG_NEWAE,	NETLINK_XFRM_SOCKET__NLMSG_WRITE },
+ 	{ XFRM_MSG_GETAE,	NETLINK_XFRM_SOCKET__NLMSG_READ  },
+ 	{ XFRM_MSG_REPORT,	NETLINK_XFRM_SOCKET__NLMSG_READ  },
++	{ XFRM_MSG_MIGRATE,	NETLINK_XFRM_SOCKET__NLMSG_WRITE },
+ 	{ XFRM_MSG_NEWSADINFO,	NETLINK_XFRM_SOCKET__NLMSG_READ  },
+ 	{ XFRM_MSG_GETSADINFO,	NETLINK_XFRM_SOCKET__NLMSG_READ  },
+ 	{ XFRM_MSG_NEWSPDINFO,	NETLINK_XFRM_SOCKET__NLMSG_WRITE },
+

@@ -1,0 +1,31 @@
+From: Nicolas Dichtel <nicolas.dichtel@6wind.com>
+Subject: selinux/nlmsg: add XFRM_MSG_MAPPING
+Git-commit: bd2cba07381a6dba60bc1c87ed8b37931d244da1
+Patch-mainline: v4.1-rc1
+References: bsc#1109944  Git-fixes
+
+This command is missing.
+
+Fixes: 3a2dfbe8acb1 ("xfrm: Notify changes in UDP encapsulation via netlink")
+CC: Martin Willi <martin@strongswan.org>
+Reported-by: Stephen Smalley <sds@tycho.nsa.gov>
+Signed-off-by: Nicolas Dichtel <nicolas.dichtel@6wind.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Acked-by: Jeff Mahoney <jeffm@suse.com>
+---
+ security/selinux/nlmsgtab.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/security/selinux/nlmsgtab.c b/security/selinux/nlmsgtab.c
+index 9bd7f93109a1..30594bfa5fb1 100644
+--- a/security/selinux/nlmsgtab.c
++++ b/security/selinux/nlmsgtab.c
+@@ -109,6 +109,7 @@ static struct nlmsg_perm nlmsg_xfrm_perms[] =
+ 	{ XFRM_MSG_GETSADINFO,	NETLINK_XFRM_SOCKET__NLMSG_READ  },
+ 	{ XFRM_MSG_NEWSPDINFO,	NETLINK_XFRM_SOCKET__NLMSG_WRITE },
+ 	{ XFRM_MSG_GETSPDINFO,	NETLINK_XFRM_SOCKET__NLMSG_READ  },
++	{ XFRM_MSG_MAPPING,	NETLINK_XFRM_SOCKET__NLMSG_READ  },
+ };
+ 
+ static struct nlmsg_perm nlmsg_audit_perms[] =
+
