@@ -317,7 +317,7 @@ Acked-by: Lee Duncan <lduncan@suse.com>
  #include <linux/err.h>
  #include <linux/scatterlist.h>
  
-@@ -173,9 +173,8 @@ static int chap_server_compute_md5(
+@@ -164,9 +164,8 @@ static int chap_server_compute_md5(
  	unsigned char chap_n[MAX_CHAP_N_SIZE], chap_r[MAX_RESPONSE_LENGTH];
  	size_t compare_len;
  	struct iscsi_chap *chap = conn->auth_protocol;
@@ -329,7 +329,7 @@ Acked-by: Lee Duncan <lduncan@suse.com>
  	int auth_ret = -1, ret, challenge_len;
  
  	memset(identifier, 0, 10);
-@@ -240,52 +239,47 @@ static int chap_server_compute_md5(
+@@ -231,52 +230,47 @@ static int chap_server_compute_md5(
  
  	pr_debug("[server] Got CHAP_R=%s\n", chap_r);
  
@@ -399,9 +399,9 @@ Acked-by: Lee Duncan <lduncan@suse.com>
  	}
 -	crypto_free_hash(tfm);
  
- 	chap_binaryhex_to_asciihex(response, server_digest, MD5_SIGNATURE_SIZE);
+ 	bin2hex(response, server_digest, MD5_SIGNATURE_SIZE);
  	pr_debug("[server] MD5 Server Digest: %s\n", response);
-@@ -301,9 +295,8 @@ static int chap_server_compute_md5(
+@@ -292,9 +286,8 @@ static int chap_server_compute_md5(
  	 * authentication is not enabled.
  	 */
  	if (!auth->authenticate_target) {
@@ -413,7 +413,7 @@ Acked-by: Lee Duncan <lduncan@suse.com>
  	}
  	/*
  	 * Get CHAP_I.
-@@ -370,58 +363,37 @@ static int chap_server_compute_md5(
+@@ -361,58 +354,37 @@ static int chap_server_compute_md5(
  	/*
  	 * Generate CHAP_N and CHAP_R for mutual authentication.
  	 */
@@ -482,7 +482,7 @@ Acked-by: Lee Duncan <lduncan@suse.com>
  	/*
  	 * Generate CHAP_N and CHAP_R.
  	 */
-@@ -438,6 +410,8 @@ static int chap_server_compute_md5(
+@@ -429,6 +401,8 @@ static int chap_server_compute_md5(
  	pr_debug("[server] Sending CHAP_R=0x%s\n", response);
  	auth_ret = 0;
  out:
