@@ -11,14 +11,12 @@ either shash (for non-SG users) or ahash.
 Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
 Acked-by: Lee Duncan <lduncan@suse.com>
 ---
- drivers/target/iscsi/iscsi_target.c       | 86 ++++++++++++++-------------
- drivers/target/iscsi/iscsi_target_auth.c  | 98 ++++++++++++-------------------
- drivers/target/iscsi/iscsi_target_login.c | 45 +++++++++-----
- include/target/iscsi/iscsi_target_core.h  |  4 +-
+ drivers/target/iscsi/iscsi_target.c       |   86 ++++++++++++++------------
+ drivers/target/iscsi/iscsi_target_auth.c  |   98 +++++++++++-------------------
+ drivers/target/iscsi/iscsi_target_login.c |   45 ++++++++-----
+ include/target/iscsi/iscsi_target_core.h  |    4 -
  4 files changed, 113 insertions(+), 120 deletions(-)
 
-diff --git a/drivers/target/iscsi/iscsi_target.c b/drivers/target/iscsi/iscsi_target.c
-index 576a7a43470c..961202f4e9aa 100644
 --- a/drivers/target/iscsi/iscsi_target.c
 +++ b/drivers/target/iscsi/iscsi_target.c
 @@ -16,9 +16,9 @@
@@ -32,7 +30,7 @@ index 576a7a43470c..961202f4e9aa 100644
  #include <linux/completion.h>
  #include <linux/module.h>
  #include <linux/vmalloc.h>
-@@ -1190,7 +1190,7 @@ iscsit_handle_scsi_cmd(struct iscsi_conn *conn, struct iscsi_cmd *cmd,
+@@ -1205,7 +1205,7 @@ iscsit_handle_scsi_cmd(struct iscsi_conn
  }
  
  static u32 iscsit_do_crypto_hash_sg(
@@ -41,7 +39,7 @@ index 576a7a43470c..961202f4e9aa 100644
  	struct iscsi_cmd *cmd,
  	u32 data_offset,
  	u32 data_length,
-@@ -1201,7 +1201,7 @@ static u32 iscsit_do_crypto_hash_sg(
+@@ -1216,7 +1216,7 @@ static u32 iscsit_do_crypto_hash_sg(
  	struct scatterlist *sg;
  	unsigned int page_off;
  
@@ -50,7 +48,7 @@ index 576a7a43470c..961202f4e9aa 100644
  
  	sg = cmd->first_data_sg;
  	page_off = cmd->first_data_sg_off;
-@@ -1209,7 +1209,8 @@ static u32 iscsit_do_crypto_hash_sg(
+@@ -1224,7 +1224,8 @@ static u32 iscsit_do_crypto_hash_sg(
  	while (data_length) {
  		u32 cur_len = min_t(u32, data_length, (sg->length - page_off));
  
@@ -60,7 +58,7 @@ index 576a7a43470c..961202f4e9aa 100644
  
  		data_length -= cur_len;
  		page_off = 0;
-@@ -1221,33 +1222,34 @@ static u32 iscsit_do_crypto_hash_sg(
+@@ -1236,33 +1237,34 @@ static u32 iscsit_do_crypto_hash_sg(
  		struct scatterlist pad_sg;
  
  		sg_init_one(&pad_sg, pad_bytes, padding);
@@ -107,7 +105,7 @@ index 576a7a43470c..961202f4e9aa 100644
  }
  
  int
-@@ -1422,7 +1424,7 @@ iscsit_get_dataout(struct iscsi_conn *conn, struct iscsi_cmd *cmd,
+@@ -1437,7 +1439,7 @@ iscsit_get_dataout(struct iscsi_conn *co
  	if (conn->conn_ops->DataDigest) {
  		u32 data_crc;
  
@@ -116,7 +114,7 @@ index 576a7a43470c..961202f4e9aa 100644
  						    be32_to_cpu(hdr->offset),
  						    payload_length, padding,
  						    cmd->pad_bytes);
-@@ -1682,7 +1684,7 @@ static int iscsit_handle_nop_out(struct iscsi_conn *conn, struct iscsi_cmd *cmd,
+@@ -1697,7 +1699,7 @@ static int iscsit_handle_nop_out(struct
  		}
  
  		if (conn->conn_ops->DataDigest) {
@@ -125,7 +123,7 @@ index 576a7a43470c..961202f4e9aa 100644
  					ping_data, payload_length,
  					padding, cmd->pad_bytes,
  					(u8 *)&data_crc);
-@@ -2101,7 +2103,7 @@ iscsit_handle_text_cmd(struct iscsi_conn *conn, struct iscsi_cmd *cmd,
+@@ -2108,7 +2110,7 @@ iscsit_handle_text_cmd(struct iscsi_conn
  			goto reject;
  
  		if (conn->conn_ops->DataDigest) {
@@ -134,7 +132,7 @@ index 576a7a43470c..961202f4e9aa 100644
  					text_in, payload_length,
  					padding, (u8 *)&pad_bytes,
  					(u8 *)&data_crc);
-@@ -2440,7 +2442,7 @@ static int iscsit_handle_immediate_data(
+@@ -2447,7 +2449,7 @@ static int iscsit_handle_immediate_data(
  	if (conn->conn_ops->DataDigest) {
  		u32 data_crc;
  
@@ -143,7 +141,7 @@ index 576a7a43470c..961202f4e9aa 100644
  						    cmd->write_data_done, length, padding,
  						    cmd->pad_bytes);
  
-@@ -2553,7 +2555,7 @@ static int iscsit_send_conn_drop_async_message(
+@@ -2560,7 +2562,7 @@ static int iscsit_send_conn_drop_async_m
  	if (conn->conn_ops->HeaderDigest) {
  		u32 *header_digest = (u32 *)&cmd->pdu[ISCSI_HDR_LEN];
  
@@ -152,7 +150,7 @@ index 576a7a43470c..961202f4e9aa 100644
  				ISCSI_HDR_LEN, 0, NULL, (u8 *)header_digest);
  
  		cmd->tx_size += ISCSI_CRC_LEN;
-@@ -2683,7 +2685,7 @@ static int iscsit_send_datain(struct iscsi_cmd *cmd, struct iscsi_conn *conn)
+@@ -2690,7 +2692,7 @@ static int iscsit_send_datain(struct isc
  	if (conn->conn_ops->HeaderDigest) {
  		u32 *header_digest = (u32 *)&cmd->pdu[ISCSI_HDR_LEN];
  
@@ -161,7 +159,7 @@ index 576a7a43470c..961202f4e9aa 100644
  				ISCSI_HDR_LEN, 0, NULL, (u8 *)header_digest);
  
  		iov[0].iov_len += ISCSI_CRC_LEN;
-@@ -2711,7 +2713,7 @@ static int iscsit_send_datain(struct iscsi_cmd *cmd, struct iscsi_conn *conn)
+@@ -2718,7 +2720,7 @@ static int iscsit_send_datain(struct isc
  				cmd->padding);
  	}
  	if (conn->conn_ops->DataDigest) {
@@ -170,7 +168,7 @@ index 576a7a43470c..961202f4e9aa 100644
  			 datain.offset, datain.length, cmd->padding, cmd->pad_bytes);
  
  		iov[iov_count].iov_base	= &cmd->data_crc;
-@@ -2857,7 +2859,7 @@ iscsit_send_logout(struct iscsi_cmd *cmd, struct iscsi_conn *conn)
+@@ -2864,7 +2866,7 @@ iscsit_send_logout(struct iscsi_cmd *cmd
  	if (conn->conn_ops->HeaderDigest) {
  		u32 *header_digest = (u32 *)&cmd->pdu[ISCSI_HDR_LEN];
  
@@ -179,7 +177,7 @@ index 576a7a43470c..961202f4e9aa 100644
  				ISCSI_HDR_LEN, 0, NULL, (u8 *)header_digest);
  
  		iov[0].iov_len += ISCSI_CRC_LEN;
-@@ -2915,7 +2917,7 @@ static int iscsit_send_unsolicited_nopin(
+@@ -2922,7 +2924,7 @@ static int iscsit_send_unsolicited_nopin
  	if (conn->conn_ops->HeaderDigest) {
  		u32 *header_digest = (u32 *)&cmd->pdu[ISCSI_HDR_LEN];
  
@@ -188,7 +186,7 @@ index 576a7a43470c..961202f4e9aa 100644
  				ISCSI_HDR_LEN, 0, NULL, (u8 *)header_digest);
  
  		tx_size += ISCSI_CRC_LEN;
-@@ -2963,7 +2965,7 @@ iscsit_send_nopin(struct iscsi_cmd *cmd, struct iscsi_conn *conn)
+@@ -2970,7 +2972,7 @@ iscsit_send_nopin(struct iscsi_cmd *cmd,
  	if (conn->conn_ops->HeaderDigest) {
  		u32 *header_digest = (u32 *)&cmd->pdu[ISCSI_HDR_LEN];
  
@@ -197,7 +195,7 @@ index 576a7a43470c..961202f4e9aa 100644
  				ISCSI_HDR_LEN, 0, NULL, (u8 *)header_digest);
  
  		iov[0].iov_len += ISCSI_CRC_LEN;
-@@ -2993,7 +2995,7 @@ iscsit_send_nopin(struct iscsi_cmd *cmd, struct iscsi_conn *conn)
+@@ -3000,7 +3002,7 @@ iscsit_send_nopin(struct iscsi_cmd *cmd,
  				" padding bytes.\n", padding);
  		}
  		if (conn->conn_ops->DataDigest) {
@@ -206,7 +204,7 @@ index 576a7a43470c..961202f4e9aa 100644
  				cmd->buf_ptr, cmd->buf_ptr_size,
  				padding, (u8 *)&cmd->pad_bytes,
  				(u8 *)&cmd->data_crc);
-@@ -3049,7 +3051,7 @@ static int iscsit_send_r2t(
+@@ -3056,7 +3058,7 @@ static int iscsit_send_r2t(
  	if (conn->conn_ops->HeaderDigest) {
  		u32 *header_digest = (u32 *)&cmd->pdu[ISCSI_HDR_LEN];
  
@@ -215,7 +213,7 @@ index 576a7a43470c..961202f4e9aa 100644
  				ISCSI_HDR_LEN, 0, NULL, (u8 *)header_digest);
  
  		cmd->iov_misc[0].iov_len += ISCSI_CRC_LEN;
-@@ -3239,7 +3241,7 @@ static int iscsit_send_response(struct iscsi_cmd *cmd, struct iscsi_conn *conn)
+@@ -3246,7 +3248,7 @@ static int iscsit_send_response(struct i
  		}
  
  		if (conn->conn_ops->DataDigest) {
@@ -224,7 +222,7 @@ index 576a7a43470c..961202f4e9aa 100644
  				cmd->sense_buffer,
  				(cmd->se_cmd.scsi_sense_length + padding),
  				0, NULL, (u8 *)&cmd->data_crc);
-@@ -3262,7 +3264,7 @@ static int iscsit_send_response(struct iscsi_cmd *cmd, struct iscsi_conn *conn)
+@@ -3269,7 +3271,7 @@ static int iscsit_send_response(struct i
  	if (conn->conn_ops->HeaderDigest) {
  		u32 *header_digest = (u32 *)&cmd->pdu[ISCSI_HDR_LEN];
  
@@ -233,7 +231,7 @@ index 576a7a43470c..961202f4e9aa 100644
  				ISCSI_HDR_LEN, 0, NULL, (u8 *)header_digest);
  
  		iov[0].iov_len += ISCSI_CRC_LEN;
-@@ -3332,7 +3334,7 @@ iscsit_send_task_mgt_rsp(struct iscsi_cmd *cmd, struct iscsi_conn *conn)
+@@ -3339,7 +3341,7 @@ iscsit_send_task_mgt_rsp(struct iscsi_cm
  	if (conn->conn_ops->HeaderDigest) {
  		u32 *header_digest = (u32 *)&cmd->pdu[ISCSI_HDR_LEN];
  
@@ -242,7 +240,7 @@ index 576a7a43470c..961202f4e9aa 100644
  				ISCSI_HDR_LEN, 0, NULL, (u8 *)header_digest);
  
  		cmd->iov_misc[0].iov_len += ISCSI_CRC_LEN;
-@@ -3601,7 +3603,7 @@ static int iscsit_send_text_rsp(
+@@ -3608,7 +3610,7 @@ static int iscsit_send_text_rsp(
  	if (conn->conn_ops->HeaderDigest) {
  		u32 *header_digest = (u32 *)&cmd->pdu[ISCSI_HDR_LEN];
  
@@ -251,7 +249,7 @@ index 576a7a43470c..961202f4e9aa 100644
  				ISCSI_HDR_LEN, 0, NULL, (u8 *)header_digest);
  
  		iov[0].iov_len += ISCSI_CRC_LEN;
-@@ -3611,7 +3613,7 @@ static int iscsit_send_text_rsp(
+@@ -3618,7 +3620,7 @@ static int iscsit_send_text_rsp(
  	}
  
  	if (conn->conn_ops->DataDigest) {
@@ -260,7 +258,7 @@ index 576a7a43470c..961202f4e9aa 100644
  				cmd->buf_ptr, text_length,
  				0, NULL, (u8 *)&cmd->data_crc);
  
-@@ -3668,7 +3670,7 @@ static int iscsit_send_reject(
+@@ -3675,7 +3677,7 @@ static int iscsit_send_reject(
  	if (conn->conn_ops->HeaderDigest) {
  		u32 *header_digest = (u32 *)&cmd->pdu[ISCSI_HDR_LEN];
  
@@ -269,7 +267,7 @@ index 576a7a43470c..961202f4e9aa 100644
  				ISCSI_HDR_LEN, 0, NULL, (u8 *)header_digest);
  
  		iov[0].iov_len += ISCSI_CRC_LEN;
-@@ -3678,7 +3680,7 @@ static int iscsit_send_reject(
+@@ -3685,7 +3687,7 @@ static int iscsit_send_reject(
  	}
  
  	if (conn->conn_ops->DataDigest) {
@@ -278,7 +276,7 @@ index 576a7a43470c..961202f4e9aa 100644
  				ISCSI_HDR_LEN, 0, NULL, (u8 *)&cmd->data_crc);
  
  		iov[iov_count].iov_base = &cmd->data_crc;
-@@ -4145,7 +4147,7 @@ int iscsi_target_rx_thread(void *arg)
+@@ -4162,7 +4164,7 @@ int iscsi_target_rx_thread(void *arg)
  				goto transport_err;
  			}
  
@@ -287,7 +285,7 @@ index 576a7a43470c..961202f4e9aa 100644
  					buffer, ISCSI_HDR_LEN,
  					0, NULL, (u8 *)&checksum);
  
-@@ -4359,10 +4361,14 @@ int iscsit_close_connection(
+@@ -4391,10 +4393,14 @@ int iscsit_close_connection(
  	 */
  	iscsit_check_conn_usage_count(conn);
  
@@ -306,8 +304,6 @@ index 576a7a43470c..961202f4e9aa 100644
  
  	free_cpumask_var(conn->conn_cpumask);
  
-diff --git a/drivers/target/iscsi/iscsi_target_auth.c b/drivers/target/iscsi/iscsi_target_auth.c
-index 47e249dccb5f..667406fcf4d3 100644
 --- a/drivers/target/iscsi/iscsi_target_auth.c
 +++ b/drivers/target/iscsi/iscsi_target_auth.c
 @@ -16,9 +16,9 @@
@@ -321,7 +317,7 @@ index 47e249dccb5f..667406fcf4d3 100644
  #include <linux/err.h>
  #include <linux/scatterlist.h>
  
-@@ -185,9 +185,8 @@ static int chap_server_compute_md5(
+@@ -173,9 +173,8 @@ static int chap_server_compute_md5(
  	unsigned char chap_n[MAX_CHAP_N_SIZE], chap_r[MAX_RESPONSE_LENGTH];
  	size_t compare_len;
  	struct iscsi_chap *chap = conn->auth_protocol;
@@ -333,9 +329,9 @@ index 47e249dccb5f..667406fcf4d3 100644
  	int auth_ret = -1, ret, challenge_len;
  
  	memset(identifier, 0, 10);
-@@ -245,52 +244,47 @@ static int chap_server_compute_md5(
+@@ -240,52 +239,47 @@ static int chap_server_compute_md5(
+ 
  	pr_debug("[server] Got CHAP_R=%s\n", chap_r);
- 	chap_string_to_hex(client_digest, chap_r, strlen(chap_r));
  
 -	tfm = crypto_alloc_hash("md5", 0, CRYPTO_ALG_ASYNC);
 +	tfm = crypto_alloc_shash("md5", 0, 0);
@@ -405,7 +401,7 @@ index 47e249dccb5f..667406fcf4d3 100644
  
  	chap_binaryhex_to_asciihex(response, server_digest, MD5_SIGNATURE_SIZE);
  	pr_debug("[server] MD5 Server Digest: %s\n", response);
-@@ -306,9 +300,8 @@ static int chap_server_compute_md5(
+@@ -301,9 +295,8 @@ static int chap_server_compute_md5(
  	 * authentication is not enabled.
  	 */
  	if (!auth->authenticate_target) {
@@ -417,7 +413,7 @@ index 47e249dccb5f..667406fcf4d3 100644
  	}
  	/*
  	 * Get CHAP_I.
-@@ -372,58 +365,37 @@ static int chap_server_compute_md5(
+@@ -370,58 +363,37 @@ static int chap_server_compute_md5(
  	/*
  	 * Generate CHAP_N and CHAP_R for mutual authentication.
  	 */
@@ -486,7 +482,7 @@ index 47e249dccb5f..667406fcf4d3 100644
  	/*
  	 * Generate CHAP_N and CHAP_R.
  	 */
-@@ -440,6 +412,8 @@ static int chap_server_compute_md5(
+@@ -438,6 +410,8 @@ static int chap_server_compute_md5(
  	pr_debug("[server] Sending CHAP_R=0x%s\n", response);
  	auth_ret = 0;
  out:
@@ -495,8 +491,6 @@ index 47e249dccb5f..667406fcf4d3 100644
  	kfree(challenge);
  	kfree(challenge_binhex);
  	return auth_ret;
-diff --git a/drivers/target/iscsi/iscsi_target_login.c b/drivers/target/iscsi/iscsi_target_login.c
-index 96e78c823d13..8436d56c5f0c 100644
 --- a/drivers/target/iscsi/iscsi_target_login.c
 +++ b/drivers/target/iscsi/iscsi_target_login.c
 @@ -16,9 +16,9 @@
@@ -542,8 +536,8 @@ index 96e78c823d13..8436d56c5f0c 100644
 +	if (!conn->conn_rx_hash) {
 +		pr_err("ahash_request_alloc() failed for conn_rx_hash\n");
 +		crypto_free_ahash(tfm);
-+		return -ENOMEM;
-+	}
+ 		return -ENOMEM;
+ 	}
 +	ahash_request_set_callback(conn->conn_rx_hash, 0, NULL, NULL);
 +
 +	conn->conn_tx_hash = ahash_request_alloc(tfm, GFP_KERNEL);
@@ -552,13 +546,13 @@ index 96e78c823d13..8436d56c5f0c 100644
 +		ahash_request_free(conn->conn_rx_hash);
 +		conn->conn_rx_hash = NULL;
 +		crypto_free_ahash(tfm);
- 		return -ENOMEM;
- 	}
++		return -ENOMEM;
++	}
 +	ahash_request_set_callback(conn->conn_tx_hash, 0, NULL, NULL);
  
  	return 0;
  }
-@@ -1174,10 +1183,14 @@ old_sess_out:
+@@ -1182,10 +1191,14 @@ old_sess_out:
  		iscsit_dec_session_usage_count(conn->sess);
  	}
  
@@ -577,11 +571,9 @@ index 96e78c823d13..8436d56c5f0c 100644
  
  	free_cpumask_var(conn->conn_cpumask);
  
-diff --git a/include/target/iscsi/iscsi_target_core.h b/include/target/iscsi/iscsi_target_core.h
-index 373d3342002b..c3371fa548cb 100644
 --- a/include/target/iscsi/iscsi_target_core.h
 +++ b/include/target/iscsi/iscsi_target_core.h
-@@ -570,8 +570,8 @@ struct iscsi_conn {
+@@ -579,8 +579,8 @@ struct iscsi_conn {
  	spinlock_t		response_queue_lock;
  	spinlock_t		state_lock;
  	/* libcrypto RX and TX contexts for crc32c */
@@ -592,4 +584,3 @@ index 373d3342002b..c3371fa548cb 100644
  	/* Used for scheduling TX and RX connection kthreads */
  	cpumask_var_t		conn_cpumask;
  	unsigned int		conn_rx_reset_cpumask:1;
-
