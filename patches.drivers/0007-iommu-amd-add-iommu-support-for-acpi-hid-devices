@@ -27,7 +27,7 @@ Signed-off-by: Joerg Roedel <jroedel@suse.de>
  #include <linux/pci-ats.h>
  #include <linux/bitmap.h>
  #include <linux/slab.h>
-@@ -127,7 +128,7 @@ static struct protection_domain *to_pdom
+@@ -127,13 +128,60 @@ static struct protection_domain *to_pdom
  	return container_of(dom, struct protection_domain, domain);
  }
  
@@ -36,17 +36,7 @@ Signed-off-by: Joerg Roedel <jroedel@suse.de>
  {
  	struct pci_dev *pdev = to_pci_dev(dev);
  
-@@ -182,7 +183,7 @@ static u16 get_alias(struct device *dev)
- 	struct pci_dev *pdev = to_pci_dev(dev);
- 	u16 devid, ivrs_alias, pci_alias;
- 
--	devid = get_device_id(dev);
-+	devid = get_pci_device_id(dev);
- 	ivrs_alias = amd_iommu_alias_table[devid];
- 	pci_for_each_dma_alias(pdev, __last_alias, &pci_alias);
- 
-@@ -245,6 +246,53 @@ static struct iommu_dev_data *find_dev_d
- 	return dev_data;
+ 	return PCI_DEVID(pdev->bus->number, pdev->devfn);
  }
  
 +static inline int match_hid_uid(struct device *dev,
@@ -96,10 +86,29 @@ Signed-off-by: Joerg Roedel <jroedel@suse.de>
 +	return devid;
 +}
 +
- static struct iommu_dev_data *get_dev_data(struct device *dev)
+ static struct iommu_dev_data *alloc_dev_data(u16 devid)
  {
- 	return dev->archdata.iommu;
-@@ -325,10 +373,6 @@ static bool check_device(struct device *
+ 	struct iommu_dev_data *dev_data;
+@@ -179,11 +227,17 @@ static int __last_alias(struct pci_dev *
+ 
+ static u16 get_alias(struct device *dev)
+ {
+-	struct pci_dev *pdev = to_pci_dev(dev);
+ 	u16 devid, ivrs_alias, pci_alias;
++	struct pci_dev *pdev;
+ 
+ 	devid = get_device_id(dev);
+ 	ivrs_alias = amd_iommu_alias_table[devid];
++
++	if (!dev_is_pci(dev))
++		return ivrs_alias;
++
++	pdev = to_pci_dev(dev);
++
+ 	pci_for_each_dma_alias(pdev, __last_alias, &pci_alias);
+ 
+ 	if (ivrs_alias == pci_alias)
+@@ -324,10 +378,6 @@ static bool check_device(struct device *
  	if (!dev || !dev->dma_mask)
  		return false;
  
@@ -110,7 +119,7 @@ Signed-off-by: Joerg Roedel <jroedel@suse.de>
  	devid = get_device_id(dev);
  	if (IS_ERR_VALUE(devid))
  		return false;
-@@ -366,7 +410,6 @@ out:
+@@ -367,7 +417,6 @@ out:
  
  static int iommu_init_device(struct device *dev)
  {
@@ -118,7 +127,7 @@ Signed-off-by: Joerg Roedel <jroedel@suse.de>
  	struct iommu_dev_data *dev_data;
  	int devid;
  
-@@ -383,10 +426,10 @@ static int iommu_init_device(struct devi
+@@ -384,10 +433,10 @@ static int iommu_init_device(struct devi
  
  	dev_data->alias = get_alias(dev);
  
@@ -131,7 +140,7 @@ Signed-off-by: Joerg Roedel <jroedel@suse.de>
  		dev_data->iommu_v2 = iommu->is_iommu_v2;
  	}
  
-@@ -2156,13 +2199,17 @@ static bool pci_pri_tlp_required(struct
+@@ -2160,13 +2209,17 @@ static bool pci_pri_tlp_required(struct
  static int attach_device(struct device *dev,
  			 struct protection_domain *domain)
  {
@@ -150,7 +159,7 @@ Signed-off-by: Joerg Roedel <jroedel@suse.de>
  	if (domain->flags & PD_IOMMUV2_MASK) {
  		if (!dev_data->passthrough)
  			return -EINVAL;
-@@ -2181,6 +2228,7 @@ static int attach_device(struct device *
+@@ -2185,6 +2238,7 @@ static int attach_device(struct device *
  		dev_data->ats.qdep    = pci_ats_queue_depth(pdev);
  	}
  
@@ -158,7 +167,7 @@ Signed-off-by: Joerg Roedel <jroedel@suse.de>
  	write_lock_irqsave(&amd_iommu_devtable_lock, flags);
  	ret = __attach_device(dev_data, domain);
  	write_unlock_irqrestore(&amd_iommu_devtable_lock, flags);
-@@ -2237,6 +2285,9 @@ static void detach_device(struct device
+@@ -2241,6 +2295,9 @@ static void detach_device(struct device
  	__detach_device(dev_data);
  	write_unlock_irqrestore(&amd_iommu_devtable_lock, flags);
  

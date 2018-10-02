@@ -50,9 +50,9 @@ Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
  	debug_putstr("KASLR using");
 --- a/arch/x86/boot/compressed/misc.c
 +++ b/arch/x86/boot/compressed/misc.c
-@@ -12,6 +12,9 @@
- #include "misc.h"
+@@ -13,6 +13,9 @@
  #include "../string.h"
+ #include "../voffset.h"
  
 +#include <generated/compile.h>
 +#include <generated/utsrelease.h>
@@ -60,7 +60,7 @@ Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
  /* WARNING!!
   * This code is compiled with -fPIC and it is relocated dynamically
   * at run time, but no relocation processing is performed.
-@@ -460,3 +463,54 @@ asmlinkage __visible void *decompress_ke
+@@ -467,3 +470,54 @@ asmlinkage __visible void *decompress_ke
  	debug_putstr("done.\nBooting the kernel.\n");
  	return output;
  }
@@ -117,7 +117,7 @@ Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
 +#endif /* CONFIG_RANDOMIZE_BASE */
 --- a/arch/x86/boot/compressed/misc.h
 +++ b/arch/x86/boot/compressed/misc.h
-@@ -96,4 +96,9 @@ static inline void console_init(void)
+@@ -97,4 +97,9 @@ static inline void console_init(void)
  { }
  #endif
  
