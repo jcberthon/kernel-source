@@ -1,0 +1,35 @@
+From: Hannes Reinecke <hare@suse.de>
+Date: Tue, 2 Oct 2018 08:25:57 +0200
+Subject: [PATCH] dm-mpath: do not try to access NULL rq
+References: bsc#1110337
+Patch-Mainline: no, SLE12-SP3 specific
+
+When checking existing cmd_flags we should first check if we have
+a request to look at in the first place.
+
+Signed-off-by: Hannes Reinecke <hare@suse.com>
+---
+ drivers/md/dm-mpath.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/md/dm-mpath.c b/drivers/md/dm-mpath.c
+index b2a7c7e0ed0e..6d116deb2ba4 100644
+--- a/drivers/md/dm-mpath.c
++++ b/drivers/md/dm-mpath.c
+@@ -561,8 +561,11 @@ static int __multipath_map(struct dm_target *ti, struct request *clone,
+ 		 */
+ 		clone->q = bdev_get_queue(bdev);
+ 		clone->rq_disk = bdev->bd_disk;
+-		clone->cmd_flags = rq->cmd_flags | REQ_NOMERGE;
+-		clone->cmd_flags |= REQ_FAILFAST_TRANSPORT;
++		if (rq)
++			clone->cmd_flags = rq->cmd_flags;
++		else
++			clone->cmd_flags = 0;
++		clone->cmd_flags |= REQ_NOMERGE | REQ_FAILFAST_TRANSPORT;
+ 	} else {
+ 		/*
+ 		 * blk-mq request-based interface; used by both:
+-- 
+2.16.4
+
