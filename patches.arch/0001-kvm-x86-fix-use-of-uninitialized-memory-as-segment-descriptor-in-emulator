@@ -1,0 +1,33 @@
+From: Gleb Natapov <gleb@redhat.com>
+Date: Mon, 21 Jan 2013 15:36:48 +0200
+Subject: KVM: x86: fix use of uninitialized memory as segment descriptor in
+ emulator.
+Git-commit: 378a8b099fc207ddcb91b19a8c1457667e0af398
+Patch-mainline: v3.9-rc1
+References: bsc#1106240
+
+If VMX reports segment as unusable, zero descriptor passed by the emulator
+before returning. Such descriptor will be considered not present by the
+emulator.
+
+Signed-off-by: Gleb Natapov <gleb@redhat.com>
+Signed-off-by: Marcelo Tosatti <mtosatti@redhat.com>
+Acked-by: Joerg Roedel <jroedel@suse.de>
+---
+ arch/x86/kvm/x86.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+--- a/arch/x86/kvm/x86.c
++++ b/arch/x86/kvm/x86.c
+@@ -4578,8 +4578,10 @@ static bool emulator_get_segment(struct
+ 	kvm_get_segment(emul_to_vcpu(ctxt), &var, seg);
+ 	*selector = var.selector;
+ 
+-	if (var.unusable)
++	if (var.unusable) {
++		memset(desc, 0, sizeof(*desc));
+ 		return false;
++	}
+ 
+ 	if (var.g)
+ 		var.limit >>= 12;
