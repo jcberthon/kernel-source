@@ -1,0 +1,38 @@
+From 357e6d36ace9562a7632995b17cdbc3b4f936e49 Mon Sep 17 00:00:00 2001
+From: Geert Uytterhoeven <geert+renesas@glider.be>
+Date: Fri, 17 Feb 2017 15:25:08 +0100
+Subject: [PATCH 04/16] arm64: kernel: Update kerneldoc for cpu_suspend()
+ rename
+
+Git-commit: 0e4c0e6ea7d4a988a5ae2791c7cb5769b5256dad
+Patch-mainline: v4.11-rc3
+References: bsc#1110602
+
+Commit af391b15f7b56ce1 ("arm64: kernel: rename __cpu_suspend to keep it
+aligned with arm") renamed cpu_suspend() to arm_cpuidle_suspend(), but
+forgot to update the kerneldoc header.
+
+Fixes: af391b15f7b56ce1 ("arm64: kernel: rename __cpu_suspend to keep it aligned with arm")
+Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Signed-off-by: Will Deacon <will.deacon@arm.com>
+Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
+---
+ arch/arm64/kernel/cpuidle.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/kernel/cpuidle.c b/arch/arm64/kernel/cpuidle.c
+index 207e9d56971c..a5fcc4e8ca30 100644
+--- a/arch/arm64/kernel/cpuidle.c
++++ b/arch/arm64/kernel/cpuidle.c
+@@ -29,7 +29,7 @@ int arm_cpuidle_init(unsigned int cpu)
+ }
+ 
+ /**
+- * cpu_suspend() - function to enter a low-power idle state
++ * arm_cpuidle_suspend() - function to enter a low-power idle state
+  * @arg: argument to pass to CPU suspend operations
+  *
+  * Return: 0 on success, -EOPNOTSUPP if CPU suspend hook not initialized, CPU
+-- 
+2.11.0
+
