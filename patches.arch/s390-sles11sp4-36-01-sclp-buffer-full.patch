@@ -1,0 +1,64 @@
+From: Peter Oberparleiter <oberpar@linux.vnet.ibm.com>
+Date: Thu, 2 Jul 2015 09:06:55 +0200
+Subject: s390/sclp: Change SCLP console default buffer-full behavior
+Patch-mainline: v4.3-rc1
+Git-commit: 00fd2cb0ec4208a32272b4c2f1063ab99a76473c
+References: bnc#1108314, LTC#171049
+
+Description:  kernel: drop sclp console buffer by default
+Symptom:      A Linux instance using the line-mode or vt220 SCLP console
+              in combination with a high amount of output to the console
+              device may experience delays and increased steal time
+              although enough CPU resources are available.
+Problem:      The default behaviour of the SCLP console drivers is to
+              wait in case of a buffer full condition. The wait loop
+              uses diagnose 0x44 which increases the steal time.
+              The sclp_con_drop=1 kernel parameter can be used to avoid
+              the wait loop at the cost of lost console output.
+Solution:     Make sclp_con_drop=1 the default setting.
+Reproduction: Set sclp_con_drop=0 and flood the SCLP console device with
+              messages.
+
+Upstream-Description:
+
+              s390/sclp: Change SCLP console default buffer-full behavior
+
+              Dropping kernel messages during a console-buffer-full condition
+              is preferable to halting the system until console messages are
+              delivered, especially for production systems.
+
+              Update default for sclp_console_drop kernel parameter accordingly.
+
+              Signed-off-by: Peter Oberparleiter <peter.oberparleiter@linux.vnet.ibm.com>
+              Acked-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+              Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+
+
+Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+Acked-by: Petr Tesarik <ptesarik@suse.com>
+---
+ drivers/s390/char/sclp.c |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+--- a/drivers/s390/char/sclp.c
++++ b/drivers/s390/char/sclp.c
+@@ -53,7 +53,7 @@ static DECLARE_COMPLETION(sclp_request_queue_flushed);
+ /* Number of console pages to allocate, used by sclp_con.c and sclp_vt220.c */
+ int sclp_console_pages = SCLP_CONSOLE_PAGES;
+ /* Flag to indicate if buffer pages are dropped on buffer full condition */
+-int sclp_console_drop = 0;
++int sclp_console_drop = 1;
+ /* Number of times the console dropped buffer pages */
+ unsigned long sclp_console_full;
+ 
+@@ -79,8 +79,8 @@ static int __init sclp_setup_console_drop(char *str)
+ 	int drop, rc;
+ 
+ 	rc = kstrtoint(str, 0, &drop);
+-	if (!rc && drop)
+-		sclp_console_drop = 1;
++	if (!rc)
++		sclp_console_drop = drop;
+ 	return 1;
+ }
+ 
