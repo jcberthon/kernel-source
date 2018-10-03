@@ -1,9 +1,12 @@
 From: Tejun Heo <tj@kernel.org>
 Date: Mon, 21 Nov 2016 18:03:32 -0500
-Subject: block,blkcg: use __GFP_NOWARN for best-effort allocations in blkcg
-References: bsc#1020989,FATE#322379
+Subject: [PATCH] block,blkcg: use __GFP_NOWARN for best-effort allocations in
+ blkcg
+Patch-mainline: 4.4.157
+References: FATE#322379 bnc#1012382 bsc#1020989
 Git-commit: e00f4f4d0ff7e13b9115428a245b49108d625f09
-Patch-Mainline: v4.10-rc1
+
+commit e00f4f4d0ff7e13b9115428a245b49108d625f09 upstream.
 
 blkcg allocates some per-cgroup data structures with GFP_NOWAIT and
 when that fails falls back to operations which aren't specific to the
@@ -18,14 +21,16 @@ Signed-off-by: Tejun Heo <tj@kernel.org>
 Reported-by: Marc MERLIN <marc@merlins.org>
 Reported-by: Vlastimil Babka <vbabka@suse.cz>
 Signed-off-by: Jens Axboe <axboe@fb.com>
-Signed-off-by: Hannes Reinecke <hare@suse.de>
+Signed-off-by: Amit Pundir <amit.pundir@linaro.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  block/blk-cgroup.c  | 9 +++++----
  block/cfq-iosched.c | 3 ++-
  2 files changed, 7 insertions(+), 5 deletions(-)
 
 diff --git a/block/blk-cgroup.c b/block/blk-cgroup.c
-index b08ccbb..8ba0af7 100644
+index 46ba2402c8f9..987361113ecd 100644
 --- a/block/blk-cgroup.c
 +++ b/block/blk-cgroup.c
 @@ -185,7 +185,8 @@ static struct blkcg_gq *blkg_create(struct blkcg *blkcg,
@@ -56,7 +61,7 @@ index b08ccbb..8ba0af7 100644
  	INIT_HLIST_HEAD(&blkcg->blkg_list);
  #ifdef CONFIG_CGROUP_WRITEBACK
  	INIT_LIST_HEAD(&blkcg->cgwb_list);
-@@ -1240,7 +1241,7 @@ pd_prealloc:
+@@ -1238,7 +1239,7 @@ int blkcg_activate_policy(struct request_queue *q,
  		if (blkg->pd[pol->plid])
  			continue;
  
@@ -66,10 +71,10 @@ index b08ccbb..8ba0af7 100644
  			swap(pd, pd_prealloc);
  		if (!pd) {
 diff --git a/block/cfq-iosched.c b/block/cfq-iosched.c
-index 68b64e5..f1ca511 100644
+index 6e363ba773b4..4e1f49434bbe 100644
 --- a/block/cfq-iosched.c
 +++ b/block/cfq-iosched.c
-@@ -3859,7 +3859,8 @@ cfq_get_queue(struct cfq_data *cfqd, bool is_sync, struct cfq_io_cq *cic,
+@@ -3811,7 +3811,8 @@ cfq_get_queue(struct cfq_data *cfqd, bool is_sync, struct cfq_io_cq *cic,
  			goto out;
  	}
  
@@ -80,5 +85,5 @@ index 68b64e5..f1ca511 100644
  	if (!cfqq) {
  		cfqq = &cfqd->oom_cfqq;
 -- 
-1.8.5.6
+2.19.0
 

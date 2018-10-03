@@ -1,10 +1,14 @@
-From cc51e5428ea54f575d49cfcede1d4cb3a72b4ec4 Mon Sep 17 00:00:00 2001
 From: Andi Kleen <ak@linux.intel.com>
-Date: Fri, 24 Aug 2018 10:03:50 -0700
+Date: Mon, 3 Sep 2018 10:19:13 -0700
 Subject: [PATCH] x86/speculation/l1tf: Increase l1tf memory limit for Nehalem+
-Git-commit: cc51e5428ea54f575d49cfcede1d4cb3a72b4ec4
-Patch-mainline: 4.19-rc2
-References: bnc#1105536
+References: bnc#1012382 bnc#1105536
+Patch-mainline: 4.4.157
+Git-commit: e29c75d4fb491a7b1890293302f7ab40be7ce586
+
+[upstream cc51e5428ea54f575d49cfcede1d4cb3a72b4ec4 for 4.4.
+Note there might be still a trivial conflict with the backport
+for b0a182f875689647b014bc01d36b340217792852, but should
+be easy to resolve]
 
 On Nehalem and newer core CPUs the CPU cache internally uses 44 bits
 physical address space. The L1TF workaround is limited by this internal
@@ -37,28 +41,28 @@ Cc: Michael Hocko <mhocko@suse.com>
 Cc: vbabka@suse.cz
 Cc: stable@vger.kernel.org
 Link: https://lkml.kernel.org/r/20180824170351.34874-1-andi@firstfloor.org
-Acked-by: Michal Hocko <mhocko@suse.com>
-
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- arch/x86/include/asm/processor.h |    7 ++++-
- arch/x86/kernel/cpu/bugs.c       |   48 ++++++++++++++++++++++++++++++++++-----
- 2 files changed, 49 insertions(+), 6 deletions(-)
+ arch/x86/include/asm/processor.h |  4 ++-
+ arch/x86/kernel/cpu/bugs.c       | 47 ++++++++++++++++++++++++++++----
+ arch/x86/kernel/cpu/common.c     |  2 ++
+ 3 files changed, 47 insertions(+), 6 deletions(-)
 
+diff --git a/arch/x86/include/asm/processor.h b/arch/x86/include/asm/processor.h
+index 337c52192278..440a948c4feb 100644
 --- a/arch/x86/include/asm/processor.h
 +++ b/arch/x86/include/asm/processor.h
-@@ -139,6 +139,11 @@ struct cpuinfo_x86 {
- 	/* Index into per_cpu list: */
- 	u16			cpu_index;
- 	u32			microcode;
-+	/*
-+	 * Address space bits used by the cache internally
-+	 * NOTE: only to be used for l1tf mitigation
-+	 */
-+	u8			x86_cache_bits;
- };
- 
- struct cpuid_regs {
-@@ -189,7 +194,7 @@ extern void cpu_detect(struct cpuinfo_x8
+@@ -104,6 +104,8 @@ struct cpuinfo_x86 {
+ 	__u8			x86_phys_bits;
+ 	/* CPUID returned core id bits: */
+ 	__u8			x86_coreid_bits;
++
++	__u8			x86_cache_bits;
+ 	/* Max extended CPUID function supported: */
+ 	__u32			extended_cpuid_level;
+ 	/* Maximum supported CPUID level, -1=no CPUID: */
+@@ -174,7 +176,7 @@ extern void cpu_detect(struct cpuinfo_x86 *c);
  
  static inline unsigned long long l1tf_pfn_limit(void)
  {
@@ -67,12 +71,15 @@ Acked-by: Michal Hocko <mhocko@suse.com>
  }
  
  extern void early_cpu_init(void);
+diff --git a/arch/x86/kernel/cpu/bugs.c b/arch/x86/kernel/cpu/bugs.c
+index b9e6b60df148..621bc6561189 100644
 --- a/arch/x86/kernel/cpu/bugs.c
 +++ b/arch/x86/kernel/cpu/bugs.c
-@@ -686,6 +686,47 @@ void x86_spec_ctrl_setup_ap(void)
- 		x86_amd_ssb_disable();
- }
+@@ -634,6 +634,46 @@ void x86_spec_ctrl_setup_ap(void)
  
+ #undef pr_fmt
+ #define pr_fmt(fmt)	"L1TF: " fmt
++
 +/*
 + * These CPUs all support 44bits physical address space internally in the
 + * cache but CPUID can report a smaller number of physical address bits.
@@ -89,8 +96,6 @@ Acked-by: Michal Hocko <mhocko@suse.com>
 + */
 +static void override_cache_bits(struct cpuinfo_x86 *c)
 +{
-+	c->x86_cache_bits = c->x86_phys_bits;
-+
 +	if (c->x86 != 6)
 +		return;
 +
@@ -114,19 +119,17 @@ Acked-by: Michal Hocko <mhocko@suse.com>
 +	}
 +}
 +
- #undef pr_fmt
- #define pr_fmt(fmt)	"L1TF: " fmt
  static void __init l1tf_select_mitigation(void)
-@@ -695,6 +736,8 @@ static void __init l1tf_select_mitigatio
+ {
+ 	u64 half_pa;
+@@ -641,16 +681,13 @@ static void __init l1tf_select_mitigation(void)
  	if (!boot_cpu_has_bug(X86_BUG_L1TF))
  		return;
  
 +	override_cache_bits(&boot_cpu_data);
 +
- 	switch (l1tf_mitigation) {
- 	case L1TF_MITIGATION_OFF:
- 	case L1TF_MITIGATION_FLUSH_NOWARN:
-@@ -714,11 +757,6 @@ static void __init l1tf_select_mitigatio
+ #if CONFIG_PGTABLE_LEVELS == 2
+ 	pr_warn("Kernel not compiled for PAE. No mitigation for L1TF\n");
  	return;
  #endif
  
@@ -138,3 +141,19 @@ Acked-by: Michal Hocko <mhocko@suse.com>
  	half_pa = (u64)l1tf_pfn_limit() << PAGE_SHIFT;
  	if (e820_any_mapped(half_pa, ULLONG_MAX - half_pa, E820_RAM)) {
  		pr_warn("System has more than MAX_PA/2 memory. L1TF mitigation not effective.\n");
+diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
+index 4d3fa79c0f09..b12c0287d6cf 100644
+--- a/arch/x86/kernel/cpu/common.c
++++ b/arch/x86/kernel/cpu/common.c
+@@ -798,6 +798,8 @@ void get_cpu_cap(struct cpuinfo_x86 *c)
+ 		c->x86_phys_bits = 36;
+ #endif
+ 
++	c->x86_cache_bits = c->x86_phys_bits;
++
+ 	if (c->extended_cpuid_level >= 0x8000000a)
+ 		c->x86_capability[CPUID_8000_000A_EDX] = cpuid_edx(0x8000000a);
+ 
+-- 
+2.19.0
+

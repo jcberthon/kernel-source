@@ -1,10 +1,11 @@
-From 0522236d4f9c5ab2e79889cb020d1acbe5da416e Mon Sep 17 00:00:00 2001
 From: Ondrej Mosnacek <omosnace@redhat.com>
 Date: Wed, 22 Aug 2018 08:26:31 +0200
 Subject: [PATCH] crypto: vmx - Fix sleep-in-atomic bugs
+Patch-mainline: 4.4.157
+References: bnc#1012382 bsc#1048317
 Git-commit: 0522236d4f9c5ab2e79889cb020d1acbe5da416e
-Patch-mainline: v4.19
-References: bsc#1048317
+
+commit 0522236d4f9c5ab2e79889cb020d1acbe5da416e upstream.
 
 This patch fixes sleep-in-atomic bugs in AES-CBC and AES-XTS VMX
 implementations. The problem is that the blkcipher_* functions should
@@ -37,47 +38,39 @@ Fixes: c07f5d3da643 ("crypto: vmx - Adding support for XTS")
 Cc: stable@vger.kernel.org
 Signed-off-by: Ondrej Mosnacek <omosnace@redhat.com>
 Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
-Signed-off-by: Oliver Neukum <oneukum@suse.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- drivers/crypto/vmx/aes_xts.c |   17 +++++++++++------
- 1 file changed, 11 insertions(+), 6 deletions(-)
+ drivers/crypto/vmx/aes_cbc.c | 30 ++++++++++++++----------------
+ 1 file changed, 14 insertions(+), 16 deletions(-)
 
---- a/drivers/crypto/vmx/aes_xts.c
-+++ b/drivers/crypto/vmx/aes_xts.c
-@@ -122,18 +122,24 @@ static int p8_aes_xts_crypt(struct blkci
- 		ret = enc ? crypto_blkcipher_encrypt(&fallback_desc, dst, src, nbytes) :
-                             crypto_blkcipher_decrypt(&fallback_desc, dst, src, nbytes);
+diff --git a/drivers/crypto/vmx/aes_cbc.c b/drivers/crypto/vmx/aes_cbc.c
+index 9506e8693c81..d8ef1147b344 100644
+--- a/drivers/crypto/vmx/aes_cbc.c
++++ b/drivers/crypto/vmx/aes_cbc.c
+@@ -111,24 +111,23 @@ static int p8_aes_cbc_encrypt(struct blkcipher_desc *desc,
+ 		ret = crypto_blkcipher_encrypt(&fallback_desc, dst, src,
+ 					       nbytes);
  	} else {
-+		blkcipher_walk_init(&walk, dst, src, nbytes);
-+
-+		ret = blkcipher_walk_virt(desc, &walk);
- 		preempt_disable();
- 		pagefault_disable();
- 		enable_kernel_vsx();
- 
--		blkcipher_walk_init(&walk, dst, src, nbytes);
+-		preempt_disable();
+-		pagefault_disable();
+-		enable_kernel_altivec();
+-		enable_kernel_vsx();
 -
--		ret = blkcipher_walk_virt(desc, &walk);
- 		iv = walk.iv;
- 		memset(tweak, 0, AES_BLOCK_SIZE);
- 		aes_p8_encrypt(iv, tweak, &ctx->tweak_key);
- 
-+		pagefault_enable();
-+		preempt_enable();
-+
+ 		blkcipher_walk_init(&walk, dst, src, nbytes);
+ 		ret = blkcipher_walk_virt(desc, &walk);
  		while ((nbytes = walk.nbytes)) {
 +			preempt_disable();
 +			pagefault_disable();
 +			enable_kernel_vsx();
- 			if (enc)
- 				aes_p8_xts_encrypt(walk.src.virt.addr, walk.dst.virt.addr,
- 						nbytes & AES_BLOCK_MASK, &ctx->enc_key, NULL, tweak);
-@@ -141,12 +147,11 @@ static int p8_aes_xts_crypt(struct blkci
- 				aes_p8_xts_decrypt(walk.src.virt.addr, walk.dst.virt.addr,
- 						nbytes & AES_BLOCK_MASK, &ctx->dec_key, NULL, tweak);
- 
++			enable_kernel_altivec();
+ 			aes_p8_cbc_encrypt(walk.src.virt.addr,
+ 					   walk.dst.virt.addr,
+ 					   nbytes & AES_BLOCK_MASK,
+ 					   &ctx->enc_key, walk.iv, 1);
 +			pagefault_enable();
 +			preempt_enable();
++
  			nbytes &= AES_BLOCK_SIZE - 1;
  			ret = blkcipher_walk_done(desc, &walk, nbytes);
  		}
@@ -85,5 +78,40 @@ Signed-off-by: Oliver Neukum <oneukum@suse.com>
 -		pagefault_enable();
 -		preempt_enable();
  	}
+ 
  	return ret;
- }
+@@ -152,24 +151,23 @@ static int p8_aes_cbc_decrypt(struct blkcipher_desc *desc,
+ 		ret = crypto_blkcipher_decrypt(&fallback_desc, dst, src,
+ 					       nbytes);
+ 	} else {
+-		preempt_disable();
+-		pagefault_disable();
+-		enable_kernel_altivec();
+-		enable_kernel_vsx();
+-
+ 		blkcipher_walk_init(&walk, dst, src, nbytes);
+ 		ret = blkcipher_walk_virt(desc, &walk);
+ 		while ((nbytes = walk.nbytes)) {
++			preempt_disable();
++			pagefault_disable();
++			enable_kernel_vsx();
++			enable_kernel_altivec();
+ 			aes_p8_cbc_encrypt(walk.src.virt.addr,
+ 					   walk.dst.virt.addr,
+ 					   nbytes & AES_BLOCK_MASK,
+ 					   &ctx->dec_key, walk.iv, 0);
++			pagefault_enable();
++			preempt_enable();
++
+ 			nbytes &= AES_BLOCK_SIZE - 1;
+ 			ret = blkcipher_walk_done(desc, &walk, nbytes);
+ 		}
+-
+-		pagefault_enable();
+-		preempt_enable();
+ 	}
+ 
+ 	return ret;
+-- 
+2.19.0
+

@@ -1,9 +1,11 @@
 From: Wei Yongjun <weiyongjun1@huawei.com>
 Date: Thu, 18 Jan 2018 14:05:05 +0000
-Subject: mtd: ubi: wl: Fix error return code in ubi_wl_init()
+Subject: [PATCH] mtd: ubi: wl: Fix error return code in ubi_wl_init()
+Patch-mainline: 4.4.157
+References: bnc#1012382 git-fixes
 Git-commit: 7233982ade15eeac05c6f351e8d347406e6bcd2f
-Patch-mainline: v4.16-rc1
-References: git-fixes
+
+commit 7233982ade15eeac05c6f351e8d347406e6bcd2f upstream.
 
 Fix to return error code -ENOMEM from the kmem_cache_alloc() error
 handling case instead of 0, as done elsewhere in this function.
@@ -13,14 +15,18 @@ attach")
 Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
 Reviewed-by: Boris Brezillon <boris.brezillon@free-electrons.com>
 Signed-off-by: Richard Weinberger <richard@nod.at>
+Cc: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- drivers/mtd/ubi/wl.c |    8 ++++++--
+ drivers/mtd/ubi/wl.c | 8 ++++++--
  1 file changed, 6 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/mtd/ubi/wl.c b/drivers/mtd/ubi/wl.c
+index b3c1b8106a68..f4b3ce2b2bc3 100644
 --- a/drivers/mtd/ubi/wl.c
 +++ b/drivers/mtd/ubi/wl.c
-@@ -1597,8 +1597,10 @@ int ubi_wl_init(struct ubi_device *ubi,
+@@ -1597,8 +1597,10 @@ int ubi_wl_init(struct ubi_device *ubi, struct ubi_attach_info *ai)
  		cond_resched();
  
  		e = kmem_cache_alloc(ubi_wl_entry_slab, GFP_KERNEL);
@@ -32,7 +38,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  
  		e->pnum = aeb->pnum;
  		e->ec = aeb->ec;
-@@ -1617,8 +1619,10 @@ int ubi_wl_init(struct ubi_device *ubi,
+@@ -1617,8 +1619,10 @@ int ubi_wl_init(struct ubi_device *ubi, struct ubi_attach_info *ai)
  			cond_resched();
  
  			e = kmem_cache_alloc(ubi_wl_entry_slab, GFP_KERNEL);
@@ -44,3 +50,6 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  
  			e->pnum = aeb->pnum;
  			e->ec = aeb->ec;
+-- 
+2.19.0
+
