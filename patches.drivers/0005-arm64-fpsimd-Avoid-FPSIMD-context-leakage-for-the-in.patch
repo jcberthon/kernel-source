@@ -1,0 +1,71 @@
+From 2e93c15b5dc6bdc77bf06c0a617ae068dafb33d9 Mon Sep 17 00:00:00 2001
+From: Dave Martin <Dave.Martin@arm.com>
+Date: Thu, 24 May 2018 15:54:30 +0100
+Subject: [PATCH 05/16] arm64: fpsimd: Avoid FPSIMD context leakage for the
+ init task
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Git-commit: 66e48a0d29bdedc574c8fc0af7a5d112b594ced6
+Patch-mainline: v4.18-rc1
+References: bsc#1110603
+
+The init task is started with thread_flags equal to 0, which means
+that TIF_FOREIGN_FPSTATE is initially clear.
+
+It is theoretically possible (if unlikely) that the init task could
+reach userspace without ever being scheduled out.  If this occurs,
+data left in the FPSIMD registers by the kernel could be exposed.
+
+This patch fixes this anomaly by ensuring that the init task's
+initial TIF_FOREIGN_FPSTATE is set.
+
+Signed-off-by: Dave Martin <Dave.Martin@arm.com>
+Fixes: 005f78cd8849 ("arm64: defer reloading a task's FPSIMD state to userland resume")
+Reviewed-by: Catalin Marinas <catalin.marinas@arm.com>
+Reviewed-by: Alex Bennée <alex.bennee@linaro.org>
+Cc: Will Deacon <will.deacon@arm.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Marc Zyngier <marc.zyngier@arm.com>
+Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
+---
+ arch/arm64/include/asm/thread_info.h | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm64/include/asm/thread_info.h b/arch/arm64/include/asm/thread_info.h
+index 3073ce408c6a..117fff77d52c 100644
+--- a/arch/arm64/include/asm/thread_info.h
++++ b/arch/arm64/include/asm/thread_info.h
+@@ -56,14 +56,6 @@ struct thread_info {
+ 	int			cpu;		/* cpu */
+ };
+ 
+-#define INIT_THREAD_INFO(tsk)						\
+-{									\
+-	.task		= &tsk,						\
+-	.flags		= 0,						\
+-	.preempt_count	= INIT_PREEMPT_COUNT,				\
+-	.addr_limit	= KERNEL_DS,					\
+-}
+-
+ #define init_thread_info	(init_thread_union.thread_info)
+ #define init_stack		(init_thread_union.stack)
+ 
+@@ -147,5 +139,13 @@ static inline struct thread_info *get_thread_info(unsigned long thread_stack)
+ 				 _TIF_SYSCALL_TRACEPOINT | _TIF_SECCOMP | \
+ 				 _TIF_NOHZ)
+ 
++#define INIT_THREAD_INFO(tsk)						\
++{									\
++	.task		= &tsk,						\
++	.flags		= _TIF_FOREIGN_FPSTATE,				\
++	.preempt_count	= INIT_PREEMPT_COUNT,				\
++	.addr_limit	= KERNEL_DS,					\
++}
++
+ #endif /* __KERNEL__ */
+ #endif /* __ASM_THREAD_INFO_H */
+-- 
+2.11.0
+
