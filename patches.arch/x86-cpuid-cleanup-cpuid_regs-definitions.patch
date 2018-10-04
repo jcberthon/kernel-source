@@ -35,8 +35,8 @@ Signed-off-by: Bruce Rogers <brogers@suse.com>
 
 --- a/arch/x86/include/asm/processor.h
 +++ b/arch/x86/include/asm/processor.h
-@@ -141,6 +141,17 @@ struct cpuinfo_x86 {
- 	u32			microcode;
+@@ -145,6 +145,17 @@ struct cpuinfo_x86 {
+ #endif
  };
  
 +struct cpuid_regs {

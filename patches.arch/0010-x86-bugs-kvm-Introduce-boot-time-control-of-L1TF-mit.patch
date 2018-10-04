@@ -194,7 +194,7 @@ Link: https://lkml.kernel.org/r/20180713142323.202758176@linutronix.de
  	l3cr=		[PPC]
 --- a/arch/x86/include/asm/processor.h
 +++ b/arch/x86/include/asm/processor.h
-@@ -870,4 +870,16 @@ bool xen_set_default_idle(void);
+@@ -867,4 +867,16 @@ bool xen_set_default_idle(void);
  
  void stop_this_cpu(void *dummy);
  void df_debug(struct pt_regs *regs, long error_code);
@@ -225,9 +225,9 @@ Link: https://lkml.kernel.org/r/20180713142323.202758176@linutronix.de
  enum vmx_l1d_flush_state l1tf_vmx_mitigation = VMENTER_L1D_FLUSH_AUTO;
  EXPORT_SYMBOL_GPL(l1tf_vmx_mitigation);
  #endif
-@@ -674,6 +678,20 @@ static void __init l1tf_select_mitigatio
- 	if (!boot_cpu_has_bug(X86_BUG_L1TF))
- 		return;
+@@ -733,6 +737,20 @@ static void __init l1tf_select_mitigatio
+ 
+ 	override_cache_bits(&boot_cpu_data);
  
 +	switch (l1tf_mitigation) {
 +	case L1TF_MITIGATION_OFF:
@@ -246,7 +246,7 @@ Link: https://lkml.kernel.org/r/20180713142323.202758176@linutronix.de
  #if CONFIG_PGTABLE_LEVELS == 2
  	pr_warn("Kernel not compiled for PAE. No mitigation for L1TF\n");
  	return;
-@@ -694,6 +712,33 @@ static void __init l1tf_select_mitigatio
+@@ -752,6 +770,33 @@ static void __init l1tf_select_mitigatio
  }
  #undef pr_fmt
  

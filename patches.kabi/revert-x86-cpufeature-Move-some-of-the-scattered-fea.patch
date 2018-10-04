@@ -107,9 +107,9 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  		c->x86_capability[CPUID_7_ECX] = ecx;
  		c->x86_capability[CPUID_7_EDX] = edx;
  	}
-@@ -801,9 +800,6 @@ void get_cpu_cap(struct cpuinfo_x86 *c)
- 		c->x86_phys_bits = 36;
- #endif
+@@ -803,9 +802,6 @@ void get_cpu_cap(struct cpuinfo_x86 *c)
+ 
+ 	c->x86_cache_bits = c->x86_phys_bits;
  
 -	if (c->extended_cpuid_level >= 0x8000000a)
 -		c->x86_capability[CPUID_8000_000A_EDX] = cpuid_edx(0x8000000a);

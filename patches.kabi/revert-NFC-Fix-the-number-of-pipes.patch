@@ -1,0 +1,28 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Date: Wed, 3 Oct 2018 17:18:04 +0200
+Subject: Revert "NFC: Fix the number of pipes"
+Patch-mainline: never, kabi
+References: kabi
+
+This reverts commit b413ee0476ea3426846a8139a71514bb627f7596, upstream
+commit e285d5bfb7e9785d289663baef252dd315e171f8. It increases
+NFC_HCI_MAX_PIPES which changes the middle of struct nfc_hci_dev. And
+the structure is returned by nfc_hci_allocate_device to whoever, so we
+cannot change the it.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ include/net/nfc/hci.h |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/include/net/nfc/hci.h
++++ b/include/net/nfc/hci.h
+@@ -87,7 +87,7 @@ struct nfc_hci_pipe {
+  * According to specification 102 622 chapter 4.4 Pipes,
+  * the pipe identifier is 7 bits long.
+  */
+-#define NFC_HCI_MAX_PIPES		128
++#define NFC_HCI_MAX_PIPES		127
+ struct nfc_hci_init_data {
+ 	u8 gate_count;
+ 	struct nfc_hci_gate gates[NFC_HCI_MAX_CUSTOM_GATES];

@@ -33,14 +33,14 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  drivers/net/ethernet/smsc/smsc911x.c         |    4 +---
  drivers/net/ethernet/smsc/smsc9420.c         |    9 ++-------
  drivers/net/ethernet/synopsys/dwc_eth_qos.c  |   12 +-----------
- drivers/net/ethernet/ti/cpsw.c               |    4 ++--
+ drivers/net/ethernet/ti/cpsw.c               |    2 +-
  drivers/net/ethernet/ti/davinci_emac.c       |    5 +----
  drivers/net/ethernet/toshiba/tc35815.c       |    6 ++----
  drivers/net/phy/phy_device.c                 |   27 +++++++++++++++++++++++++++
  drivers/staging/netlogic/xlr_net.c           |    3 +--
  include/linux/phy.h                          |    4 ++++
  net/dsa/slave.c                              |    5 ++---
- 25 files changed, 64 insertions(+), 82 deletions(-)
+ 25 files changed, 63 insertions(+), 81 deletions(-)
 
 --- a/drivers/net/ethernet/adi/bfin_mac.c
 +++ b/drivers/net/ethernet/adi/bfin_mac.c
@@ -135,7 +135,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  	return 0;
  }
  
-@@ -17911,13 +17913,7 @@ static int tg3_init_one(struct pci_dev *
+@@ -17937,13 +17939,7 @@ static int tg3_init_one(struct pci_dev *
  		    tg3_bus_string(tp, str),
  		    dev->dev_addr);
  
@@ -230,7 +230,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  }
 --- a/drivers/net/ethernet/renesas/ravb_main.c
 +++ b/drivers/net/ethernet/renesas/ravb_main.c
-@@ -908,8 +908,7 @@ static int ravb_phy_init(struct net_devi
+@@ -919,8 +919,7 @@ static int ravb_phy_init(struct net_devi
  	/* 10BASE is not supported */
  	phydev->supported &= ~PHY_10BT_FEATURES;
  
@@ -242,7 +242,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  
 --- a/drivers/net/ethernet/renesas/sh_eth.c
 +++ b/drivers/net/ethernet/renesas/sh_eth.c
-@@ -1879,8 +1879,7 @@ static int sh_eth_phy_init(struct net_de
+@@ -1881,8 +1881,7 @@ static int sh_eth_phy_init(struct net_de
  		return PTR_ERR(phydev);
  	}
  
@@ -325,20 +325,18 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  
 --- a/drivers/net/ethernet/ti/cpsw.c
 +++ b/drivers/net/ethernet/ti/cpsw.c
-@@ -1159,8 +1159,8 @@ static void cpsw_slave_open(struct cpsw_
- 			slave->data->phy_id, slave->slave_num);
- 		slave->phy = NULL;
- 	} else {
--		dev_info(priv->dev, "phy found : id is : 0x%x\n",
--			 slave->phy->phy_id);
-+		phy_attached_info(slave->phy);
-+
- 		phy_start(slave->phy);
+@@ -1186,7 +1186,7 @@ static void cpsw_slave_open(struct cpsw_
+ 		}
+ 	}
  
- 		/* Configure GMII_SEL register */
+-	dev_info(priv->dev, "phy found : id is : 0x%x\n", slave->phy->phy_id);
++	phy_attached_info(slave->phy);
+ 
+ 	phy_start(slave->phy);
+ 
 --- a/drivers/net/ethernet/ti/davinci_emac.c
 +++ b/drivers/net/ethernet/ti/davinci_emac.c
-@@ -1644,10 +1644,7 @@ static int emac_dev_open(struct net_devi
+@@ -1648,10 +1648,7 @@ static int emac_dev_open(struct net_devi
  		priv->speed = 0;
  		priv->duplex = ~0;
  
@@ -423,7 +421,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  #include <linux/spinlock.h>
  #include <linux/ethtool.h>
  #include <linux/mdio.h>
-@@ -785,6 +786,9 @@ static inline const char *phydev_name(co
+@@ -796,6 +797,9 @@ static inline const char *phydev_name(co
  	return dev_name(&phydev->dev);
  }
  
@@ -435,7 +433,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  int genphy_restart_aneg(struct phy_device *phydev);
 --- a/net/dsa/slave.c
 +++ b/net/dsa/slave.c
-@@ -1080,11 +1080,10 @@ static int dsa_slave_phy_setup(struct ds
+@@ -1078,11 +1078,10 @@ static int dsa_slave_phy_setup(struct ds
  			netdev_err(slave_dev, "failed to connect to port %d: %d\n", p->port, ret);
  			return ret;
  		}
