@@ -1,30 +1,38 @@
 From: Michal Hocko <mhocko@suse.com>
 Subject: kabi: x86/speculation/l1tf: Increase l1tf memory limit for Nehalem+
-Patch-mainline: no, suse specific
+Patch-mainline: never, kabi
 References: bnc#1105536
 
-hide new x86_cache_bits from the kabi checker. Nobody should be touching
-this part of the structure.
+Hide the new x86_cache_bits from the kabi checker. Nobody should be
+touching this part of the structure.
+
+[js] 4.4.157 added the original patch (cc51e5428ea5), so this was
+rebased on the top of it. In particular, we need to move the member to
+the end now.
 
 Signed-off-by: Michal Hocko <mhocko@suse.com>
-
+Signed-off-by: Jiri Slaby <jslaby@suse.cz> [updates above]
 ---
- arch/x86/include/asm/processor.h |    2 ++
- 1 file changed, 2 insertions(+)
+ arch/x86/include/asm/processor.h |    4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
 --- a/arch/x86/include/asm/processor.h
 +++ b/arch/x86/include/asm/processor.h
-@@ -139,11 +139,13 @@ struct cpuinfo_x86 {
+@@ -105,7 +105,6 @@ struct cpuinfo_x86 {
+ 	/* CPUID returned core id bits: */
+ 	__u8			x86_coreid_bits;
+ 
+-	__u8			x86_cache_bits;
+ 	/* Max extended CPUID function supported: */
+ 	__u32			extended_cpuid_level;
+ 	/* Maximum supported CPUID level, -1=no CPUID: */
+@@ -141,6 +140,9 @@ struct cpuinfo_x86 {
  	/* Index into per_cpu list: */
  	u16			cpu_index;
  	u32			microcode;
 +#ifndef __GENKSYMS__
- 	/*
- 	 * Address space bits used by the cache internally
- 	 * NOTE: only to be used for l1tf mitigation
- 	 */
- 	u8			x86_cache_bits;
++	u8			x86_cache_bits;
 +#endif
  };
  
- struct cpuid_regs {
+ #define X86_VENDOR_INTEL	0

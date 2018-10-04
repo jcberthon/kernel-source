@@ -34,14 +34,12 @@ Signed-off-by: Jean-Philippe Brucker <jean-philippe.brucker@arm.com>
 Signed-off-by: Will Deacon <will.deacon@arm.com>
 Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 ---
- drivers/iommu/arm-smmu-v3.c | 150 +++++++++++++++++++-------------------------
- 1 file changed, 66 insertions(+), 84 deletions(-)
+ drivers/iommu/arm-smmu-v3.c |  148 +++++++++++++++++++-------------------------
+ 1 file changed, 65 insertions(+), 83 deletions(-)
 
-diff --git a/drivers/iommu/arm-smmu-v3.c b/drivers/iommu/arm-smmu-v3.c
-index 56af0ff..77d459d 100644
 --- a/drivers/iommu/arm-smmu-v3.c
 +++ b/drivers/iommu/arm-smmu-v3.c
-@@ -1160,36 +1160,66 @@ static irqreturn_t arm_smmu_evtq_thread(int irq, void *dev)
+@@ -1154,36 +1154,66 @@ static irqreturn_t arm_smmu_evtq_thread(
  	struct arm_smmu_queue *q = &smmu->evtq.q;
  	u64 evt[EVTQ_ENT_DWORDS];
  
@@ -77,21 +75,11 @@ index 56af0ff..77d459d 100644
  }
  
 -static irqreturn_t arm_smmu_evtq_handler(int irq, void *dev)
--{
++static void arm_smmu_handle_ppr(struct arm_smmu_device *smmu, u64 *evt)
+ {
 -	irqreturn_t ret = IRQ_WAKE_THREAD;
 -	struct arm_smmu_device *smmu = dev;
 -	struct arm_smmu_queue *q = &smmu->evtq.q;
--
--	/*
--	 * Not much we can do on overflow, so scream and pretend we're
--	 * trying harder.
--	 */
--	if (queue_sync_prod(q) == -EOVERFLOW)
--		dev_err(smmu->dev, "EVTQ overflow detected -- events lost\n");
--	else if (queue_empty(q))
--		ret = IRQ_NONE;
-+static void arm_smmu_handle_ppr(struct arm_smmu_device *smmu, u64 *evt)
-+{
 +	u32 sid, ssid;
 +	u16 grpid;
 +	bool ssv, last;
@@ -124,13 +112,22 @@ index 56af0ff..77d459d 100644
 +			},
 +		};
  
+-	/*
+-	 * Not much we can do on overflow, so scream and pretend we're
+-	 * trying harder.
+-	 */
+-	if (queue_sync_prod(q) == -EOVERFLOW)
+-		dev_err(smmu->dev, "EVTQ overflow detected -- events lost\n");
+-	else if (queue_empty(q))
+-		ret = IRQ_NONE;
+-
 -	return ret;
 +		arm_smmu_cmdq_issue_cmd(smmu, &cmd);
 +	}
  }
  
  static irqreturn_t arm_smmu_priq_thread(int irq, void *dev)
-@@ -1198,63 +1228,19 @@ static irqreturn_t arm_smmu_priq_thread(int irq, void *dev)
+@@ -1192,42 +1222,13 @@ static irqreturn_t arm_smmu_priq_thread(
  	struct arm_smmu_queue *q = &smmu->priq.q;
  	u64 evt[PRIQ_ENT_DWORDS];
  
@@ -179,6 +176,7 @@ index 56af0ff..77d459d 100644
  
  	/* Sync our overflow flag, as we believe we're up to speed */
  	q->cons = Q_OVF(q, q->prod) | Q_WRP(q, q->cons) | Q_IDX(q, q->cons);
+@@ -1235,21 +1236,6 @@ static irqreturn_t arm_smmu_priq_thread(
  	return IRQ_HANDLED;
  }
  
@@ -200,7 +198,7 @@ index 56af0ff..77d459d 100644
  static irqreturn_t arm_smmu_cmdq_sync_handler(int irq, void *dev)
  {
  	/* We don't actually use CMD_SYNC interrupts for anything */
-@@ -1287,15 +1273,11 @@ static irqreturn_t arm_smmu_gerror_handler(int irq, void *dev)
+@@ -1282,15 +1268,11 @@ static irqreturn_t arm_smmu_gerror_handl
  	if (active & GERROR_MSI_GERROR_ABT_ERR)
  		dev_warn(smmu->dev, "GERROR MSI write aborted\n");
  
@@ -218,7 +216,7 @@ index 56af0ff..77d459d 100644
  
  	if (active & GERROR_MSI_CMDQ_ABT_ERR) {
  		dev_warn(smmu->dev, "CMDQ MSI write aborted\n");
-@@ -2236,10 +2218,10 @@ static int arm_smmu_setup_irqs(struct arm_smmu_device *smmu)
+@@ -2233,10 +2215,10 @@ static int arm_smmu_setup_irqs(struct ar
  	/* Request interrupt lines */
  	irq = smmu->evtq.q.irq;
  	if (irq) {
@@ -232,7 +230,7 @@ index 56af0ff..77d459d 100644
  		if (IS_ERR_VALUE(ret))
  			dev_warn(smmu->dev, "failed to enable evtq irq\n");
  	}
-@@ -2264,10 +2246,10 @@ static int arm_smmu_setup_irqs(struct arm_smmu_device *smmu)
+@@ -2261,10 +2243,10 @@ static int arm_smmu_setup_irqs(struct ar
  	if (smmu->features & ARM_SMMU_FEAT_PRI) {
  		irq = smmu->priq.q.irq;
  		if (irq) {
@@ -246,6 +244,3 @@ index 56af0ff..77d459d 100644
  							smmu);
  			if (IS_ERR_VALUE(ret))
  				dev_warn(smmu->dev,
--- 
-1.8.5.6
-

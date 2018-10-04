@@ -3613,7 +3613,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
  			       int len, __wsum sum, int *err_ptr)
 --- a/arch/powerpc/lib/code-patching.c
 +++ b/arch/powerpc/lib/code-patching.c
-@@ -13,7 +13,7 @@
+@@ -15,7 +15,7 @@
  #include <asm/setup.h>
  #include <asm/sections.h>
  #include <asm/code-patching.h>
@@ -10175,8 +10175,8 @@ Signed-off-by: Coly Li <colyli@suse.de>
 -#include <asm/uaccess.h>
 +#include <linux/uaccess.h>
  
- #include <linux/kbd_kern.h>
- #include <linux/vt_kern.h>
+ #include <linux/nospec.h>
+ 
 --- a/drivers/usb/atm/usbatm.c
 +++ b/drivers/usb/atm/usbatm.c
 @@ -64,7 +64,7 @@
@@ -10465,7 +10465,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
  static struct inode *anon_inode_inode;
 --- a/fs/autofs4/autofs_i.h
 +++ b/fs/autofs4/autofs_i.h
-@@ -35,7 +35,7 @@
+@@ -36,7 +36,7 @@
  #include <linux/mount.h>
  #include <linux/namei.h>
  #include <asm/current.h>
@@ -11839,7 +11839,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
  
 --- a/kernel/printk/printk.c
 +++ b/kernel/printk/printk.c
-@@ -49,7 +49,7 @@
+@@ -50,7 +50,7 @@
  #include <linux/kthread.h>
  #include <linux/sched/rt.h>
  

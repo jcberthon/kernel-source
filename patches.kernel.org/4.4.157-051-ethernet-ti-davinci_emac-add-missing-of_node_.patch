@@ -1,0 +1,40 @@
+From: Peter Chen <peter.chen@nxp.com>
+Date: Mon, 1 Aug 2016 15:02:43 +0800
+Subject: [PATCH] ethernet: ti: davinci_emac: add missing of_node_put after
+ calling of_parse_phandle
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+References: bnc#1012382
+Patch-mainline: 4.4.157
+Git-commit: 5817f977527e5cdbea9ca56d2b95824f59c8747d
+
+commit 5817f977527e5cdbea9ca56d2b95824f59c8747d upstream.
+
+of_node_put needs to be called when the device node which is got
+from of_parse_phandle has finished using.
+
+Signed-off-by: Peter Chen <peter.chen@nxp.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: SZ Lin (林上智) <sz.lin@moxa.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/net/ethernet/ti/davinci_emac.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/net/ethernet/ti/davinci_emac.c b/drivers/net/ethernet/ti/davinci_emac.c
+index 6be315303d61..8ecb24186b7f 100644
+--- a/drivers/net/ethernet/ti/davinci_emac.c
++++ b/drivers/net/ethernet/ti/davinci_emac.c
+@@ -2108,6 +2108,7 @@ static int davinci_emac_remove(struct platform_device *pdev)
+ 	cpdma_ctlr_destroy(priv->dma);
+ 
+ 	unregister_netdev(ndev);
++	of_node_put(priv->phy_node);
+ 	free_netdev(ndev);
+ 
+ 	return 0;
+-- 
+2.19.0
+

@@ -21,7 +21,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 
 --- a/drivers/net/ethernet/marvell/mvneta.c
 +++ b/drivers/net/ethernet/marvell/mvneta.c
-@@ -3042,6 +3042,20 @@ static int mvneta_check_mtu_valid(struct
+@@ -3047,6 +3047,20 @@ static int mvneta_check_mtu_valid(struct
  	return mtu;
  }
  
@@ -42,7 +42,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  /* Change the device mtu */
  static int mvneta_change_mtu(struct net_device *dev, int mtu)
  {
-@@ -3066,6 +3080,7 @@ static int mvneta_change_mtu(struct net_
+@@ -3071,6 +3085,7 @@ static int mvneta_change_mtu(struct net_
  	 * reallocation of the queues
  	 */
  	mvneta_stop_dev(pp);
@@ -50,15 +50,15 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  
  	mvneta_cleanup_txqs(pp);
  	mvneta_cleanup_rxqs(pp);
-@@ -3089,6 +3104,7 @@ static int mvneta_change_mtu(struct net_
+@@ -3094,6 +3109,7 @@ static int mvneta_change_mtu(struct net_
  		return ret;
  	}
  
 +	on_each_cpu(mvneta_percpu_enable, pp, true);
  	mvneta_start_dev(pp);
- 	mvneta_port_up(pp);
  
-@@ -3242,20 +3258,6 @@ static void mvneta_mdio_remove(struct mv
+ 	netdev_update_features(dev);
+@@ -3246,20 +3262,6 @@ static void mvneta_mdio_remove(struct mv
  	pp->phy_dev = NULL;
  }
  

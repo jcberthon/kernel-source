@@ -281,7 +281,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
  static int r5l_load_log(struct r5l_log *log)
  {
  	struct md_rdev *rdev = log->rdev;
-@@ -1253,6 +1388,8 @@ int r5l_init_log(struct r5conf *conf, st
+@@ -1248,6 +1383,8 @@ int r5l_init_log(struct r5conf *conf, st
  	INIT_LIST_HEAD(&log->no_space_stripes);
  	spin_lock_init(&log->no_space_stripes_lock);
  
@@ -292,9 +292,9 @@ Signed-off-by: Coly Li <colyli@suse.de>
  
 --- a/drivers/md/raid5.c
 +++ b/drivers/md/raid5.c
-@@ -4154,6 +4154,9 @@ static void analyse_stripe(struct stripe
- 			if (rdev && !test_bit(Faulty, &rdev->flags))
- 				do_recovery = 1;
+@@ -4133,6 +4133,9 @@ static void analyse_stripe(struct stripe
+ 					do_recovery = 1;
+ 			}
  		}
 +
 +		if (test_bit(R5_InJournal, &dev->flags))
@@ -302,7 +302,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
  	}
  	if (test_bit(STRIPE_SYNCING, &sh->state)) {
  		/* If there is a failed device being replaced,
-@@ -4435,14 +4438,47 @@ static void handle_stripe(struct stripe_
+@@ -4413,14 +4416,47 @@ static void handle_stripe(struct stripe_
  	    || s.expanding)
  		handle_stripe_fill(sh, &s, disks);
  
@@ -354,7 +354,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
  
  	/* maybe we need to check and possibly fix the parity for this stripe
  	 * Any reads will already have been scheduled, so we just see if enough
-@@ -5159,6 +5195,7 @@ static void raid5_make_request(struct md
+@@ -5137,6 +5173,7 @@ static void raid5_make_request(struct md
  	 * data on failed drives.
  	 */
  	if (rw == READ && mddev->degraded == 0 &&
@@ -364,7 +364,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
  		if (!bi)
 --- a/drivers/md/raid5.h
 +++ b/drivers/md/raid5.h
-@@ -270,6 +270,7 @@ struct stripe_head_state {
+@@ -264,6 +264,7 @@ struct stripe_head_state {
  	int syncing, expanding, expanded, replacing;
  	int locked, uptodate, to_read, to_write, failed, written;
  	int to_fill, compute, req_compute, non_overwrite;
@@ -372,7 +372,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
  	int failed_num[2];
  	int p_failed, q_failed;
  	int dec_preread_active;
-@@ -319,6 +320,11 @@ enum r5dev_flags {
+@@ -313,6 +314,11 @@ enum r5dev_flags {
  			 */
  	R5_Discard,	/* Discard the stripe */
  	R5_SkipCopy,	/* Don't copy data from bio to stripe cache */
@@ -384,7 +384,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
  };
  
  /*
-@@ -351,7 +357,23 @@ enum {
+@@ -345,7 +351,23 @@ enum {
  	STRIPE_BITMAP_PENDING,	/* Being added to bitmap, don't add
  				 * to batch yet.
  				 */
