@@ -1,0 +1,42 @@
+From: Petr Mladek <pmladek@suse.com>
+Subject: x86/kaiser: Avoid loosing NMIs when using trampoline stack
+Patch-mainline: Never, specific for a back port to kernel 4.4
+References: bsc#1106293 bsc#1099597
+
+This is a fixup of the patch adding per-CPU trampoline stack for
+kernel entry. It added SWITCH_KERNEL_CR3 macro into NMI entry path
+where it was unsafe to use the NMI stack.
+
+In particular, NMI interrupting a user space process replaced
+"NMI executing" variable on the stack by the value of %rax.
+If the value was "1" then a later NMI interrupting kernel space
+thought that it was nested, set iret frame for the outer NMI
+to repeat the loop. But there was no outer NMI and the handler
+was never called.
+
+Now, the only NMIs on the machine were from the hard lockup detector.
+Missed NMI caused that the detector stopped working. NMI were not
+longer scheduled on the given CPU and the wrong state of "NMI executing"
+variable stayed wrong.
+
+Finally, any crash triggered a crash dump. The related kexec tried to
+stop other CPUs using NMI. But the NMI handler was ignored on CPUs
+with borked "NMI executing" state. These CPUs were not stopped
+and eventually caused troubles later.
+
+Signed-off-by: Petr Mladek <pmladek@suse.com>
+---
+ arch/x86/entry/entry_64.S |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/arch/x86/entry/entry_64.S
++++ b/arch/x86/entry/entry_64.S
+@@ -1353,7 +1353,7 @@ ENTRY(nmi)
+ 	SWAPGS_UNSAFE_STACK
+ 	cld
+ 
+-	SWITCH_KERNEL_CR3
++	SWITCH_KERNEL_CR3_NO_STACK
+ 
+ 	movq	%rsp, %rdx
+ 	movq	PER_CPU_VAR(cpu_current_top_of_stack), %rsp
