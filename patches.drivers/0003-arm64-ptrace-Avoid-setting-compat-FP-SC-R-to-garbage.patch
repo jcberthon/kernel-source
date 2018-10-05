@@ -1,0 +1,48 @@
+From 74a6e5e2a5dc91090c798c50d5352cbafe44d961 Mon Sep 17 00:00:00 2001
+From: Dave Martin <Dave.Martin@arm.com>
+Date: Thu, 29 Jun 2017 15:25:47 +0100
+Subject: [PATCH 03/16] arm64: ptrace: Avoid setting compat FP[SC]R to garbage
+ if get_user fails
+
+Git-commit: 53b1a742ed251780267a57415bc955bd50f40c3d
+Patch-mainline: v4.13-rc1
+References: bsc#1110601
+
+If get_user() fails when reading the new FPSCR value from userspace
+in compat_vfp_get(), then garbage* will be written to the task's
+FPSR and FPCR registers.
+
+This patch prevents this by checking the return from get_user()
+first.
+
+[*] Actually, zero, due to the behaviour of get_user() on error, but
+that's still not what userspace expects.
+
+Fixes: 478fcb2cdb23 ("arm64: Debugging support")
+Signed-off-by: Dave Martin <Dave.Martin@arm.com>
+Signed-off-by: Will Deacon <will.deacon@arm.com>
+Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
+---
+ arch/arm64/kernel/ptrace.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/kernel/ptrace.c b/arch/arm64/kernel/ptrace.c
+index 55909b2208cc..5b227c9c91f2 100644
+--- a/arch/arm64/kernel/ptrace.c
++++ b/arch/arm64/kernel/ptrace.c
+@@ -831,8 +831,10 @@ static int compat_vfp_set(struct task_struct *target,
+ 
+ 	if (count && !ret) {
+ 		ret = get_user(fpscr, (compat_ulong_t *)ubuf);
+-		uregs->fpsr = fpscr & VFP_FPSCR_STAT_MASK;
+-		uregs->fpcr = fpscr & VFP_FPSCR_CTRL_MASK;
++		if (!ret) {
++			uregs->fpsr = fpscr & VFP_FPSCR_STAT_MASK;
++			uregs->fpcr = fpscr & VFP_FPSCR_CTRL_MASK;
++		}
+ 	}
+ 
+ 	fpsimd_flush_task_state(target);
+-- 
+2.11.0
+

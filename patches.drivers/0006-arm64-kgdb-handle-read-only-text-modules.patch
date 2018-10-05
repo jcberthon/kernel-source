@@ -1,0 +1,96 @@
+From 743ae3bdbc960c5d07830e940ce9dca45d86f81f Mon Sep 17 00:00:00 2001
+From: AKASHI Takahiro <takahiro.akashi@linaro.org>
+Date: Fri, 23 Sep 2016 16:42:08 +0900
+Subject: [PATCH 06/16] arm64: kgdb: handle read-only text / modules
+
+Git-commit: 67787b68ec48c239d5ec12f9bf5adaf5c459517a
+Patch-mainline: v4.8-rc8
+References: bsc#1110604
+
+Handle read-only cases when CONFIG_DEBUG_RODATA (4.0) or
+CONFIG_DEBUG_SET_MODULE_RONX (3.18) are enabled by using
+aarch64_insn_write() instead of probe_kernel_write() as introduced by
+commit 2f896d586610 ("arm64: use fixmap for text patching") in 4.0.
+
+Fixes: 11d91a770f1f ("arm64: Add CONFIG_DEBUG_SET_MODULE_RONX support")
+Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+Reviewed-by: Mark Rutland <mark.rutland@arm.com>
+Cc: Will Deacon <will.deacon@arm.com>
+Cc: Jason Wessel <jason.wessel@windriver.com>
+Signed-off-by: Catalin Marinas <catalin.marinas@arm.com>
+Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
+---
+ arch/arm64/include/asm/debug-monitors.h |  2 --
+ arch/arm64/kernel/kgdb.c                | 36 ++++++++++++++++++++++-----------
+ 2 files changed, 24 insertions(+), 14 deletions(-)
+
+diff --git a/arch/arm64/include/asm/debug-monitors.h b/arch/arm64/include/asm/debug-monitors.h
+index 2fcb9b7c876c..be06881161af 100644
+--- a/arch/arm64/include/asm/debug-monitors.h
++++ b/arch/arm64/include/asm/debug-monitors.h
+@@ -61,8 +61,6 @@
+ 
+ #define AARCH64_BREAK_KGDB_DYN_DBG	\
+ 	(AARCH64_BREAK_MON | (KGDB_DYN_DBG_BRK_IMM << 5))
+-#define KGDB_DYN_BRK_INS_BYTE(x)	\
+-	((AARCH64_BREAK_KGDB_DYN_DBG >> (8 * (x))) & 0xff)
+ 
+ #define CACHE_FLUSH_IS_SAFE		1
+ 
+diff --git a/arch/arm64/kernel/kgdb.c b/arch/arm64/kernel/kgdb.c
+index b67531a13136..84c30aae68b0 100644
+--- a/arch/arm64/kernel/kgdb.c
++++ b/arch/arm64/kernel/kgdb.c
+@@ -19,9 +19,12 @@
+  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+ 
++#include <linux/bug.h>
+ #include <linux/irq.h>
+ #include <linux/kdebug.h>
+ #include <linux/kgdb.h>
++#include <asm/debug-monitors.h>
++#include <asm/insn.h>
+ #include <asm/traps.h>
+ 
+ struct dbg_reg_def_t dbg_reg_def[DBG_MAX_REG_NUM] = {
+@@ -322,15 +325,24 @@ void kgdb_arch_exit(void)
+ 	unregister_die_notifier(&kgdb_notifier);
+ }
+ 
+-/*
+- * ARM instructions are always in LE.
+- * Break instruction is encoded in LE format
+- */
+-struct kgdb_arch arch_kgdb_ops = {
+-	.gdb_bpt_instr = {
+-		KGDB_DYN_BRK_INS_BYTE(0),
+-		KGDB_DYN_BRK_INS_BYTE(1),
+-		KGDB_DYN_BRK_INS_BYTE(2),
+-		KGDB_DYN_BRK_INS_BYTE(3),
+-	}
+-};
++struct kgdb_arch arch_kgdb_ops;
++
++int kgdb_arch_set_breakpoint(struct kgdb_bkpt *bpt)
++{
++	int err;
++
++	BUILD_BUG_ON(AARCH64_INSN_SIZE != BREAK_INSTR_SIZE);
++
++	err = aarch64_insn_read((void *)bpt->bpt_addr, (u32 *)bpt->saved_instr);
++	if (err)
++		return err;
++
++	return aarch64_insn_write((void *)bpt->bpt_addr,
++			(u32)AARCH64_BREAK_KGDB_DYN_DBG);
++}
++
++int kgdb_arch_remove_breakpoint(struct kgdb_bkpt *bpt)
++{
++	return aarch64_insn_write((void *)bpt->bpt_addr,
++			*(u32 *)bpt->saved_instr);
++}
+-- 
+2.11.0
+
