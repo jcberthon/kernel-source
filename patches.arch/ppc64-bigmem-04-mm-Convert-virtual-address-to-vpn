@@ -701,7 +701,7 @@ index 2a6686101739..664be3081e49 100644
 -		va &= ~0xffful;
  		va |= ssize << 8;
  		asm volatile(ASM_FTR_IFCLR("tlbie %0,0", PPC_TLBIE(%1,%0), %2)
- 			     : : "r" (va), "r"(0), "i" (CPU_FTR_HVMODE_206)
+ 			     : : "r" (va), "r"(0), "i" (CPU_FTR_ARCH_206)
  			     : "memory");
  		break;
  	default:

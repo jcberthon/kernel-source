@@ -45,7 +45,7 @@ index b9d7e6d0a36d..3b7085332f2c 100644
  #define _MASKABLE_EXCEPTION_PSERIES(vec, label, h)			\
  	__MASKABLE_EXCEPTION_PSERIES(vec, label, h)
 diff --git a/arch/powerpc/kernel/entry_64.S b/arch/powerpc/kernel/entry_64.S
-index 5ae478b5540e..aaeccdecba75 100644
+index 8755563af59c..f298eea63021 100644
 --- a/arch/powerpc/kernel/entry_64.S
 +++ b/arch/powerpc/kernel/entry_64.S
 @@ -32,6 +32,12 @@
@@ -61,7 +61,7 @@ index 5ae478b5540e..aaeccdecba75 100644
  
  /*
   * System calls.
-@@ -913,7 +919,7 @@ _GLOBAL(enter_rtas)
+@@ -914,7 +920,7 @@ _GLOBAL(enter_rtas)
  	
  	mtspr	SPRN_SRR0,r5
  	mtspr	SPRN_SRR1,r6
@@ -70,7 +70,7 @@ index 5ae478b5540e..aaeccdecba75 100644
  	b	.	/* prevent speculative execution */
  
  _STATIC(rtas_return_loc)
-@@ -936,7 +942,7 @@ _STATIC(rtas_return_loc)
+@@ -937,7 +943,7 @@ _STATIC(rtas_return_loc)
  
  	mtspr	SPRN_SRR0,r3
  	mtspr	SPRN_SRR1,r4
@@ -80,10 +80,10 @@ index 5ae478b5540e..aaeccdecba75 100644
  
  	.align	3
 diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
-index 2c4ffe3bdd34..1447cb86a57d 100644
+index fd0778901925..f7dde87a3481 100644
 --- a/arch/powerpc/kernel/exceptions-64s.S
 +++ b/arch/powerpc/kernel/exceptions-64s.S
-@@ -224,14 +224,14 @@ END_FTR_SECTION_IFSET(CPU_FTR_REAL_LE)
+@@ -220,14 +220,14 @@ END_FTR_SECTION_IFSET(CPU_FTR_REAL_LE)
  	mtspr	SPRN_SRR0,r10
  	ld	r10,PACAKMSR(r13)
  	mtspr	SPRN_SRR1,r10
@@ -100,7 +100,7 @@ index 2c4ffe3bdd34..1447cb86a57d 100644
  	b	.
  
  	STD_EXCEPTION_PSERIES(0xd00, 0xd00, single_step)
-@@ -312,7 +312,7 @@ masked_interrupt:
+@@ -308,7 +308,7 @@ masked_interrupt:
  	mtspr	SPRN_SRR1,r10
  	ld	r10,PACA_EXGEN+EX_R10(r13)
  	GET_SCRATCH0(r13)
@@ -109,7 +109,7 @@ index 2c4ffe3bdd34..1447cb86a57d 100644
  	b	.
  
  masked_Hinterrupt:
-@@ -325,7 +325,7 @@ masked_Hinterrupt:
+@@ -321,7 +321,7 @@ masked_Hinterrupt:
  	mtspr	SPRN_HSRR1,r10
  	ld	r10,PACA_EXGEN+EX_R10(r13)
  	GET_SCRATCH0(r13)
@@ -117,8 +117,8 @@ index 2c4ffe3bdd34..1447cb86a57d 100644
 +	HRFI_TO_KERNEL
  	b	.
  
- #ifndef CONFIG_BIGMEM
-@@ -382,7 +382,7 @@ slb_miss_user_pseries:
+ 	.align	7
+@@ -376,7 +376,7 @@ slb_miss_user_pseries:
  	mtspr	SRR0,r12
  	mfspr	r12,SRR1			/* and SRR1 */
  	mtspr	SRR1,r10
@@ -127,7 +127,7 @@ index 2c4ffe3bdd34..1447cb86a57d 100644
  	b	.				/* prevent spec. execution */
  #endif /* __DISABLED__ */
  
-@@ -591,7 +591,7 @@ slb_miss_user_common:
+@@ -585,7 +585,7 @@ slb_miss_user_common:
  	ld	r11,PACA_EXGEN+EX_R11(r13)
  	ld	r12,PACA_EXGEN+EX_R12(r13)
  	ld	r13,PACA_EXGEN+EX_R13(r13)
@@ -136,7 +136,7 @@ index 2c4ffe3bdd34..1447cb86a57d 100644
  	b	.
  
  slb_miss_fault:
-@@ -682,7 +682,7 @@ END_FW_FTR_SECTION_IFSET(FW_FEATURE_ISERIES)
+@@ -676,7 +676,7 @@ END_FW_FTR_SECTION_IFSET(FW_FEATURE_ISERIES)
  	mtspr	SPRN_SRR0,r10
  	ld	r10,PACAKMSR(r13)
  	mtspr	SPRN_SRR1,r10
@@ -145,7 +145,7 @@ index 2c4ffe3bdd34..1447cb86a57d 100644
  	b	.
  
  unrecov_slb:
-@@ -1105,7 +1105,7 @@ _GLOBAL(do_stab_bolted)
+@@ -1096,7 +1096,7 @@ _GLOBAL(do_stab_bolted)
  	ld	r11,PACA_EXSLB+EX_R11(r13)
  	ld	r12,PACA_EXSLB+EX_R12(r13)
  	ld	r13,PACA_EXSLB+EX_R13(r13)
@@ -153,7 +153,7 @@ index 2c4ffe3bdd34..1447cb86a57d 100644
 +	rfid /* ignore this old power3 code */
  	b	.	/* prevent speculative execution */
  
- #endif
+ #ifdef CONFIG_PPC_PSERIES
 -- 
-2.13.6
+2.13.7
 

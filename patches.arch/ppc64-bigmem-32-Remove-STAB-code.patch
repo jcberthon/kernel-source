@@ -27,7 +27,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  9 files changed, 4 insertions(+), 530 deletions(-)
 
 diff --git a/arch/powerpc/include/asm/mmu-hash64.h b/arch/powerpc/include/asm/mmu-hash64.h
-index 3957e5ed4aea..7fc049244e0e 100644
+index fc91b3daf868..34e39478006b 100644
 --- a/arch/powerpc/include/asm/mmu-hash64.h
 +++ b/arch/powerpc/include/asm/mmu-hash64.h
 @@ -23,26 +23,6 @@
@@ -90,10 +90,10 @@ index a73668a5f30d..67962d3ab072 100644
  	/* Out of line for now */
  	switch_mmu_context(prev, next);
 diff --git a/arch/powerpc/include/asm/paca.h b/arch/powerpc/include/asm/paca.h
-index 17d6b5379ca4..6c8988625380 100644
+index 24dd6a5b6914..dfdcddf9b6c3 100644
 --- a/arch/powerpc/include/asm/paca.h
 +++ b/arch/powerpc/include/asm/paca.h
-@@ -73,10 +73,6 @@ struct paca_struct {
+@@ -93,10 +93,6 @@ struct paca_struct {
  	u64 kernel_toc;			/* Kernel TOC address */
  	u64 kernelbase;			/* Base address of kernel */
  	u64 kernel_msr;			/* MSR while running in kernel */
@@ -105,7 +105,7 @@ index 17d6b5379ca4..6c8988625380 100644
  	u64 data_offset;		/* per cpu data offset */
  	s16 hw_cpu_id;			/* Physical processor number */
 diff --git a/arch/powerpc/kernel/asm-offsets.c b/arch/powerpc/kernel/asm-offsets.c
-index d213a0397931..38ef0db99ae6 100644
+index 25a20415edb2..3e78091dc08d 100644
 --- a/arch/powerpc/kernel/asm-offsets.c
 +++ b/arch/powerpc/kernel/asm-offsets.c
 @@ -172,8 +172,6 @@ int main(void)
@@ -118,7 +118,7 @@ index d213a0397931..38ef0db99ae6 100644
  	DEFINE(PACASLBCACHEPTR, offsetof(struct paca_struct, slb_cache_ptr));
  	DEFINE(PACAVMALLOCSLLP, offsetof(struct paca_struct, vmalloc_sllp));
 diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
-index 5b7c0ac144a6..242690751bb3 100644
+index 93eb871fdefd..1b0cddd36638 100644
 --- a/arch/powerpc/kernel/exceptions-64s.S
 +++ b/arch/powerpc/kernel/exceptions-64s.S
 @@ -80,30 +80,7 @@ data_access_pSeries:
@@ -152,8 +152,8 @@ index 5b7c0ac144a6..242690751bb3 100644
  
  	. = 0x380
  	.globl data_access_slb_pSeries
-@@ -324,14 +301,6 @@ masked_Hinterrupt:
- 	hrfid
+@@ -327,14 +304,6 @@ masked_Hinterrupt:
+ 	HRFI_TO_KERNEL
  	b	.
  
 -	.align	7
@@ -167,7 +167,7 @@ index 5b7c0ac144a6..242690751bb3 100644
  #ifdef CONFIG_PPC_PSERIES
  /*
   * Vectors for the FWNMI option.  Share common code.
-@@ -868,12 +837,6 @@ _STATIC(do_hash_page)
+@@ -1020,12 +989,6 @@ _STATIC(do_hash_page)
  	bne-	handle_page_fault	/* if not, try to insert a HPTE */
  	andis.  r0,r4,DSISR_DABRMATCH@h
  	bne-    handle_dabr_fault
@@ -180,7 +180,7 @@ index 5b7c0ac144a6..242690751bb3 100644
  	clrrdi	r11,r1,THREAD_SHIFT
  	lwz	r0,TI_PREEMPT(r11)	/* If we're in an "NMI" */
  	andis.	r0,r0,NMI_MASK@h	/* (i.e. an irq when soft-disabled) */
-@@ -1006,117 +969,6 @@ handle_page_fault:
+@@ -1158,117 +1121,6 @@ handle_page_fault:
  	bl	.bad_page_fault
  	b	.ret_from_except
  
@@ -292,13 +292,13 @@ index 5b7c0ac144a6..242690751bb3 100644
 -	ld	r11,PACA_EXSLB+EX_R11(r13)
 -	ld	r12,PACA_EXSLB+EX_R12(r13)
 -	ld	r13,PACA_EXSLB+EX_R13(r13)
--	rfid
+-	rfid /* ignore this old power3 code */
 -	b	.	/* prevent speculative execution */
 -
  #ifdef CONFIG_PPC_PSERIES
  /*
   * Data area reserved for FWNMI option.
-@@ -1153,17 +1005,3 @@ xLparMap:
+@@ -1305,17 +1157,3 @@ xLparMap:
  #ifdef CONFIG_PPC_PSERIES
          . = 0x8000
  #endif /* CONFIG_PPC_PSERIES */
@@ -317,7 +317,7 @@ index 5b7c0ac144a6..242690751bb3 100644
 -initial_stab:
 -	.space	4096
 diff --git a/arch/powerpc/kernel/setup_64.c b/arch/powerpc/kernel/setup_64.c
-index 7867fd17a0de..bde8b84cd4c1 100644
+index 2847e8555456..64e09454f244 100644
 --- a/arch/powerpc/kernel/setup_64.c
 +++ b/arch/powerpc/kernel/setup_64.c
 @@ -562,9 +562,6 @@ void __init setup_arch(char **cmdline_p)
@@ -331,7 +331,7 @@ index 7867fd17a0de..bde8b84cd4c1 100644
  	do_init_bootmem();
  	sparse_init();
 diff --git a/arch/powerpc/mm/hash_utils_64.c b/arch/powerpc/mm/hash_utils_64.c
-index 8b7cf67056a3..5e7c38377667 100644
+index 30b58c487d5f..de15b06f3333 100644
 --- a/arch/powerpc/mm/hash_utils_64.c
 +++ b/arch/powerpc/mm/hash_utils_64.c
 @@ -753,22 +753,15 @@ static void __init htab_initialize(void)
@@ -715,5 +715,5 @@ index 1077bb62c8c7..02cad8204b66 100644
  #endif
  
 -- 
-2.10.2
+2.13.7
 
