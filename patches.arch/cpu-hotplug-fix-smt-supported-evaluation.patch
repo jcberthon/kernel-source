@@ -20,16 +20,61 @@ SMT evaulation on x86 is a trainwreck as the firmware has all the
 information _before_ booting the kernel, but there is no interface to query
 it.
 
+
+Additional notes for 4.4
+=========================
+
+At the time cpu_smt_check_topology() runs, we haven't set cpu_smt_available
+even if SMT *is* available because we can't set it due to this here:
+
+bool cpu_smt_allowed(unsigned int cpu):
+
+	...
+
+        if (per_cpu(cpuhp_state, cpu).booted_once)
+                cpu_smt_available = true;
+
+because we haven't set ->booted_once yet - we are booting once now.
+
+By the time we run smp_smt_post_init(), cpu_smt_allowed() there is too late
+because there we have:
+
+[   17.601853] smp_smt_post_init: CPU12
+[   17.613980] cpu_smt_allowed: CPU12
+[   17.625679] cpu_smt_allowed: CPU12 cpu_smt_available: 0
+[   17.641459] cpu_smt_allowed: cpu_smt_control: 3
+[   17.655643] cpu_smt_allowed: CPU12 returning: 0:
+
+where cpu_smt_control has already been set to CPU_SMT_NOT_SUPPORTED in
+cpu_smt_check_topology() due to the wrong detection.
+
+tl;dr version is: we need to call cpu_smt_allowed() directly after
+cpu_set_booted() so that cpu_smt_available gets set:
+
+        if (per_cpu(cpuhp_state, cpu).booted_once)
+                cpu_smt_available = true;
+
+and so that cpu_smt_check_topology() doesn't do this:
+
+        cpu_smt_control = CPU_SMT_NOT_SUPPORTED;
+
+The idea is to keep the non-upstream changes at a minimum and therefore we are
+"dancing" around the scheme so that it works.
+
+Boris.
+======
+
 Fixes: 73d5e2b47264 ("cpu/hotplug: detect SMT disabled by BIOS")
 Reported-by: Josh Poimboeuf <jpoimboe@redhat.com>
 Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
 Acked-by: Borislav Petkov <bp@suse.de>
 ---
  arch/x86/kernel/cpu/bugs.c |    2 +-
+ arch/x86/kernel/smpboot.c  |    9 +++++++++
  include/linux/cpu.h        |    2 ++
  kernel/cpu.c               |   41 ++++++++++++++++++++++++++++-------------
  kernel/smp.c               |    2 ++
- 4 files changed, 33 insertions(+), 14 deletions(-)
+ 5 files changed, 42 insertions(+), 14 deletions(-)
 
 --- a/arch/x86/kernel/cpu/bugs.c
 +++ b/arch/x86/kernel/cpu/bugs.c
@@ -42,6 +87,24 @@ Acked-by: Borislav Petkov <bp@suse.de>
  
  	if (!IS_ENABLED(CONFIG_SMP)) {
  		pr_info("CPU: ");
+--- a/arch/x86/kernel/smpboot.c
++++ b/arch/x86/kernel/smpboot.c
+@@ -1026,6 +1026,15 @@ int native_cpu_up(unsigned int cpu, stru
+ 
+ 	cpu_set_booted(cpu);
+ 
++	/*
++	 * bp: Run the function below again so that cpu_smt_available gets set for
++	 * cpu_smt_check_topology()'s check to succeed. The whole CPU hotplug
++	 * order in this kernel is significantly different from upstream so we
++	 * have to do monkey business in order to fit the upstream scheme without
++	 * changing too much.
++	*/
++	cpu_smt_allowed(cpu);
++
+ 	return 0;
+ }
+ 
 --- a/include/linux/cpu.h
 +++ b/include/linux/cpu.h
 @@ -305,10 +305,12 @@ enum cpuhp_smt_control {
