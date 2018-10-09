@@ -1,0 +1,48 @@
+From: Heiko Carstens <heiko.carstens@de.ibm.com>
+Date: Mon, 20 Mar 2017 14:29:50 +0100
+Subject: s390/facilites: use stfle_fac_list array size for MAX_FACILITY_BIT
+Patch-mainline: v4.12-rc1
+Git-commit: 6f5165e864d240d15675cc2fb5a369d57e1f60d0
+References: bnc#1108314, LTC#171326
+
+Description:  kernel: incorrct facility list in /proc/cpuinfo
+Symptom:      The facility list reported by /proc/cpuinfo has many
+              entries for bit numbers larger than 1024.
+Problem:      The size of the facility list in the lowcore structure
+              has been reduced from 256 to 128 bytes, but the define
+              that indicates the number of bits in the field still
+              reports 256*8 bits.
+Solution:     Backport git commit 6f5165e864d240d1 "s390/facilites:
+              use stfle_fac_list array size for MAX_FACILITY_BIT"
+Reproduction: Read /proc/cpuinfo
+
+Upstream-Description:
+
+              s390/facilites: use stfle_fac_list array size for MAX_FACILITY_BIT
+
+              Use the actual size of the facility list array within the lowcore
+              structure for the MAX_FACILITY_BIT define instead of a comment which
+              states what this is good for. This makes it a bit harder to break
+              things.
+
+              Signed-off-by: Heiko Carstens <heiko.carstens@de.ibm.com>
+              Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+
+
+Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+Acked-by: Petr Tesarik <ptesarik@suse.com>
+---
+ arch/s390/include/asm/system.h |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/arch/s390/include/asm/system.h
++++ b/arch/s390/include/asm/system.h
+@@ -306,7 +306,7 @@ extern void smp_ctl_clear_bit(int cr, in
+ 
+ #endif /* CONFIG_SMP */
+ 
+-#define MAX_FACILITY_BIT (256*8)	/* stfle_fac_list has 256 bytes */
++#define MAX_FACILITY_BIT (sizeof(((struct _lowcore *)0)->stfle_fac_list) * 8)
+ 
+ static inline void __set_facility(unsigned long nr, void *facilities)
+ {
