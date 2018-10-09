@@ -1,0 +1,33 @@
+From: Hannes Reinecke <hare@suse.de>
+Date: Tue, 9 Oct 2018 08:25:26 +0200
+Subject: [PATCH] lpfc: fixup crash in lpfc_els_unsol_buffer()
+Patch-Mainline: submitted to linux-scsi 2018/10/08
+References: bsc#1107318
+
+lpfc_nlp_get() in lpfc_els_unsol_buffer() is not running under a
+lock, so there is a chance that it might actually fail. But as we
+never check the return value we'll get a crash in lpfc_nlp_put()
+later on trying to free an invalid buffer.
+
+Signed-off-by: Hannes Reinecke <hare@suse.com>
+---
+ drivers/scsi/lpfc/lpfc_els.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/scsi/lpfc/lpfc_els.c b/drivers/scsi/lpfc/lpfc_els.c
+index f1c1faa74b46..ef6aaa2609ae 100644
+--- a/drivers/scsi/lpfc/lpfc_els.c
++++ b/drivers/scsi/lpfc/lpfc_els.c
+@@ -7930,6 +7930,9 @@ lpfc_els_unsol_buffer(struct lpfc_hba *phba, struct lpfc_sli_ring *pring,
+ 	elsiocb->context1 = lpfc_nlp_get(ndlp);
+ 	elsiocb->vport = vport;
+ 
++	if (!elsiocb->context1)
++		goto dropit;
++
+ 	if ((cmd & ELS_CMD_MASK) == ELS_CMD_RSCN) {
+ 		cmd &= ELS_CMD_MASK;
+ 	}
+-- 
+2.16.4
+
