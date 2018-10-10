@@ -1,0 +1,34 @@
+From 1b348f0164d045f9b7509f37eab67df86aa8ad1a Mon Sep 17 00:00:00 2001
+From: Michal Suchanek <msuchanek@suse.de>
+Date: Wed, 12 Sep 2018 19:06:23 +0200
+Subject: [PATCH 16/24] Define early_radix_enabled()
+
+References: bsc#1094244
+Patch-mainline: no, not needed
+
+We do not support POWER9 native mode so radix is never enabled.
+
+Signed-off-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/include/asm/mmu.h | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/powerpc/include/asm/mmu.h b/arch/powerpc/include/asm/mmu.h
+index 13aa7916ece1..2eebce77533b 100644
+--- a/arch/powerpc/include/asm/mmu.h
++++ b/arch/powerpc/include/asm/mmu.h
+@@ -137,6 +137,11 @@ extern void setup_initial_memory_limit(phys_addr_t first_memblock_base,
+ extern u64 ppc64_rma_size;
+ #endif /* CONFIG_PPC64 */
+ 
++static inline bool early_radix_enabled(void)
++{
++	return false;
++}
++
+ #endif /* !__ASSEMBLY__ */
+ 
+ /* The kernel use the constants below to index in the page sizes array.
+-- 
+2.13.7
+

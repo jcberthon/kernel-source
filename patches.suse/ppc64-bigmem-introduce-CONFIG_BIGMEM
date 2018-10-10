@@ -8,7 +8,7 @@ References: bsc#928138,fate#319026
 diff -urp a/arch/powerpc/include/asm/cputable.h b/arch/powerpc/include/asm/cputable.h
 --- a/arch/powerpc/include/asm/cputable.h
 +++ b/arch/powerpc/include/asm/cputable.h
-@@ -405,6 +405,13 @@ extern const char *powerpc_base_platform
+@@ -412,6 +412,13 @@ extern const char *powerpc_base_platform
  #define CPU_FTRS_GENERIC_32	(CPU_FTR_COMMON | CPU_FTR_NODSISRALIGN)
  
  /* 64-bit CPUs */
@@ -22,7 +22,7 @@ diff -urp a/arch/powerpc/include/asm/cputable.h b/arch/powerpc/include/asm/cputa
  #define CPU_FTRS_POWER4	(CPU_FTR_USE_TB | CPU_FTR_LWSYNC | \
  	    CPU_FTR_PPCAS_ARCH_V2 | CPU_FTR_CTRL | \
  	    CPU_FTR_MMCRA | CPU_FTR_CP_USE_DCBTZ | \
-@@ -460,11 +467,19 @@ extern const char *powerpc_base_platform
+@@ -467,11 +474,19 @@ extern const char *powerpc_base_platform
  #ifdef CONFIG_PPC_BOOK3E
  #define CPU_FTRS_POSSIBLE	(CPU_FTRS_E5500 | CPU_FTRS_A2)
  #else
@@ -42,7 +42,7 @@ diff -urp a/arch/powerpc/include/asm/cputable.h b/arch/powerpc/include/asm/cputa
  #else
  enum {
  	CPU_FTRS_POSSIBLE =
-@@ -508,11 +523,18 @@ enum {
+@@ -515,11 +530,18 @@ enum {
  #ifdef CONFIG_PPC_BOOK3E
  #define CPU_FTRS_ALWAYS		(CPU_FTRS_E5500 & CPU_FTRS_A2)
  #else
@@ -193,9 +193,9 @@ diff -urp a/arch/powerpc/include/asm/mmu.h b/arch/powerpc/include/asm/mmu.h
  #endif /* !CONFIG_DEBUG_VM */
  
 +#endif
- #endif /* !__ASSEMBLY__ */
- 
- /* The kernel use the constants below to index in the page sizes array.
+ static inline bool early_radix_enabled(void)
+ {
+ 	return false;
 diff -urp a/arch/powerpc/include/asm/mmu-hash64.h b/arch/powerpc/include/asm/mmu-hash64.h
 --- a/arch/powerpc/include/asm/mmu-hash64.h
 +++ b/arch/powerpc/include/asm/mmu-hash64.h
@@ -712,7 +712,7 @@ diff -urp a/arch/powerpc/include/asm/mmu-hash64.h b/arch/powerpc/include/asm/mmu
 diff -urp a/arch/powerpc/include/asm/paca.h b/arch/powerpc/include/asm/paca.h
 --- a/arch/powerpc/include/asm/paca.h
 +++ b/arch/powerpc/include/asm/paca.h
-@@ -93,6 +93,12 @@ struct paca_struct {
+@@ -101,6 +101,12 @@ struct paca_struct {
  	u64 kernel_toc;			/* Kernel TOC address */
  	u64 kernelbase;			/* Base address of kernel */
  	u64 kernel_msr;			/* MSR while running in kernel */
@@ -725,7 +725,7 @@ diff -urp a/arch/powerpc/include/asm/paca.h b/arch/powerpc/include/asm/paca.h
  	void *emergency_sp;		/* pointer to emergency stack */
  	u64 data_offset;		/* per cpu data offset */
  	s16 hw_cpu_id;			/* Physical processor number */
-@@ -126,7 +132,11 @@ struct paca_struct {
+@@ -134,7 +140,11 @@ struct paca_struct {
  	/* SLB related definitions */
  	u16 vmalloc_sllp;
  	u16 slb_cache_ptr;
@@ -740,7 +740,7 @@ diff -urp a/arch/powerpc/include/asm/paca.h b/arch/powerpc/include/asm/paca.h
 diff -urp a/arch/powerpc/include/asm/page_64.h b/arch/powerpc/include/asm/page_64.h
 --- a/arch/powerpc/include/asm/page_64.h
 +++ b/arch/powerpc/include/asm/page_64.h
-@@ -91,6 +91,14 @@ extern unsigned int HPAGE_SHIFT;
+@@ -90,6 +90,14 @@ extern unsigned int HPAGE_SHIFT;
  #define GET_HIGH_SLICE_INDEX(addr)	((addr) >> SLICE_HIGH_SHIFT)
  
  #ifndef __ASSEMBLY__
@@ -1149,7 +1149,7 @@ diff -urp a/arch/powerpc/kernel/cputable.c b/arch/powerpc/kernel/cputable.c
 diff -urp a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
 --- a/arch/powerpc/kernel/exceptions-64s.S
 +++ b/arch/powerpc/kernel/exceptions-64s.S
-@@ -1024,6 +1024,14 @@ _STATIC(do_hash_page)
+@@ -1076,6 +1076,14 @@ _STATIC(do_hash_page)
  	bne-	handle_page_fault	/* if not, try to insert a HPTE */
  	andis.  r0,r4,DSISR_DABRMATCH@h
  	bne-    handle_dabr_fault
@@ -1164,7 +1164,7 @@ diff -urp a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exception
  	clrrdi	r11,r1,THREAD_SHIFT
  	lwz	r0,TI_PREEMPT(r11)	/* If we're in an "NMI" */
  	andis.	r0,r0,NMI_MASK@h	/* (i.e. an irq when soft-disabled) */
-@@ -1156,6 +1164,101 @@ handle_page_fault:
+@@ -1208,6 +1216,101 @@ handle_page_fault:
  	bl	.bad_page_fault
  	b	.ret_from_except
  
@@ -1266,7 +1266,7 @@ diff -urp a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exception
  #ifdef CONFIG_PPC_PSERIES
  /*
   * Data area reserved for FWNMI option.
-@@ -1192,3 +1295,19 @@ xLparMap:
+@@ -1244,3 +1347,19 @@ xLparMap:
  #ifdef CONFIG_PPC_PSERIES
          . = 0x8000
  #endif /* CONFIG_PPC_PSERIES */
@@ -1289,7 +1289,7 @@ diff -urp a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exception
 diff -urp a/arch/powerpc/kernel/setup_64.c b/arch/powerpc/kernel/setup_64.c
 --- a/arch/powerpc/kernel/setup_64.c
 +++ b/arch/powerpc/kernel/setup_64.c
-@@ -562,6 +562,11 @@ void __init setup_arch(char **cmdline_p)
+@@ -591,6 +591,11 @@ void __init setup_arch(char **cmdline_p)
  	exc_lvl_early_init();
  	emergency_stack_init();
  
@@ -2404,7 +2404,7 @@ diff -urp a/arch/powerpc/mm/hash_utils_64.c b/arch/powerpc/mm/hash_utils_64.c
  					 HPTE_V_BOLTED, psize, ssize);
  
  		if (ret < 0)
-@@ -755,15 +769,35 @@ static void __init htab_initialize(void)
+@@ -753,15 +767,35 @@ static void __init htab_initialize(void)
  
  void __init early_init_mmu(void)
  {
@@ -2440,7 +2440,7 @@ diff -urp a/arch/powerpc/mm/hash_utils_64.c b/arch/powerpc/mm/hash_utils_64.c
  }
  
  #ifdef CONFIG_SMP
-@@ -773,9 +807,20 @@ void __cpuinit early_init_mmu_secondary(
+@@ -771,9 +805,20 @@ void __cpuinit early_init_mmu_secondary(
  	if (!firmware_has_feature(FW_FEATURE_LPAR))
  		mtspr(SPRN_SDR1, _SDR1);
  
@@ -2461,7 +2461,7 @@ diff -urp a/arch/powerpc/mm/hash_utils_64.c b/arch/powerpc/mm/hash_utils_64.c
  }
  #endif /* CONFIG_SMP */
  
-@@ -805,19 +850,37 @@ unsigned int hash_page_do_lazy_icache(un
+@@ -803,19 +848,37 @@ unsigned int hash_page_do_lazy_icache(un
  #ifdef CONFIG_PPC_MM_SLICES
  unsigned int get_paca_psize(unsigned long addr)
  {
@@ -2499,7 +2499,7 @@ diff -urp a/arch/powerpc/mm/hash_utils_64.c b/arch/powerpc/mm/hash_utils_64.c
  }
  
  #else
-@@ -923,6 +986,13 @@ int hash_page(unsigned long ea, unsigned
+@@ -921,6 +984,13 @@ int hash_page(unsigned long ea, unsigned
  	DBG_LOW("hash_page(ea=%016lx, access=%lx, trap=%lx\n",
  		ea, access, trap);
  
@@ -2513,7 +2513,7 @@ diff -urp a/arch/powerpc/mm/hash_utils_64.c b/arch/powerpc/mm/hash_utils_64.c
  	/* Get region & vsid */
   	switch (REGION_ID(ea)) {
  	case USER_REGION_ID:
-@@ -953,11 +1023,13 @@ int hash_page(unsigned long ea, unsigned
+@@ -951,11 +1021,13 @@ int hash_page(unsigned long ea, unsigned
  	}
  	DBG_LOW(" mm=%p, mm->pgdir=%p, vsid=%016lx\n", mm, mm->pgd, vsid);
  
@@ -2527,7 +2527,7 @@ diff -urp a/arch/powerpc/mm/hash_utils_64.c b/arch/powerpc/mm/hash_utils_64.c
  	/* Get pgdir */
  	pgdir = mm->pgd;
  	if (pgdir == NULL)
-@@ -1137,8 +1209,10 @@ void hash_preload(struct mm_struct *mm,
+@@ -1135,8 +1207,10 @@ void hash_preload(struct mm_struct *mm,
  	/* Get VSID */
  	ssize = user_segment_size(ea);
  	vsid = get_vsid(mm->context.id, ea, ssize);
@@ -2538,7 +2538,7 @@ diff -urp a/arch/powerpc/mm/hash_utils_64.c b/arch/powerpc/mm/hash_utils_64.c
  
  	/* Hash doesn't like irqs */
  	local_irq_save(flags);
-@@ -1169,21 +1243,35 @@ void hash_preload(struct mm_struct *mm,
+@@ -1167,21 +1241,35 @@ void hash_preload(struct mm_struct *mm,
  /* WARNING: This is called from hash_low_64.S, if you change this prototype,
   *          do not forget to update the assembly call site !
   */
@@ -2574,7 +2574,7 @@ diff -urp a/arch/powerpc/mm/hash_utils_64.c b/arch/powerpc/mm/hash_utils_64.c
  	} pte_iterate_hashed_end();
  }
  
-@@ -1197,7 +1285,11 @@ void flush_hash_range(unsigned long numb
+@@ -1195,7 +1283,11 @@ void flush_hash_range(unsigned long numb
  			&__get_cpu_var(ppc64_tlb_batch);
  
  		for (i = 0; i < number; i++)
@@ -2586,7 +2586,7 @@ diff -urp a/arch/powerpc/mm/hash_utils_64.c b/arch/powerpc/mm/hash_utils_64.c
  					batch->psize, batch->ssize, local);
  	}
  }
-@@ -1224,17 +1316,29 @@ static void kernel_map_linear_page(unsig
+@@ -1222,17 +1314,29 @@ static void kernel_map_linear_page(unsig
  {
  	unsigned long hash, hpteg;
  	unsigned long vsid = get_kernel_vsid(vaddr, mmu_kernel_ssize);
@@ -2616,7 +2616,7 @@ diff -urp a/arch/powerpc/mm/hash_utils_64.c b/arch/powerpc/mm/hash_utils_64.c
  				 mode, HPTE_V_BOLTED,
  				 mmu_linear_psize, mmu_kernel_ssize);
  	BUG_ON (ret < 0);
-@@ -1248,9 +1352,17 @@ static void kernel_unmap_linear_page(uns
+@@ -1246,9 +1350,17 @@ static void kernel_unmap_linear_page(uns
  {
  	unsigned long hash, hidx, slot;
  	unsigned long vsid = get_kernel_vsid(vaddr, mmu_kernel_ssize);
@@ -2634,7 +2634,7 @@ diff -urp a/arch/powerpc/mm/hash_utils_64.c b/arch/powerpc/mm/hash_utils_64.c
  	spin_lock(&linear_map_hash_lock);
  	BUG_ON(!(linear_map_hash_slots[lmi] & 0x80));
  	hidx = linear_map_hash_slots[lmi] & 0x7f;
-@@ -1260,7 +1372,11 @@ static void kernel_unmap_linear_page(uns
+@@ -1258,7 +1370,11 @@ static void kernel_unmap_linear_page(uns
  		hash = ~hash;
  	slot = (hash & htab_hash_mask) * HPTES_PER_GROUP;
  	slot += hidx & _PTEIDX_GROUP_IX;
