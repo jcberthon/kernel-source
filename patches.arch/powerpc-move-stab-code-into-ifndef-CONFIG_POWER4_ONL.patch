@@ -1,0 +1,110 @@
+From c4b9faf3b3cdaaf61360b0da9f116e25df01633f Mon Sep 17 00:00:00 2001
+From: Paul Mackerras <paulus@samba.org>
+Date: Wed, 29 Jun 2011 02:18:26 +0200
+Subject: [PATCH 1/4] powerpc: move stab code into #ifndef CONFIG_POWER4_ONLY
+
+References: bsc#1094244
+Patch-mainline: v3.1-rc1
+Git-commit: b01c8b54a1a271c0fc4243845927fe1d250767a3 (part 1/4)
+
+Signed-off-by: Paul Mackerras <paulus@samba.org>
+Signed-off-by: Alexander Graf <agraf@suse.de>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/kernel/exceptions-64s.S | 64 +++++++++++++++++++-----------------
+ 1 file changed, 34 insertions(+), 30 deletions(-)
+
+diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
+index d47b0e7b53d9..a707f51d5578 100644
+--- a/arch/powerpc/kernel/exceptions-64s.S
++++ b/arch/powerpc/kernel/exceptions-64s.S
+@@ -80,30 +80,13 @@ data_access_pSeries:
+ 	HMT_MEDIUM_PPR_DISCARD
+ 	DO_KVM	0x300
+ 	SET_SCRATCH0(r13)
++#ifndef CONFIG_POWER4_ONLY
+ BEGIN_FTR_SECTION
+-	GET_PACA(r13)
+-	std	r9,PACA_EXSLB+EX_R9(r13)
+-	HMT_MEDIUM_PPR_SAVE(PACA_EXGEN, r9)
+-	std	r10,PACA_EXSLB+EX_R10(r13)
+-	mfspr	r10,SPRN_DAR
+-	mfspr	r9,SPRN_DSISR
+-	srdi	r10,r10,60
+-	rlwimi	r10,r9,16,0x20
+-	mfcr	r9
+-	cmpwi	r10,0x2c
+-	beq	do_stab_bolted_pSeries
+-	ld	r10,PACA_EXSLB+EX_R10(r13)
+-	std	r11,PACA_EXGEN+EX_R11(r13)
+-	ld	r11,PACA_EXSLB+EX_R9(r13)
+-	std	r12,PACA_EXGEN+EX_R12(r13)
+-	GET_SCRATCH0(r12)
+-	std	r10,PACA_EXGEN+EX_R10(r13)
+-	std	r11,PACA_EXGEN+EX_R9(r13)
+-	std	r12,PACA_EXGEN+EX_R13(r13)
+-	EXCEPTION_PROLOG_PSERIES_1(data_access_common, EXC_STD)
+-FTR_SECTION_ELSE
++	b	data_access_check_stab
++data_access_not_stab:
++END_MMU_FTR_SECTION_IFCLR(MMU_FTR_SLB)
++#endif
+ 	EXCEPTION_PROLOG_PSERIES(PACA_EXGEN, data_access_common, EXC_STD)
+-ALT_MMU_FTR_SECTION_END_IFCLR(MMU_FTR_SLB)
+ 
+ 	. = 0x380
+ 	.globl data_access_slb_pSeries
+@@ -282,6 +265,35 @@ vsx_unavailable_pSeries_1:
+ 
+ /*** Out of line interrupts support ***/
+ 
++#ifndef CONFIG_POWER4_ONLY
++	/* moved from 0x300 */
++data_access_check_stab:
++	GET_PACA(r13)
++	std	r9,PACA_EXSLB+EX_R9(r13)
++	std	r10,PACA_EXSLB+EX_R10(r13)
++	mfspr	r10,SPRN_DAR
++	mfspr	r9,SPRN_DSISR
++	srdi	r10,r10,60
++	rlwimi	r10,r9,16,0x20
++#ifdef CONFIG_KVM_BOOK3S_64_HANDLER
++	lbz	r9,PACA_KVM_SVCPU+SVCPU_IN_GUEST(r13)
++	rlwimi	r10,r9,8,0x300
++#endif
++	mfcr	r9
++	cmpwi	r10,0x2c
++	beq	do_stab_bolted_pSeries
++	mtcrf	0x80,r9
++	ld	r9,PACA_EXSLB+EX_R9(r13)
++	ld	r10,PACA_EXSLB+EX_R10(r13)
++	b	data_access_not_stab
++do_stab_bolted_pSeries:
++	std	r11,PACA_EXSLB+EX_R11(r13)
++	std	r12,PACA_EXSLB+EX_R12(r13)
++	GET_SCRATCH0(r10)
++	std	r10,PACA_EXSLB+EX_R13(r13)
++	EXCEPTION_PROLOG_PSERIES_1(.do_stab_bolted, EXC_STD)
++#endif /* CONFIG_POWER4_ONLY */
++
+ 	/* moved from 0xe00 */
+ 	STD_EXCEPTION_HV(., 0xe00, h_data_storage)
+ 	STD_EXCEPTION_HV(., 0xe20, h_instr_storage)
+@@ -324,14 +336,6 @@ masked_Hinterrupt:
+ 	hrfid
+ 	b	.
+ 
+-	.align	7
+-do_stab_bolted_pSeries:
+-	std	r11,PACA_EXSLB+EX_R11(r13)
+-	std	r12,PACA_EXSLB+EX_R12(r13)
+-	GET_SCRATCH0(r10)
+-	std	r10,PACA_EXSLB+EX_R13(r13)
+-	EXCEPTION_PROLOG_PSERIES_1(.do_stab_bolted, EXC_STD)
+-
+ #ifdef CONFIG_PPC_PSERIES
+ /*
+  * Vectors for the FWNMI option.  Share common code.
+-- 
+2.13.7
+

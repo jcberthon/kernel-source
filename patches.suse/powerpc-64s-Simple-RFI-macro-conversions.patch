@@ -80,7 +80,6 @@ index 8755563af59c..f298eea63021 100644
  
  	.align	3
 diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
-index fd0778901925..f7dde87a3481 100644
 --- a/arch/powerpc/kernel/exceptions-64s.S
 +++ b/arch/powerpc/kernel/exceptions-64s.S
 @@ -220,14 +220,14 @@ END_FTR_SECTION_IFSET(CPU_FTR_REAL_LE)
@@ -117,7 +116,7 @@ index fd0778901925..f7dde87a3481 100644
 +	HRFI_TO_KERNEL
  	b	.
  
- 	.align	7
+ #ifdef CONFIG_PPC_PSERIES
 @@ -376,7 +376,7 @@ slb_miss_user_pseries:
  	mtspr	SRR0,r12
  	mfspr	r12,SRR1			/* and SRR1 */
