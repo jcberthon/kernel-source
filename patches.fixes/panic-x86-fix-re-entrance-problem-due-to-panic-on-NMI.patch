@@ -75,9 +75,9 @@ Acked-by: Michal Hocko <mhocko@suse.cz>
  }
 --- a/include/linux/kernel.h
 +++ b/include/linux/kernel.h
-@@ -413,6 +413,19 @@ static inline char * __deprecated pack_h
- extern int hex_to_bin(char ch);
- extern int __must_check hex2bin(u8 *dst, const char *src, size_t count);
+@@ -416,6 +416,19 @@ extern int __must_check hex2bin(u8 *dst,
+ extern int __must_check _hex2bin(u8 *dst, const char *src, size_t count);
+ extern char *bin2hex(char *dst, const void *src, size_t count);
  
 +extern atomic_t panic_cpu;
 +
