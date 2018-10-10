@@ -40,15 +40,15 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  arch/powerpc/include/asm/exception-64s.h     |  29 ++++++
  arch/powerpc/include/asm/feature-fixups.h    |  19 ++++
  arch/powerpc/include/asm/security_features.h |  11 ++
- arch/powerpc/kernel/exceptions-64s.S         |  19 ++++
+ arch/powerpc/kernel/exceptions-64s.S         |  17 +++
  arch/powerpc/kernel/security.c               | 148 +++++++++++++++++++++++++++
  arch/powerpc/kernel/vmlinux.lds.S            |  14 +++
  arch/powerpc/lib/feature-fixups.c            | 106 +++++++++++++++++++
  arch/powerpc/platforms/pseries/setup.c       |   1 +
- 8 files changed, 347 insertions(+)
+ 8 files changed, 345 insertions(+)
 
 diff --git a/arch/powerpc/include/asm/exception-64s.h b/arch/powerpc/include/asm/exception-64s.h
-index 5d9666b4a328..cfdba7295c02 100644
+index 639c3071d8ec..fbe67741126b 100644
 --- a/arch/powerpc/include/asm/exception-64s.h
 +++ b/arch/powerpc/include/asm/exception-64s.h
 @@ -52,6 +52,27 @@
@@ -125,14 +125,14 @@ index 5d9666b4a328..cfdba7295c02 100644
  	RFI_FLUSH_SLOT;							\
  	hrfid;								\
  	b	hrfi_flush_fallback
-@@ -168,6 +196,7 @@ END_FTR_SECTION_NESTED(CPU_FTR_HAS_PPR,CPU_FTR_HAS_PPR,943)
+@@ -164,6 +192,7 @@ END_FTR_SECTION_NESTED(CPU_FTR_HAS_PPR,CPU_FTR_HAS_PPR,943)
+ 	mfspr	r10,SPRN_CFAR;						\
+ 	std	r10,area+EX_CFAR(r13);					\
  	END_FTR_SECTION_NESTED(CPU_FTR_CFAR, CPU_FTR_CFAR, 66);		\
- 	GET_SCRATCH0(r9);						\
- 	std	r9,area+EX_R13(r13);					\
 +	INTERRUPT_TO_KERNEL;						\
- 	mfcr	r9
- 
- #define __EXCEPTION_PROLOG_PSERIES_1(label, h)				\
+ 	mfcr	r9;							\
+ 	extra(vec);							\
+ 	std	r11,area+EX_R11(r13);					\
 diff --git a/arch/powerpc/include/asm/feature-fixups.h b/arch/powerpc/include/asm/feature-fixups.h
 index 05675d8fd3f0..05fc5760afb9 100644
 --- a/arch/powerpc/include/asm/feature-fixups.h
@@ -204,7 +204,7 @@ index c7e55a28005d..96b3def6f26a 100644
  	mfspr	r11,SPRN_SRR0
  	mfspr	r12,SPRN_SRR1
  	ld	r10,PACAKBASE(r13)
-@@ -358,6 +361,22 @@ machine_check_fwnmi:
+@@ -391,6 +392,22 @@ system_reset_fwnmi:
  
  #endif /* CONFIG_PPC_PSERIES */
  
@@ -545,5 +545,5 @@ index 2040a738e8da..b599d4e28580 100644
  	/* Find and initialize PCI host bridges */
  	init_pci_config_tokens();
 -- 
-2.13.6
+2.13.7
 
