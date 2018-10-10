@@ -1,0 +1,43 @@
+From 0f0ca7f8d4bdf6544e002ad7b1eba8e3132ae27c Mon Sep 17 00:00:00 2001
+From: Michal Suchanek <msuchanek@suse.de>
+Date: Tue, 3 Jul 2018 16:10:11 +0200
+Subject: [PATCH 24/24] KABI: move the new handler to end of machdep_calls and
+ hide it from genksyms
+
+References: bsc#1094244
+Patch-mainline: never, KABI
+
+Signed-off-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/include/asm/machdep.h | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/arch/powerpc/include/asm/machdep.h b/arch/powerpc/include/asm/machdep.h
+index 86b1595a72e9..c28a0326947e 100644
+--- a/arch/powerpc/include/asm/machdep.h
++++ b/arch/powerpc/include/asm/machdep.h
+@@ -152,9 +152,6 @@ struct machdep_calls {
+ 	int		(*system_reset_exception)(struct pt_regs *regs);
+ 	int 		(*machine_check_exception)(struct pt_regs *regs);
+ 
+-	/* Early exception handlers called in realmode */
+-	long		(*machine_check_early)(struct pt_regs *regs);
+-
+ 	/* Motherboard/chipset features. This is a kind of general purpose
+ 	 * hook used to control some machine specific features (like reset
+ 	 * lines, chip power control, etc...).
+@@ -252,6 +249,11 @@ struct machdep_calls {
+ 	ssize_t (*cpu_probe)(const char *, size_t);
+ 	ssize_t (*cpu_release)(const char *, size_t);
+ #endif
++
++#ifndef __GENKSYMS__
++	/* Early exception handlers called in realmode */
++	long		(*machine_check_early)(struct pt_regs *regs);
++#endif
+ };
+ 
+ extern void e500_idle(void);
+-- 
+2.13.7
+
