@@ -1,4 +1,4 @@
-From 41728e847cf0fa9e3109e862ee4c2261ddb7b407 Mon Sep 17 00:00:00 2001
+From d11e66b9812ccd87e4efa94c4524dcd1762117df Mon Sep 17 00:00:00 2001
 From: Nicholas Piggin <npiggin@gmail.com>
 Date: Tue, 22 May 2018 09:00:00 +1000
 Subject: [PATCH] powerpc/64s: Add support for a store forwarding barrier at
@@ -193,26 +193,10 @@ index fa4d2e1cf772..44989b22383c 100644
  {
  	powerpc_security_features |= feature;
 diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
-index 395caee0a6ac..2c8a8dc43db2 100644
+index c7e55a28005d..96b3def6f26a 100644
 --- a/arch/powerpc/kernel/exceptions-64s.S
 +++ b/arch/powerpc/kernel/exceptions-64s.S
-@@ -131,6 +131,7 @@ data_access_slb_pSeries:
- 	std	r12,PACA_EXSLB+EX_R12(r13)
- 	GET_SCRATCH0(r10)
- 	std	r10,PACA_EXSLB+EX_R13(r13)
-+	INTERRUPT_TO_KERNEL
- 	mfspr	r12,SPRN_SRR1		/* and SRR1 */
- #ifndef CONFIG_RELOCATABLE
- 	b	.slb_miss_realmode
-@@ -171,6 +172,7 @@ instruction_access_slb_pSeries:
- 	std	r12,PACA_EXSLB+EX_R12(r13)
- 	GET_SCRATCH0(r10)
- 	std	r10,PACA_EXSLB+EX_R13(r13)
-+	INTERRUPT_TO_KERNEL
- 	mfspr	r12,SPRN_SRR1		/* and SRR1 */
- #ifndef CONFIG_RELOCATABLE
- 	b	.slb_miss_realmode
-@@ -217,6 +219,7 @@ BEGIN_FTR_SECTION
+@@ -199,6 +199,7 @@ BEGIN_FTR_SECTION
  END_FTR_SECTION_IFSET(CPU_FTR_REAL_LE)
  	mr	r9,r13
  	GET_PACA(r13)
