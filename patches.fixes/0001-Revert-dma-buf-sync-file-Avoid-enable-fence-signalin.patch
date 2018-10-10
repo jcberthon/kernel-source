@@ -1,0 +1,39 @@
+From 069cad6d02fef7924fb942b37a6c17dd02a79f7f Mon Sep 17 00:00:00 2001
+From: Gustavo Padovan <gustavo.padovan@collabora.co.uk>
+Date: Fri, 18 Nov 2016 17:26:43 +0900
+Subject: [PATCH] Revert "dma-buf/sync-file: Avoid enable fence signaling if
+ poll(.timeout=0)"
+References: bsc#1111363
+Patch-mainline: v4.9-rc4
+Git-commit: 069cad6d02fef7924fb942b37a6c17dd02a79f7f
+
+This reverts commit ecebca79f6976ddaddfd054d699272515869ea28.
+
+Do not enable fence callback on poll() when using fence_array causes the
+fence_array to not signal.
+
+For now we will revert the change and enable signaling everytime time
+poll is called with timeout=0 as well.
+
+Cc: Chris Wilson <chris@chris-wilson.co.uk>
+Signed-off-by: Gustavo Padovan <gustavo.padovan@collabora.co.uk>
+Acked-by: Chris Wilson <chris@chris-wilson.co.uk>
+Signed-off-by: Daniel Vetter <daniel.vetter@ffwll.ch>
+Acked-by: Stefan Dirsch <sndirsch@suse.de>
+Link: http://patchwork.freedesktop.org/patch/msgid/1479457603-30758-1-git-send-email-gustavo@padovan.org
+---
+ drivers/dma-buf/sync_file.c |    3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+--- a/drivers/dma-buf/sync_file.c
++++ b/drivers/dma-buf/sync_file.c
+@@ -311,8 +311,7 @@ static unsigned int sync_file_poll(struc
+ 
+ 	poll_wait(file, &sync_file->wq, wait);
+ 
+-	if (!poll_does_not_wait(wait) &&
+-	    !test_and_set_bit(POLL_ENABLED, &sync_file->fence->flags)) {
++	if (!test_and_set_bit(POLL_ENABLED, &sync_file->fence->flags)) {
+ 		if (fence_add_callback(sync_file->fence, &sync_file->cb,
+ 				       fence_check_cb_func) < 0)
+ 			wake_up_all(&sync_file->wq);

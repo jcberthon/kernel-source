@@ -1,0 +1,51 @@
+From: Hannes Reinecke <hare@suse.de>
+Date: Wed, 10 Oct 2018 08:05:53 +0200
+Subject: [PATCH] dm-mpath: finally fixup cmd_flags
+Patch-Mainline: never, SLE12 SP3 specific
+References: bsc#1110930
+
+If we don't have an 'rq' argument for __multipath_map() it means we
+are called via the 'map_rq' function, which has the cloned request
+already initialized. But as we don't have access to the original
+request we really don't have a good way of initializing the flags
+of the cloned request, other than setting the failfast bits.
+The remaining initialisation has to be done in setup_clone().
+
+Signed-off-by: Hannes Reinecke <hare@suse.com>
+---
+ drivers/md/dm-mpath.c | 6 +-----
+ drivers/md/dm-rq.c    | 1 +
+ 2 files changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/md/dm-mpath.c b/drivers/md/dm-mpath.c
+index 6d116deb2ba4..a01067e01739 100644
+--- a/drivers/md/dm-mpath.c
++++ b/drivers/md/dm-mpath.c
+@@ -561,11 +561,7 @@ static int __multipath_map(struct dm_target *ti, struct request *clone,
+ 		 */
+ 		clone->q = bdev_get_queue(bdev);
+ 		clone->rq_disk = bdev->bd_disk;
+-		if (rq)
+-			clone->cmd_flags = rq->cmd_flags;
+-		else
+-			clone->cmd_flags = 0;
+-		clone->cmd_flags |= REQ_NOMERGE | REQ_FAILFAST_TRANSPORT;
++		clone->cmd_flags |= REQ_FAILFAST_TRANSPORT;
+ 	} else {
+ 		/*
+ 		 * blk-mq request-based interface; used by both:
+diff --git a/drivers/md/dm-rq.c b/drivers/md/dm-rq.c
+index a0701a7fd016..d1a93c0e4b9f 100644
+--- a/drivers/md/dm-rq.c
++++ b/drivers/md/dm-rq.c
+@@ -498,6 +498,7 @@ static int setup_clone(struct request *clone, struct request *rq,
+ 	if (r)
+ 		return r;
+ 
++	clone->cmd_flags = rq->cmd_flags | REQ_NOMERGE;
+ 	clone->end_io = end_clone_request;
+ 	clone->end_io_data = tio;
+ 
+-- 
+2.16.4
+
