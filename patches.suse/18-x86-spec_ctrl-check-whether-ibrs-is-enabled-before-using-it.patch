@@ -97,9 +97,9 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  #endif /* _ASM_X86_SPEC_CTRL_H */
 --- a/arch/x86/kernel/cpu/spec_ctrl.c
 +++ b/arch/x86/kernel/cpu/spec_ctrl.c
-@@ -7,16 +7,27 @@
- #include <asm/processor.h>
+@@ -8,16 +8,27 @@
  #include <asm/spec_ctrl.h>
+ #include <asm/cpufeature.h>
  
 +/*
 + * Keep it open for more flags in case needed.
@@ -129,7 +129,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  EXPORT_SYMBOL_GPL(x86_enable_ibrs);
 --- a/arch/x86/kvm/vmx.c
 +++ b/arch/x86/kvm/vmx.c
-@@ -8619,7 +8619,7 @@ static void __noclone vmx_vcpu_run(struc
+@@ -8621,7 +8621,7 @@ static void __noclone vmx_vcpu_run(struc
  
  	atomic_switch_perf_msrs(vmx);
  
