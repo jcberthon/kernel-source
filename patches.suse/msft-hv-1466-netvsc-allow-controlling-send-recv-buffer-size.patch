@@ -78,8 +78,8 @@ diff --git a/drivers/net/hyperv/netvsc.c b/drivers/net/hyperv/netvsc.c
 +	net_device->send_section_size = NETVSC_SEND_SECTION_SIZE;
 +
  	init_completion(&net_device->channel_init_wait);
+ 	init_waitqueue_head(&net_device->subchan_open);
  
- 	return net_device;
 @@ -143,6 +147,7 @@ static void netvsc_destroy_buf(struct hv_device *device)
  				"revoke receive buffer to netvsp\n");
  			return;

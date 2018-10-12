@@ -71,5 +71,5 @@ diff --git a/drivers/net/hyperv/rndis_filter.c b/drivers/net/hyperv/rndis_filter
 +		rndis_device->rx_table[i] = ethtool_rxfh_indir_default(
 +						i, net_device->num_chn);
  
+ 	atomic_set(&net_device->open_chn, 1);
  	num_rss_qs = net_device->num_chn - 1;
- 	if (num_rss_qs == 0)

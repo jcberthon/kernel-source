@@ -57,8 +57,8 @@ diff --git a/drivers/net/hyperv/netvsc.c b/drivers/net/hyperv/netvsc.c
 -	net_device->send_section_size = NETVSC_SEND_SECTION_SIZE;
 -
  	init_completion(&net_device->channel_init_wait);
+ 	init_waitqueue_head(&net_device->subchan_open);
  
- 	return net_device;
 @@ -262,7 +259,7 @@ static int netvsc_init_buf(struct hv_device *device,
  	int ret = 0;
  
