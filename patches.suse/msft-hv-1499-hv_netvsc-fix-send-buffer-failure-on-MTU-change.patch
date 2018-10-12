@@ -58,7 +58,7 @@ diff --git a/drivers/net/hyperv/netvsc.c b/drivers/net/hyperv/netvsc.c
 -
  	init_completion(&net_device->channel_init_wait);
  	init_waitqueue_head(&net_device->subchan_open);
- 
+ 	INIT_WORK(&net_device->subchan_work, rndis_set_subchannel);
 @@ -262,7 +259,7 @@ static int netvsc_init_buf(struct hv_device *device,
  	int ret = 0;
  
