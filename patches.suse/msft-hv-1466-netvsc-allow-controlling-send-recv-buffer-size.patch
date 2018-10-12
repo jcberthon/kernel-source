@@ -260,8 +260,8 @@ diff --git a/drivers/net/hyperv/netvsc_drv.c b/drivers/net/hyperv/netvsc_drv.c
 +#define NETVSC_DEFAULT_RX	2048	/* ~4M */
 +
  #define LINKCHANGE_INT (2 * HZ)
+ #define VF_TAKEOVER_INT (HZ / 10)
  static int ring_size = 128;
- module_param(ring_size, int, S_IRUGO);
 @@ -831,11 +836,13 @@ static int netvsc_set_channels(struct net_device *net,
  	if (was_opened)
  		rndis_filter_close(nvdev);

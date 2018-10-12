@@ -29,4 +29,4 @@ diff --git a/drivers/net/hyperv/netvsc_drv.c b/drivers/net/hyperv/netvsc_drv.c
 +#define NETVSC_DEFAULT_RX	10485   /* Max ~16M */
  
  #define LINKCHANGE_INT (2 * HZ)
- static int ring_size = 128;
+ #define VF_TAKEOVER_INT (HZ / 10)
