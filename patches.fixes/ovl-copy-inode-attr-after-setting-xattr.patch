@@ -1,0 +1,29 @@
+From: Goldwyn Rodrigues <rgoldwyn@suse.com>
+Subject: [PATCH] Copy inode attributes after setting xattr
+References: bsc#1107299
+Patch-mainline: no, covered partially in d9854c87f0ed1a5f32fec24bb5b5fb426ad79c26
+
+This is a partial patch of:
+d9854c87f0ed ("ovl: copy up times")
+
+The whole patch is not required because it is a part of file-operations
+stacking which is not supported in 12-SP3.
+
+After setting xattributes, you need to copy the attributes in order
+to make sure the mode and ctime/mtime is set.
+
+Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
+
+diff --git a/fs/overlayfs/inode.c b/fs/overlayfs/inode.c
+index 15468acf453a..9798c7fe7408 100644
+--- a/fs/overlayfs/inode.c
++++ b/fs/overlayfs/inode.c
+@@ -286,6 +286,8 @@ int ovl_setxattr(struct dentry *dentry, const char *name,
+ 	upperdentry = ovl_dentry_upper(dentry);
+ 	err = vfs_setxattr(upperdentry, name, value, size, flags);
+ 
++	ovl_copyattr(upperdentry->d_inode, dentry->d_inode);
++
+ out_drop_write:
+ 	ovl_drop_write(dentry);
+ out:
