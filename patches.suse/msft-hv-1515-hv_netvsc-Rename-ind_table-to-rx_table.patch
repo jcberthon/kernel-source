@@ -72,4 +72,4 @@ diff --git a/drivers/net/hyperv/rndis_filter.c b/drivers/net/hyperv/rndis_filter
 +						i, net_device->num_chn);
  
  	atomic_set(&net_device->open_chn, 1);
- 	num_rss_qs = net_device->num_chn - 1;
+ 
