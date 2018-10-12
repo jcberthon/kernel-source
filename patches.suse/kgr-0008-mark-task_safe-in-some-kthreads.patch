@@ -74,7 +74,7 @@ Cc: Tejun Heo <tj@kernel.org>
  drivers/char/virtio_console.c                          |   10 ++++---
  drivers/crypto/ccp/ccp-dev.c                           |    1 
  drivers/crypto/mv_cesa.c                               |    2 +
- drivers/crypto/mxs-dcp.c                               |    4 +++
+ drivers/crypto/mxs-dcp.c                               |    2 +
  drivers/crypto/sahara.c                                |    1 
  drivers/dma/dmatest.c                                  |    6 +++-
  drivers/gpu/drm/amd/scheduler/gpu_scheduler.c          |    5 ++-
@@ -231,7 +231,7 @@ Cc: Tejun Heo <tj@kernel.org>
  net/netfilter/ipvs/ip_vs_sync.c                        |   11 +++++---
  samples/trace_events/trace-events-sample.c             |    1 
  sound/pci/emu10k1/emu10k1_main.c                       |    1 
- 186 files changed, 479 insertions(+), 168 deletions(-)
+ 186 files changed, 477 insertions(+), 168 deletions(-)
 
 --- a/arch/arm/common/bL_switcher.c
 +++ b/arch/arm/common/bL_switcher.c
@@ -386,7 +386,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		if (print)
 --- a/drivers/acpi/acpi_pad.c
 +++ b/drivers/acpi/acpi_pad.c
-@@ -149,6 +149,8 @@ static int power_saving_thread(void *dat
+@@ -152,6 +152,8 @@ static int power_saving_thread(void *dat
  	while (!kthread_should_stop()) {
  		unsigned long expire_time;
  
@@ -539,7 +539,7 @@ Cc: Tejun Heo <tj@kernel.org>
  
 --- a/drivers/char/ipmi/ipmi_ssif.c
 +++ b/drivers/char/ipmi/ipmi_ssif.c
-@@ -478,6 +478,8 @@ static int ipmi_ssif_thread(void *data)
+@@ -482,6 +482,8 @@ static int ipmi_ssif_thread(void *data)
  	while (!kthread_should_stop()) {
  		int result;
  
@@ -550,7 +550,7 @@ Cc: Tejun Heo <tj@kernel.org>
  						&ssif_info->wake_thread);
 --- a/drivers/char/random.c
 +++ b/drivers/char/random.c
-@@ -1884,9 +1884,10 @@ void add_hwgenerator_randomness(const ch
+@@ -1896,9 +1896,10 @@ void add_hwgenerator_randomness(const ch
  		 * random_write_wakeup_thresh, or when the calling
  		 * thread is about to terminate.
  		 */
@@ -612,24 +612,22 @@ Cc: Tejun Heo <tj@kernel.org>
  }
 --- a/drivers/crypto/mxs-dcp.c
 +++ b/drivers/crypto/mxs-dcp.c
-@@ -367,6 +367,8 @@ static int dcp_chan_thread_aes(void *dat
- 		}
+@@ -350,6 +350,7 @@ static int dcp_chan_thread_aes(void *dat
+ 	int ret;
  
- 		schedule();
-+
+ 	while (!kthread_should_stop()) {
 +		klp_kgraft_mark_task_safe(current);
- 	} while (!kthread_should_stop());
+ 		set_current_state(TASK_INTERRUPTIBLE);
  
- 	return 0;
-@@ -668,6 +670,8 @@ static int dcp_chan_thread_sha(void *dat
- 		}
+ 		spin_lock(&sdcp->lock[chan]);
+@@ -650,6 +651,7 @@ static int dcp_chan_thread_sha(void *dat
+ 	int ret, fini;
  
- 		schedule();
-+
+ 	while (!kthread_should_stop()) {
 +		klp_kgraft_mark_task_safe(current);
- 	} while (!kthread_should_stop());
+ 		set_current_state(TASK_INTERRUPTIBLE);
  
- 	return 0;
+ 		spin_lock(&sdcp->lock[chan]);
 --- a/drivers/crypto/sahara.c
 +++ b/drivers/crypto/sahara.c
 @@ -1040,6 +1040,7 @@ static int sahara_queue_manage(void *dat
@@ -679,7 +677,7 @@ Cc: Tejun Heo <tj@kernel.org>
  			continue;
 --- a/drivers/hv/hv_balloon.c
 +++ b/drivers/hv/hv_balloon.c
-@@ -1340,6 +1340,8 @@ static int dm_thread_func(void *dm_dev)
+@@ -1378,6 +1378,8 @@ static int dm_thread_func(void *dm_dev)
  	struct hv_dynmem_device *dm = dm_dev;
  
  	while (!kthread_should_stop()) {
@@ -784,7 +782,7 @@ Cc: Tejun Heo <tj@kernel.org>
  			goto pop_from_list;
 --- a/drivers/md/md.c
 +++ b/drivers/md/md.c
-@@ -7428,9 +7428,9 @@ static int md_thread(void *arg)
+@@ -7432,9 +7432,9 @@ static int md_thread(void *arg)
  			flush_signals(current);
  
  		wait_event_interruptible_timeout
@@ -798,7 +796,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		clear_bit(THREAD_WAKEUP, &thread->flags);
 --- a/drivers/media/dvb-core/dvb_ca_en50221.c
 +++ b/drivers/media/dvb-core/dvb_ca_en50221.c
-@@ -996,6 +996,7 @@ static int dvb_ca_en50221_thread(void *d
+@@ -1019,6 +1019,7 @@ static int dvb_ca_en50221_thread(void *d
  				return 0;
  		}
  		ca->wakeup = 0;
@@ -1040,7 +1038,7 @@ Cc: Tejun Heo <tj@kernel.org>
  
 --- a/drivers/net/ethernet/qualcomm/qca_spi.c
 +++ b/drivers/net/ethernet/qualcomm/qca_spi.c
-@@ -521,6 +521,7 @@ qcaspi_spi_thread(void *data)
+@@ -522,6 +522,7 @@ qcaspi_spi_thread(void *data)
  			schedule();
  
  		set_current_state(TASK_RUNNING);
@@ -1133,7 +1131,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		if (atomic_read(&dev->rx_thread.thread_done))
 --- a/drivers/net/xen-netback/netback.c
 +++ b/drivers/net/xen-netback/netback.c
-@@ -2052,6 +2052,7 @@ static void xenvif_wait_for_rx_work(stru
+@@ -2050,6 +2050,7 @@ static void xenvif_wait_for_rx_work(stru
  	for (;;) {
  		long ret;
  
@@ -1141,7 +1139,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		prepare_to_wait(&queue->wq, &wait, TASK_INTERRUPTIBLE);
  		if (xenvif_have_rx_work(queue))
  			break;
-@@ -2071,6 +2072,8 @@ int xenvif_kthread_guest_rx(void *data)
+@@ -2069,6 +2070,8 @@ int xenvif_kthread_guest_rx(void *data)
  		xenvif_queue_carrier_on(queue);
  
  	for (;;) {
@@ -1150,7 +1148,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		xenvif_wait_for_rx_work(queue);
  
  		if (kthread_should_stop())
-@@ -2134,9 +2137,10 @@ int xenvif_dealloc_kthread(void *data)
+@@ -2132,9 +2135,10 @@ int xenvif_dealloc_kthread(void *data)
  	struct xenvif_queue *queue = data;
  
  	for (;;) {
@@ -1253,7 +1251,7 @@ Cc: Tejun Heo <tj@kernel.org>
  	chain = 0;
 --- a/drivers/s390/scsi/zfcp_erp.c
 +++ b/drivers/s390/scsi/zfcp_erp.c
-@@ -1402,9 +1402,10 @@ static int zfcp_erp_thread(void *data)
+@@ -1471,9 +1471,10 @@ static int zfcp_erp_thread(void *data)
  	unsigned long flags;
  
  	for (;;) {
@@ -1288,7 +1286,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		if (kthread_should_stop())
 --- a/drivers/scsi/aacraid/commsup.c
 +++ b/drivers/scsi/aacraid/commsup.c
-@@ -2439,6 +2439,9 @@ int aac_command_thread(void *data)
+@@ -2434,6 +2434,9 @@ int aac_command_thread(void *data)
  	set_current_state(TASK_INTERRUPTIBLE);
  	dprintk ((KERN_INFO "aac_command_thread start\n"));
  	while (1) {
@@ -1321,7 +1319,7 @@ Cc: Tejun Heo <tj@kernel.org>
  			list_splice_init(&p->work_list, &work_list);
 --- a/drivers/scsi/ibmvscsi/ibmvfc.c
 +++ b/drivers/scsi/ibmvscsi/ibmvfc.c
-@@ -4495,8 +4495,9 @@ static int ibmvfc_work(void *data)
+@@ -4493,8 +4493,9 @@ static int ibmvfc_work(void *data)
  	set_user_nice(current, MIN_NICE);
  
  	while (1) {
@@ -1375,7 +1373,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		if (!atomic_read(&mhba->pnp_count))
 --- a/drivers/scsi/qla2xxx/qla_os.c
 +++ b/drivers/scsi/qla2xxx/qla_os.c
-@@ -5443,6 +5443,7 @@ qla2x00_do_dpc(void *data)
+@@ -5885,6 +5885,7 @@ qla2x00_do_dpc(void *data)
  		    "DPC handler sleeping.\n");
  
  		schedule();
@@ -1385,7 +1383,7 @@ Cc: Tejun Heo <tj@kernel.org>
  			goto end_loop;
 --- a/drivers/scsi/scsi_error.c
 +++ b/drivers/scsi/scsi_error.c
-@@ -2235,6 +2235,8 @@ int scsi_error_handler(void *data)
+@@ -2246,6 +2246,8 @@ int scsi_error_handler(void *data)
  	 * disables signal delivery for the created thread.
  	 */
  	while (true) {
@@ -1840,7 +1838,7 @@ Cc: Tejun Heo <tj@kernel.org>
  			spk_unprocessed_sound.active = 0;
 --- a/drivers/staging/unisys/visorhba/visorhba_main.c
 +++ b/drivers/staging/unisys/visorhba/visorhba_main.c
-@@ -1021,8 +1021,9 @@ static int process_incoming_rsps(void *v
+@@ -1027,8 +1027,9 @@ static int process_incoming_rsps(void *v
  		if (kthread_should_stop())
  			break;
  		wait_event_interruptible_timeout(
@@ -1854,7 +1852,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		drain_queue(cmdrsp, devdata);
 --- a/drivers/staging/wilc1000/host_interface.c
 +++ b/drivers/staging/wilc1000/host_interface.c
-@@ -2813,6 +2813,8 @@ static int hostIFthread(void *pvArg)
+@@ -2815,6 +2815,8 @@ static int hostIFthread(void *pvArg)
  	memset(&msg, 0, sizeof(struct host_if_msg));
  
  	while (1) {
@@ -1875,7 +1873,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		down(&wl->txq_event);
 --- a/drivers/target/iscsi/iscsi_target.c
 +++ b/drivers/target/iscsi/iscsi_target.c
-@@ -3839,8 +3839,10 @@ int iscsi_target_tx_thread(void *arg)
+@@ -3834,8 +3834,10 @@ int iscsi_target_tx_thread(void *arg)
  		 */
  		iscsit_thread_check_cpumask(conn, current, 1);
  
@@ -1888,7 +1886,7 @@ Cc: Tejun Heo <tj@kernel.org>
  
  		if (signal_pending(current))
  			goto transport_err;
-@@ -3974,6 +3976,7 @@ static void iscsit_get_rx_pdu(struct isc
+@@ -3969,6 +3971,7 @@ static void iscsit_get_rx_pdu(struct isc
  	struct kvec iov;
  
  	while (!kthread_should_stop()) {
@@ -1898,7 +1896,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		 * are scheduled to run on the same CPU.
 --- a/drivers/target/iscsi/iscsi_target_login.c
 +++ b/drivers/target/iscsi/iscsi_target_login.c
-@@ -1454,6 +1454,7 @@ int iscsi_target_login_thread(void *arg)
+@@ -1461,6 +1461,7 @@ int iscsi_target_login_thread(void *arg)
  	allow_signal(SIGINT);
  
  	while (1) {
@@ -2024,7 +2022,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		/* lock the device pointers */
 --- a/drivers/usb/usbip/stub_rx.c
 +++ b/drivers/usb/usbip/stub_rx.c
-@@ -584,6 +584,7 @@ int stub_rx_loop(void *data)
+@@ -621,6 +621,7 @@ int stub_rx_loop(void *data)
  	struct usbip_device *ud = data;
  
  	while (!kthread_should_stop()) {
@@ -2065,7 +2063,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		if (event_handler(ud) < 0)
 --- a/drivers/usb/usbip/vhci_rx.c
 +++ b/drivers/usb/usbip/vhci_rx.c
-@@ -258,6 +258,7 @@ int vhci_rx_loop(void *data)
+@@ -261,6 +261,7 @@ int vhci_rx_loop(void *data)
  	struct usbip_device *ud = data;
  
  	while (!kthread_should_stop()) {
@@ -2075,7 +2073,7 @@ Cc: Tejun Heo <tj@kernel.org>
  
 --- a/drivers/usb/usbip/vhci_tx.c
 +++ b/drivers/usb/usbip/vhci_tx.c
-@@ -212,10 +212,11 @@ int vhci_tx_loop(void *data)
+@@ -215,10 +215,11 @@ int vhci_tx_loop(void *data)
  		if (vhci_send_cmd_unlink(vdev) < 0)
  			break;
  
@@ -2106,7 +2104,7 @@ Cc: Tejun Heo <tj@kernel.org>
  			break;
 --- a/drivers/vhost/vhost.c
 +++ b/drivers/vhost/vhost.c
-@@ -291,6 +291,7 @@ static int vhost_worker(void *data)
+@@ -290,6 +290,7 @@ static int vhost_worker(void *data)
  	use_mm(dev->mm);
  
  	for (;;) {
@@ -2116,7 +2114,7 @@ Cc: Tejun Heo <tj@kernel.org>
  
 --- a/drivers/virtio/virtio_balloon.c
 +++ b/drivers/virtio/virtio_balloon.c
-@@ -370,6 +370,8 @@ static int balloon(void *_vballoon)
+@@ -372,6 +372,8 @@ static int balloon(void *_vballoon)
  
  		add_wait_queue(&vb->config_change, &wait);
  		for (;;) {
@@ -2151,7 +2149,7 @@ Cc: Tejun Heo <tj@kernel.org>
  
 --- a/fs/cifs/connect.c
 +++ b/fs/cifs/connect.c
-@@ -941,6 +941,7 @@ cifs_demultiplex_thread(void *p)
+@@ -943,6 +943,7 @@ cifs_demultiplex_thread(void *p)
  	if (!task_to_wake) {
  		set_current_state(TASK_INTERRUPTIBLE);
  		while (!signal_pending(current)) {
@@ -2210,7 +2208,7 @@ Cc: Tejun Heo <tj@kernel.org>
  			mutex_unlock(&ecryptfs_kthread_ctl.mux);
 --- a/fs/ext4/mmp.c
 +++ b/fs/ext4/mmp.c
-@@ -159,6 +159,7 @@ static int kmmpd(void *data)
+@@ -158,6 +158,7 @@ static int kmmpd(void *data)
  	       sizeof(mmp->mmp_nodename));
  
  	while (!kthread_should_stop()) {
@@ -2220,7 +2218,7 @@ Cc: Tejun Heo <tj@kernel.org>
  
 --- a/fs/f2fs/segment.c
 +++ b/fs/f2fs/segment.c
-@@ -347,8 +347,9 @@ repeat:
+@@ -350,8 +350,9 @@ repeat:
  		fcc->dispatch_list = NULL;
  	}
  
@@ -2322,7 +2320,7 @@ Cc: Tejun Heo <tj@kernel.org>
  						 timeout);
  	}
  
-@@ -732,8 +733,9 @@ static int dlm_remaster_locks(struct dlm
+@@ -739,8 +740,9 @@ static int dlm_remaster_locks(struct dlm
  		}
  		/* wait to be signalled, with periodic timeout
  		 * to check for node death */
@@ -2366,7 +2364,7 @@ Cc: Tejun Heo <tj@kernel.org>
  
 --- a/fs/ocfs2/journal.c
 +++ b/fs/ocfs2/journal.c
-@@ -2293,9 +2293,10 @@ static int ocfs2_commit_thread(void *arg
+@@ -2294,9 +2294,10 @@ static int ocfs2_commit_thread(void *arg
  	while (!(kthread_should_stop() &&
  		 atomic_read(&journal->j_num_trans) == 0)) {
  
@@ -2471,7 +2469,7 @@ Cc: Tejun Heo <tj@kernel.org>
  	might_sleep();
  
  	if (unlikely(freezing(current)))
-@@ -538,6 +540,7 @@ int kthreadd(void *unused)
+@@ -544,6 +546,7 @@ int kthreadd(void *unused)
  		if (list_empty(&kthread_create_list))
  			schedule();
  		__set_current_state(TASK_RUNNING);
@@ -2787,7 +2785,7 @@ Cc: Tejun Heo <tj@kernel.org>
  				schedule_timeout_interruptible(stutter - 1);
 --- a/kernel/trace/ring_buffer.c
 +++ b/kernel/trace/ring_buffer.c
-@@ -4832,6 +4832,7 @@ static __init int rb_test(void *arg)
+@@ -4854,6 +4854,7 @@ static __init int rb_test(void *arg)
  	struct rb_test_data *data = arg;
  
  	while (!kthread_should_stop()) {
@@ -2795,7 +2793,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		rb_write_something(data, false);
  		data->cnt++;
  
-@@ -4855,6 +4856,7 @@ static __init void rb_ipi(void *ignore)
+@@ -4877,6 +4878,7 @@ static __init void rb_ipi(void *ignore)
  static __init int rb_hammer_test(void *arg)
  {
  	while (!kthread_should_stop()) {
@@ -2833,7 +2831,7 @@ Cc: Tejun Heo <tj@kernel.org>
  
 --- a/kernel/trace/trace_events.c
 +++ b/kernel/trace/trace_events.c
-@@ -3212,6 +3212,7 @@ static __init int event_test_thread(void
+@@ -3226,6 +3226,7 @@ static __init int event_test_thread(void
  
  	set_current_state(TASK_INTERRUPTIBLE);
  	while (!kthread_should_stop()) {
@@ -2872,7 +2870,7 @@ Cc: Tejun Heo <tj@kernel.org>
  	 * shouldn't have any work pending, but @wq->maydays may still have
 --- a/mm/huge_memory.c
 +++ b/mm/huge_memory.c
-@@ -2993,6 +2993,7 @@ static void khugepaged_do_scan(void)
+@@ -2990,6 +2990,7 @@ static void khugepaged_do_scan(void)
  			break;
  
  		cond_resched();
@@ -2880,7 +2878,7 @@ Cc: Tejun Heo <tj@kernel.org>
  
  		if (unlikely(kthread_should_stop() || try_to_freeze()))
  			break;
-@@ -3019,14 +3020,17 @@ static void khugepaged_wait_work(void)
+@@ -3016,14 +3017,17 @@ static void khugepaged_wait_work(void)
  		if (!khugepaged_scan_sleep_millisecs)
  			return;
  
@@ -2903,7 +2901,7 @@ Cc: Tejun Heo <tj@kernel.org>
  static int khugepaged(void *none)
 --- a/mm/kmemleak.c
 +++ b/mm/kmemleak.c
-@@ -1492,6 +1492,8 @@ static int kmemleak_scan_thread(void *ar
+@@ -1494,6 +1494,8 @@ static int kmemleak_scan_thread(void *ar
  	while (!kthread_should_stop()) {
  		signed long timeout = jiffies_scan_wait;
  
@@ -2914,7 +2912,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		mutex_unlock(&scan_mutex);
 --- a/mm/ksm.c
 +++ b/mm/ksm.c
-@@ -1760,8 +1760,9 @@ static int ksm_scan_thread(void *nothing
+@@ -1788,8 +1788,9 @@ static int ksm_scan_thread(void *nothing
  			schedule_timeout_interruptible(
  				msecs_to_jiffies(ksm_thread_sleep_millisecs));
  		} else {
@@ -2969,7 +2967,7 @@ Cc: Tejun Heo <tj@kernel.org>
  
 --- a/net/netfilter/ipvs/ip_vs_sync.c
 +++ b/net/netfilter/ipvs/ip_vs_sync.c
-@@ -1693,6 +1693,7 @@ static int sync_thread_master(void *data
+@@ -1673,6 +1673,7 @@ static int sync_thread_master(void *data
  		ipvs->mcfg.mcast_ifn, ipvs->mcfg.syncid, tinfo->id);
  
  	for (;;) {
@@ -2977,7 +2975,7 @@ Cc: Tejun Heo <tj@kernel.org>
  		sb = next_sync_buff(ipvs, ms);
  		if (unlikely(kthread_should_stop()))
  			break;
-@@ -1704,9 +1705,10 @@ static int sync_thread_master(void *data
+@@ -1684,9 +1685,10 @@ static int sync_thread_master(void *data
  			/* (Ab)use interruptible sleep to avoid increasing
  			 * the load avg.
  			 */
@@ -2990,7 +2988,7 @@ Cc: Tejun Heo <tj@kernel.org>
  			if (unlikely(kthread_should_stop()))
  				goto done;
  		}
-@@ -1747,9 +1749,10 @@ static int sync_thread_backup(void *data
+@@ -1727,9 +1729,10 @@ static int sync_thread_backup(void *data
  		ipvs->bcfg.mcast_ifn, ipvs->bcfg.syncid, tinfo->id);
  
  	while (!kthread_should_stop()) {

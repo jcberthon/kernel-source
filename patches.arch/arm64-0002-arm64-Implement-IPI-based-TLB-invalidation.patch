@@ -28,21 +28,23 @@ Signed-off-by: Robert Richter <rrichter@cavium.com>
 Signed-off-by: Alexander Graf <agraf@suse.de>
 Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 ---
- arch/arm64/include/asm/cpufeature.h |    3 -
+ arch/arm64/include/asm/cpufeature.h |    5 +
  arch/arm64/include/asm/tlbflush.h   |   94 +++++++++++++++++++++++++++++++-----
  arch/arm64/mm/flush.c               |   46 +++++++++++++++++
- 3 files changed, 129 insertions(+), 14 deletions(-)
+ 3 files changed, 130 insertions(+), 15 deletions(-)
 
 --- a/arch/arm64/include/asm/cpufeature.h
 +++ b/arch/arm64/include/asm/cpufeature.h
-@@ -32,8 +32,9 @@
+@@ -32,9 +32,10 @@
  #define ARM64_WORKAROUND_834220			7
  #define ARM64_WORKAROUND_CAVIUM_27456		8
  #define ARM64_HAS_NO_HW_PREFETCH		9
+-#define ARM64_HAS_32BIT_EL0			10
 +#define ARM64_HAS_NO_BCAST_TLBI			10
++#define ARM64_HAS_32BIT_EL0			11
  
--#define ARM64_NCAPS				10
-+#define ARM64_NCAPS				11
+-#define ARM64_NCAPS				11
++#define ARM64_NCAPS				12
  
  #ifndef __ASSEMBLY__
  

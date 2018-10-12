@@ -1,9 +1,12 @@
 From: Johan Hovold <johan@kernel.org>
 Date: Tue, 12 Jun 2018 14:43:35 +0200
-Subject: EDAC, i7core: Fix memleaks and use-after-free on probe and remove
+Subject: [PATCH] EDAC, i7core: Fix memleaks and use-after-free on probe and
+ remove
+Patch-mainline: 4.4.160
+References: bnc#1012382 bsc#1109441
 Git-commit: 6c974d4dfafe5e9ee754f2a6fba0eb1864f1649e
-Patch-mainline: v4.19-rc1
-References: bsc#1109441
+
+[ Upstream commit 6c974d4dfafe5e9ee754f2a6fba0eb1864f1649e ]
 
 Make sure to free and deregister the addrmatch and chancounts devices
 allocated during probe in all error paths. Also fix use-after-free in a
@@ -16,15 +19,18 @@ Cc: linux-edac <linux-edac@vger.kernel.org>
 Fixes: 356f0a30860d ("i7core_edac: change the mem allocation scheme to make Documentation/kobject.txt happy")
 Link: http://lkml.kernel.org/r/20180612124335.6420-2-johan@kernel.org
 Signed-off-by: Borislav Petkov <bp@suse.de>
+Signed-off-by: Sasha Levin <alexander.levin@microsoft.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  drivers/edac/i7core_edac.c | 22 +++++++++++++++-------
  1 file changed, 15 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/edac/i7core_edac.c b/drivers/edac/i7core_edac.c
-index 8ed4dd9c571b..8e120bf60624 100644
+index 792bdae2b91d..d14c8ffea910 100644
 --- a/drivers/edac/i7core_edac.c
 +++ b/drivers/edac/i7core_edac.c
-@@ -1177,15 +1177,14 @@ static int i7core_create_sysfs_devices(struct mem_ctl_info *mci)
+@@ -1187,15 +1187,14 @@ static int i7core_create_sysfs_devices(struct mem_ctl_info *mci)
  
  	rc = device_add(pvt->addrmatch_dev);
  	if (rc < 0)
@@ -43,7 +49,7 @@ index 8ed4dd9c571b..8e120bf60624 100644
  		}
  
  		pvt->chancounts_dev->type = &all_channel_counts_type;
-@@ -1199,9 +1198,18 @@ static int i7core_create_sysfs_devices(struct mem_ctl_info *mci)
+@@ -1209,9 +1208,18 @@ static int i7core_create_sysfs_devices(struct mem_ctl_info *mci)
  
  		rc = device_add(pvt->chancounts_dev);
  		if (rc < 0)
@@ -63,7 +69,7 @@ index 8ed4dd9c571b..8e120bf60624 100644
  }
  
  static void i7core_delete_sysfs_devices(struct mem_ctl_info *mci)
-@@ -1211,11 +1219,11 @@ static void i7core_delete_sysfs_devices(struct mem_ctl_info *mci)
+@@ -1221,11 +1229,11 @@ static void i7core_delete_sysfs_devices(struct mem_ctl_info *mci)
  	edac_dbg(1, "\n");
  
  	if (!pvt->is_registered) {
@@ -77,4 +83,6 @@ index 8ed4dd9c571b..8e120bf60624 100644
  }
  
  /****************************************************************************
+-- 
+2.19.1
 
