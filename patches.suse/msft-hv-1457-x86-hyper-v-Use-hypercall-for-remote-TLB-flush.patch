@@ -127,7 +127,7 @@ index 000000000000..9419a20b1d75
 +	return gva_n - offset;
 +}
 +
-+static void hyperv_flush_tlb_others(const struct cpumask *cpus,
++static void hyperv_flush_tlb_others(struct cpumask *cpus,
 +				struct mm_struct *mm, unsigned long start, unsigned long end)
 +{
 +	int cpu, vcpu, gva_n, max_gvas;

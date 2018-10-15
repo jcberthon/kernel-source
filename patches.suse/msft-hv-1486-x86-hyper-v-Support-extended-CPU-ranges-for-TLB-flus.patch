@@ -91,14 +91,14 @@ diff --git a/arch/x86/hyperv/mmu.c b/arch/x86/hyperv/mmu.c
 +	return nr_bank;
 +}
 +
- static void hyperv_flush_tlb_others(const struct cpumask *cpus,
+ static void hyperv_flush_tlb_others(struct cpumask *cpus,
  				struct mm_struct *mm, unsigned long start, unsigned long end)
  {
 @@ -122,17 +164,102 @@ do_native:
  	native_flush_tlb_others(cpus, mm, start, end);
  }
  
-+static void hyperv_flush_tlb_others_ex(const struct cpumask *cpus,
++static void hyperv_flush_tlb_others_ex(struct cpumask *cpus,
 +				struct mm_struct *mm, unsigned long start, unsigned long end)
 +{
 +	int nr_bank = 0, max_gvas, gva_n;
