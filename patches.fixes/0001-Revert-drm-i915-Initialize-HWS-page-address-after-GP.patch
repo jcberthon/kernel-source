@@ -1,0 +1,52 @@
+From fb1a21114fe18e2ee96ea159c6b42441cc3aedf1 Mon Sep 17 00:00:00 2001
+From: Arun Siluvery <arun.siluvery@linux.intel.com>
+Date: Thu, 19 Nov 2015 16:47:44 +0000
+Subject: Revert "drm/i915: Initialize HWS page address after GPU reset"
+Git-commit: fb1a21114fe18e2ee96ea159c6b42441cc3aedf1
+Patch-mainline: v4.3-rc3
+References: bsc#1106929
+
+This reverts commit 2e5356da370e36ba7aab39d2800c7a2412630ae7.
+
+It is now redundant as it is already covered in below commit which introduced
+the changes to reuse initialization of resources in resume/reset path.
+
+commit e84fe80337dc85cca07d0417ea97edbec4789d8b
+Author: Nick Hoath <nicholas.hoath@intel.com>
+Date:   Fri Sep 11 12:53:46 2015 +0100
+
+    drm/i915: Split alloc from init for lrc
+
+lrc_setup_hardware_status_page() in the same function gen8_init_common_ring()
+takes care of this.
+
+Cc: Nick Hoath <nicholas.hoath@intel.com>
+Cc: Daniel Vetter <daniel.vetter@ffwll.ch>
+Signed-off-by: Arun Siluvery <arun.siluvery@linux.intel.com>
+Link: http://patchwork.freedesktop.org/patch/msgid/1447951664-9347-1-git-send-email-arun.siluvery@linux.intel.com
+Signed-off-by: Daniel Vetter <daniel.vetter@ffwll.ch>
+Acked-by: Thomas Zimmermann <tzimmermann@suse.de>
+---
+ drivers/gpu/drm/i915/intel_lrc.c | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/drivers/gpu/drm/i915/intel_lrc.c b/drivers/gpu/drm/i915/intel_lrc.c
+index 99fcbd4e153e..c276f63cf819 100644
+--- a/drivers/gpu/drm/i915/intel_lrc.c
++++ b/drivers/gpu/drm/i915/intel_lrc.c
+@@ -1476,12 +1476,6 @@ static int gen8_init_common_ring(struct intel_engine_cs *ring)
+ 	I915_WRITE_IMR(ring, ~(ring->irq_enable_mask | ring->irq_keep_mask));
+ 	I915_WRITE(RING_HWSTAM(ring->mmio_base), 0xffffffff);
+ 
+-	if (ring->status_page.obj) {
+-		I915_WRITE(RING_HWS_PGA(ring->mmio_base),
+-			   (u32)ring->status_page.gfx_addr);
+-		POSTING_READ(RING_HWS_PGA(ring->mmio_base));
+-	}
+-
+ 	I915_WRITE(RING_MODE_GEN7(ring),
+ 		   _MASKED_BIT_DISABLE(GFX_REPLAY_MODE) |
+ 		   _MASKED_BIT_ENABLE(GFX_RUN_LIST_ENABLE));
+-- 
+2.19.0
+
