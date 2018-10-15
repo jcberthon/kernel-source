@@ -1,10 +1,11 @@
-From 513f86d73855ce556ea9522b6bfd79f87356dc3a Mon Sep 17 00:00:00 2001
 From: Theodore Ts'o <tytso@mit.edu>
 Date: Wed, 13 Jun 2018 00:51:28 -0400
 Subject: [PATCH] ext4: always verify the magic number in xattr blocks
+Patch-mainline: 4.4.161
+References: bnc#1012382 bsc#1099844 cve-2018-10879
 Git-commit: 513f86d73855ce556ea9522b6bfd79f87356dc3a
-Patch-mainline: v4.18-rc4
-References: bsc#1099844 cve-2018-10879
+
+commit 513f86d73855ce556ea9522b6bfd79f87356dc3a upstream.
 
 If there an inode points to a block which is also some other type of
 metadata block (such as a block allocation bitmap), the
@@ -21,16 +22,19 @@ https://bugzilla.kernel.org/show_bug.cgi?id=200001
 
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 Reviewed-by: Andreas Dilger <adilger@dilger.ca>
-Cc: stable@kernel.org
-Acked-by: Jan Kara <jack@suse.cz>
-
+[Backported to 4.4: adjust context]
+Signed-off-by: Daniel Rosenberg <drosen@google.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- fs/ext4/xattr.c |    6 +++---
+ fs/ext4/xattr.c | 6 +++---
  1 file changed, 3 insertions(+), 3 deletions(-)
 
+diff --git a/fs/ext4/xattr.c b/fs/ext4/xattr.c
+index b51bb73b06a6..d0aaf338fa9f 100644
 --- a/fs/ext4/xattr.c
 +++ b/fs/ext4/xattr.c
-@@ -218,12 +218,12 @@ ext4_xattr_check_block(struct inode *ino
+@@ -220,12 +220,12 @@ ext4_xattr_check_block(struct inode *inode, struct buffer_head *bh)
  {
  	int error;
  
@@ -46,3 +50,6 @@ Acked-by: Jan Kara <jack@suse.cz>
  	if (!ext4_xattr_block_csum_verify(inode, bh->b_blocknr, BHDR(bh)))
  		return -EFSBADCRC;
  	error = ext4_xattr_check_names(BFIRST(bh), bh->b_data + bh->b_size,
+-- 
+2.19.1
+

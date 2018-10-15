@@ -1,11 +1,11 @@
-From 06aa71d283d1e78ef633ca8b918917eeb78d5a66 Mon Sep 17 00:00:00 2001
 From: Jann Horn <jannh@google.com>
 Date: Fri, 5 Oct 2018 15:52:07 -0700
 Subject: [PATCH] mm/vmstat.c: skip NR_TLB_REMOTE_FLUSH* properly
-
-References: git fixes
-Patch-mainline: v4.19
+References: bnc#1012382
+Patch-mainline: 4.4.161
 Git-commit: 58bc4c34d249bf1bc50730a9a209139347cfacfe
+
+commit 58bc4c34d249bf1bc50730a9a209139347cfacfe upstream.
 
 5dd0b16cdaff ("mm/vmstat: Make NR_TLB_REMOTE_FLUSH_RECEIVED available even
 on UP") made the availability of the NR_TLB_REMOTE_FLUSH* counters inside
@@ -33,16 +33,16 @@ Cc: Ingo Molnar <mingo@kernel.org>
 Cc: <stable@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Signed-off-by: Mel Gorman <mgorman@suse.de>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  mm/vmstat.c | 3 +++
  1 file changed, 3 insertions(+)
 
 diff --git a/mm/vmstat.c b/mm/vmstat.c
-index 94e94f444f05..8828e1f5c387 100644
+index 5712cdaae964..8895eff2d735 100644
 --- a/mm/vmstat.c
 +++ b/mm/vmstat.c
-@@ -837,6 +837,9 @@ const char * const vmstat_text[] = {
+@@ -858,6 +858,9 @@ const char * const vmstat_text[] = {
  #ifdef CONFIG_SMP
  	"nr_tlb_remote_flush",
  	"nr_tlb_remote_flush_received",
@@ -52,3 +52,6 @@ index 94e94f444f05..8828e1f5c387 100644
  #endif /* CONFIG_SMP */
  	"nr_tlb_local_flush_all",
  	"nr_tlb_local_flush_one",
+-- 
+2.19.1
+

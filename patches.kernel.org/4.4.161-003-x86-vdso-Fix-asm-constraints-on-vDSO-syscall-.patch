@@ -1,9 +1,11 @@
 From: Andy Lutomirski <luto@kernel.org>
 Date: Mon, 1 Oct 2018 12:52:15 -0700
-Subject: x86/vdso: Fix asm constraints on vDSO syscall fallbacks
+Subject: [PATCH] x86/vdso: Fix asm constraints on vDSO syscall fallbacks
+Patch-mainline: 4.4.161
+References: bnc#1012382 bsc#1110006
 Git-commit: 715bd9d12f84d8f5cc8ad21d888f9bc304a8eb0b
-Patch-mainline: v4.19-rc7
-References: bsc#1110006
+
+commit 715bd9d12f84d8f5cc8ad21d888f9bc304a8eb0b upstream.
 
 The syscall fallbacks in the vDSO have incorrect asm constraints.
 They are not marked as writing to their outputs -- instead, they are
@@ -41,15 +43,17 @@ Signed-off-by: Andy Lutomirski <luto@kernel.org>
 Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
 Cc: stable@vger.kernel.org
 Link: https://lkml.kernel.org/r/2c0231690551989d2fafa60ed0e7b5cc8b403908.1538422295.git.luto@kernel.org
-
-Acked-by: Joerg Roedel <jroedel@suse.de>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  arch/x86/entry/vdso/vclock_gettime.c | 18 ++++++++++--------
  1 file changed, 10 insertions(+), 8 deletions(-)
 
+diff --git a/arch/x86/entry/vdso/vclock_gettime.c b/arch/x86/entry/vdso/vclock_gettime.c
+index 5dd363d54348..722cbed8026b 100644
 --- a/arch/x86/entry/vdso/vclock_gettime.c
 +++ b/arch/x86/entry/vdso/vclock_gettime.c
-@@ -48,8 +48,9 @@ extern u8 pvclock_page
+@@ -51,8 +51,9 @@ extern u8 pvclock_page
  notrace static long vdso_fallback_gettime(long clock, struct timespec *ts)
  {
  	long ret;
@@ -61,7 +65,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	return ret;
  }
  
-@@ -57,8 +58,9 @@ notrace static long vdso_fallback_gtod(s
+@@ -60,8 +61,9 @@ notrace static long vdso_fallback_gtod(struct timeval *tv, struct timezone *tz)
  {
  	long ret;
  
@@ -73,7 +77,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	return ret;
  }
  
-@@ -69,12 +71,12 @@ notrace static long vdso_fallback_gettim
+@@ -143,12 +145,12 @@ notrace static long vdso_fallback_gettime(long clock, struct timespec *ts)
  {
  	long ret;
  
@@ -88,7 +92,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		: "0" (__NR_clock_gettime), "g" (clock), "c" (ts)
  		: "memory", "edx");
  	return ret;
-@@ -84,12 +86,12 @@ notrace static long vdso_fallback_gtod(s
+@@ -158,12 +160,12 @@ notrace static long vdso_fallback_gtod(struct timeval *tv, struct timezone *tz)
  {
  	long ret;
  
@@ -103,3 +107,6 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		: "0" (__NR_gettimeofday), "g" (tv), "c" (tz)
  		: "memory", "edx");
  	return ret;
+-- 
+2.19.1
+

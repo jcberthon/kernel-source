@@ -1,9 +1,11 @@
 From: Andy Lutomirski <luto@kernel.org>
 Date: Wed, 3 Oct 2018 16:23:49 -0700
-Subject: x86/vdso: Fix vDSO syscall fallback asm constraint regression
+Subject: [PATCH] x86/vdso: Fix vDSO syscall fallback asm constraint regression
+Patch-mainline: 4.4.161
+References: bnc#1012382 bsc#1110006
 Git-commit: 02e425668f5c9deb42787d10001a3b605993ad15
-Patch-mainline: v4.19-rc7
-References: bsc#1110006
+
+commit 02e425668f5c9deb42787d10001a3b605993ad15 upstream.
 
 When I added the missing memory outputs, I failed to update the
 index of the first argument (ebx) on 32-bit builds, which broke the
@@ -20,15 +22,17 @@ Cc: stable@vger.kernel.org
 Fixes: 715bd9d12f84 ("x86/vdso: Fix asm constraints on vDSO syscall fallbacks")
 Link: http://lkml.kernel.org/r/21bd45ab04b6d838278fa5bebfa9163eceffa13c.1538608971.git.luto@kernel.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Acked-by: Joerg Roedel <jroedel@suse.de>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- arch/x86/entry/vdso/vclock_gettime.c    |  8 ++--
- tools/testing/selftests/x86/test_vdso.c | 73 +++++++++++++++++++++++++++++++++
- 2 files changed, 77 insertions(+), 4 deletions(-)
+ arch/x86/entry/vdso/vclock_gettime.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
+diff --git a/arch/x86/entry/vdso/vclock_gettime.c b/arch/x86/entry/vdso/vclock_gettime.c
+index 722cbed8026b..049327ee8868 100644
 --- a/arch/x86/entry/vdso/vclock_gettime.c
 +++ b/arch/x86/entry/vdso/vclock_gettime.c
-@@ -73,11 +73,11 @@ notrace static long vdso_fallback_gettim
+@@ -147,11 +147,11 @@ notrace static long vdso_fallback_gettime(long clock, struct timespec *ts)
  
  	asm (
  		"mov %%ebx, %%edx \n"
@@ -42,7 +46,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		: "memory", "edx");
  	return ret;
  }
-@@ -88,11 +88,11 @@ notrace static long vdso_fallback_gtod(s
+@@ -162,11 +162,11 @@ notrace static long vdso_fallback_gtod(struct timeval *tv, struct timezone *tz)
  
  	asm (
  		"mov %%ebx, %%edx \n"
@@ -56,3 +60,6 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		: "memory", "edx");
  	return ret;
  }
+-- 
+2.19.1
+
