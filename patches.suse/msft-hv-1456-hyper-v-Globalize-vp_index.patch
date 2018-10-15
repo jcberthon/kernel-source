@@ -40,15 +40,16 @@ Acked-by: Olaf Hering <ohering@suse.de>
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
-@@ -26,6 +26,7 @@
+@@ -27,6 +27,8 @@
  #include <linux/mm.h>
  #include <linux/clockchips.h>
  #include <linux/hyperv.h>
 +#include <linux/slab.h>
++#include <linux/cpu.h>
  
  #ifdef CONFIG_HYPERV_TSCPAGE
  
-@@ -80,6 +82,24 @@ EXPORT_SYMBOL_GPL(hv_hypercall_pg);
+@@ -80,6 +82,29 @@ EXPORT_SYMBOL_GPL(hv_hypercall_pg);
  struct clocksource *hyperv_cs;
  EXPORT_SYMBOL_GPL(hyperv_cs);
  
@@ -66,14 +67,19 @@ diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
 +	return 0;
 +}
 +
-+static void _hv_cpu_init(void *p)
++static int _hv_cpu_init(struct notifier_block *self, unsigned long action, void *hcpu)
 +{
-+	hv_cpu_init((unsigned long)p);
++	if (action == CPU_STARTING)
++		hv_cpu_init((unsigned long)hcpu);
++	return NOTIFY_OK;
 +}
++static struct notifier_block _hv_cpu_notifier = {
++	.notifier_call	= _hv_cpu_init,
++};
  /*
   * This function is to be invoked early in the boot sequence after the
   * hypervisor has been detected.
-@@ -95,6 +111,20 @@ void hyperv_init(void)
+@@ -95,6 +111,16 @@ void hyperv_init(void)
  	if (x86_hyper != &x86_hyper_ms_hyperv)
  		return;
  
@@ -83,13 +89,9 @@ diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
 +	if (!hv_vp_index)
 +		return;
 +
-+	{ int cpu; preempt_disable();
 +	hv_cpu_init(smp_processor_id());
-+	for_each_online_cpu(cpu) {
-+		if (cpu == smp_processor_id()) continue;
-+		smp_call_function_single(cpu, _hv_cpu_init, (void *)(long)cpu, true);
-+	}
-+	preempt_enable(); }
++
++	register_cpu_notifier(&_hv_cpu_notifier);
 +
  	/*
  	 * Setup the hypercall page and enable hypercalls.
