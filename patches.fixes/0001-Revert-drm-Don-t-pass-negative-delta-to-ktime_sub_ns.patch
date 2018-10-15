@@ -1,0 +1,58 @@
+From a91d7b9142b91c9567bc0304cb7d718ac411e85e Mon Sep 17 00:00:00 2001
+From: Daniel Vetter <daniel.vetter@ffwll.ch>
+Date: Tue, 29 Mar 2016 13:12:22 +0200
+Subject: Revert "drm: Don't pass negative delta to ktime_sub_ns()"
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Git-commit: a91d7b9142b91c9567bc0304cb7d718ac411e85e
+Patch-mainline: v4.5-rc3
+References: bsc#1106929
+
+This reverts commit e91abf80a0998f326107874c88d549f94839f13c.
+
+Since
+
+commit 24e4a8c3e8868874835b0f1ad6dd417341e99822
+Author: John Stultz <john.stultz@linaro.org>
+Date:   Wed Jul 16 21:03:53 2014 +0000
+
+    ktime: Kill non-scalar ktime_t implementation for 2038
+
+there is no longer a 32bit version that's unsigned, and we don't have
+to jump through ridiculous hoops to make the calculations correct.
+
+I didn't look whether there's more of this pattern in the kernel.
+
+Cc: John Stultz <john.stultz@linaro.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Michel Dänzer <michel.daenzer@amd.com>
+Cc: Imre Deak <imre.deak@intel.com>
+Cc: Dave Airlie <airlied@redhat.com>
+Reviewed-by: Imre Deak <imre.deak@intel.com>
+Signed-off-by: Daniel Vetter <daniel.vetter@intel.com>
+Link: http://patchwork.freedesktop.org/patch/msgid/1459249942-21589-1-git-send-email-daniel.vetter@ffwll.ch
+Acked-by: Thomas Zimmermann <tzimmermann@suse.de>
+---
+ drivers/gpu/drm/drm_irq.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/drivers/gpu/drm/drm_irq.c b/drivers/gpu/drm/drm_irq.c
+index 96d03ac38ef7..bfc4b379f0b5 100644
+--- a/drivers/gpu/drm/drm_irq.c
++++ b/drivers/gpu/drm/drm_irq.c
+@@ -805,10 +805,7 @@ int drm_calc_vbltimestamp_from_scanoutpos(struct drm_device *dev,
+ 	/* Subtract time delta from raw timestamp to get final
+ 	 * vblank_time timestamp for end of vblank.
+ 	 */
+-	if (delta_ns < 0)
+-		etime = ktime_add_ns(etime, -delta_ns);
+-	else
+-		etime = ktime_sub_ns(etime, delta_ns);
++	etime = ktime_sub_ns(etime, delta_ns);
+ 	*vblank_time = ktime_to_timeval(etime);
+ 
+ 	DRM_DEBUG_VBL("crtc %u : v 0x%x p(%d,%d)@ %ld.%ld -> %ld.%ld [e %d us, %d rep]\n",
+-- 
+2.19.0
+
