@@ -1,0 +1,56 @@
+From: Heiko Carstens <heiko.carstens@de.ibm.com>
+Date: Mon, 1 Feb 2016 10:13:05 +0100
+Subject: s390/stacktrace: fix address ranges for asynchronous and panic stack
+Git-commit: 9900c48c46d8bcf497972024c5fe366e6d9771f3
+Patch-mainline: v4.5-rc5
+References: git-fixes
+
+git commit dc7ee00d4771 ("s390: lowcore stack pointer offsets")
+introduced a regression in regard to save_stack_trace(). The stack
+pointer for the asynchronous and the panic stack in the lowcore now
+have an additional offset applied to them. This offset needs to be
+taken into account in the calculation for the low and high address for
+the stacks.
+
+This bug was already partially fixed with 9cc5c206d9b4
+("s390/dumpstack: fix address ranges for asynchronous and panic
+stack"). This patch fixes it also for the stacktrace code.
+
+Fixes: dc7ee00d4771 ("s390: lowcore stack pointer offsets")
+Signed-off-by: Heiko Carstens <heiko.carstens@de.ibm.com>
+Tested-by: Peter Oberparleiter <oberpar@linux.vnet.ibm.com>
+Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+Acked-by: Petr Tesarik <ptesarik@suse.com>
+---
+ arch/s390/kernel/stacktrace.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/arch/s390/kernel/stacktrace.c b/arch/s390/kernel/stacktrace.c
+index dd484c75be56..225bed00aa92 100644
+--- a/arch/s390/kernel/stacktrace.c
++++ b/arch/s390/kernel/stacktrace.c
+@@ -62,17 +62,18 @@ static unsigned long save_context_stack(struct stack_trace *trace,
+ void save_stack_trace(struct stack_trace *trace)
+ {
+ 	register unsigned long sp asm ("15");
+-	unsigned long orig_sp, new_sp;
++	unsigned long orig_sp, new_sp, frame_size;
+ 
++	frame_size = STACK_FRAME_OVERHEAD + sizeof(struct pt_regs);
+ 	orig_sp = sp & PSW_ADDR_INSN;
+ 	new_sp = save_context_stack(trace, orig_sp,
+-				    S390_lowcore.panic_stack - PAGE_SIZE,
+-				    S390_lowcore.panic_stack, 1);
++			S390_lowcore.panic_stack + frame_size - PAGE_SIZE,
++			S390_lowcore.panic_stack + frame_size, 1);
+ 	if (new_sp != orig_sp)
+ 		return;
+ 	new_sp = save_context_stack(trace, new_sp,
+-				    S390_lowcore.async_stack - ASYNC_SIZE,
+-				    S390_lowcore.async_stack, 1);
++			S390_lowcore.async_stack + frame_size - ASYNC_SIZE,
++			S390_lowcore.async_stack + frame_size, 1);
+ 	if (new_sp != orig_sp)
+ 		return;
+ 	save_context_stack(trace, new_sp,
+

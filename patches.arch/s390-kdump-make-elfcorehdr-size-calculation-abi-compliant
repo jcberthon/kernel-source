@@ -1,0 +1,64 @@
+From: Philipp Rudo <prudo@linux.ibm.com>
+Date: Mon, 6 Aug 2018 13:39:52 +0200
+Subject: s390/kdump: Make elfcorehdr size calculation ABI compliant
+Git-commit: 263b0e480c9b0fda77a89f5d6375d8a39de5c166
+Patch-mainline: v4.19-rc1
+References: git-fixes
+
+There are two ways to pass the vmcoreinfo to the crash kernel 1) via the
+os_info mechanism and 2) via the lowcore->vmcore_info field. In the Linux
+kernel only the second way is used. However, the first way is ABI for
+stand-alone kdump. So other OSes use it to pass additional debug info. Make
+the elfcorehdr size calculation aware of both possible ways.
+
+Fixes: 8cce437fbb5c ("s390/kdump: Fix elfcorehdr size calculation")
+Signed-off-by: Philipp Rudo <prudo@linux.ibm.com>
+Acked-by: Heiko Carstens <heiko.carstens@de.ibm.com>
+Signed-off-by: Heiko Carstens <heiko.carstens@de.ibm.com>
+Acked-by: Petr Tesarik <ptesarik@suse.com>
+---
+ arch/s390/kernel/crash_dump.c | 26 ++++++++++----------------
+ 1 file changed, 10 insertions(+), 16 deletions(-)
+
+diff --git a/arch/s390/kernel/crash_dump.c b/arch/s390/kernel/crash_dump.c
+index c3620bafc374..4b2773e1ddfe 100644
+--- a/arch/s390/kernel/crash_dump.c
++++ b/arch/s390/kernel/crash_dump.c
+@@ -478,26 +478,20 @@ static void *nt_vmcoreinfo(void *ptr)
+ 
+ static size_t nt_vmcoreinfo_size(void)
+ {
+-	const char *name = "VMCOREINFO";
+-	char nt_name[11];
+-	Elf64_Nhdr note;
+-	void *addr;
+-
+-	if (copy_from_oldmem(&addr, &S390_lowcore.vmcore_info, sizeof(addr)))
+-		return 0;
+-
+-	if (copy_from_oldmem(&note, addr, sizeof(note)))
+-		return 0;
++	const char *name = "VMCOREINFO";
++	unsigned long size;
++	void *vmcoreinfo;
+ 
+-	memset(nt_name, 0, sizeof(nt_name));
+-	if (copy_from_oldmem(nt_name, addr + sizeof(note),
+-			       sizeof(nt_name) - 1))
+-		return 0;
++	vmcoreinfo = os_info_old_entry(OS_INFO_VMCOREINFO, &size);
++	if (vmcoreinfo)
++		return nt_size_name(size, name);
+ 
+-	if (strcmp(nt_name, name) != 0)
++	vmcoreinfo = get_vmcoreinfo_old(&size);
++	if (!vmcoreinfo)
+ 		return 0;
+ 
+-	return nt_size_name(note.n_descsz, name);
++	kfree(vmcoreinfo);
++	return nt_size_name(size, name);
+ }
+ 
+ /*
+
