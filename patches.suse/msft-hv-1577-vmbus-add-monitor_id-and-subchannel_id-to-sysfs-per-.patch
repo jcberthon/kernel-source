@@ -1,0 +1,52 @@
+From: Stephen Hemminger <stephen@networkplumber.org>
+Date: Tue, 9 Jan 2018 10:29:06 -0800
+Patch-mainline: v4.16-rc1
+Subject: vmbus: add monitor_id and subchannel_id to sysfs per channel
+Git-commit: f0fa297404c3f8ab90f1d89405a72edaff988825
+References: bsc#1109038
+
+Useful to identify which network queue is associated with
+which vmbus channel.
+
+Signed-off-by: Stephen Hemminger <sthemmin@microsoft.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Olaf Hering <ohering@suse.de>
+---
+ Documentation/ABI/stable/sysfs-bus-vmbus | 14 ++++++++++++++
+ drivers/hv/vmbus_drv.c                   | 17 +++++++++++++++++
+ 2 files changed, 31 insertions(+)
+
+diff --git a/drivers/hv/vmbus_drv.c b/drivers/hv/vmbus_drv.c
+--- a/drivers/hv/vmbus_drv.c
++++ b/drivers/hv/vmbus_drv.c
+@@ -1254,6 +1254,21 @@ static ssize_t channel_events_show(const struct vmbus_channel *channel, char *bu
+ }
+ static VMBUS_CHAN_ATTR(events, S_IRUGO, channel_events_show, NULL);
+ 
++static ssize_t subchannel_monitor_id_show(const struct vmbus_channel *channel,
++					  char *buf)
++{
++	return sprintf(buf, "%u\n", channel->offermsg.monitorid);
++}
++static VMBUS_CHAN_ATTR(monitor_id, S_IRUGO, subchannel_monitor_id_show, NULL);
++
++static ssize_t subchannel_id_show(const struct vmbus_channel *channel,
++				  char *buf)
++{
++	return sprintf(buf, "%u\n",
++		       channel->offermsg.offer.sub_channel_index);
++}
++static VMBUS_CHAN_ATTR_RO(subchannel_id);
++
+ static struct attribute *vmbus_chan_attrs[] = {
+ 	&chan_attr_out_mask.attr,
+ 	&chan_attr_in_mask.attr,
+@@ -1264,6 +1279,8 @@ static struct attribute *vmbus_chan_attrs[] = {
+ 	&chan_attr_latency.attr,
+ 	&chan_attr_interrupts.attr,
+ 	&chan_attr_events.attr,
++	&chan_attr_monitor_id.attr,
++	&chan_attr_subchannel_id.attr,
+ 	NULL
+ };
+ 
