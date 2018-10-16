@@ -15,9 +15,9 @@ Acked-by: Lee Duncan <lduncan@suse.com>
 
 --- a/drivers/target/iscsi/iscsi_target_auth.c
 +++ b/drivers/target/iscsi/iscsi_target_auth.c
-@@ -40,15 +40,6 @@ static int chap_string_to_hex(unsigned c
- 	return j;
- }
+@@ -28,15 +28,6 @@
+ #include "iscsi_target_nego.h"
+ #include "iscsi_target_auth.h"
  
 -static void chap_binaryhex_to_asciihex(char *dst, char *src, int src_len)
 -{
@@ -31,7 +31,7 @@ Acked-by: Lee Duncan <lduncan@suse.com>
  static void chap_set_random(char *data, int length)
  {
  	long r;
-@@ -87,7 +78,7 @@ static void chap_gen_challenge(
+@@ -75,7 +66,7 @@ static void chap_gen_challenge(
  	memset(challenge_asciihex, 0, CHAP_CHALLENGE_LENGTH * 2 + 1);
  
  	chap_set_random(chap->challenge, CHAP_CHALLENGE_LENGTH);
@@ -40,7 +40,7 @@ Acked-by: Lee Duncan <lduncan@suse.com>
  				CHAP_CHALLENGE_LENGTH);
  	/*
  	 * Set CHAP_C, and copy the generated challenge into c_str.
-@@ -286,7 +277,7 @@ static int chap_server_compute_md5(
+@@ -274,7 +265,7 @@ static int chap_server_compute_md5(
  	}
  	crypto_free_hash(tfm);
  
@@ -49,7 +49,7 @@ Acked-by: Lee Duncan <lduncan@suse.com>
  	pr_debug("[server] MD5 Server Digest: %s\n", response);
  
  	if (memcmp(server_digest, client_digest, MD5_SIGNATURE_SIZE) != 0) {
-@@ -409,7 +400,7 @@ static int chap_server_compute_md5(
+@@ -397,7 +388,7 @@ static int chap_server_compute_md5(
  	/*
  	 * Convert response from binary hex to ascii hext.
  	 */
