@@ -1,47 +1,52 @@
-From 02e43746054b619d39013c3792fe26e072f42a88 Mon Sep 17 00:00:00 2001
+From 9a4215e20f806e725e27579e3682ad2a49971cea Mon Sep 17 00:00:00 2001
 From: Mahesh Salgaonkar <mahesh@linux.vnet.ibm.com>
-Date: Wed, 6 Jun 2018 10:07:29 +0530
-Subject: [PATCH 6/6] powerpc/pseries: Display machine check error details.
+Date: Thu, 28 Jun 2018 13:13:10 +0200
+Subject: [PATCH 22/24] powerpc/pseries: Display machine check error details.
 
 References: bsc#1094244
-Patch-mainline: submitted http://patchwork.ozlabs.org/patch/925715
+Patch-mainline: queued
+Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/powerpc/linux.git
+Git-commit: 8f0b80561f217e3f379d7819a6c6b429bebdaea6
 
-Extract the MCE eror details from RTAS extended log and display it to
+Extract the MCE error details from RTAS extended log and display it to
 console.
 
 With this patch you should now see mce logs like below:
 
-[  822.711745] Severe Machine check interrupt [Recovered]
-[  822.711746]   Initiator: CPU
-[  822.711747]   Error type: SLB [Multihit]
-[  822.711747]     Effective address: d00000000c660000
+[  142.371818] Severe Machine check interrupt [Recovered]
+[  142.371822]   NIP [d00000000ca301b8]: init_module+0x1b8/0x338 [bork_kernel]
+[  142.371822]   Initiator: CPU
+[  142.371823]   Error type: SLB [Multihit]
+[  142.371824]     Effective address: d00000000ca70000
 
 Signed-off-by: Mahesh Salgaonkar <mahesh@linux.vnet.ibm.com>
-[don't call useless wrappers rtas_error_severity() and rtas_error_initiator()]
-Signed-off-by: Laurent Dufour <ldufour@linux.vnet.ibm.com>
+Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
 Acked-by: Michal Suchanek <msuchanek@suse.de>
 ---
- arch/powerpc/platforms/pseries/ras.c | 116 +++++++++++++++++++++++++++++++++++
- 1 file changed, 116 insertions(+)
+ arch/powerpc/platforms/pseries/ras.c | 133 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 133 insertions(+)
 
 diff --git a/arch/powerpc/platforms/pseries/ras.c b/arch/powerpc/platforms/pseries/ras.c
-index 4426a1acd738..8884118120e8 100644
+index 1b136dc77d68..71e044da4360 100644
 --- a/arch/powerpc/platforms/pseries/ras.c
 +++ b/arch/powerpc/platforms/pseries/ras.c
-@@ -376,6 +376,121 @@ int pSeries_system_reset_exception(struct pt_regs *regs)
- 	return 0; /* need to perform reset */
+@@ -487,6 +487,136 @@ static void mce_process_errlog_event(struct irq_work *work)
+ 	log_error((char *)err, ERR_TYPE_RTAS_LOG, 0);
  }
  
-+#define VAL_TO_STRING(ar, val)	((val < ARRAY_SIZE(ar)) ? ar[val] : "Unknown")
++#define VAL_TO_STRING(ar, val)	\
++	(((val) < ARRAY_SIZE(ar)) ? ar[(val)] : "Unknown")
 +
-+static void pseries_print_mce_info(struct rtas_error_log *errp, int disposition)
++static void pseries_print_mce_info(struct pt_regs *regs,
++				   struct rtas_error_log *errp)
 +{
 +	const char *level, *sevstr;
 +	struct pseries_errorlog *pseries_log;
 +	struct pseries_mc_errorlog *mce_log;
-+	uint8_t error_type, err_sub_type;
-+	uint8_t initiator = errp->initiator;
-+	uint64_t addr;
++	u8 error_type, err_sub_type;
++	u64 addr;
++	u8 initiator = errp->initiator;
++	int disposition = errp->disposition;
 +
 +	static const char * const initiators[] = {
 +		"Unknown",
@@ -83,13 +88,18 @@ index 4426a1acd738..8884118120e8 100644
 +		"Indeterminate",
 +	};
 +
++	if (!errp->extended) {
++		pr_err("Machine check interrupt: Missing extended error log\n");
++		return;
++	}
++
 +	pseries_log = get_pseries_errorlog(errp, PSERIES_ELOG_SECT_ID_MCE);
 +	if (pseries_log == NULL)
 +		return;
 +
 +	mce_log = (struct pseries_mc_errorlog *)pseries_log->data;
 +
-+	error_type = rtas_mc_error_type(mce_log);
++	error_type = mce_log->error_type;
 +	err_sub_type = rtas_mc_error_sub_type(mce_log);
 +
 +	switch (errp->severity) {
@@ -114,31 +124,38 @@ index 4426a1acd738..8884118120e8 100644
 +	}
 +
 +	printk("%s%s Machine check interrupt [%s]\n", level, sevstr,
-+		disposition == RTAS_DISP_FULLY_RECOVERED ?
-+		"Recovered" : "Not recovered");
++	       disposition == RTAS_DISP_FULLY_RECOVERED ?
++	       "Recovered" : "Not recovered");
++	if (user_mode(regs)) {
++		printk("%s  NIP: [%016lx] PID: %d Comm: %s\n", level,
++		       regs->nip, current->pid, current->comm);
++	} else {
++		printk("%s  NIP [%016lx]: %pS\n", level, regs->nip,
++		       (void *)regs->nip);
++	}
 +	printk("%s  Initiator: %s\n", level,
-+				VAL_TO_STRING(initiators, initiator));
++	       VAL_TO_STRING(initiators, initiator));
 +
 +	switch (error_type) {
-+	case PSERIES_MC_ERROR_TYPE_UE:
++	case MC_ERROR_TYPE_UE:
 +		printk("%s  Error type: %s [%s]\n", level,
-+			VAL_TO_STRING(mc_err_types, error_type),
-+			VAL_TO_STRING(mc_ue_types, err_sub_type));
++		       VAL_TO_STRING(mc_err_types, error_type),
++		       VAL_TO_STRING(mc_ue_types, err_sub_type));
 +		break;
-+	case PSERIES_MC_ERROR_TYPE_SLB:
++	case MC_ERROR_TYPE_SLB:
 +		printk("%s  Error type: %s [%s]\n", level,
-+			VAL_TO_STRING(mc_err_types, error_type),
-+			VAL_TO_STRING(mc_slb_types, err_sub_type));
++		       VAL_TO_STRING(mc_err_types, error_type),
++		       VAL_TO_STRING(mc_slb_types, err_sub_type));
 +		break;
-+	case PSERIES_MC_ERROR_TYPE_ERAT:
-+	case PSERIES_MC_ERROR_TYPE_TLB:
++	case MC_ERROR_TYPE_ERAT:
++	case MC_ERROR_TYPE_TLB:
 +		printk("%s  Error type: %s [%s]\n", level,
-+			VAL_TO_STRING(mc_err_types, error_type),
-+			VAL_TO_STRING(mc_soft_types, err_sub_type));
++		       VAL_TO_STRING(mc_err_types, error_type),
++		       VAL_TO_STRING(mc_soft_types, err_sub_type));
 +		break;
 +	default:
 +		printk("%s  Error type: %s\n", level,
-+			VAL_TO_STRING(mc_err_types, error_type));
++		       VAL_TO_STRING(mc_err_types, error_type));
 +		break;
 +	}
 +
@@ -150,14 +167,18 @@ index 4426a1acd738..8884118120e8 100644
  static int mce_handle_error(struct rtas_error_log *errp)
  {
  	struct pseries_errorlog *pseries_log;
-@@ -396,6 +511,7 @@ static int mce_handle_error(struct rtas_error_log *errp)
- 		slb_flush_and_rebolt();
- 		disposition = RTAS_DISP_FULLY_RECOVERED;
- 	}
-+	pseries_print_mce_info(errp, disposition);
+@@ -537,8 +667,11 @@ static int recover_mce(struct pt_regs *regs, struct rtas_error_log *err)
+ {
+ 	int recovered = 0;
  
- out:
- 	return disposition;
++	pseries_print_mce_info(regs, err);
++
+ 	if (!(regs->msr & MSR_RI)) {
+ 		/* If MSR_RI isn't set, we cannot recover */
++		pr_err("Machine check interrupt unrecoverable: MSR(RI=0)\n");
+ 		recovered = 0;
+ 
+ 	} else if (err->disposition == RTAS_DISP_FULLY_RECOVERED) {
 -- 
-2.7.4
+2.13.7
 

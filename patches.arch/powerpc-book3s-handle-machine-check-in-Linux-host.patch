@@ -1,0 +1,121 @@
+From 31ec621a918aa78fcb3d0ee4fc04e016fb7d6770 Mon Sep 17 00:00:00 2001
+From: Mahesh Salgaonkar <mahesh@linux.vnet.ibm.com>
+Date: Wed, 30 Oct 2013 20:04:08 +0530
+Subject: [PATCH 06/20] powerpc/book3s: handle machine check in Linux host.
+
+References: bsc#1094244
+Patch-mainline: v3.14-rc1
+Git-commit: 1e9b4507ed98457edb8a892934282b8f63e17246 (exclude HV handler)
+
+Move machine check entry point into Linux. So far we were dependent on
+firmware to decode MCE error details and handover the high level info to OS.
+
+This patch introduces early machine check routine that saves the MCE
+information (srr1, srr0, dar and dsisr) to the emergency stack. We allocate
+stack frame on emergency stack and set the r1 accordingly. This allows us to be
+prepared to take another exception without loosing context. One thing to note
+here that, if we get another machine check while ME bit is off then we risk a
+checkstop. Hence we restrict ourselves to save only MCE information and
+register saved on PACA_EXMC save are before we turn the ME bit on. We use
+paca->in_mce flag to differentiate between first entry and nested machine check
+entry which helps proper use of emergency stack. We increment paca->in_mce
+every time we enter in early machine check handler and decrement it while
+leaving. When we enter machine check early handler first time (paca->in_mce ==
+0), we are sure nobody is using MC emergency stack and allocate a stack frame
+at the start of the emergency stack. During subsequent entry (paca->in_mce >
+0), we know that r1 points inside emergency stack and we allocate separate
+stack frame accordingly. This prevents us from clobbering MCE information
+during nested machine checks.
+
+The early machine check handler changes are placed under CPU_FTR_HVMODE
+section. This makes sure that the early machine check handler will get executed
+only in hypervisor kernel.
+
+This is the code flow:
+
+		Machine Check Interrupt
+			|
+			V
+		   0x200 vector				  ME=0, IR=0, DR=0
+			|
+			V
+	+-----------------------------------------------+
+	|machine_check_pSeries_early:			| ME=0, IR=0, DR=0
+	|	Alloc frame on emergency stack		|
+	|	Save srr1, srr0, dar and dsisr on stack |
+	+-----------------------------------------------+
+			|
+		(ME=1, IR=0, DR=0, RFID)
+			|
+			V
+		machine_check_handle_early		  ME=1, IR=0, DR=0
+			|
+			V
+	+-----------------------------------------------+
+	|	machine_check_early (r3=pt_regs)	| ME=1, IR=0, DR=0
+	|	Things to do: (in next patches)		|
+	|		Flush SLB for SLB errors	|
+	|		Flush TLB for TLB errors	|
+	|		Decode and save MCE info	|
+	+-----------------------------------------------+
+			|
+	(Fall through existing exception handler routine.)
+			|
+			V
+		machine_check_pSerie			  ME=1, IR=0, DR=0
+			|
+		(ME=1, IR=1, DR=1, RFID)
+			|
+			V
+		machine_check_common			  ME=1, IR=1, DR=1
+			.
+			.
+			.
+
+Signed-off-by: Mahesh Salgaonkar <mahesh@linux.vnet.ibm.com>
+Signed-off-by: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/kernel/asm-offsets.c |  2 ++
+ arch/powerpc/kernel/traps.c       | 12 ++++++++++++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/arch/powerpc/kernel/asm-offsets.c b/arch/powerpc/kernel/asm-offsets.c
+index 75951a6df1e7..336e4af532c7 100644
+--- a/arch/powerpc/kernel/asm-offsets.c
++++ b/arch/powerpc/kernel/asm-offsets.c
+@@ -205,6 +205,8 @@ int main(void)
+ 	OFFSET(PACA_RFI_FLUSH_FALLBACK_AREA, paca_aux_struct, rfi_flush_fallback_area);
+ 	OFFSET(PACA_EXRFI, paca_aux_struct, exrfi);
+ 	OFFSET(PACA_L1D_FLUSH_SIZE, paca_aux_struct, l1d_flush_size);
++	DEFINE(PACAMCEMERGSP, offsetof(struct paca_aux_struct, mc_emergency_sp));
++	DEFINE(PACA_IN_MCE, offsetof(struct paca_aux_struct, in_mce));
+ #endif /* CONFIG_PPC_STD_MMU_64 */
+ 	DEFINE(PACAEMERGSP, offsetof(struct paca_struct, emergency_sp));
+ 
+diff --git a/arch/powerpc/kernel/traps.c b/arch/powerpc/kernel/traps.c
+index 15da8c78bedb..f652f6039648 100644
+--- a/arch/powerpc/kernel/traps.c
++++ b/arch/powerpc/kernel/traps.c
+@@ -251,6 +251,18 @@ void system_reset_exception(struct pt_regs *regs)
+ 
+ 	/* What should we do here? We could issue a shutdown or hard reset. */
+ }
++
++/*
++ * This function is called in real mode. Strictly no printk's please.
++ *
++ * regs->nip and regs->msr contains srr0 and ssr1.
++ */
++long machine_check_early(struct pt_regs *regs)
++{
++	/* TODO: handle/decode machine check reason */
++	return 0;
++}
++
+ #endif
+ 
+ /*
+-- 
+2.13.7
+

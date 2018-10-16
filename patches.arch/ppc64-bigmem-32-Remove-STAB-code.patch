@@ -1,4 +1,4 @@
-From a726db506a7c0497ea1f7c5bc28a41dad4303ccf Mon Sep 17 00:00:00 2001
+From ea6693fc7ca2e3ae2c1233bc577fdb4901dd4799 Mon Sep 17 00:00:00 2001
 From: Michael Ellerman <mpe@ellerman.id.au>
 Date: Thu, 10 Jul 2014 12:29:19 +1000
 Subject: [PATCH] powerpc: Remove STAB code
@@ -15,19 +15,18 @@ Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
 Signed-off-by: Benjamin Herrenschmidt <benh@kernel.crashing.org>
 Acked-by: Michal Suchanek <msuchanek@suse.de>
 ---
- arch/powerpc/include/asm/mmu-hash64.h  |  22 ---
+ arch/powerpc/include/asm/mmu-hash64.h  |  23 ---
  arch/powerpc/include/asm/mmu_context.h |   3 -
  arch/powerpc/include/asm/paca.h        |   4 -
  arch/powerpc/kernel/asm-offsets.c      |   2 -
- arch/powerpc/kernel/exceptions-64s.S   | 162 ------------------
+ arch/powerpc/kernel/exceptions-64s.S   | 131 ---------------
  arch/powerpc/kernel/setup_64.c         |   3 -
  arch/powerpc/mm/hash_utils_64.c        |  20 +--
  arch/powerpc/mm/stab.c                 | 296 ---------------------------------
  arch/powerpc/xmon/xmon.c               |  22 ---
- 9 files changed, 4 insertions(+), 530 deletions(-)
+ 9 files changed, 4 insertions(+), 500 deletions(-)
 
 diff --git a/arch/powerpc/include/asm/mmu-hash64.h b/arch/powerpc/include/asm/mmu-hash64.h
-index fc91b3daf868..34e39478006b 100644
 --- a/arch/powerpc/include/asm/mmu-hash64.h
 +++ b/arch/powerpc/include/asm/mmu-hash64.h
 @@ -23,26 +23,6 @@
@@ -57,17 +56,23 @@ index fc91b3daf868..34e39478006b 100644
   * SLB
   */
  
-@@ -318,10 +298,8 @@ extern void hpte_init_iSeries(void);
+@@ -318,8 +298,6 @@ extern void hpte_init_iSeries(void);
  extern void hpte_init_beat(void);
  extern void hpte_init_beat_v3(void);
  
 -extern void stabs_alloc(void);
+-
+ struct slb_entry {
+ 	u64	esid;
+ 	u64	vsid;
+@@ -329,7 +307,6 @@ extern void slb_initialize(void);
+ 
  extern void slb_initialize(void);
  extern void slb_flush_and_rebolt(void);
 -extern void stab_initialize(unsigned long stab);
- 
- extern void slb_vmalloc_update(void);
- extern void slb_set_size(u16 size);
+ void slb_flush_all_realmode(void);
+ void __slb_restore_bolted_realmode(void);
+ void slb_restore_bolted_realmode(void);
 diff --git a/arch/powerpc/include/asm/mmu_context.h b/arch/powerpc/include/asm/mmu_context.h
 index a73668a5f30d..67962d3ab072 100644
 --- a/arch/powerpc/include/asm/mmu_context.h
@@ -90,10 +95,10 @@ index a73668a5f30d..67962d3ab072 100644
  	/* Out of line for now */
  	switch_mmu_context(prev, next);
 diff --git a/arch/powerpc/include/asm/paca.h b/arch/powerpc/include/asm/paca.h
-index 24dd6a5b6914..dfdcddf9b6c3 100644
+index 9fc4962c9788..9309c41e6e13 100644
 --- a/arch/powerpc/include/asm/paca.h
 +++ b/arch/powerpc/include/asm/paca.h
-@@ -93,10 +93,6 @@ struct paca_struct {
+@@ -110,10 +110,6 @@ struct paca_struct {
  	u64 kernel_toc;			/* Kernel TOC address */
  	u64 kernelbase;			/* Base address of kernel */
  	u64 kernel_msr;			/* MSR while running in kernel */
@@ -105,7 +110,7 @@ index 24dd6a5b6914..dfdcddf9b6c3 100644
  	u64 data_offset;		/* per cpu data offset */
  	s16 hw_cpu_id;			/* Physical processor number */
 diff --git a/arch/powerpc/kernel/asm-offsets.c b/arch/powerpc/kernel/asm-offsets.c
-index 25a20415edb2..3e78091dc08d 100644
+index a815c0c66f29..a700325cc2ca 100644
 --- a/arch/powerpc/kernel/asm-offsets.c
 +++ b/arch/powerpc/kernel/asm-offsets.c
 @@ -172,8 +172,6 @@ int main(void)
@@ -118,56 +123,10 @@ index 25a20415edb2..3e78091dc08d 100644
  	DEFINE(PACASLBCACHEPTR, offsetof(struct paca_struct, slb_cache_ptr));
  	DEFINE(PACAVMALLOCSLLP, offsetof(struct paca_struct, vmalloc_sllp));
 diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
-index 93eb871fdefd..1b0cddd36638 100644
+index d4a22a1edeb8..efc43eaf0afc 100644
 --- a/arch/powerpc/kernel/exceptions-64s.S
 +++ b/arch/powerpc/kernel/exceptions-64s.S
-@@ -80,30 +80,7 @@ data_access_pSeries:
- 	HMT_MEDIUM_PPR_DISCARD
- 	DO_KVM	0x300
- 	SET_SCRATCH0(r13)
--BEGIN_FTR_SECTION
--	GET_PACA(r13)
--	std	r9,PACA_EXSLB+EX_R9(r13)
--	HMT_MEDIUM_PPR_SAVE(PACA_EXGEN, r9)
--	std	r10,PACA_EXSLB+EX_R10(r13)
--	mfspr	r10,SPRN_DAR
--	mfspr	r9,SPRN_DSISR
--	srdi	r10,r10,60
--	rlwimi	r10,r9,16,0x20
--	mfcr	r9
--	cmpwi	r10,0x2c
--	beq	do_stab_bolted_pSeries
--	ld	r10,PACA_EXSLB+EX_R10(r13)
--	std	r11,PACA_EXGEN+EX_R11(r13)
--	ld	r11,PACA_EXSLB+EX_R9(r13)
--	std	r12,PACA_EXGEN+EX_R12(r13)
--	GET_SCRATCH0(r12)
--	std	r10,PACA_EXGEN+EX_R10(r13)
--	std	r11,PACA_EXGEN+EX_R9(r13)
--	std	r12,PACA_EXGEN+EX_R13(r13)
--	EXCEPTION_PROLOG_PSERIES_1(data_access_common, EXC_STD)
--FTR_SECTION_ELSE
- 	EXCEPTION_PROLOG_PSERIES(PACA_EXGEN, data_access_common, EXC_STD)
--ALT_MMU_FTR_SECTION_END_IFCLR(MMU_FTR_SLB)
- 
- 	. = 0x380
- 	.globl data_access_slb_pSeries
-@@ -327,14 +304,6 @@ masked_Hinterrupt:
- 	HRFI_TO_KERNEL
- 	b	.
- 
--	.align	7
--do_stab_bolted_pSeries:
--	std	r11,PACA_EXSLB+EX_R11(r13)
--	std	r12,PACA_EXSLB+EX_R12(r13)
--	GET_SCRATCH0(r10)
--	std	r10,PACA_EXSLB+EX_R13(r13)
--	EXCEPTION_PROLOG_PSERIES_1(.do_stab_bolted, EXC_STD)
--
- #ifdef CONFIG_PPC_PSERIES
- /*
-  * Vectors for the FWNMI option.  Share common code.
-@@ -1020,12 +989,6 @@ _STATIC(do_hash_page)
+@@ -1219,12 +1219,6 @@ _STATIC(do_hash_page)
  	bne-	handle_page_fault	/* if not, try to insert a HPTE */
  	andis.  r0,r4,DSISR_DABRMATCH@h
  	bne-    handle_dabr_fault
@@ -180,7 +139,7 @@ index 93eb871fdefd..1b0cddd36638 100644
  	clrrdi	r11,r1,THREAD_SHIFT
  	lwz	r0,TI_PREEMPT(r11)	/* If we're in an "NMI" */
  	andis.	r0,r0,NMI_MASK@h	/* (i.e. an irq when soft-disabled) */
-@@ -1158,117 +1121,6 @@ handle_page_fault:
+@@ -1357,117 +1351,6 @@ handle_page_fault:
  	bl	.bad_page_fault
  	b	.ret_from_except
  
@@ -298,7 +257,7 @@ index 93eb871fdefd..1b0cddd36638 100644
  #ifdef CONFIG_PPC_PSERIES
  /*
   * Data area reserved for FWNMI option.
-@@ -1305,17 +1157,3 @@ xLparMap:
+@@ -1504,17 +1387,3 @@ xLparMap:
  #ifdef CONFIG_PPC_PSERIES
          . = 0x8000
  #endif /* CONFIG_PPC_PSERIES */
@@ -317,10 +276,10 @@ index 93eb871fdefd..1b0cddd36638 100644
 -initial_stab:
 -	.space	4096
 diff --git a/arch/powerpc/kernel/setup_64.c b/arch/powerpc/kernel/setup_64.c
-index 2847e8555456..64e09454f244 100644
+index c1e30c582daa..9b703783b965 100644
 --- a/arch/powerpc/kernel/setup_64.c
 +++ b/arch/powerpc/kernel/setup_64.c
-@@ -562,9 +562,6 @@ void __init setup_arch(char **cmdline_p)
+@@ -591,9 +591,6 @@ void __init setup_arch(char **cmdline_p)
  	exc_lvl_early_init();
  	emergency_stack_init();
  

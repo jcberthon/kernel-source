@@ -17,33 +17,24 @@ Signed-off-by: Nicholas Piggin <npiggin@gmail.com>
 Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
 Acked-by: Michal Suchanek <msuchanek@suse.de>
 ---
- arch/powerpc/include/asm/exception-64s.h |  4 ++--
+ arch/powerpc/include/asm/exception-64s.h |  2 +-
  arch/powerpc/kernel/entry_64.S           | 10 ++++++++--
  arch/powerpc/kernel/exceptions-64s.S     | 16 ++++++++--------
- 3 files changed, 18 insertions(+), 12 deletions(-)
+ 3 files changed, 17 insertions(+), 11 deletions(-)
 
 diff --git a/arch/powerpc/include/asm/exception-64s.h b/arch/powerpc/include/asm/exception-64s.h
-index b9d7e6d0a36d..3b7085332f2c 100644
+index b7ef23436cf2..eafb47bfff3c 100644
 --- a/arch/powerpc/include/asm/exception-64s.h
 +++ b/arch/powerpc/include/asm/exception-64s.h
-@@ -154,7 +154,7 @@ END_FTR_SECTION_NESTED(CPU_FTR_HAS_PPR,CPU_FTR_HAS_PPR,943)
- 	mtspr	SPRN_##h##SRR0,r12;					\
- 	mfspr	r12,SPRN_##h##SRR1;	/* and SRR1 */			\
- 	mtspr	SPRN_##h##SRR1,r10;					\
--	h##rfid;							\
-+	h##rfid; /* h##RFI_TO_KERNEL runs out of space */		\
- 	b	.	/* prevent speculative execution */
- #define EXCEPTION_PROLOG_PSERIES_1(label, h) \
- 	__EXCEPTION_PROLOG_PSERIES_1(label, h)
-@@ -273,7 +273,7 @@ label##_hv:						\
+@@ -157,7 +157,7 @@ END_FTR_SECTION_NESTED(CPU_FTR_HAS_PPR,CPU_FTR_HAS_PPR,943)
  	mtspr	SPRN_##h##SRR0,r12;					\
  	mfspr	r12,SPRN_##h##SRR1;	/* and SRR1 */			\
  	mtspr	SPRN_##h##SRR1,r10;					\
 -	h##rfid;							\
 +	h##RFI_TO_KERNEL;						\
  	b	.	/* prevent speculative execution */
- #define _MASKABLE_EXCEPTION_PSERIES(vec, label, h)			\
- 	__MASKABLE_EXCEPTION_PSERIES(vec, label, h)
+ #define EXCEPTION_PROLOG_PSERIES_1(label, h)				\
+ 	__EXCEPTION_PROLOG_PSERIES_1(label, h)
 diff --git a/arch/powerpc/kernel/entry_64.S b/arch/powerpc/kernel/entry_64.S
 index 8755563af59c..f298eea63021 100644
 --- a/arch/powerpc/kernel/entry_64.S
@@ -80,10 +71,10 @@ index 8755563af59c..f298eea63021 100644
  
  	.align	3
 diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
-index fd0778901925..f7dde87a3481 100644
+index b63103b00554..c82dbe5bc95f 100644
 --- a/arch/powerpc/kernel/exceptions-64s.S
 +++ b/arch/powerpc/kernel/exceptions-64s.S
-@@ -220,14 +220,14 @@ END_FTR_SECTION_IFSET(CPU_FTR_REAL_LE)
+@@ -206,7 +206,7 @@ END_FTR_SECTION_IFSET(CPU_FTR_REAL_LE)
  	mtspr	SPRN_SRR0,r10
  	ld	r10,PACAKMSR(r13)
  	mtspr	SPRN_SRR1,r10
@@ -91,7 +82,8 @@ index fd0778901925..f7dde87a3481 100644
 +	RFI_TO_KERNEL ;						\
  	b	.	/* prevent speculative execution */
  
- /* Fast LE/BE switch system call */
+ 	KVM_HANDLER(PACA_EXGEN, EXC_STD, 0xc00)
+@@ -215,7 +215,7 @@ END_FTR_SECTION_IFSET(CPU_FTR_REAL_LE)
  1:	mfspr	r12,SPRN_SRR1
  	xori	r12,r12,MSR_LE
  	mtspr	SPRN_SRR1,r12
@@ -100,7 +92,7 @@ index fd0778901925..f7dde87a3481 100644
  	b	.
  
  	STD_EXCEPTION_PSERIES(0xd00, 0xd00, single_step)
-@@ -308,7 +308,7 @@ masked_interrupt:
+@@ -361,7 +361,7 @@ masked_interrupt:
  	mtspr	SPRN_SRR1,r10
  	ld	r10,PACA_EXGEN+EX_R10(r13)
  	GET_SCRATCH0(r13)
@@ -109,7 +101,7 @@ index fd0778901925..f7dde87a3481 100644
  	b	.
  
  masked_Hinterrupt:
-@@ -321,7 +321,7 @@ masked_Hinterrupt:
+@@ -374,7 +374,7 @@ masked_Hinterrupt:
  	mtspr	SPRN_HSRR1,r10
  	ld	r10,PACA_EXGEN+EX_R10(r13)
  	GET_SCRATCH0(r13)
@@ -117,8 +109,8 @@ index fd0778901925..f7dde87a3481 100644
 +	HRFI_TO_KERNEL
  	b	.
  
- 	.align	7
-@@ -376,7 +376,7 @@ slb_miss_user_pseries:
+ #ifdef CONFIG_PPC_PSERIES
+@@ -415,7 +415,7 @@ slb_miss_user_pseries:
  	mtspr	SRR0,r12
  	mfspr	r12,SRR1			/* and SRR1 */
  	mtspr	SRR1,r10
@@ -127,7 +119,7 @@ index fd0778901925..f7dde87a3481 100644
  	b	.				/* prevent spec. execution */
  #endif /* __DISABLED__ */
  
-@@ -585,7 +585,7 @@ slb_miss_user_common:
+@@ -624,7 +624,7 @@ slb_miss_user_common:
  	ld	r11,PACA_EXGEN+EX_R11(r13)
  	ld	r12,PACA_EXGEN+EX_R12(r13)
  	ld	r13,PACA_EXGEN+EX_R13(r13)
@@ -136,7 +128,7 @@ index fd0778901925..f7dde87a3481 100644
  	b	.
  
  slb_miss_fault:
-@@ -676,7 +676,7 @@ END_FW_FTR_SECTION_IFSET(FW_FEATURE_ISERIES)
+@@ -715,7 +715,7 @@ END_FW_FTR_SECTION_IFSET(FW_FEATURE_ISERIES)
  	mtspr	SPRN_SRR0,r10
  	ld	r10,PACAKMSR(r13)
  	mtspr	SPRN_SRR1,r10
@@ -145,7 +137,7 @@ index fd0778901925..f7dde87a3481 100644
  	b	.
  
  unrecov_slb:
-@@ -1096,7 +1096,7 @@ _GLOBAL(do_stab_bolted)
+@@ -1135,7 +1135,7 @@ _GLOBAL(do_stab_bolted)
  	ld	r11,PACA_EXSLB+EX_R11(r13)
  	ld	r12,PACA_EXSLB+EX_R12(r13)
  	ld	r13,PACA_EXSLB+EX_R13(r13)

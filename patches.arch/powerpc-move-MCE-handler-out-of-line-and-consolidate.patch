@@ -1,0 +1,72 @@
+From b8955d06f1057dfbbf2a16afd043e0534a279d89 Mon Sep 17 00:00:00 2001
+From: Paul Mackerras <paulus@samba.org>
+Date: Wed, 29 Jun 2011 02:18:26 +0200
+Subject: [PATCH 3/4] powerpc: move MCE handler out-of-line and consolidate
+ with machine_check_fwnmi
+
+References: bsc#1094244
+Patch-mainline: v3.1-rc1
+Git-commit: b01c8b54a1a271c0fc4243845927fe1d250767a3 (part 3/4)
+
+Signed-off-by: Paul Mackerras <paulus@samba.org>
+Signed-off-by: Alexander Graf <agraf@suse.de>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/kernel/exceptions-64s.S | 27 +++++++++++++++------------
+ 1 file changed, 15 insertions(+), 12 deletions(-)
+
+diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
+index 207287f0819b..ebe0f5cd1329 100644
+--- a/arch/powerpc/kernel/exceptions-64s.S
++++ b/arch/powerpc/kernel/exceptions-64s.S
+@@ -68,11 +68,12 @@ END_FTR_SECTION_IFSET(CPU_FTR_HVMODE | CPU_FTR_ARCH_206)
+ 	EXCEPTION_PROLOG_PSERIES(PACA_EXGEN, system_reset_common, EXC_STD)
+ 
+ 	. = 0x200
+-_machine_check_pSeries:
+-	HMT_MEDIUM_PPR_DISCARD
+-	DO_KVM	0x200
+-	SET_SCRATCH0(r13)
+-	EXCEPTION_PROLOG_PSERIES(PACA_EXMC, machine_check_common, EXC_STD)
++machine_check_pSeries_1:
++	/* This is moved out of line as it can be patched by FW, but
++	 * some code path might still want to branch into the original
++	 * vector
++	 */
++	b	machine_check_pSeries
+ 
+ 	. = 0x300
+ 	.globl data_access_pSeries
+@@ -249,6 +250,15 @@ vsx_unavailable_pSeries_1:
+ 
+ /*** Out of line interrupts support ***/
+ 
++	/* moved from 0x200 */
++machine_check_pSeries:
++	.globl machine_check_fwnmi
++machine_check_fwnmi:
++	HMT_MEDIUM_PPR_DISCARD
++	DO_KVM	0x200
++	SET_SCRATCH0(r13)		/* save r13 */
++	EXCEPTION_PROLOG_PSERIES(PACA_EXMC, machine_check_common, EXC_STD)
++
+ #ifndef CONFIG_POWER4_ONLY
+ 	/* moved from 0x300 */
+ data_access_check_stab:
+@@ -331,13 +341,6 @@ system_reset_fwnmi:
+ 	SET_SCRATCH0(r13)		/* save r13 */
+ 	EXCEPTION_PROLOG_PSERIES(PACA_EXGEN, system_reset_common, EXC_STD)
+ 
+-	.globl machine_check_fwnmi
+-      .align 7
+-machine_check_fwnmi:
+-	HMT_MEDIUM_PPR_DISCARD
+-	SET_SCRATCH0(r13)		/* save r13 */
+-	EXCEPTION_PROLOG_PSERIES(PACA_EXMC, machine_check_common, EXC_STD)
+-
+ #endif /* CONFIG_PPC_PSERIES */
+ 
+ #ifdef __DISABLED__
+-- 
+2.13.7
+

@@ -1,0 +1,86 @@
+From 7de3e2fd57638d861421976da0cf6d3b6d4ddd3b Mon Sep 17 00:00:00 2001
+From: Michael Ellerman <mpe@ellerman.id.au>
+Date: Tue, 26 Jul 2016 15:29:30 +1000
+Subject: [PATCH] powerpc/64: Do load of PACAKBASE in LOAD_HANDLER
+
+References: bsc#1094244
+Patch-mainline: v4.9-rc1
+Git-commit: d8d42b0511fefc78165ee9b4c2d95f5d6db7350d
+
+The LOAD_HANDLER macro requires that you have previously loaded "reg"
+with PACAKBASE. Although that gives callers flexibility to get PACAKBASE
+in some interesting way, none of the callers actually do that. So fold
+the load of PACAKBASE into the macro, making it simpler for callers to
+use correctly.
+
+[note: to support backports of exception code that comes from 4.9+
+backporting older code will at worst result in loading PACAKBASE twice]
+
+Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+Reviewed-by: Nick Piggin <npiggin@gmail.com>
+Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/include/asm/exception-64s.h | 2 +-
+ arch/powerpc/kernel/exceptions-64s.S     | 4 ----
+ 2 files changed, 1 insertion(+), 5 deletions(-)
+
+diff --git a/arch/powerpc/include/asm/exception-64s.h b/arch/powerpc/include/asm/exception-64s.h
+index cea2d3b0b190..5955ef07c333 100644
+--- a/arch/powerpc/include/asm/exception-64s.h
++++ b/arch/powerpc/include/asm/exception-64s.h
+@@ -141,6 +141,7 @@
+  */
+ #define LOAD_HANDLER(reg, label)					\
+ 	/* Handlers must be within 64K of kbase, which must be 64k aligned */ \
++	ld	reg,PACAKBASE(r13);	/* get high part of &label */	\
+ 	ori	reg,reg,(label)-_stext;	/* virt addr of handler ... */
+ 
+ /* Exception register prefixes */
+@@ -211,7 +212,6 @@ END_FTR_SECTION_NESTED(ftr,ftr,943)
+ 	__EXCEPTION_PROLOG_1(area, extra, vec)
+ 
+ #define __EXCEPTION_PROLOG_PSERIES_1(label, h)				\
+-	ld	r12,PACAKBASE(r13);	/* get high part of &label */	\
+ 	ld	r10,PACAKMSR(r13);	/* get MSR value for kernel */	\
+ 	mfspr	r11,SPRN_##h##SRR0;	/* save SRR0 */			\
+ 	LOAD_HANDLER(r12,label)						\
+diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
+index 0018a92be645..a0cd3553b508 100644
+--- a/arch/powerpc/kernel/exceptions-64s.S
++++ b/arch/powerpc/kernel/exceptions-64s.S
+@@ -116,7 +116,6 @@ data_access_slb_pSeries:
+ 	 * the kernel ends up being put.
+ 	 */
+ 	mfctr	r11
+-	ld	r10,PACAKBASE(r13)
+ 	LOAD_HANDLER(r10, .slb_miss_realmode)
+ 	mtctr	r10
+ 	bctr
+@@ -143,7 +142,6 @@ instruction_access_slb_pSeries:
+ 	b	.slb_miss_realmode
+ #else
+ 	mfctr	r11
+-	ld	r10,PACAKBASE(r13)
+ 	LOAD_HANDLER(r10, .slb_miss_realmode)
+ 	mtctr	r10
+ 	bctr
+@@ -207,7 +205,6 @@ END_FTR_SECTION_IFSET(CPU_FTR_REAL_LE)
+ 	INTERRUPT_TO_KERNEL
+ 	mfspr	r11,SPRN_SRR0
+ 	mfspr	r12,SPRN_SRR1
+-	ld	r10,PACAKBASE(r13)
+ 	LOAD_HANDLER(r10, system_call_entry)
+ 	mtspr	SPRN_SRR0,r10
+ 	ld	r10,PACAKMSR(r13)
+@@ -865,7 +862,6 @@ BEGIN_FW_FTR_SECTION
+ END_FW_FTR_SECTION_IFSET(FW_FEATURE_ISERIES)
+ #endif /* CONFIG_PPC_ISERIES */
+ 	mfspr	r11,SPRN_SRR0
+-	ld	r10,PACAKBASE(r13)
+ 	LOAD_HANDLER(r10,unrecov_slb)
+ 	mtspr	SPRN_SRR0,r10
+ 	ld	r10,PACAKMSR(r13)
+-- 
+2.13.7
+

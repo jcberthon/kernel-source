@@ -1,0 +1,294 @@
+From c9193a8f3d1083d60352d0364b9abbd67c5b5663 Mon Sep 17 00:00:00 2001
+From: Paul Mackerras <paulus@samba.org>
+Date: Mon, 4 Feb 2013 18:10:15 +0000
+Subject: [PATCH 04/21] powerpc: Save CFAR before branching in interrupt entry
+ paths
+
+References: bsc#1094244
+Patch-mainline: v3.9-rc1
+Git-commit: 1707dd161349e6c54170c88d94fed012e3d224e3
+
+Some of the interrupt vectors on 64-bit POWER server processors are
+only 32 bytes long, which is not enough for the full first-level
+interrupt handler.  For these we currently just have a branch to an
+out-of-line handler.  However, this means that we corrupt the CFAR
+(come-from address register) on POWER7 and later processors.
+
+To fix this, we split the EXCEPTION_PROLOG_1 macro into two pieces:
+EXCEPTION_PROLOG_0 contains the part up to the point where the CFAR
+is saved in the PACA, and EXCEPTION_PROLOG_1 contains the rest.  We
+then put EXCEPTION_PROLOG_0 in the short interrupt vectors before
+we branch to the out-of-line handler, which contains the rest of the
+first-level interrupt handler.  To facilitate this, we define new
+_OOL (out of line) variants of STD_EXCEPTION_PSERIES, etc.
+
+In order to get EXCEPTION_PROLOG_0 to be short enough, i.e., no more
+than 6 instructions, it was necessary to move the stores that move
+the PPR and CFAR values into the PACA into __EXCEPTION_PROLOG_1 and
+to get rid of one of the two HMT_MEDIUM instructions.  Previously
+there was a HMT_MEDIUM_PPR_DISCARD before the prolog, which was
+nop'd out on processors with the PPR (POWER7 and later), and then
+another HMT_MEDIUM inside the HMT_MEDIUM_PPR_SAVE macro call inside
+__EXCEPTION_PROLOG_1, which was nop'd out on processors without PPR.
+Now the HMT_MEDIUM inside EXCEPTION_PROLOG_0 is there unconditionally
+and the HMT_MEDIUM_PPR_DISCARD is not strictly necessary, although
+this leaves it in for the interrupt vectors where there is room for
+it.
+
+Previously we had a handler for hypervisor maintenance interrupts at
+0xe50, which doesn't leave enough room for the vector for hypervisor
+emulation assist interrupts at 0xe40, since we need 8 instructions.
+The 0xe50 vector was only used on POWER6, as the HMI vector was moved
+to 0xe60 on POWER7.  Since we don't support running in hypervisor mode
+on POWER6, we just remove the handler at 0xe50.
+
+This also changes denorm_exception_hv to use EXCEPTION_PROLOG_0
+instead of open-coding it, and removes the HMT_MEDIUM_PPR_DISCARD
+from the relocation-on vectors (since any CPU that supports
+relocation-on interrupts also has the PPR).
+
+Signed-off-by: Paul Mackerras <paulus@samba.org>
+Signed-off-by: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/include/asm/exception-64s.h | 58 ++++++++++++++++++++++++--------
+ arch/powerpc/kernel/exceptions-64s.S     | 48 +++++++++++++++++++-------
+ 2 files changed, 79 insertions(+), 27 deletions(-)
+
+diff --git a/arch/powerpc/include/asm/exception-64s.h b/arch/powerpc/include/asm/exception-64s.h
+index 1081091d934c..7bbe0f231a6b 100644
+--- a/arch/powerpc/include/asm/exception-64s.h
++++ b/arch/powerpc/include/asm/exception-64s.h
+@@ -89,25 +89,32 @@ BEGIN_FTR_SECTION_NESTED(942)						\
+ END_FTR_SECTION_NESTED(CPU_FTR_HAS_PPR,0,942)	/* non P7 */
+ 
+ /*
+- * Save PPR in paca whenever some register is available to use.
+- * Then increase the priority.
++ * Get an SPR into a register if the CPU has the given feature
+  */
+-#define HMT_MEDIUM_PPR_SAVE(area, ra)					\
++#define OPT_GET_SPR(ra, spr, ftr)					\
+ BEGIN_FTR_SECTION_NESTED(943)						\
+-	mfspr	ra,SPRN_PPR;						\
+-	std	ra,area+EX_PPR(r13);					\
+-	HMT_MEDIUM;							\
+-END_FTR_SECTION_NESTED(CPU_FTR_HAS_PPR,CPU_FTR_HAS_PPR,943)
++	mfspr	ra,spr;							\
++END_FTR_SECTION_NESTED(ftr,ftr,943)
+ 
+-#define __EXCEPTION_PROLOG_1(area, extra, vec)				\
++/*
++ * Save a register to the PACA if the CPU has the given feature
++ */
++#define OPT_SAVE_REG_TO_PACA(offset, ra, ftr)				\
++BEGIN_FTR_SECTION_NESTED(943)						\
++	std	ra,offset(r13);						\
++END_FTR_SECTION_NESTED(ftr,ftr,943)
++
++#define EXCEPTION_PROLOG_0(area)					\
+ 	GET_PACA(r13);							\
+ 	std	r9,area+EX_R9(r13);	/* save r9 */			\
+-	HMT_MEDIUM_PPR_SAVE(area, r9);					\
++	OPT_GET_SPR(r9, SPRN_PPR, CPU_FTR_HAS_PPR);			\
++	HMT_MEDIUM;							\
+ 	std	r10,area+EX_R10(r13);	/* save r10 - r12 */		\
+-	BEGIN_FTR_SECTION_NESTED(66);					\
+-	mfspr	r10,SPRN_CFAR;						\
+-	std	r10,area+EX_CFAR(r13);					\
+-	END_FTR_SECTION_NESTED(CPU_FTR_CFAR, CPU_FTR_CFAR, 66);		\
++	OPT_GET_SPR(r10, SPRN_CFAR, CPU_FTR_CFAR)
++
++#define __EXCEPTION_PROLOG_1(area, extra, vec)				\
++	OPT_SAVE_REG_TO_PACA(area+EX_PPR, r9, CPU_FTR_HAS_PPR);		\
++	OPT_SAVE_REG_TO_PACA(area+EX_CFAR, r10, CPU_FTR_CFAR);		\
+ 	mfcr	r9;							\
+ 	extra(vec);							\
+ 	std	r11,area+EX_R11(r13);					\
+@@ -131,6 +138,7 @@ END_FTR_SECTION_NESTED(CPU_FTR_HAS_PPR,CPU_FTR_HAS_PPR,943)
+ 	__EXCEPTION_PROLOG_PSERIES_1(label, h)
+ 
+ #define EXCEPTION_PROLOG_PSERIES(area, label, h, extra, vec)		\
++	EXCEPTION_PROLOG_0(area);					\
+ 	EXCEPTION_PROLOG_1(area, extra, vec);				\
+ 	EXCEPTION_PROLOG_PSERIES_1(label, h);
+ 
+@@ -253,6 +261,13 @@ label##_pSeries:					\
+ 	EXCEPTION_PROLOG_PSERIES(PACA_EXGEN, label##_common,	\
+ 				 EXC_STD, KVMTEST, vec)
+ 
++/* Version of above for when we have to branch out-of-line */
++#define STD_EXCEPTION_PSERIES_OOL(vec, label)			\
++	.globl label##_pSeries;					\
++label##_pSeries:						\
++	EXCEPTION_PROLOG_1(PACA_EXGEN, KVMTEST, vec);	\
++	EXCEPTION_PROLOG_PSERIES_1(label##_common, EXC_STD)
++
+ #define STD_EXCEPTION_HV(loc, vec, label)		\
+ 	. = loc;					\
+ 	.globl label##_hv;				\
+@@ -262,6 +277,13 @@ label##_hv:						\
+ 	EXCEPTION_PROLOG_PSERIES(PACA_EXGEN, label##_common,	\
+ 				 EXC_HV, KVMTEST, vec)
+ 
++/* Version of above for when we have to branch out-of-line */
++#define STD_EXCEPTION_HV_OOL(vec, label)		\
++	.globl label##_hv;				\
++label##_hv:						\
++	EXCEPTION_PROLOG_1(PACA_EXGEN, KVMTEST, vec);	\
++	EXCEPTION_PROLOG_PSERIES_1(label##_common, EXC_HV)
++
+ #define __SOFTEN_TEST(h)						\
+ 	lbz	r10,PACASOFTIRQEN(r13);					\
+ 	cmpwi	r10,0;							\
+@@ -279,8 +301,10 @@ label##_hv:						\
+ #define __MASKABLE_EXCEPTION_PSERIES(vec, label, h, extra)		\
+ 	HMT_MEDIUM_PPR_DISCARD;						\
+ 	SET_SCRATCH0(r13);    /* save r13 */				\
+-	__EXCEPTION_PROLOG_1(PACA_EXGEN, extra, vec);		\
++	EXCEPTION_PROLOG_0(PACA_EXGEN);					\
++	__EXCEPTION_PROLOG_1(PACA_EXGEN, extra, vec);			\
+ 	EXCEPTION_PROLOG_PSERIES_1(label##_common, h);
++
+ #define _MASKABLE_EXCEPTION_PSERIES(vec, label, h, extra)		\
+ 	__MASKABLE_EXCEPTION_PSERIES(vec, label, h, extra)
+ 
+@@ -298,6 +322,12 @@ label##_hv:								\
+ 	_MASKABLE_EXCEPTION_PSERIES(vec, label,				\
+ 				    EXC_HV, SOFTEN_TEST_HV)
+ 
++#define MASKABLE_EXCEPTION_HV_OOL(vec, label)				\
++	.globl label##_hv;						\
++label##_hv:								\
++	EXCEPTION_PROLOG_1(PACA_EXGEN, SOFTEN_TEST_HV, vec);		\
++	EXCEPTION_PROLOG_PSERIES_1(label##_common, EXC_HV);
++
+ #ifdef CONFIG_PPC_ISERIES
+ #define DISABLE_INTS				\
+ 	li	r11,0;				\
+diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
+--- a/arch/powerpc/kernel/exceptions-64s.S
++++ b/arch/powerpc/kernel/exceptions-64s.S
+@@ -73,7 +73,10 @@ machine_check_pSeries_1:
+ 	 * some code path might still want to branch into the original
+ 	 * vector
+ 	 */
+-	b	machine_check_pSeries
++	HMT_MEDIUM_PPR_DISCARD
++	SET_SCRATCH0(r13)		/* save r13 */
++	EXCEPTION_PROLOG_0(PACA_EXMC)
++	b	machine_check_pSeries_0
+ 
+ 	. = 0x300
+ 	.globl data_access_pSeries
+@@ -94,6 +97,7 @@ END_MMU_FTR_SECTION_IFCLR(MMU_FTR_SLB)
+ data_access_slb_pSeries:
+ 	HMT_MEDIUM_PPR_DISCARD
+ 	SET_SCRATCH0(r13)
++	EXCEPTION_PROLOG_0(PACA_EXSLB)
+ 	EXCEPTION_PROLOG_1(PACA_EXSLB, KVMTEST, 0x380)
+ 	std	r3,PACA_EXSLB+EX_R3(r13)
+ 	mfspr	r3,SPRN_DAR
+@@ -125,6 +129,7 @@ data_access_slb_pSeries:
+ instruction_access_slb_pSeries:
+ 	HMT_MEDIUM_PPR_DISCARD
+ 	SET_SCRATCH0(r13)
++	EXCEPTION_PROLOG_0(PACA_EXSLB)
+ 	EXCEPTION_PROLOG_1(PACA_EXSLB, KVMTEST, 0x480)
+ 	std	r3,PACA_EXSLB+EX_R3(r13)
+ 	mfspr	r3,SPRN_SRR0		/* SRR0 is faulting address */
+@@ -226,14 +231,23 @@ END_FTR_SECTION_IFSET(CPU_FTR_REAL_LE)
+ 	 */
+ 	. = 0xe00
+ hv_exception_trampoline:
++	SET_SCRATCH0(r13)
++	EXCEPTION_PROLOG_0(PACA_EXGEN)
+ 	b	h_data_storage_hv
++
+ 	. = 0xe20
++	SET_SCRATCH0(r13)
++	EXCEPTION_PROLOG_0(PACA_EXGEN)
+ 	b	h_instr_storage_hv
++
+ 	. = 0xe40
++	SET_SCRATCH0(r13)
++	EXCEPTION_PROLOG_0(PACA_EXGEN)
+ 	b	emulation_assist_hv
+-	. = 0xe50
+-	b	hmi_exception_hv
++
+ 	. = 0xe60
++	SET_SCRATCH0(r13)
++	EXCEPTION_PROLOG_0(PACA_EXGEN)
+ 	b	hmi_exception_hv
+ 
+ 	/* We need to deal with the Altivec unavailable exception
+@@ -243,14 +257,20 @@ hv_exception_trampoline:
+ 	 */
+ performance_monitor_pSeries_1:
+ 	. = 0xf00
++	SET_SCRATCH0(r13)
++	EXCEPTION_PROLOG_0(PACA_EXGEN)
+ 	b	performance_monitor_pSeries
+ 
+ altivec_unavailable_pSeries_1:
+ 	. = 0xf20
++	SET_SCRATCH0(r13)
++	EXCEPTION_PROLOG_0(PACA_EXGEN)
+ 	b	altivec_unavailable_pSeries
+ 
+ vsx_unavailable_pSeries_1:
+ 	. = 0xf40
++	SET_SCRATCH0(r13)
++	EXCEPTION_PROLOG_0(PACA_EXGEN)
+ 	b	vsx_unavailable_pSeries
+ 
+ 	. = 0xf60
+@@ -287,8 +307,10 @@ machine_check_pSeries:
+ machine_check_fwnmi:
+ 	HMT_MEDIUM_PPR_DISCARD
+ 	SET_SCRATCH0(r13)		/* save r13 */
+-	EXCEPTION_PROLOG_PSERIES(PACA_EXMC, machine_check_common,
+-				 EXC_STD, KVMTEST, 0x200)
++	EXCEPTION_PROLOG_0(PACA_EXMC)
++machine_check_pSeries_0:
++	EXCEPTION_PROLOG_1(PACA_EXMC, KVMTEST, 0x200)
++	EXCEPTION_PROLOG_PSERIES_1(machine_check_common, EXC_STD)
+ 	KVM_HANDLER_SKIP(PACA_EXMC, EXC_STD, 0x200)
+ 
+ #ifndef CONFIG_POWER4_ONLY
+@@ -329,23 +351,23 @@ do_stab_bolted_pSeries:
+ 
+ 	.align	7
+ 	/* moved from 0xe00 */
+-	STD_EXCEPTION_HV(., 0xe02, h_data_storage)
++	STD_EXCEPTION_HV_OOL(0xe02, h_data_storage)
+ 	KVM_HANDLER_SKIP(PACA_EXGEN, EXC_HV, 0xe02)
+-	STD_EXCEPTION_HV(., 0xe22, h_instr_storage)
++	STD_EXCEPTION_HV_OOL(0xe22, h_instr_storage)
+ 	KVM_HANDLER(PACA_EXGEN, EXC_HV, 0xe22)
+-	STD_EXCEPTION_HV(., 0xe42, emulation_assist)
++	STD_EXCEPTION_HV_OOL(0xe42, emulation_assist)
+ 	KVM_HANDLER(PACA_EXGEN, EXC_HV, 0xe42)
+-	STD_EXCEPTION_HV(., 0xe62, hmi_exception) /* need to flush cache ? */
++	STD_EXCEPTION_HV_OOL(0xe62, hmi_exception) /* need to flush cache ? */
+ 	KVM_HANDLER(PACA_EXGEN, EXC_HV, 0xe62)
+ 
+ 	/* moved from 0xf00 */
+-	STD_EXCEPTION_PSERIES(., 0xf00, performance_monitor)
++	STD_EXCEPTION_PSERIES_OOL(0xf00, performance_monitor)
+ 	KVM_HANDLER(PACA_EXGEN, EXC_STD, 0xf00)
+-	STD_EXCEPTION_PSERIES(., 0xf20, altivec_unavailable)
++	STD_EXCEPTION_PSERIES_OOL(0xf20, altivec_unavailable)
+ 	KVM_HANDLER(PACA_EXGEN, EXC_STD, 0xf20)
+-	STD_EXCEPTION_PSERIES(., 0xf40, vsx_unavailable)
++	STD_EXCEPTION_PSERIES_OOL(0xf40, vsx_unavailable)
+ 	KVM_HANDLER(PACA_EXGEN, EXC_STD, 0xf40)
+-	STD_EXCEPTION_PSERIES(., 0xf60, facility_unavailable)
++	STD_EXCEPTION_PSERIES_OOL(0xf60, facility_unavailable)
+ 	KVM_HANDLER(PACA_EXGEN, EXC_STD, 0xf60)
+ 
+ /*
+-- 
+2.13.7
+
