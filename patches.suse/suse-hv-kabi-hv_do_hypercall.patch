@@ -15,7 +15,7 @@ References: bnc#1082632
 +}
 +EXPORT_SYMBOL_GPL(hv_do_hypercall);
 +
- void hyperv_report_panic(struct pt_regs *regs)
+ void hyperv_report_panic(struct pt_regs *regs, long err)
  {
  	static bool panic_reported;
 --- a/arch/x86/include/asm/mshyperv.h
