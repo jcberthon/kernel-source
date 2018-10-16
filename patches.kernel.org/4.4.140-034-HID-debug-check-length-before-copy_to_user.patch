@@ -1,7 +1,7 @@
 From: Daniel Rosenberg <drosen@google.com>
 Date: Mon, 2 Jul 2018 16:59:37 -0700
 Subject: [PATCH] HID: debug: check length before copy_to_user()
-References: bnc#1012382
+References: bnc#1012382,CVE-2018-9516,bsc#1108498
 Patch-mainline: 4.4.140
 Git-commit: 717adfdaf14704fd3ec7fa2c04520c0723247eac
 
