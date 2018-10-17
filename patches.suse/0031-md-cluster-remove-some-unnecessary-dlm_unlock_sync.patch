@@ -14,23 +14,21 @@ Reviewed-by: NeilBrown <neilb@suse.com>
 Signed-off-by: Guoqing Jiang <gqjiang@suse.com>
 Signed-off-by: Shaohua Li <shli@fb.com>
 ---
- drivers/md/md-cluster.c | 6 +-----
+ drivers/md/md-cluster.c |    6 +-----
  1 file changed, 1 insertion(+), 5 deletions(-)
 
-diff --git a/drivers/md/md-cluster.c b/drivers/md/md-cluster.c
-index ccd756f..67a7358 100644
 --- a/drivers/md/md-cluster.c
 +++ b/drivers/md/md-cluster.c
-@@ -284,7 +284,7 @@ static void recover_bitmaps(struct md_thread *thread)
+@@ -275,7 +275,7 @@ static void recover_bitmaps(struct md_th
  		ret = bitmap_copy_from_slot(mddev, slot, &lo, &hi, true);
  		if (ret) {
  			pr_err("md-cluster: Could not copy data from bitmap %d\n", slot);
 -			goto dlm_unlock;
 +			goto clear_bit;
  		}
- 		if (hi > 0) {
- 			if (lo < mddev->recovery_cp)
-@@ -296,8 +296,6 @@ static void recover_bitmaps(struct md_thread *thread)
+ 
+ 		/* Clear suspend_area associated with the bitmap */
+@@ -297,8 +297,6 @@ static void recover_bitmaps(struct md_th
  			    md_wakeup_thread(mddev->thread);
  			}
  		}
@@ -39,7 +37,7 @@ index ccd756f..67a7358 100644
  clear_bit:
  		lockres_free(bm_lockres);
  		clear_bit(slot, &cinfo->recovery_map);
-@@ -766,7 +764,6 @@ static int gather_all_resync_info(struct mddev *mddev, int total_slots)
+@@ -767,7 +765,6 @@ static int gather_all_resync_info(struct
  			md_check_recovery(mddev);
  		}
  
@@ -47,7 +45,7 @@ index ccd756f..67a7358 100644
  		lockres_free(bm_lockres);
  	}
  out:
-@@ -1182,7 +1179,6 @@ static void unlock_all_bitmaps(struct mddev *mddev)
+@@ -1180,7 +1177,6 @@ static void unlock_all_bitmaps(struct md
  	if (cinfo->other_bitmap_lockres) {
  		for (i = 0; i < mddev->bitmap_info.nodes - 1; i++) {
  			if (cinfo->other_bitmap_lockres[i]) {
@@ -55,6 +53,3 @@ index ccd756f..67a7358 100644
  				lockres_free(cinfo->other_bitmap_lockres[i]);
  			}
  		}
--- 
-2.6.6
-

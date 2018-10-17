@@ -53,7 +53,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  notrace static long vdso_fallback_gettime(long clock, struct timespec *ts)
  {
  	long ret;
-@@ -64,8 +62,42 @@ notrace static long vdso_fallback_gtod(s
+@@ -66,8 +64,42 @@ notrace static long vdso_fallback_gtod(s
  	return ret;
  }
  
@@ -65,13 +65,13 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
 +{
 +	long ret;
 +
-+	asm(
++	asm (
 +		"mov %%ebx, %%edx \n"
-+		"mov %2, %%ebx \n"
++		"mov %[clock], %%ebx \n"
 +		"call __kernel_vsyscall \n"
 +		"mov %%edx, %%ebx \n"
-+		: "=a" (ret)
-+		: "0" (__NR_clock_gettime), "g" (clock), "c" (ts)
++		: "=a" (ret), "=m" (*ts)
++		: "0" (__NR_clock_gettime), [clock] "g" (clock), "c" (ts)
 +		: "memory", "edx");
 +	return ret;
 +}
@@ -80,13 +80,13 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
 +{
 +	long ret;
 +
-+	asm(
++	asm (
 +		"mov %%ebx, %%edx \n"
-+		"mov %2, %%ebx \n"
++		"mov %[tv], %%ebx \n"
 +		"call __kernel_vsyscall \n"
 +		"mov %%edx, %%ebx \n"
-+		: "=a" (ret)
-+		: "0" (__NR_gettimeofday), "g" (tv), "c" (tz)
++		: "=a" (ret), "=m" (*tv), "=m" (*tz)
++		: "0" (__NR_gettimeofday), [tv] "g" (tv), "c" (tz)
 +		: "memory", "edx");
 +	return ret;
 +}
@@ -97,7 +97,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  static notrace const struct pvclock_vsyscall_time_info *get_pvti0(void)
  {
  	return (const struct pvclock_vsyscall_time_info *)&pvclock_page;
-@@ -109,9 +141,9 @@ static notrace cycle_t vread_pvclock(int
+@@ -111,9 +143,9 @@ static notrace cycle_t vread_pvclock(int
  	do {
  		version = pvti->version;
  
@@ -109,7 +109,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  		pvti_tsc_to_system_mul = pvti->tsc_to_system_mul;
  		pvti_tsc_shift = pvti->tsc_shift;
  		pvti_system_time = pvti->system_time;
-@@ -126,7 +158,7 @@ static notrace cycle_t vread_pvclock(int
+@@ -128,7 +160,7 @@ static notrace cycle_t vread_pvclock(int
  		pvclock_scale_delta(delta, pvti_tsc_to_system_mul,
  				    pvti_tsc_shift);
  
@@ -118,7 +118,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  	last = gtod->cycle_last;
  
  	if (likely(ret >= last))
-@@ -136,49 +168,6 @@ static notrace cycle_t vread_pvclock(int
+@@ -138,49 +170,6 @@ static notrace cycle_t vread_pvclock(int
  }
  #endif
  
@@ -128,13 +128,13 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
 -{
 -	long ret;
 -
--	asm(
+-	asm (
 -		"mov %%ebx, %%edx \n"
--		"mov %2, %%ebx \n"
+-		"mov %[clock], %%ebx \n"
 -		"call __kernel_vsyscall \n"
 -		"mov %%edx, %%ebx \n"
--		: "=a" (ret)
--		: "0" (__NR_clock_gettime), "g" (clock), "c" (ts)
+-		: "=a" (ret), "=m" (*ts)
+-		: "0" (__NR_clock_gettime), [clock] "g" (clock), "c" (ts)
 -		: "memory", "edx");
 -	return ret;
 -}
@@ -143,13 +143,13 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
 -{
 -	long ret;
 -
--	asm(
+-	asm (
 -		"mov %%ebx, %%edx \n"
--		"mov %2, %%ebx \n"
+-		"mov %[tv], %%ebx \n"
 -		"call __kernel_vsyscall \n"
 -		"mov %%edx, %%ebx \n"
--		: "=a" (ret)
--		: "0" (__NR_gettimeofday), "g" (tv), "c" (tz)
+-		: "=a" (ret), "=m" (*tv), "=m" (*tz)
+-		: "0" (__NR_gettimeofday), [tv] "g" (tv), "c" (tz)
 -		: "memory", "edx");
 -	return ret;
 -}

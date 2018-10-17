@@ -6,3 +6,4 @@ VARIANT=
 OBS_PROJECT=openSUSE:Leap:42.3:Update
 # Check the sorted patches section of series.conf
 SORT_SERIES=yes
+BUGZILLA_PRODUCT="SUSE Linux Enterprise Server 12 SP3"

@@ -28,18 +28,16 @@ Cc: James Morse <james.morse@arm.com>
 Signed-off-by: Catalin Marinas <catalin.marinas@arm.com>
 Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 ---
- arch/arm64/include/asm/cpufeature.h |  2 +-
- arch/arm64/include/asm/cputype.h    |  8 ++---
- arch/arm64/kernel/cpufeature.c      | 60 ++++++++++++++++++-------------------
- arch/arm64/kernel/cpuinfo.c         | 56 +++++++++++++++++-----------------
- arch/arm64/mm/context.c             |  2 +-
- 5 files changed, 64 insertions(+), 64 deletions(-)
+ arch/arm64/include/asm/cpufeature.h |    2 -
+ arch/arm64/include/asm/cputype.h    |    8 ++---
+ arch/arm64/kernel/cpufeature.c      |   56 ++++++++++++++++++------------------
+ arch/arm64/kernel/cpuinfo.c         |   52 ++++++++++++++++-----------------
+ arch/arm64/mm/context.c             |    2 -
+ 5 files changed, 60 insertions(+), 60 deletions(-)
 
-diff --git a/arch/arm64/include/asm/cpufeature.h b/arch/arm64/include/asm/cpufeature.h
-index c841721..b5299d2 100644
 --- a/arch/arm64/include/asm/cpufeature.h
 +++ b/arch/arm64/include/asm/cpufeature.h
-@@ -189,7 +189,7 @@ u64 read_system_reg(u32 id);
+@@ -190,7 +190,7 @@ u64 read_system_reg(u32 id);
  
  static inline bool cpu_supports_mixed_endian_el0(void)
  {
@@ -47,12 +45,10 @@ index c841721..b5299d2 100644
 +	return id_aa64mmfr0_mixed_endian_el0(read_cpuid(ID_AA64MMFR0_EL1));
  }
  
- static inline bool system_supports_mixed_endian_el0(void)
-diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h
-index dcb84e6..bb74981 100644
+ static inline bool system_supports_32bit_el0(void)
 --- a/arch/arm64/include/asm/cputype.h
 +++ b/arch/arm64/include/asm/cputype.h
-@@ -93,7 +93,7 @@
+@@ -104,7 +104,7 @@
  
  #define read_cpuid(reg) ({						\
  	u64 __val;							\
@@ -61,7 +57,7 @@ index dcb84e6..bb74981 100644
  	__val;								\
  })
  
-@@ -104,12 +104,12 @@
+@@ -115,12 +115,12 @@
   */
  static inline u32 __attribute_const__ read_cpuid_id(void)
  {
@@ -76,7 +72,7 @@ index dcb84e6..bb74981 100644
  }
  
  static inline unsigned int __attribute_const__ read_cpuid_implementor(void)
-@@ -124,7 +124,7 @@ static inline unsigned int __attribute_const__ read_cpuid_part_number(void)
+@@ -135,7 +135,7 @@ static inline unsigned int __attribute_c
  
  static inline u32 __attribute_const__ read_cpuid_cachetype(void)
  {
@@ -85,11 +81,9 @@ index dcb84e6..bb74981 100644
  }
  #endif /* __ASSEMBLY__ */
  
-diff --git a/arch/arm64/kernel/cpufeature.c b/arch/arm64/kernel/cpufeature.c
-index bb30e90..e9dd421 100644
 --- a/arch/arm64/kernel/cpufeature.c
 +++ b/arch/arm64/kernel/cpufeature.c
-@@ -858,36 +858,36 @@ static inline void set_sys_caps_initialised(void)
+@@ -866,36 +866,36 @@ static inline void set_sys_caps_initiali
  static u64 __raw_read_system_reg(u32 sys_id)
  {
  	switch (sys_id) {
@@ -109,20 +103,6 @@ index bb30e90..e9dd421 100644
 -	case SYS_MVFR0_EL1:		return read_cpuid(SYS_MVFR0_EL1);
 -	case SYS_MVFR1_EL1:		return read_cpuid(SYS_MVFR1_EL1);
 -	case SYS_MVFR2_EL1:		return read_cpuid(SYS_MVFR2_EL1);
--
--	case SYS_ID_AA64PFR0_EL1:	return read_cpuid(SYS_ID_AA64PFR0_EL1);
--	case SYS_ID_AA64PFR1_EL1:	return read_cpuid(SYS_ID_AA64PFR0_EL1);
--	case SYS_ID_AA64DFR0_EL1:	return read_cpuid(SYS_ID_AA64DFR0_EL1);
--	case SYS_ID_AA64DFR1_EL1:	return read_cpuid(SYS_ID_AA64DFR0_EL1);
--	case SYS_ID_AA64MMFR0_EL1:	return read_cpuid(SYS_ID_AA64MMFR0_EL1);
--	case SYS_ID_AA64MMFR1_EL1:	return read_cpuid(SYS_ID_AA64MMFR1_EL1);
--	case SYS_ID_AA64MMFR2_EL1:	return read_cpuid(SYS_ID_AA64MMFR2_EL1);
--	case SYS_ID_AA64ISAR0_EL1:	return read_cpuid(SYS_ID_AA64ISAR0_EL1);
--	case SYS_ID_AA64ISAR1_EL1:	return read_cpuid(SYS_ID_AA64ISAR1_EL1);
--
--	case SYS_CNTFRQ_EL0:		return read_cpuid(SYS_CNTFRQ_EL0);
--	case SYS_CTR_EL0:		return read_cpuid(SYS_CTR_EL0);
--	case SYS_DCZID_EL0:		return read_cpuid(SYS_DCZID_EL0);
 +	case SYS_ID_PFR0_EL1:		return read_cpuid(ID_PFR0_EL1);
 +	case SYS_ID_PFR1_EL1:		return read_cpuid(ID_PFR1_EL1);
 +	case SYS_ID_DFR0_EL1:		return read_cpuid(ID_DFR0_EL1);
@@ -139,7 +119,16 @@ index bb30e90..e9dd421 100644
 +	case SYS_MVFR0_EL1:		return read_cpuid(MVFR0_EL1);
 +	case SYS_MVFR1_EL1:		return read_cpuid(MVFR1_EL1);
 +	case SYS_MVFR2_EL1:		return read_cpuid(MVFR2_EL1);
-+
+ 
+-	case SYS_ID_AA64PFR0_EL1:	return read_cpuid(SYS_ID_AA64PFR0_EL1);
+-	case SYS_ID_AA64PFR1_EL1:	return read_cpuid(SYS_ID_AA64PFR0_EL1);
+-	case SYS_ID_AA64DFR0_EL1:	return read_cpuid(SYS_ID_AA64DFR0_EL1);
+-	case SYS_ID_AA64DFR1_EL1:	return read_cpuid(SYS_ID_AA64DFR0_EL1);
+-	case SYS_ID_AA64MMFR0_EL1:	return read_cpuid(SYS_ID_AA64MMFR0_EL1);
+-	case SYS_ID_AA64MMFR1_EL1:	return read_cpuid(SYS_ID_AA64MMFR1_EL1);
+-	case SYS_ID_AA64MMFR2_EL1:	return read_cpuid(SYS_ID_AA64MMFR2_EL1);
+-	case SYS_ID_AA64ISAR0_EL1:	return read_cpuid(SYS_ID_AA64ISAR0_EL1);
+-	case SYS_ID_AA64ISAR1_EL1:	return read_cpuid(SYS_ID_AA64ISAR1_EL1);
 +	case SYS_ID_AA64PFR0_EL1:	return read_cpuid(ID_AA64PFR0_EL1);
 +	case SYS_ID_AA64PFR1_EL1:	return read_cpuid(ID_AA64PFR0_EL1);
 +	case SYS_ID_AA64DFR0_EL1:	return read_cpuid(ID_AA64DFR0_EL1);
@@ -149,18 +138,19 @@ index bb30e90..e9dd421 100644
 +	case SYS_ID_AA64MMFR2_EL1:	return read_cpuid(ID_AA64MMFR2_EL1);
 +	case SYS_ID_AA64ISAR0_EL1:	return read_cpuid(ID_AA64ISAR0_EL1);
 +	case SYS_ID_AA64ISAR1_EL1:	return read_cpuid(ID_AA64ISAR1_EL1);
-+
+ 
+-	case SYS_CNTFRQ_EL0:		return read_cpuid(SYS_CNTFRQ_EL0);
+-	case SYS_CTR_EL0:		return read_cpuid(SYS_CTR_EL0);
+-	case SYS_DCZID_EL0:		return read_cpuid(SYS_DCZID_EL0);
 +	case SYS_CNTFRQ_EL0:		return read_cpuid(CNTFRQ_EL0);
 +	case SYS_CTR_EL0:		return read_cpuid(CTR_EL0);
 +	case SYS_DCZID_EL0:		return read_cpuid(DCZID_EL0);
  	default:
  		BUG();
  		return 0;
-diff --git a/arch/arm64/kernel/cpuinfo.c b/arch/arm64/kernel/cpuinfo.c
-index 95a6fae..ef25665 100644
 --- a/arch/arm64/kernel/cpuinfo.c
 +++ b/arch/arm64/kernel/cpuinfo.c
-@@ -208,36 +208,36 @@ static void __cpuinfo_store_cpu(struct cpuinfo_arm64 *info)
+@@ -208,36 +208,36 @@ static void __cpuinfo_store_cpu(struct c
  {
  	info->reg_cntfrq = arch_timer_get_cntfrq();
  	info->reg_ctr = read_cpuid_cachetype();
@@ -177,7 +167,16 @@ index 95a6fae..ef25665 100644
 -	info->reg_id_aa64mmfr2 = read_cpuid(SYS_ID_AA64MMFR2_EL1);
 -	info->reg_id_aa64pfr0 = read_cpuid(SYS_ID_AA64PFR0_EL1);
 -	info->reg_id_aa64pfr1 = read_cpuid(SYS_ID_AA64PFR1_EL1);
--
++	info->reg_id_aa64dfr0 = read_cpuid(ID_AA64DFR0_EL1);
++	info->reg_id_aa64dfr1 = read_cpuid(ID_AA64DFR1_EL1);
++	info->reg_id_aa64isar0 = read_cpuid(ID_AA64ISAR0_EL1);
++	info->reg_id_aa64isar1 = read_cpuid(ID_AA64ISAR1_EL1);
++	info->reg_id_aa64mmfr0 = read_cpuid(ID_AA64MMFR0_EL1);
++	info->reg_id_aa64mmfr1 = read_cpuid(ID_AA64MMFR1_EL1);
++	info->reg_id_aa64mmfr2 = read_cpuid(ID_AA64MMFR2_EL1);
++	info->reg_id_aa64pfr0 = read_cpuid(ID_AA64PFR0_EL1);
++	info->reg_id_aa64pfr1 = read_cpuid(ID_AA64PFR1_EL1);
+ 
 -	info->reg_id_dfr0 = read_cpuid(SYS_ID_DFR0_EL1);
 -	info->reg_id_isar0 = read_cpuid(SYS_ID_ISAR0_EL1);
 -	info->reg_id_isar1 = read_cpuid(SYS_ID_ISAR1_EL1);
@@ -191,20 +190,6 @@ index 95a6fae..ef25665 100644
 -	info->reg_id_mmfr3 = read_cpuid(SYS_ID_MMFR3_EL1);
 -	info->reg_id_pfr0 = read_cpuid(SYS_ID_PFR0_EL1);
 -	info->reg_id_pfr1 = read_cpuid(SYS_ID_PFR1_EL1);
--
--	info->reg_mvfr0 = read_cpuid(SYS_MVFR0_EL1);
--	info->reg_mvfr1 = read_cpuid(SYS_MVFR1_EL1);
--	info->reg_mvfr2 = read_cpuid(SYS_MVFR2_EL1);
-+	info->reg_id_aa64dfr0 = read_cpuid(ID_AA64DFR0_EL1);
-+	info->reg_id_aa64dfr1 = read_cpuid(ID_AA64DFR1_EL1);
-+	info->reg_id_aa64isar0 = read_cpuid(ID_AA64ISAR0_EL1);
-+	info->reg_id_aa64isar1 = read_cpuid(ID_AA64ISAR1_EL1);
-+	info->reg_id_aa64mmfr0 = read_cpuid(ID_AA64MMFR0_EL1);
-+	info->reg_id_aa64mmfr1 = read_cpuid(ID_AA64MMFR1_EL1);
-+	info->reg_id_aa64mmfr2 = read_cpuid(ID_AA64MMFR2_EL1);
-+	info->reg_id_aa64pfr0 = read_cpuid(ID_AA64PFR0_EL1);
-+	info->reg_id_aa64pfr1 = read_cpuid(ID_AA64PFR1_EL1);
-+
 +	info->reg_id_dfr0 = read_cpuid(ID_DFR0_EL1);
 +	info->reg_id_isar0 = read_cpuid(ID_ISAR0_EL1);
 +	info->reg_id_isar1 = read_cpuid(ID_ISAR1_EL1);
@@ -218,15 +203,16 @@ index 95a6fae..ef25665 100644
 +	info->reg_id_mmfr3 = read_cpuid(ID_MMFR3_EL1);
 +	info->reg_id_pfr0 = read_cpuid(ID_PFR0_EL1);
 +	info->reg_id_pfr1 = read_cpuid(ID_PFR1_EL1);
-+
+ 
+-	info->reg_mvfr0 = read_cpuid(SYS_MVFR0_EL1);
+-	info->reg_mvfr1 = read_cpuid(SYS_MVFR1_EL1);
+-	info->reg_mvfr2 = read_cpuid(SYS_MVFR2_EL1);
 +	info->reg_mvfr0 = read_cpuid(MVFR0_EL1);
 +	info->reg_mvfr1 = read_cpuid(MVFR1_EL1);
 +	info->reg_mvfr2 = read_cpuid(MVFR2_EL1);
  
  	cpuinfo_detect_icache_policy(info);
  
-diff --git a/arch/arm64/mm/context.c b/arch/arm64/mm/context.c
-index 6c989f0..c90c3c5 100644
 --- a/arch/arm64/mm/context.c
 +++ b/arch/arm64/mm/context.c
 @@ -45,7 +45,7 @@ static cpumask_t tlb_flush_pending;
@@ -238,6 +224,3 @@ index 6c989f0..c90c3c5 100644
  						ID_AA64MMFR0_ASID_SHIFT);
  
  	switch (fld) {
--- 
-2.11.0
-
