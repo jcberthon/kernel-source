@@ -1,0 +1,68 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Date: Mon, 15 Oct 2018 18:39:03 +0200
+Subject: Revert "tcp: add tcp_ooo_try_coalesce() helper"
+Patch-mainline: never, kabi
+References: kabi
+
+This reverts commit eee1af4e268e10fecb76bce42a8d7343aeb2a5e6, upstream
+commit 58152ecbbcc6a0ce7fddd5bf5f6ee535834ece0c. It fixes/depends on
+commit 4666b6e2b27d91e05a5b8459e40e4a05dbc1c7b0, upstream commit
+9f5afeae51526b3ad7b7cb21ee8b145ce6ea7a7a and that is being reverted due
+to kABI breakage.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ net/ipv4/tcp_input.c | 23 ++---------------------
+ 1 file changed, 2 insertions(+), 21 deletions(-)
+
+diff --git a/net/ipv4/tcp_input.c b/net/ipv4/tcp_input.c
+index 1aff93d76f24..cbe0ca03bde8 100644
+--- a/net/ipv4/tcp_input.c
++++ b/net/ipv4/tcp_input.c
+@@ -4296,23 +4296,6 @@ static bool tcp_try_coalesce(struct sock *sk,
+ 	return true;
+ }
+ 
+-static bool tcp_ooo_try_coalesce(struct sock *sk,
+-			     struct sk_buff *to,
+-			     struct sk_buff *from,
+-			     bool *fragstolen)
+-{
+-	bool res = tcp_try_coalesce(sk, to, from, fragstolen);
+-
+-	/* In case tcp_drop() is called later, update to->gso_segs */
+-	if (res) {
+-		u32 gso_segs = max_t(u16, 1, skb_shinfo(to)->gso_segs) +
+-			       max_t(u16, 1, skb_shinfo(from)->gso_segs);
+-
+-		skb_shinfo(to)->gso_segs = min_t(u32, gso_segs, 0xFFFF);
+-	}
+-	return res;
+-}
+-
+ static void tcp_drop(struct sock *sk, struct sk_buff *skb)
+ {
+ 	sk_drops_add(sk, skb);
+@@ -4439,8 +4422,7 @@ static void tcp_data_queue_ofo(struct sock *sk, struct sk_buff *skb)
+ 	/* In the typical case, we are adding an skb to the end of the list.
+ 	 * Use of ooo_last_skb avoids the O(Log(N)) rbtree lookup.
+ 	 */
+-	if (tcp_ooo_try_coalesce(sk, tp->ooo_last_skb,
+-				 skb, &fragstolen)) {
++	if (tcp_try_coalesce(sk, tp->ooo_last_skb, skb, &fragstolen)) {
+ coalesce_done:
+ 		tcp_grow_window(sk, skb);
+ 		kfree_skb_partial(skb, fragstolen);
+@@ -4485,8 +4467,7 @@ coalesce_done:
+ 				tcp_drop(sk, skb1);
+ 				goto merge_right;
+ 			}
+-		} else if (tcp_ooo_try_coalesce(sk, skb1,
+-						skb, &fragstolen)) {
++		} else if (tcp_try_coalesce(sk, skb1, skb, &fragstolen)) {
+ 			goto coalesce_done;
+ 		}
+ 		p = &parent->rb_right;
+-- 
+2.19.1
+

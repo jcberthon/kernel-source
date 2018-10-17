@@ -1,0 +1,42 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Date: Mon, 15 Oct 2018 18:26:06 +0200
+Subject: Revert "tcp: call tcp_drop() from tcp_data_queue_ofo()"
+Patch-mainline: never, kabi
+References: kabi
+
+This reverts commit be288481479ca8c1beba02a7e779ffeaa11f1597, upstream
+commit 8541b21e781a22dce52a74fef0b9bed00404a1cd. It fixes/depends on
+commit 4666b6e2b27d91e05a5b8459e40e4a05dbc1c7b0, upstream commit
+9f5afeae51526b3ad7b7cb21ee8b145ce6ea7a7a and that is being reverted due
+to kABI breakage.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ net/ipv4/tcp_input.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/net/ipv4/tcp_input.c b/net/ipv4/tcp_input.c
+index cbe0ca03bde8..4739a93425ed 100644
+--- a/net/ipv4/tcp_input.c
++++ b/net/ipv4/tcp_input.c
+@@ -4445,7 +4445,7 @@ coalesce_done:
+ 				/* All the bits are present. Drop. */
+ 				NET_INC_STATS(sock_net(sk),
+ 					      LINUX_MIB_TCPOFOMERGE);
+-				tcp_drop(sk, skb);
++				__kfree_skb(skb);
+ 				skb = NULL;
+ 				tcp_dsack_set(sk, seq, end_seq);
+ 				goto add_sack;
+@@ -4464,7 +4464,7 @@ coalesce_done:
+ 						 TCP_SKB_CB(skb1)->end_seq);
+ 				NET_INC_STATS(sock_net(sk),
+ 					      LINUX_MIB_TCPOFOMERGE);
+-				tcp_drop(sk, skb1);
++				__kfree_skb(skb1);
+ 				goto merge_right;
+ 			}
+ 		} else if (tcp_try_coalesce(sk, skb1, skb, &fragstolen)) {
+-- 
+2.19.1
+

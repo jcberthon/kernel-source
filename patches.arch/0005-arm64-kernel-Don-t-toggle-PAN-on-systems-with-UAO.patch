@@ -33,36 +33,34 @@ Signed-off-by: James Morse <james.morse@arm.com>
 Signed-off-by: Catalin Marinas <catalin.marinas@arm.com>
 Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 ---
- arch/arm64/include/asm/cpufeature.h |  3 ++-
- arch/arm64/include/asm/uaccess.h    |  8 ++++----
- arch/arm64/kernel/cpufeature.c      | 16 ++++++++++++++++
- arch/arm64/lib/clear_user.S         |  4 ++--
- arch/arm64/lib/copy_from_user.S     |  4 ++--
- arch/arm64/lib/copy_in_user.S       |  4 ++--
- arch/arm64/lib/copy_to_user.S       |  4 ++--
- arch/arm64/mm/fault.c               |  3 +++
- 8 files changed, 33 insertions(+), 13 deletions(-)
+ arch/arm64/include/asm/cpufeature.h |    5 +++--
+ arch/arm64/include/asm/uaccess.h    |    8 ++++----
+ arch/arm64/kernel/cpufeature.c      |   16 ++++++++++++++++
+ arch/arm64/lib/clear_user.S         |    4 ++--
+ arch/arm64/lib/copy_from_user.S     |    4 ++--
+ arch/arm64/lib/copy_in_user.S       |    4 ++--
+ arch/arm64/lib/copy_to_user.S       |    4 ++--
+ arch/arm64/mm/fault.c               |    3 +++
+ 8 files changed, 34 insertions(+), 14 deletions(-)
 
-diff --git a/arch/arm64/include/asm/cpufeature.h b/arch/arm64/include/asm/cpufeature.h
-index 5a3991d10a2e..1d7c84dffdd8 100644
 --- a/arch/arm64/include/asm/cpufeature.h
 +++ b/arch/arm64/include/asm/cpufeature.h
-@@ -34,8 +34,9 @@
+@@ -34,9 +34,10 @@
  #define ARM64_HAS_NO_HW_PREFETCH		9
  #define ARM64_HAS_NO_BCAST_TLBI			10
  #define ARM64_HAS_UAO				11
+-#define ARM64_HAS_32BIT_EL0			12
 +#define ARM64_ALT_PAN_NOT_UAO			12
++#define ARM64_HAS_32BIT_EL0			13
  
--#define ARM64_NCAPS				12
-+#define ARM64_NCAPS				13
+-#define ARM64_NCAPS				13
++#define ARM64_NCAPS				14
  
  #ifndef __ASSEMBLY__
  
-diff --git a/arch/arm64/include/asm/uaccess.h b/arch/arm64/include/asm/uaccess.h
-index f973bdce8410..16ba0d5c9740 100644
 --- a/arch/arm64/include/asm/uaccess.h
 +++ b/arch/arm64/include/asm/uaccess.h
-@@ -145,7 +145,7 @@ static inline void set_fs(mm_segment_t fs)
+@@ -154,7 +154,7 @@ static inline void set_fs(mm_segment_t f
  do {									\
  	unsigned long __gu_val;						\
  	__chk_user_ptr(ptr);						\
@@ -71,7 +69,7 @@ index f973bdce8410..16ba0d5c9740 100644
  			CONFIG_ARM64_PAN));				\
  	switch (sizeof(*(ptr))) {					\
  	case 1:								\
-@@ -168,7 +168,7 @@ do {									\
+@@ -177,7 +177,7 @@ do {									\
  		BUILD_BUG();						\
  	}								\
  	(x) = (__force __typeof__(*(ptr)))__gu_val;			\
@@ -80,7 +78,7 @@ index f973bdce8410..16ba0d5c9740 100644
  			CONFIG_ARM64_PAN));				\
  } while (0)
  
-@@ -217,7 +217,7 @@ do {									\
+@@ -226,7 +226,7 @@ do {									\
  do {									\
  	__typeof__(*(ptr)) __pu_val = (x);				\
  	__chk_user_ptr(ptr);						\
@@ -89,7 +87,7 @@ index f973bdce8410..16ba0d5c9740 100644
  			CONFIG_ARM64_PAN));				\
  	switch (sizeof(*(ptr))) {					\
  	case 1:								\
-@@ -239,7 +239,7 @@ do {									\
+@@ -248,7 +248,7 @@ do {									\
  	default:							\
  		BUILD_BUG();						\
  	}								\
@@ -98,8 +96,6 @@ index f973bdce8410..16ba0d5c9740 100644
  			CONFIG_ARM64_PAN));				\
  } while (0)
  
-diff --git a/arch/arm64/kernel/cpufeature.c b/arch/arm64/kernel/cpufeature.c
-index 088bc0434a5b..3ac3728d6b33 100644
 --- a/arch/arm64/kernel/cpufeature.c
 +++ b/arch/arm64/kernel/cpufeature.c
 @@ -69,6 +69,10 @@ DECLARE_BITMAP(cpu_hwcaps, ARM64_NCAPS);
@@ -113,7 +109,7 @@ index 088bc0434a5b..3ac3728d6b33 100644
  static struct arm64_ftr_bits ftr_id_aa64isar0[] = {
  	ARM64_FTR_BITS(FTR_STRICT, FTR_EXACT, 32, 32, 0),
  	ARM64_FTR_BITS(FTR_STRICT, FTR_EXACT, ID_AA64ISAR0_RDM_SHIFT, 4, 0),
-@@ -690,6 +694,12 @@ static const struct arm64_cpu_capabilities arm64_features[] = {
+@@ -690,6 +694,12 @@ static const struct arm64_cpu_capabiliti
  		.enable = cpu_enable_uao,
  	},
  #endif /* CONFIG_ARM64_UAO */
@@ -123,10 +119,10 @@ index 088bc0434a5b..3ac3728d6b33 100644
 +		.matches = cpufeature_pan_not_uao,
 +	},
 +#endif /* CONFIG_ARM64_PAN */
- 	{},
- };
- 
-@@ -973,3 +983,9 @@ void __init setup_cpu_features(void)
+ 	{
+ 		.desc = "32-bit EL0 Support",
+ 		.capability = ARM64_HAS_32BIT_EL0,
+@@ -981,3 +991,9 @@ void __init setup_cpu_features(void)
  		pr_warn("L1_CACHE_BYTES smaller than the Cache Writeback Granule (%d < %d)\n",
  			L1_CACHE_BYTES, cls);
  }
@@ -136,8 +132,6 @@ index 088bc0434a5b..3ac3728d6b33 100644
 +{
 +	return (cpus_have_cap(ARM64_HAS_PAN) && !cpus_have_cap(ARM64_HAS_UAO));
 +}
-diff --git a/arch/arm64/lib/clear_user.S b/arch/arm64/lib/clear_user.S
-index 3f950b677c07..5d1cad3ce6d6 100644
 --- a/arch/arm64/lib/clear_user.S
 +++ b/arch/arm64/lib/clear_user.S
 @@ -33,7 +33,7 @@
@@ -149,7 +143,7 @@ index 3f950b677c07..5d1cad3ce6d6 100644
  	    CONFIG_ARM64_PAN)
  	mov	x2, x1			// save the size for fixup return
  	subs	x1, x1, #8
-@@ -54,7 +54,7 @@ uao_user_alternative 9f, strh, sttrh, wzr, x0, 2
+@@ -54,7 +54,7 @@ uao_user_alternative 9f, strh, sttrh, wz
  	b.mi	5f
  uao_user_alternative 9f, strb, sttrb, wzr, x0, 0
  5:	mov	x0, #0
@@ -158,8 +152,6 @@ index 3f950b677c07..5d1cad3ce6d6 100644
  	    CONFIG_ARM64_PAN)
  	ret
  ENDPROC(__clear_user)
-diff --git a/arch/arm64/lib/copy_from_user.S b/arch/arm64/lib/copy_from_user.S
-index 1d982d64f1a7..17e8306dca29 100644
 --- a/arch/arm64/lib/copy_from_user.S
 +++ b/arch/arm64/lib/copy_from_user.S
 @@ -67,11 +67,11 @@
@@ -176,8 +168,6 @@ index 1d982d64f1a7..17e8306dca29 100644
  	    CONFIG_ARM64_PAN)
  	mov	x0, #0				// Nothing to copy
  	ret
-diff --git a/arch/arm64/lib/copy_in_user.S b/arch/arm64/lib/copy_in_user.S
-index feaad1520dc1..f7292dd08c84 100644
 --- a/arch/arm64/lib/copy_in_user.S
 +++ b/arch/arm64/lib/copy_in_user.S
 @@ -68,11 +68,11 @@
@@ -194,8 +184,6 @@ index feaad1520dc1..f7292dd08c84 100644
  	    CONFIG_ARM64_PAN)
  	mov	x0, #0
  	ret
-diff --git a/arch/arm64/lib/copy_to_user.S b/arch/arm64/lib/copy_to_user.S
-index 2dae2cd2c481..21faae60f988 100644
 --- a/arch/arm64/lib/copy_to_user.S
 +++ b/arch/arm64/lib/copy_to_user.S
 @@ -66,11 +66,11 @@
@@ -212,11 +200,9 @@ index 2dae2cd2c481..21faae60f988 100644
  	    CONFIG_ARM64_PAN)
  	mov	x0, #0
  	ret
-diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
-index 82cb8b3ee09a..276c328cf13e 100644
 --- a/arch/arm64/mm/fault.c
 +++ b/arch/arm64/mm/fault.c
-@@ -286,6 +286,9 @@ static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
+@@ -286,6 +286,9 @@ static int __kprobes do_page_fault(unsig
  	}
  
  	if (permission_fault(esr) && (addr < USER_DS)) {
@@ -226,6 +212,3 @@ index 82cb8b3ee09a..276c328cf13e 100644
  		if (!search_exception_tables(regs->pc))
  			panic("Accessing user space memory outside uaccess.h routines");
  	}
--- 
-2.11.0
-

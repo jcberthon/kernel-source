@@ -1,0 +1,37 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: x86/cpufeature: deduplicate X86_FEATURE_L1TF_PTEINV
+Patch-mainline: never, kabi
+References: kabi
+
+The import of 4.4.148 defined X86_FEATURE_L1TF_PTEINV as 7*32+29. But
+that is already reserved for X86_FEATURE_RETPOLINE. So renumber
+X86_FEATURE_L1TF_PTEINV to be in the 2*32 space like it was before
+4.4.148.
+
+I didn't notice the conflict, because the diff context did not show
+X86_FEATURE_RETPOLINE, which is out of order.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ arch/x86/include/asm/cpufeatures.h |    3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+--- a/arch/x86/include/asm/cpufeatures.h
++++ b/arch/x86/include/asm/cpufeatures.h
+@@ -83,6 +83,7 @@
+ 
+ #define X86_FEATURE_IBRS	( 2*32+ 7) /* Indirect Branch Restricted Speculation */
+ #define X86_FEATURE_FLUSH_L1D	( 2*32+ 8) /* Flush L1D cache */
++#define X86_FEATURE_L1TF_PTEINV	( 2*32+ 9) /* "" L1TF workaround PTE inversion */
+ 
+ /* Other features, Linux-defined mapping, word 3 */
+ /* This range is used for feature bits which conflict or are synthesized */
+@@ -238,8 +239,6 @@
+ /* Because the ALTERNATIVE scheme is for members of the X86_FEATURE club... */
+ #define X86_FEATURE_KAISER	( 7*32+31) /* CONFIG_PAGE_TABLE_ISOLATION w/o nokaiser */
+ 
+-#define X86_FEATURE_L1TF_PTEINV	( 7*32+29) /* "" L1TF workaround PTE inversion */
+-
+ /* Virtualization flags: Linux defined, word 8 */
+ #define X86_FEATURE_TPR_SHADOW  ( 8*32+ 0) /* Intel TPR Shadow */
+ #define X86_FEATURE_VNMI        ( 8*32+ 1) /* Intel Virtual NMI */

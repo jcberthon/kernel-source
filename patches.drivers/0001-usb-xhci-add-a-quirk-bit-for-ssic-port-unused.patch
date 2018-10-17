@@ -34,9 +34,9 @@ Signed-off-by: Oliver Neukum <oneukum@suse.com>
 +	}
 +	if (pdev->vendor == PCI_VENDOR_ID_INTEL &&
  	    (pdev->device == PCI_DEVICE_ID_INTEL_CHERRYVIEW_XHCI ||
- 	     pdev->device == PCI_DEVICE_ID_INTEL_APL_XHCI ||
- 	     pdev->device == PCI_DEVICE_ID_INTEL_DNV_XHCI))
-@@ -337,46 +341,47 @@ static void xhci_pci_remove(struct pci_d
+ 	     pdev->device == PCI_DEVICE_ID_INTEL_SUNRISEPOINT_LP_XHCI ||
+ 	     pdev->device == PCI_DEVICE_ID_INTEL_SUNRISEPOINT_H_XHCI ||
+@@ -345,46 +349,47 @@ static void xhci_pci_remove(struct pci_d
   * SSIC PORT need to be marked as "unused" before putting xHCI
   * into D3. After D3 exit, the SSIC port need to be marked as "used".
   * Without this change, xHCI might not enter D3 state.
@@ -116,7 +116,7 @@ Signed-off-by: Oliver Neukum <oneukum@suse.com>
  
  	reg = (void __iomem *) xhci->cap_regs + 0x80a4;
  	val = readl(reg);
-@@ -397,7 +402,10 @@ static int xhci_pci_suspend(struct usb_h
+@@ -405,7 +410,10 @@ static int xhci_pci_suspend(struct usb_h
  		pdev->no_d3cold = true;
  
  	if (xhci->quirks & XHCI_PME_STUCK_QUIRK)
@@ -128,7 +128,7 @@ Signed-off-by: Oliver Neukum <oneukum@suse.com>
  
  	return xhci_suspend(xhci, do_wakeup);
  }
-@@ -429,8 +437,11 @@ static int xhci_pci_resume(struct usb_hc
+@@ -437,8 +445,11 @@ static int xhci_pci_resume(struct usb_hc
  	if (pdev->vendor == PCI_VENDOR_ID_INTEL)
  		usb_enable_intel_xhci_ports(pdev);
  
