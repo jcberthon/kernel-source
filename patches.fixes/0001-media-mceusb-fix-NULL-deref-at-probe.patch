@@ -1,0 +1,36 @@
+From 03eb2a557ed552e920a0942b774aaf931596eec1 Mon Sep 17 00:00:00 2001
+From: Johan Hovold <johan@kernel.org>
+Date: Tue, 7 Mar 2017 15:14:13 -0300
+Subject: [PATCH] [media] mceusb: fix NULL-deref at probe
+Git-commit: 03eb2a557ed552e920a0942b774aaf931596eec1
+Patch-mainline: v4.12
+References: bsc#1050431
+
+Make sure to check for the required out endpoint to avoid dereferencing
+a NULL-pointer in mce_request_packet should a malicious device lack such
+an endpoint. Note that this path is hit during probe.
+
+Fixes: 66e89522aff7 ("V4L/DVB: IR: add mceusb IR receiver driver")
+
+Cc: stable <stable@vger.kernel.org>	# 2.6.36
+Signed-off-by: Johan Hovold <johan@kernel.org>
+Signed-off-by: Sean Young <sean@mess.org>
+Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+Signed-off-by: Oliver Neukum <oneukum@suse.com>
+---
+ drivers/media/rc/mceusb.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+--- a/drivers/media/rc/mceusb.c
++++ b/drivers/media/rc/mceusb.c
+@@ -1166,8 +1166,8 @@ static int __devinit mceusb_dev_probe(st
+ 				"found\n");
+ 		}
+ 	}
+-	if (ep_in == NULL) {
+-		mce_dbg(&intf->dev, "inbound and/or endpoint not found\n");
++	if (i!ep_in || !ep_out) {
++		mce_dbg(&intf->dev, "required endpoints not found\n");
+ 		return -ENODEV;
+ 	}
+ 
