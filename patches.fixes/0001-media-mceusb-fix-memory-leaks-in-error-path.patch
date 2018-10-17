@@ -1,0 +1,43 @@
+From 2d5a6ce71c72d98d4f7948672842e3e8c265a8b7 Mon Sep 17 00:00:00 2001
+From: Johan Hovold <johan@kernel.org>
+Date: Thu, 1 Jun 2017 04:45:59 -0300
+Subject: [PATCH] [media] mceusb: fix memory leaks in error path
+Git-commit: 2d5a6ce71c72d98d4f7948672842e3e8c265a8b7
+Patch-mainline: v4.13
+REferences: bsc#1050431
+
+Fix urb and transfer-buffer leaks in an urb-submission error path which
+may be hit when a device is disconnected.
+
+Fixes: 66e89522aff7 ("V4L/DVB: IR: add mceusb IR receiver driver")
+
+Cc: stable <stable@vger.kernel.org>     # 2.6.36
+Cc: Jarod Wilson <jarod@redhat.com>
+Signed-off-by: Johan Hovold <johan@kernel.org>
+Signed-off-by: Sean Young <sean@mess.org>
+Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+Signed-off-by: Oliver Neukum <oneukum@suse.com>
+---
+ drivers/media/rc/mceusb.c |    4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+--- a/drivers/media/rc/mceusb.c
++++ b/drivers/media/rc/mceusb.c
+@@ -676,6 +676,8 @@ static void mce_request_packet(struct mc
+ 	res = usb_submit_urb(async_urb, GFP_ATOMIC);
+ 	if (res) {
+ 		mce_dbg(dev, "receive request FAILED! (res=%d)\n", res);
++		kfree(async_buf);
++		usb_free_urb(async_urb);
+ 		return;
+ 	}
+ 	mce_dbg(dev, "receive request complete (res=%d)\n", res);
+@@ -1166,7 +1168,7 @@ static int __devinit mceusb_dev_probe(st
+ 				"found\n");
+ 		}
+ 	}
+-	if (i!ep_in || !ep_out) {
++	if (!ep_in || !ep_out) {
+ 		mce_dbg(&intf->dev, "required endpoints not found\n");
+ 		return -ENODEV;
+ 	}
