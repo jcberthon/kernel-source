@@ -1,7 +1,8 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Subject: btrfs: constify tracepoint arguments
 References: bsc#974590 bsc#1030061 bsc#1022914 bsc#1017461
-Patch-mainline: Submitted, 20 June 2017
+Git-commit: 9a35b63728ceb8602c111260044451dd64952500
+Patch-mainline: v4.14-rc1
 
 Tracepoint arguments are all read-only.  If we mark the arguments
 as const, we're able to keep or convert those arguments to const

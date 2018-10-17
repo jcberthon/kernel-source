@@ -1,7 +1,8 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Subject: btrfs: add a node counter to each of the rbtrees
 References: bsc#974590 bsc#1030061 bsc#1022914 bsc#1017461
-Patch-mainline: Submitted, 20 June 2017
+Patch-mainline: v4.14-rc1
+Git-commit: 6c336b212bef66e507897c78551b3bb4e613a857
 
 This patch adds counters to each of the rbtrees so that we can tell
 how large they are growing for a given workload.  These counters

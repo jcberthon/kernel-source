@@ -1,7 +1,8 @@
 From: Edmund Nadolski <enadolski@suse.com>
 Subject: btrfs: clean up extraneous computations in add_delayed_refs
 References: bsc#974590 bsc#1030061 bsc#1022914 bsc#1017461
-Patch-mainline: Submitted, 20 June 2017
+Patch-mainline: v4.14-rc1
+Git-commit: 01747e92a996cc2f2965c28fde485da932836ef8
 
 Repeating the same computation in multiple places is not
 necessary.
