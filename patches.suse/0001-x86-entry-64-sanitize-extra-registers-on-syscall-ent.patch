@@ -1,0 +1,219 @@
+From de47ade472f5808012319df6ce559f4641135a05 Mon Sep 17 00:00:00 2001
+From: Jessica Yu <jeyu@suse.de>
+Date: Wed, 10 Oct 2018 14:09:43 +0200
+Subject: [PATCH 1/2] x86/entry/64: sanitize extra registers on syscall entry
+References: bsc#1105931
+Patch-Mainline: never, SLE12-SP3 specific
+
+Sanitize extra registers on syscall entry. This was based on the
+following upstream commit:
+
+commit 8e1eb3fa009aa7c0b944b3c8b26b07de0efb3200
+Author: Dan Williams <dan.j.williams@intel.com>
+Date:   Mon Feb 5 17:18:05 2018 -0800
+
+    x86/entry/64: Clear extra registers beyond syscall arguments, to reduce speculation attack surface
+
+    At entry userspace may have (maliciously) populated the extra registers
+    outside the syscall calling convention with arbitrary values that could
+    be useful in a speculative execution (Spectre style) attack.
+
+    Clear these registers to minimize the kernel's attack surface.
+
+    Note, this only clears the extra registers and not the unused
+    registers for syscalls less than 6 arguments, since those registers are
+    likely to be clobbered well before their values could be put to use
+    under speculation.
+
+    Note, Linus found that the XOR instructions can be executed with
+    minimized cost if interleaved with the PUSH instructions, and Ingo's
+    analysis found that R10 and R11 should be included in the register
+    clearing beyond the typical 'extra' syscall calling convention
+    registers.
+
+    Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
+    Reported-by: Andi Kleen <ak@linux.intel.com>
+    Signed-off-by: Dan Williams <dan.j.williams@intel.com>
+    Cc: <stable@vger.kernel.org>
+    Cc: Andy Lutomirski <luto@kernel.org>
+    Cc: Borislav Petkov <bp@alien8.de>
+    Cc: Brian Gerst <brgerst@gmail.com>
+    Cc: Denys Vlasenko <dvlasenk@redhat.com>
+    Cc: H. Peter Anvin <hpa@zytor.com>
+    Cc: Josh Poimboeuf <jpoimboe@redhat.com>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Link: http://lkml.kernel.org/r/151787988577.7847.16733592218894189003.stgit@dwillia2-desk3.amr.corp.intel.com
+    [ Made small improvements to the changelog and the code comments. ]
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+Differences from upstream:
+
+- fast path still exists in SLE12-SP3 so needed to make sure the
+  register restores were being done in all return paths (although with the
+  full pt_regs now being saved and relevant regs cleared with each syscall
+  I doubt the fast path is "fast" anymore)
+
+- fork/clone-related syscall stubs were doing extra register saves for
+  full pt_regs, but now we always push all regs, so the extra saves are
+  unnecessary and have been removed
+
+- the upstream commit clears %r10,%r11 in addition to the "extra" regs.
+  Needed to resanitize %r10,%r11 after any function call through the two slow paths
+
+Signed-off-by: Jessica Yu <jeyu@suse.de>
+---
+ arch/x86/entry/entry_64.S |   50 +++++++++++++++++++++++++++++-----------------
+ 1 file changed, 32 insertions(+), 18 deletions(-)
+
+--- a/arch/x86/entry/entry_64.S
++++ b/arch/x86/entry/entry_64.S
+@@ -172,8 +172,26 @@ GLOBAL(entry_SYSCALL_64_after_swapgs)
+ 	pushq	%r8				/* pt_regs->r8 */
+ 	pushq	%r9				/* pt_regs->r9 */
+ 	pushq	%r10				/* pt_regs->r10 */
++	/*
++	 * Clear extra registers that a speculation attack might
++	 * otherwise want to exploit. Interleave XOR with PUSH
++	 * for better uop scheduling:
++	 */
++	xorq	%r10, %r10			/* nospec   r10 */
+ 	pushq	%r11				/* pt_regs->r11 */
+-	sub	$(6*8), %rsp			/* pt_regs->bp, bx, r12-15 not saved */
++	xorq	%r11, %r11			/* nospec   r11 */
++	pushq	%rbx				/* pt_regs->rbx */
++	xorl	%ebx, %ebx			/* nospec   rbx */
++	pushq	%rbp				/* pt_regs->rbp */
++	xorl	%ebp, %ebp			/* nospec   rbp */
++	pushq	%r12				/* pt_regs->r12 */
++	xorq	%r12, %r12			/* nospec   r12 */
++	pushq	%r13				/* pt_regs->r13 */
++	xorq	%r13, %r13			/* nospec   r13 */
++	pushq	%r14				/* pt_regs->r14 */
++	xorq	%r14, %r14			/* nospec   r14 */
++	pushq	%r15				/* pt_regs->r15 */
++	xorq	%r15, %r15			/* nospec   r15 */
+ 
+ 	ENABLE_IBRS
+ 
+@@ -189,7 +207,7 @@ entry_SYSCALL_64_fastpath:
+ 	jae	1f				/* return -ENOSYS (already in pt_regs->ax) */
+ 	sbb	%rcx, %rcx			/* array_index_mask_nospec() */
+ 	and	%rcx, %rax
+-	movq	%r10, %rcx
++	movq	R10(%rsp), %rcx
+ #ifdef CONFIG_RETPOLINE
+ 	movq	sys_call_table(, %rax, 8), %rax
+ 	call	__x86_indirect_thunk_rax
+@@ -201,7 +219,6 @@ entry_SYSCALL_64_fastpath:
+ 1:
+ /*
+  * Syscall return path ending with SYSRET (fast path).
+- * Has incompletely filled pt_regs.
+  */
+ 	LOCKDEP_SYS_EXIT
+ 	/*
+@@ -227,6 +244,7 @@ entry_SYSCALL_64_fastpath:
+ 	DISABLE_IBRS
+ 
+ 	RESTORE_C_REGS_EXCEPT_RCX_R11
++	RESTORE_EXTRA_REGS
+ 	movq	RSP(%rsp), %rsp
+ 	/*
+ 	 * This opens a window where we have a user CR3, but are
+@@ -266,11 +284,13 @@ tracesys:
+ 	test	%rax, %rax
+ 	jnz	tracesys_phase2			/* if needed, run the slow path */
+ 	RESTORE_C_REGS_EXCEPT_RAX		/* else restore clobbered regs */
++	/* Re-sanitize %r10 and %r11, since the previous call may have clobbered them */
++	xorq	%r10, %r10			/* nospec   r10 */
++	xorq	%r11, %r11			/* nospec   r11 */
+ 	movq	ORIG_RAX(%rsp), %rax
+ 	jmp	entry_SYSCALL_64_fastpath	/* and return to the fast path */
+ 
+ tracesys_phase2:
+-	SAVE_EXTRA_REGS
+ 	movq	%rsp, %rdi
+ 	movl	$AUDIT_ARCH_X86_64, %esi
+ 	movq	%rax, %rdx
+@@ -282,7 +302,9 @@ tracesys_phase2:
+ 	 * the value it wants us to use in the table lookup.
+ 	 */
+ 	RESTORE_C_REGS_EXCEPT_RAX
+-	RESTORE_EXTRA_REGS
++	/* Re-sanitize %r10 and %r11, since the previous call may have clobbered them */
++	xorq	%r10, %r10			/* nospec   r10 */
++	xorq	%r11, %r11			/* nospec   r11 */
+ #if __SYSCALL_MASK == ~0
+ 	cmpq	$NR_syscalls, %rax
+ #else
+@@ -292,7 +314,7 @@ tracesys_phase2:
+ 	jae	1f				/* return -ENOSYS (already in pt_regs->ax) */
+ 	sbb	%rcx, %rcx			/* array_index_mask_nospec() */
+ 	and	%rcx, %rax
+-	movq	%r10, %rcx			/* fixup for C */
++	movq	R10(%rsp), %rcx			/* fixup for C */
+ #ifdef CONFIG_RETPOLINE
+ 	movq	sys_call_table(, %rax, 8), %rax
+ 	call	__x86_indirect_thunk_rax
+@@ -308,10 +330,8 @@ tracesys_phase2:
+  * Has correct iret frame.
+  */
+ GLOBAL(int_ret_from_sys_call)
+-	SAVE_EXTRA_REGS
+ 	movq	%rsp, %rdi
+ 	call	syscall_return_slowpath	/* returns with IRQs disabled */
+-	RESTORE_EXTRA_REGS
+ 	TRACE_IRQS_IRETQ		/* we're about to change IF */
+ 
+ 	/*
+@@ -381,6 +401,7 @@ syscall_return_via_sysret:
+ 
+ 	/* rcx and r11 are already restored (see code above) */
+ 	RESTORE_C_REGS_EXCEPT_RCX_R11
++	RESTORE_EXTRA_REGS
+ 	movq	RSP(%rsp), %rsp
+ 	/*
+ 	 * This opens a window where we have a user CR3, but are
+@@ -395,13 +416,12 @@ syscall_return_via_sysret:
+ opportunistic_sysret_failed:
+ 	DISABLE_IBRS
+ 
+-	jmp tramp_restore_c_regs_and_iret
++	jmp tramp_restore_regs_and_iret
+ END(entry_SYSCALL_64)
+ 
+ 
+ 	.macro FORK_LIKE func
+ ENTRY(stub_\func)
+-	SAVE_EXTRA_REGS 8
+ 	jmp	sys_\func
+ END(stub_\func)
+ 	.endm
+@@ -453,24 +473,18 @@ END(stub_x32_execveat)
+  */
+ ENTRY(stub_rt_sigreturn)
+ 	/*
+-	 * SAVE_EXTRA_REGS result is not normally needed:
+-	 * sigreturn overwrites all pt_regs->GPREGS.
+-	 * But sigreturn can fail (!), and there is no easy way to detect that.
+-	 * To make sure RESTORE_EXTRA_REGS doesn't restore garbage on error,
+-	 * we SAVE_EXTRA_REGS here.
++	 * Note: extra regs are already saved on entry and restored on return,
++	 * so we don't need an extra {SAVE,RESTORE}_EXTRA_REGS here.
+ 	 */
+-	SAVE_EXTRA_REGS 8
+ 	call	sys_rt_sigreturn
+ return_from_stub:
+ 	addq	$8, %rsp
+-	RESTORE_EXTRA_REGS
+ 	movq	%rax, RAX(%rsp)
+ 	jmp	int_ret_from_sys_call
+ END(stub_rt_sigreturn)
+ 
+ #ifdef CONFIG_X86_X32_ABI
+ ENTRY(stub_x32_rt_sigreturn)
+-	SAVE_EXTRA_REGS 8
+ 	call	sys32_x32_rt_sigreturn
+ 	jmp	return_from_stub
+ END(stub_x32_rt_sigreturn)
