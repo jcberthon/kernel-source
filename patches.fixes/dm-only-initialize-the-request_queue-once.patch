@@ -1,0 +1,92 @@
+From 2df360a6264fa822f8f1e1474275c9e3defe4c0c Mon Sep 17 00:00:00 2001
+From: Thomas Abraham <tabraham@suse.com>
+Date: Mon, 27 Aug 2018 12:14:14 -0400
+Subject: [PATCH] dm: only initialize the request_queue once
+References: bsc#1047027
+Git-commit: 3e6180f0c82b3790a9ec6d13d67aae359bf1ce84
+Patch-mainline: v4.1-rc2
+
+Commit bfebd1cdb4 ("dm: add full blk-mq support to request-based DM")
+didn't properly account for the need to short-circuit re-initializing
+DM's blk-mq request_queue if it was already initialized.
+
+Otherwise, reloading a blk-mq request-based DM table (either manually
+or via multipathd) resulted in errors, see:
+ https://www.redhat.com/archives/dm-devel/2015-April/msg00132.html
+
+Fix is to only initialize the request_queue on the initial table load
+(when the mapped_device type is assigned).
+
+This is better than having dm_init_request_based_blk_mq_queue() return
+early if the queue was already initialized because it elevates the
+constraint to a more meaningful location in DM core.  As such the
+pre-existing early return in dm_init_request_based_queue() can now be
+removed.
+
+Fixes: bfebd1cdb4 ("dm: add full blk-mq support to request-based DM")
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Mike Snitzer <snitzer@redhat.com>
+Signed-off-by: Thomas Abraham <tabraham@suse.com>
+[tabraham@suse.com: handled backport]
+---
+ drivers/md/dm-ioctl.c | 20 ++++++++++----------
+ drivers/md/dm.c       |  3 ---
+ 2 files changed, 10 insertions(+), 13 deletions(-)
+
+diff --git a/drivers/md/dm-ioctl.c b/drivers/md/dm-ioctl.c
+index 984f4b81eaed..0231a84a4ced 100644
+--- a/drivers/md/dm-ioctl.c
++++ b/drivers/md/dm-ioctl.c
+@@ -1277,10 +1277,18 @@ static int table_load(struct dm_ioctl *param, size_t param_size)
+ 
+ 	/* Protect md->type and md->queue against concurrent table loads. */
+ 	dm_lock_md_type(md);
+-	if (dm_get_md_type(md) == DM_TYPE_NONE)
++	if (dm_get_md_type(md) == DM_TYPE_NONE) {
+ 		/* Initial table load: acquire type of table. */
+ 		dm_set_md_type(md, dm_table_get_type(t));
+-	else if (dm_get_md_type(md) != dm_table_get_type(t)) {
++		/* setup md->queue to reflect md's type (may block) */
++		r = dm_setup_md_queue(md, t);
++		if (r) {
++			DMWARN("unable to set up device queue for new table.");
++			dm_table_destroy(t);
++			dm_unlock_md_type(md);
++			goto out;
++		}
++	} else if (dm_get_md_type(md) != dm_table_get_type(t)) {
+ 		DMWARN("can't change device type after initial table load.");
+ 		dm_table_destroy(t);
+ 		dm_unlock_md_type(md);
+@@ -1288,14 +1296,6 @@ static int table_load(struct dm_ioctl *param, size_t param_size)
+ 		goto out;
+ 	}
+ 
+-	/* setup md->queue to reflect md's type (may block) */
+-	r = dm_setup_md_queue(md, t);
+-	if (r) {
+-		DMWARN("unable to set up device queue for new table.");
+-		dm_table_destroy(t);
+-		dm_unlock_md_type(md);
+-		goto out;
+-	}
+ 	dm_unlock_md_type(md);
+ 
+ 	/* stage inactive table */
+diff --git a/drivers/md/dm.c b/drivers/md/dm.c
+index dec7310b8c38..bffb82d22a4b 100644
+--- a/drivers/md/dm.c
++++ b/drivers/md/dm.c
+@@ -2322,9 +2322,6 @@ static int dm_init_request_based_queue(struct mapped_device *md)
+ {
+ 	struct request_queue *q = NULL;
+ 
+-	if (md->queue->elevator)
+-		return 1;
+-
+ 	/* Fully initialize the queue */
+ 	q = blk_init_allocated_queue(md->queue, dm_request_fn, NULL);
+ 	if (!q)
+-- 
+2.13.7
+
