@@ -1,7 +1,7 @@
 From: Petr Mladek <pmladek@suse.com>
 Subject: x86/kaiser: Avoid loosing NMIs when using trampoline stack
 Patch-mainline: Never, specific for a back port to kernel 4.4
-References: bsc#1106293 bsc#1099597
+References: bsc#1106293 bsc#1099597 bsc#1110837
 
 This is a fixup of the patch adding per-CPU trampoline stack for
 kernel entry. It added SWITCH_KERNEL_CR3 macro into NMI entry path

@@ -1,7 +1,8 @@
 From: Edmund Nadolski <enadolski@suse.com>
 Subject: btrfs: allow backref search checks for shared extents
 References: bsc#974590 bsc#1030061 bsc#1022914 bsc#1017461
-Patch-mainline: Submitted, 20 June 2017
+Patch-mainline: v4.14-rc1
+Git-commit: 3ec4d3238ab1655ae3f696c412fb3244cd3b58de
 
 When called with a struct share_check, find_parent_nodes()
 will detect a shared extent and immediately return with
