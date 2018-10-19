@@ -1,7 +1,8 @@
 From: Edmund Nadolski <enadolski@suse.com>
 Subject: btrfs: convert prelimary reference tracking to use rbtrees
 References: bsc#974590 bsc#1030061 bsc#1022914 bsc#1017461
-Patch-mainline: Submitted, 20 June 2017
+Git-commit: 86d5f994425252d8a40e2184c94a2682ae8ecfbf
+Patch-mainline: v4.14-rc1
 
 It's been known for a while that the use of multiple lists
 that are periodically merged was an algorithmic problem within

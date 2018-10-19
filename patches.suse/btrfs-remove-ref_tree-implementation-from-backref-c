@@ -1,7 +1,8 @@
 From: Edmund Nadolski <enadolski@suse.com>
 Subject: btrfs: remove ref_tree implementation from backref.c
 References: bsc#974590 bsc#1030061 bsc#1022914 bsc#1017461
-Patch-mainline: Submitted, 20 June 2017
+Git-commit: f6954245d9e17902a66a1253d2a3afc05e335172
+Patch-mainline: v4.14-rc1
 
 The BACKREF_FOUND_SHARED checking will be addressed in an upcoming
 patch.

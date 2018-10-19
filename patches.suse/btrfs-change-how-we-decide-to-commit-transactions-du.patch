@@ -3,7 +3,8 @@ From: Josef Bacik <jbacik@fb.com>
 Date: Tue, 22 Aug 2017 16:00:39 -0400
 Subject: [PATCH] btrfs: change how we decide to commit transactions during
  flushing
-Patch-mainline: Submitted on 21.08.2017, https://patchwork.kernel.org/patch/9912831/
+Patch-mainline: v4.15-rc1
+Git-commit: 996478ca9c460886ac147eb0d00e99841b71d31b
 References: bsc#1060197
 
 Nikolay reported that generic/273 was failing currently with ENOSPC.
