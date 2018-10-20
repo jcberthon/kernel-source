@@ -3,7 +3,7 @@ From: David Sterba <dsterba@suse.com>
 Date: Mon, 13 Feb 2017 13:42:29 +0100
 Subject: [PATCH 2/8] btrfs: embed extent_changeset::range_changed to the
  structure
-Git-commit: e29368f1160a60e766ec341ecb96d39064a41c90
+Git-commit: 53d3235995b3f87754a42de24d707f158c1b3b40
 Patch-mainline: 4.12
 References: dependent patch, bsc#1031395
 

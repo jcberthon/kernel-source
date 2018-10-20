@@ -3,7 +3,8 @@ From: Omar Sandoval <osandov@fb.com>
 Date: Tue, 6 Jun 2017 16:45:26 -0700
 Subject: [PATCH 1/7] Btrfs: make add_pinned_bytes() take an s64 num_bytes
  instead of u64
-Patch-mainline: Submitted, https://www.spinics.net/lists/linux-btrfs/msg66259.html
+Patch-mainline: v4.13-rc1
+Git-commit: 0d9f824df35d11215016785213f9c0fd06a72fc0
 References: bsc#1040182
 
 There are a few places where we pass in a negative num_bytes, so make it
