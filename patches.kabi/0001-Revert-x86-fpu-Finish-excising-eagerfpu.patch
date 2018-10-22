@@ -1,0 +1,83 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Date: Mon, 22 Oct 2018 08:39:18 +0200
+Subject: Revert "x86/fpu: Finish excising 'eagerfpu'"
+Patch-mainline: never, kabi
+References: kabi
+
+This reverts commit 4e7ef8fc8001589339083872f3b6260734cc0e76, upstream
+commit e63650840e8b053aa09ad934877e87e9941ed135. As we want to
+preserve both eager and lazy fpu in released SLE, revert this
+eagerfpu-only patch.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ Documentation/kernel-parameters.txt |  5 +++++
+ arch/x86/include/asm/cpufeatures.h  |  1 +
+ arch/x86/include/asm/fpu/types.h    | 23 +++++++++++++++++++++++
+ 3 files changed, 29 insertions(+)
+
+diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
+index da515c535e62..3fd53e193b7f 100644
+--- a/Documentation/kernel-parameters.txt
++++ b/Documentation/kernel-parameters.txt
+@@ -961,6 +961,11 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+ 			See Documentation/x86/intel_mpx.txt for more
+ 			information about the feature.
+ 
++	eagerfpu=	[X86]
++			on	enable eager fpu restore
++			off	disable eager fpu restore
++			auto	selects the default scheme, which automatically
++				enables eagerfpu restore for xsaveopt.
+ 
+ 	module.async_probe [KNL]
+ 			Enable asynchronous probe on this module.
+diff --git a/arch/x86/include/asm/cpufeatures.h b/arch/x86/include/asm/cpufeatures.h
+index a5fa3195a230..dd2269dcbc47 100644
+--- a/arch/x86/include/asm/cpufeatures.h
++++ b/arch/x86/include/asm/cpufeatures.h
+@@ -104,6 +104,7 @@
+ #define X86_FEATURE_EXTD_APICID	( 3*32+26) /* has extended APICID (8 bits) */
+ #define X86_FEATURE_AMD_DCM     ( 3*32+27) /* multi-node processor */
+ #define X86_FEATURE_APERFMPERF	( 3*32+28) /* APERFMPERF */
++/* free, was #define X86_FEATURE_EAGER_FPU	( 3*32+29) * "eagerfpu" Non lazy FPU restore */
+ #define X86_FEATURE_NONSTOP_TSC_S3 ( 3*32+30) /* TSC doesn't stop in S3 state */
+ 
+ /* Intel-defined CPU features, CPUID level 0x00000001 (ecx), word 4 */
+diff --git a/arch/x86/include/asm/fpu/types.h b/arch/x86/include/asm/fpu/types.h
+index 0d81c7d6fe96..dcb85a9ac9b4 100644
+--- a/arch/x86/include/asm/fpu/types.h
++++ b/arch/x86/include/asm/fpu/types.h
+@@ -310,6 +310,29 @@ struct fpu {
+ 	 * the registers in the FPU are more recent than this state
+ 	 * copy. If the task context-switches away then they get
+ 	 * saved here and represent the FPU state.
++	 *
++	 * After context switches there may be a (short) time period
++	 * during which the in-FPU hardware registers are unchanged
++	 * and still perfectly match this state, if the tasks
++	 * scheduled afterwards are not using the FPU.
++	 *
++	 * This is the 'lazy restore' window of optimization, which
++	 * we track though 'fpu_fpregs_owner_ctx' and 'fpu->last_cpu'.
++	 *
++	 * We detect whether a subsequent task uses the FPU via setting
++	 * CR0::TS to 1, which causes any FPU use to raise a #NM fault.
++	 *
++	 * During this window, if the task gets scheduled again, we
++	 * might be able to skip having to do a restore from this
++	 * memory buffer to the hardware registers - at the cost of
++	 * incurring the overhead of #NM fault traps.
++	 *
++	 * Note that on modern CPUs that support the XSAVEOPT (or other
++	 * optimized XSAVE instructions), we don't use #NM traps anymore,
++	 * as the hardware can track whether FPU registers need saving
++	 * or not. On such CPUs we activate the non-lazy ('eagerfpu')
++	 * logic, which unconditionally saves/restores all FPU state
++	 * across context switches. (if FPU state exists.)
+ 	 */
+ 	union fpregs_state		state;
+ 	/*
+-- 
+2.19.1
+

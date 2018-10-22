@@ -13,28 +13,26 @@ Signed-off-by: Jan Kara <jack@suse.cz>
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 
 ---
- fs/Makefile              |   2 +-
- fs/ext2/ext2.h           |   4 +-
- fs/ext2/xattr.c          |  48 +++---
- fs/ext2/xattr.h          |   8 +-
- fs/ext4/ext4.h           |   2 +-
- fs/ext4/xattr.c          |  54 +++---
- fs/ext4/xattr.h          |   4 +-
- fs/mbcache.c             | 424 +++++++++++++++++++++++++++++++++++++++++++++++
- fs/mbcache2.c            | 424 -----------------------------------------------
- include/linux/mbcache.h  |  53 ++++++
- include/linux/mbcache2.h |  53 ------
+ fs/Makefile              |    2 
+ fs/ext2/ext2.h           |    4 
+ fs/ext2/xattr.c          |   48 ++---
+ fs/ext2/xattr.h          |    8 
+ fs/ext4/ext4.h           |    2 
+ fs/ext4/xattr.c          |   54 ++---
+ fs/ext4/xattr.h          |    4 
+ fs/mbcache.c             |  424 +++++++++++++++++++++++++++++++++++++++++++++++
+ fs/mbcache2.c            |  424 -----------------------------------------------
+ include/linux/mbcache.h  |   53 +++++
+ include/linux/mbcache2.h |   53 -----
  11 files changed, 538 insertions(+), 538 deletions(-)
  create mode 100644 fs/mbcache.c
  delete mode 100644 fs/mbcache2.c
  create mode 100644 include/linux/mbcache.h
  delete mode 100644 include/linux/mbcache2.h
 
-diff --git a/fs/Makefile b/fs/Makefile
-index 59b844007fbc..79f522575cba 100644
 --- a/fs/Makefile
 +++ b/fs/Makefile
-@@ -41,7 +41,7 @@ obj-$(CONFIG_COMPAT_BINFMT_ELF)	+= compat_binfmt_elf.o
+@@ -41,7 +41,7 @@ obj-$(CONFIG_COMPAT_BINFMT_ELF)	+= compa
  obj-$(CONFIG_BINFMT_ELF_FDPIC)	+= binfmt_elf_fdpic.o
  obj-$(CONFIG_BINFMT_FLAT)	+= binfmt_flat.o
  
@@ -43,8 +41,6 @@ index 59b844007fbc..79f522575cba 100644
  obj-$(CONFIG_FS_POSIX_ACL)	+= posix_acl.o
  obj-$(CONFIG_NFS_COMMON)	+= nfs_common/
  obj-$(CONFIG_COREDUMP)		+= coredump.o
-diff --git a/fs/ext2/ext2.h b/fs/ext2/ext2.h
-index f98ce7e60a0f..170939f379d7 100644
 --- a/fs/ext2/ext2.h
 +++ b/fs/ext2/ext2.h
 @@ -61,7 +61,7 @@ struct ext2_block_alloc_info {
@@ -65,8 +61,6 @@ index f98ce7e60a0f..170939f379d7 100644
  };
  
  static inline spinlock_t *
-diff --git a/fs/ext2/xattr.c b/fs/ext2/xattr.c
-index 7162b4869bc3..71d58c2d7a19 100644
 --- a/fs/ext2/xattr.c
 +++ b/fs/ext2/xattr.c
 @@ -56,7 +56,7 @@
@@ -78,7 +72,7 @@ index 7162b4869bc3..71d58c2d7a19 100644
  #include <linux/quotaops.h>
  #include <linux/rwsem.h>
  #include <linux/security.h>
-@@ -90,7 +90,7 @@
+@@ -92,7 +92,7 @@
  static int ext2_xattr_set2(struct inode *, struct buffer_head *,
  			   struct ext2_xattr_header *);
  
@@ -87,7 +81,7 @@ index 7162b4869bc3..71d58c2d7a19 100644
  static struct buffer_head *ext2_xattr_cache_find(struct inode *,
  						 struct ext2_xattr_header *);
  static void ext2_xattr_rehash(struct ext2_xattr_header *,
-@@ -150,7 +150,7 @@ ext2_xattr_get(struct inode *inode, int name_index, const char *name,
+@@ -152,7 +152,7 @@ ext2_xattr_get(struct inode *inode, int
  	size_t name_len, size;
  	char *end;
  	int error;
@@ -96,7 +90,7 @@ index 7162b4869bc3..71d58c2d7a19 100644
  
  	ea_idebug(inode, "name=%d.%s, buffer=%p, buffer_size=%ld",
  		  name_index, name, buffer, (long)buffer_size);
-@@ -246,7 +246,7 @@ ext2_xattr_list(struct dentry *dentry, char *buffer, size_t buffer_size)
+@@ -248,7 +248,7 @@ ext2_xattr_list(struct dentry *dentry, c
  	char *end;
  	size_t rest = buffer_size;
  	int error;
@@ -105,7 +99,7 @@ index 7162b4869bc3..71d58c2d7a19 100644
  
  	ea_idebug(inode, "buffer=%p, buffer_size=%ld",
  		  buffer, (long)buffer_size);
-@@ -493,8 +493,8 @@ bad_block:		ext2_error(sb, "ext2_xattr_set",
+@@ -490,8 +490,8 @@ bad_block:		ext2_error(sb, "ext2_xattr_s
  			 * This must happen under buffer lock for
  			 * ext2_xattr_set2() to reliably detect modified block
  			 */
@@ -116,7 +110,7 @@ index 7162b4869bc3..71d58c2d7a19 100644
  
  			/* keep the buffer locked while modifying it. */
  		} else {
-@@ -627,7 +627,7 @@ ext2_xattr_set2(struct inode *inode, struct buffer_head *old_bh,
+@@ -624,7 +624,7 @@ ext2_xattr_set2(struct inode *inode, str
  	struct super_block *sb = inode->i_sb;
  	struct buffer_head *new_bh = NULL;
  	int error;
@@ -125,7 +119,7 @@ index 7162b4869bc3..71d58c2d7a19 100644
  
  	if (header) {
  		new_bh = ext2_xattr_cache_find(inode, header);
-@@ -721,8 +721,8 @@ ext2_xattr_set2(struct inode *inode, struct buffer_head *old_bh,
+@@ -718,8 +718,8 @@ ext2_xattr_set2(struct inode *inode, str
  			 * This must happen under buffer lock for
  			 * ext2_xattr_set2() to reliably detect freed block
  			 */
@@ -136,7 +130,7 @@ index 7162b4869bc3..71d58c2d7a19 100644
  			/* Free the old block. */
  			ea_bdebug(old_bh, "freeing");
  			ext2_free_blocks(inode, old_bh->b_blocknr, 1);
-@@ -786,8 +786,8 @@ ext2_xattr_delete_inode(struct inode *inode)
+@@ -783,8 +783,8 @@ ext2_xattr_delete_inode(struct inode *in
  		 * This must happen under buffer lock for ext2_xattr_set2() to
  		 * reliably detect freed block
  		 */
@@ -147,7 +141,7 @@ index 7162b4869bc3..71d58c2d7a19 100644
  		ext2_free_blocks(inode, EXT2_I(inode)->i_file_acl, 1);
  		get_bh(bh);
  		bforget(bh);
-@@ -818,12 +818,12 @@ cleanup:
+@@ -815,12 +815,12 @@ cleanup:
   * Returns 0, or a negative error number on failure.
   */
  static int
@@ -162,7 +156,7 @@ index 7162b4869bc3..71d58c2d7a19 100644
  	if (error) {
  		if (error == -EBUSY) {
  			ea_bdebug(bh, "already in cache (%d cache entries)",
-@@ -887,14 +887,14 @@ static struct buffer_head *
+@@ -884,14 +884,14 @@ static struct buffer_head *
  ext2_xattr_cache_find(struct inode *inode, struct ext2_xattr_header *header)
  {
  	__u32 hash = le32_to_cpu(header->h_hash);
@@ -180,7 +174,7 @@ index 7162b4869bc3..71d58c2d7a19 100644
  	while (ce) {
  		struct buffer_head *bh;
  
-@@ -915,7 +915,7 @@ again:
+@@ -912,7 +912,7 @@ again:
  			 * entry is still hashed is reliable.
  			 */
  			if (hlist_bl_unhashed(&ce->e_hash_list)) {
@@ -189,7 +183,7 @@ index 7162b4869bc3..71d58c2d7a19 100644
  				unlock_buffer(bh);
  				brelse(bh);
  				goto again;
-@@ -928,14 +928,14 @@ again:
+@@ -925,14 +925,14 @@ again:
  			} else if (!ext2_xattr_cmp(header, HDR(bh))) {
  				ea_bdebug(bh, "b_count=%d",
  					  atomic_read(&(bh->b_count)));
@@ -207,7 +201,7 @@ index 7162b4869bc3..71d58c2d7a19 100644
  	}
  	return NULL;
  }
-@@ -1010,13 +1010,13 @@ static void ext2_xattr_rehash(struct ext2_xattr_header *header,
+@@ -1007,13 +1007,13 @@ static void ext2_xattr_rehash(struct ext
  
  #define HASH_BUCKET_BITS 10
  
@@ -225,8 +219,6 @@ index 7162b4869bc3..71d58c2d7a19 100644
 -		mb2_cache_destroy(cache);
 +		mb_cache_destroy(cache);
  }
-diff --git a/fs/ext2/xattr.h b/fs/ext2/xattr.h
-index 6ea38aa9563a..6f82ab1b00ca 100644
 --- a/fs/ext2/xattr.h
 +++ b/fs/ext2/xattr.h
 @@ -53,7 +53,7 @@ struct ext2_xattr_entry {
@@ -238,7 +230,7 @@ index 6ea38aa9563a..6f82ab1b00ca 100644
  
  # ifdef CONFIG_EXT2_FS_XATTR
  
-@@ -68,8 +68,8 @@ extern int ext2_xattr_set(struct inode *, int, const char *, const void *, size_
+@@ -68,8 +68,8 @@ extern int ext2_xattr_set(struct inode *
  
  extern void ext2_xattr_delete_inode(struct inode *);
  
@@ -249,7 +241,7 @@ index 6ea38aa9563a..6f82ab1b00ca 100644
  
  extern const struct xattr_handler *ext2_xattr_handlers[];
  
-@@ -94,7 +94,7 @@ ext2_xattr_delete_inode(struct inode *inode)
+@@ -94,7 +94,7 @@ ext2_xattr_delete_inode(struct inode *in
  {
  }
  
@@ -258,11 +250,9 @@ index 6ea38aa9563a..6f82ab1b00ca 100644
  {
  }
  
-diff --git a/fs/ext4/ext4.h b/fs/ext4/ext4.h
-index 9ac9e62569ef..157b458a69d4 100644
 --- a/fs/ext4/ext4.h
 +++ b/fs/ext4/ext4.h
-@@ -1468,7 +1468,7 @@ struct ext4_sb_info {
+@@ -1443,7 +1443,7 @@ struct ext4_sb_info {
  	struct list_head s_es_list;	/* List of inodes with reclaimable extents */
  	long s_es_nr_inode;
  	struct ext4_es_stats s_es_stats;
@@ -271,8 +261,6 @@ index 9ac9e62569ef..157b458a69d4 100644
  	spinlock_t s_es_lock ____cacheline_aligned_in_smp;
  
  	/* Ratelimit ext4 messages. */
-diff --git a/fs/ext4/xattr.c b/fs/ext4/xattr.c
-index fe9f8d6ab6c9..c6af8a7a436a 100644
 --- a/fs/ext4/xattr.c
 +++ b/fs/ext4/xattr.c
 @@ -53,7 +53,7 @@
@@ -284,7 +272,7 @@ index fe9f8d6ab6c9..c6af8a7a436a 100644
  #include <linux/quotaops.h>
  #include "ext4_jbd2.h"
  #include "ext4.h"
-@@ -78,10 +78,10 @@
+@@ -80,10 +80,10 @@
  # define ea_bdebug(bh, fmt, ...)	no_printk(fmt, ##__VA_ARGS__)
  #endif
  
@@ -297,7 +285,7 @@ index fe9f8d6ab6c9..c6af8a7a436a 100644
  static void ext4_xattr_rehash(struct ext4_xattr_header *,
  			      struct ext4_xattr_entry *);
  static int ext4_xattr_list(struct dentry *dentry, char *buffer,
-@@ -276,7 +276,7 @@ ext4_xattr_block_get(struct inode *inode, int name_index, const char *name,
+@@ -302,7 +302,7 @@ ext4_xattr_block_get(struct inode *inode
  	struct ext4_xattr_entry *entry;
  	size_t size;
  	int error;
@@ -306,7 +294,7 @@ index fe9f8d6ab6c9..c6af8a7a436a 100644
  
  	ea_idebug(inode, "name=%d.%s, buffer=%p, buffer_size=%ld",
  		  name_index, name, buffer, (long)buffer_size);
-@@ -428,7 +428,7 @@ ext4_xattr_block_list(struct dentry *dentry, char *buffer, size_t buffer_size)
+@@ -449,7 +449,7 @@ ext4_xattr_block_list(struct dentry *den
  	struct inode *inode = d_inode(dentry);
  	struct buffer_head *bh = NULL;
  	int error;
@@ -315,7 +303,7 @@ index fe9f8d6ab6c9..c6af8a7a436a 100644
  
  	ea_idebug(inode, "buffer=%p, buffer_size=%ld",
  		  buffer, (long)buffer_size);
-@@ -561,8 +561,8 @@ ext4_xattr_release_block(handle_t *handle, struct inode *inode,
+@@ -582,8 +582,8 @@ ext4_xattr_release_block(handle_t *handl
  		 * This must happen under buffer lock for
  		 * ext4_xattr_block_set() to reliably detect freed block
  		 */
@@ -326,7 +314,7 @@ index fe9f8d6ab6c9..c6af8a7a436a 100644
  		get_bh(bh);
  		unlock_buffer(bh);
  		ext4_free_blocks(handle, inode, bh, 0, 1,
-@@ -782,9 +782,9 @@ ext4_xattr_block_set(handle_t *handle, struct inode *inode,
+@@ -809,9 +809,9 @@ ext4_xattr_block_set(handle_t *handle, s
  	struct super_block *sb = inode->i_sb;
  	struct buffer_head *new_bh = NULL;
  	struct ext4_xattr_search *s = &bs->s;
@@ -338,7 +326,7 @@ index fe9f8d6ab6c9..c6af8a7a436a 100644
  
  #define header(x) ((struct ext4_xattr_header *)(x))
  
-@@ -805,8 +805,8 @@ ext4_xattr_block_set(handle_t *handle, struct inode *inode,
+@@ -832,8 +832,8 @@ ext4_xattr_block_set(handle_t *handle, s
  			 * ext4_xattr_block_set() to reliably detect modified
  			 * block
  			 */
@@ -347,9 +335,9 @@ index fe9f8d6ab6c9..c6af8a7a436a 100644
 +			mb_cache_entry_delete_block(ext4_mb_cache, hash,
 +						    bs->bh->b_blocknr);
  			ea_bdebug(bs->bh, "modifying in-place");
- 			error = ext4_xattr_set_entry(i, s);
+ 			error = ext4_xattr_set_entry(i, s, inode);
  			if (!error) {
-@@ -904,7 +904,7 @@ inserted:
+@@ -929,7 +929,7 @@ inserted:
  							 EXT4_C2B(EXT4_SB(sb),
  								  1));
  					brelse(new_bh);
@@ -358,7 +346,7 @@ index fe9f8d6ab6c9..c6af8a7a436a 100644
  					ce = NULL;
  					new_bh = NULL;
  					goto inserted;
-@@ -919,8 +919,8 @@ inserted:
+@@ -944,8 +944,8 @@ inserted:
  				if (error)
  					goto cleanup_dquot;
  			}
@@ -369,7 +357,7 @@ index fe9f8d6ab6c9..c6af8a7a436a 100644
  			ce = NULL;
  		} else if (bs->bh && s->base == bs->bh->b_data) {
  			/* We were modifying this block in-place. */
-@@ -985,7 +985,7 @@ getblk_failed:
+@@ -1011,7 +1011,7 @@ getblk_failed:
  
  cleanup:
  	if (ce)
@@ -378,7 +366,7 @@ index fe9f8d6ab6c9..c6af8a7a436a 100644
  	brelse(new_bh);
  	if (!(bs->bh && s->base == bs->bh->b_data))
  		kfree(s->base);
-@@ -1546,13 +1546,13 @@ cleanup:
+@@ -1583,13 +1583,13 @@ cleanup:
   * Returns 0, or a negative error number on failure.
   */
  static void
@@ -395,7 +383,7 @@ index fe9f8d6ab6c9..c6af8a7a436a 100644
  	if (error) {
  		if (error == -EBUSY)
  			ea_bdebug(bh, "already in cache");
-@@ -1610,16 +1610,16 @@ ext4_xattr_cmp(struct ext4_xattr_header *header1,
+@@ -1647,16 +1647,16 @@ ext4_xattr_cmp(struct ext4_xattr_header
   */
  static struct buffer_head *
  ext4_xattr_cache_find(struct inode *inode, struct ext4_xattr_header *header,
@@ -416,7 +404,7 @@ index fe9f8d6ab6c9..c6af8a7a436a 100644
  	while (ce) {
  		struct buffer_head *bh;
  
-@@ -1638,7 +1638,7 @@ ext4_xattr_cache_find(struct inode *inode, struct ext4_xattr_header *header,
+@@ -1675,7 +1675,7 @@ ext4_xattr_cache_find(struct inode *inod
  			return bh;
  		}
  		brelse(bh);
@@ -425,7 +413,7 @@ index fe9f8d6ab6c9..c6af8a7a436a 100644
  	}
  	return NULL;
  }
-@@ -1713,15 +1713,15 @@ static void ext4_xattr_rehash(struct ext4_xattr_header *header,
+@@ -1750,15 +1750,15 @@ static void ext4_xattr_rehash(struct ext
  
  #define	HASH_BUCKET_BITS	10
  
@@ -445,11 +433,9 @@ index fe9f8d6ab6c9..c6af8a7a436a 100644
 +		mb_cache_destroy(cache);
  }
  
-diff --git a/fs/ext4/xattr.h b/fs/ext4/xattr.h
-index 10b0f7323ed6..69dd3e6566e0 100644
 --- a/fs/ext4/xattr.h
 +++ b/fs/ext4/xattr.h
-@@ -123,8 +123,8 @@ extern int ext4_xattr_ibody_inline_set(handle_t *handle, struct inode *inode,
+@@ -155,8 +155,8 @@ extern int ext4_xattr_ibody_inline_set(h
  				       struct ext4_xattr_info *i,
  				       struct ext4_xattr_ibody_find *is);
  
@@ -460,9 +446,6 @@ index 10b0f7323ed6..69dd3e6566e0 100644
  
  #ifdef CONFIG_EXT4_FS_SECURITY
  extern int ext4_init_security(handle_t *handle, struct inode *inode,
-diff --git a/fs/mbcache.c b/fs/mbcache.c
-new file mode 100644
-index 000000000000..4241b633f155
 --- /dev/null
 +++ b/fs/mbcache.c
 @@ -0,0 +1,424 @@
@@ -890,9 +873,6 @@ index 000000000000..4241b633f155
 +MODULE_AUTHOR("Jan Kara <jack@suse.cz>");
 +MODULE_DESCRIPTION("Meta block cache (for extended attributes)");
 +MODULE_LICENSE("GPL");
-diff --git a/fs/mbcache2.c b/fs/mbcache2.c
-deleted file mode 100644
-index 49f7a6feaa83..000000000000
 --- a/fs/mbcache2.c
 +++ /dev/null
 @@ -1,424 +0,0 @@
@@ -1320,9 +1300,6 @@ index 49f7a6feaa83..000000000000
 -MODULE_AUTHOR("Jan Kara <jack@suse.cz>");
 -MODULE_DESCRIPTION("Meta block cache (for extended attributes)");
 -MODULE_LICENSE("GPL");
-diff --git a/include/linux/mbcache.h b/include/linux/mbcache.h
-new file mode 100644
-index 000000000000..a74a1f3082fb
 --- /dev/null
 +++ b/include/linux/mbcache.h
 @@ -0,0 +1,53 @@
@@ -1379,9 +1356,6 @@ index 000000000000..a74a1f3082fb
 +			  struct mb_cache_entry *entry);
 +
 +#endif	/* _LINUX_MBCACHE_H */
-diff --git a/include/linux/mbcache2.h b/include/linux/mbcache2.h
-deleted file mode 100644
-index c934843a6a31..000000000000
 --- a/include/linux/mbcache2.h
 +++ /dev/null
 @@ -1,53 +0,0 @@
@@ -1438,6 +1412,3 @@ index c934843a6a31..000000000000
 -			   struct mb2_cache_entry *entry);
 -
 -#endif	/* _LINUX_MB2CACHE_H */
--- 
-2.6.2
-

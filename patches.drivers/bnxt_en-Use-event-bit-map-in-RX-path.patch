@@ -92,9 +92,9 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  	struct tx_cmp *txcmp;
  
  	while (1) {
-@@ -1740,12 +1741,11 @@ static int bnxt_poll_work(struct bnxt *b
- 			if (unlikely(tx_pkts > bp->tx_wake_thresh))
- 				rx_pkts = budget;
+@@ -1743,12 +1744,11 @@ static int bnxt_poll_work(struct bnxt *b
+ 				break;
+ 			}
  		} else if ((TX_CMP_TYPE(txcmp) & 0x30) == 0x10) {
 -			rc = bnxt_rx_pkt(bp, bnapi, &raw_cons, &agg_event);
 +			rc = bnxt_rx_pkt(bp, bnapi, &raw_cons, &event);
@@ -106,7 +106,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  		} else if (unlikely((TX_CMP_TYPE(txcmp) ==
  				     CMPL_BASE_TYPE_HWRM_DONE) ||
  				    (TX_CMP_TYPE(txcmp) ==
-@@ -1770,12 +1770,12 @@ static int bnxt_poll_work(struct bnxt *b
+@@ -1773,12 +1773,12 @@ static int bnxt_poll_work(struct bnxt *b
  	if (tx_pkts)
  		bnxt_tx_int(bp, bnapi, tx_pkts);
  
@@ -121,7 +121,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  			writel(DB_KEY_RX | rxr->rx_agg_prod,
  			       rxr->rx_agg_doorbell);
  			writel(DB_KEY_RX | rxr->rx_agg_prod,
-@@ -1796,7 +1796,7 @@ static int bnxt_poll_nitroa0(struct napi
+@@ -1799,7 +1799,7 @@ static int bnxt_poll_nitroa0(struct napi
  	u32 cp_cons, tmp_raw_cons;
  	u32 raw_cons = cpr->cp_raw_cons;
  	u32 rx_pkts = 0;
@@ -130,7 +130,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  
  	while (1) {
  		int rc;
-@@ -1820,7 +1820,7 @@ static int bnxt_poll_nitroa0(struct napi
+@@ -1823,7 +1823,7 @@ static int bnxt_poll_nitroa0(struct napi
  			rxcmp1->rx_cmp_cfa_code_errors_v2 |=
  				cpu_to_le32(RX_CMPL_ERRORS_CRC_ERROR);
  
@@ -139,7 +139,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  			if (likely(rc == -EIO))
  				rx_pkts++;
  			else if (rc == -EBUSY)	/* partial completion */
-@@ -1843,7 +1843,7 @@ static int bnxt_poll_nitroa0(struct napi
+@@ -1846,7 +1846,7 @@ static int bnxt_poll_nitroa0(struct napi
  	writel(DB_KEY_RX | rxr->rx_prod, rxr->rx_doorbell);
  	writel(DB_KEY_RX | rxr->rx_prod, rxr->rx_doorbell);
  

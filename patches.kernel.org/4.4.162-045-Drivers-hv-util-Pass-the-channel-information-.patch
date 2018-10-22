@@ -1,9 +1,12 @@
 From: "K. Y. Srinivasan" <kys@microsoft.com>
 Date: Fri, 26 Feb 2016 15:13:19 -0800
-Patch-mainline: v4.6-rc1
-Subject: Drivers: hv: util: Pass the channel information during the init call
+Subject: [PATCH] Drivers: hv: util: Pass the channel information during the
+ init call
+Patch-mainline: 4.4.162
+References: FATE#320485 bnc#1012382
 Git-commit: b9830d120cbe155863399f25eaef6aa8353e767f
-References: fate#320485
+
+commit b9830d120cbe155863399f25eaef6aa8353e767f upstream.
 
 Pass the channel information to the util drivers that need to defer
 reading the channel while they are processing a request. This would address
@@ -19,19 +22,22 @@ the first real request from the server.
 
 Signed-off-by: K. Y. Srinivasan <kys@microsoft.com>
 Reported-by: Vitaly Kuznetsov <vkuznets@redhat.com>
+Signed-off-by: Dexuan Cui <decui@microsoft.com>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Acked-by: Olaf Hering <ohering@suse.de>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- drivers/hv/hv_fcopy.c    |    2 +-
- drivers/hv/hv_kvp.c      |    2 +-
- drivers/hv/hv_snapshot.c |    2 +-
- drivers/hv/hv_util.c     |    1 +
- include/linux/hyperv.h   |    1 +
+ drivers/hv/hv_fcopy.c    | 2 +-
+ drivers/hv/hv_kvp.c      | 2 +-
+ drivers/hv/hv_snapshot.c | 2 +-
+ drivers/hv/hv_util.c     | 1 +
+ include/linux/hyperv.h   | 1 +
  5 files changed, 5 insertions(+), 3 deletions(-)
 
+diff --git a/drivers/hv/hv_fcopy.c b/drivers/hv/hv_fcopy.c
+index 12dcbd8226f2..2cce48d9e903 100644
 --- a/drivers/hv/hv_fcopy.c
 +++ b/drivers/hv/hv_fcopy.c
-@@ -252,7 +252,6 @@ void hv_fcopy_onchannelcallback(void *co
+@@ -256,7 +256,6 @@ void hv_fcopy_onchannelcallback(void *context)
  		 */
  
  		fcopy_transaction.recv_len = recvlen;
@@ -39,7 +45,7 @@ Acked-by: Olaf Hering <ohering@suse.de>
  		fcopy_transaction.recv_req_id = requestid;
  		fcopy_transaction.fcopy_msg = fcopy_msg;
  
-@@ -319,6 +318,7 @@ static void fcopy_on_reset(void)
+@@ -323,6 +322,7 @@ static void fcopy_on_reset(void)
  int hv_fcopy_init(struct hv_util_service *srv)
  {
  	recv_buffer = srv->recv_buffer;
@@ -47,9 +53,11 @@ Acked-by: Olaf Hering <ohering@suse.de>
  
  	init_completion(&release_event);
  	/*
+diff --git a/drivers/hv/hv_kvp.c b/drivers/hv/hv_kvp.c
+index b97ef3e094fd..cd3fb0151e8a 100644
 --- a/drivers/hv/hv_kvp.c
 +++ b/drivers/hv/hv_kvp.c
-@@ -640,7 +640,6 @@ void hv_kvp_onchannelcallback(void *cont
+@@ -640,7 +640,6 @@ void hv_kvp_onchannelcallback(void *context)
  			 */
  
  			kvp_transaction.recv_len = recvlen;
@@ -65,9 +73,11 @@ Acked-by: Olaf Hering <ohering@suse.de>
  
  	init_completion(&release_event);
  	/*
+diff --git a/drivers/hv/hv_snapshot.c b/drivers/hv/hv_snapshot.c
+index c5fb249e34cc..b0feddb17170 100644
 --- a/drivers/hv/hv_snapshot.c
 +++ b/drivers/hv/hv_snapshot.c
-@@ -264,7 +264,6 @@ void hv_vss_onchannelcallback(void *cont
+@@ -264,7 +264,6 @@ void hv_vss_onchannelcallback(void *context)
  			 */
  
  			vss_transaction.recv_len = recvlen;
@@ -83,9 +93,11 @@ Acked-by: Olaf Hering <ohering@suse.de>
  
  	/*
  	 * When this driver loads, the user level daemon that
+diff --git a/drivers/hv/hv_util.c b/drivers/hv/hv_util.c
+index 41f5896224bd..9dc63725363d 100644
 --- a/drivers/hv/hv_util.c
 +++ b/drivers/hv/hv_util.c
-@@ -326,6 +326,7 @@ static int util_probe(struct hv_device *
+@@ -326,6 +326,7 @@ static int util_probe(struct hv_device *dev,
  	srv->recv_buffer = kmalloc(PAGE_SIZE * 4, GFP_KERNEL);
  	if (!srv->recv_buffer)
  		return -ENOMEM;
@@ -93,9 +105,11 @@ Acked-by: Olaf Hering <ohering@suse.de>
  	if (srv->util_init) {
  		ret = srv->util_init(srv);
  		if (ret) {
+diff --git a/include/linux/hyperv.h b/include/linux/hyperv.h
+index ae6a711dcd1d..281bb007f725 100644
 --- a/include/linux/hyperv.h
 +++ b/include/linux/hyperv.h
-@@ -1251,6 +1251,7 @@ u64 hv_do_hypercall(u64 control, void *i
+@@ -1179,6 +1179,7 @@ int vmbus_allocate_mmio(struct resource **new, struct hv_device *device_obj,
  
  struct hv_util_service {
  	u8 *recv_buffer;
@@ -103,3 +117,6 @@ Acked-by: Olaf Hering <ohering@suse.de>
  	void (*util_cb)(void *);
  	int (*util_init)(struct hv_util_service *);
  	void (*util_deinit)(void);
+-- 
+2.19.1
+

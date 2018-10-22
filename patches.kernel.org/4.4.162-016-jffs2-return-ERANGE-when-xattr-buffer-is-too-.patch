@@ -1,0 +1,55 @@
+From: Hou Tao <houtao1@huawei.com>
+Date: Fri, 12 Oct 2018 14:01:26 +0800
+Subject: [PATCH] jffs2: return -ERANGE when xattr buffer is too small
+References: bnc#1012382
+Patch-mainline: 4.4.162
+Git-commit: 5ac147ebfa1c50cc0f25e3c7f42862cfe6b40d0d
+
+When a file have multiple xattrs and the passed buffer is
+smaller than the required size, jffs2_listxattr() should
+return -ERANGE instead of continue, else Oops may occur
+due to memory corruption.
+
+Also remove the unnecessary check ("rc < 0"), because
+xhandle->list(...) will not return an error number.
+
+Spotted by generic/377 in xfstests-dev.
+
+NB: The problem had been fixed by commit 764a5c6b1fa4 ("xattr
+handlers: Simplify list operation") in v4.5-rc1, but the
+modification in that commit may be too much because it modifies
+all file-systems which implement xattr, so I create a single
+patch for jffs2 to fix the problem.
+
+Signed-off-by: Hou Tao <houtao1@huawei.com>
+Cc: David Woodhouse <dwmw2@infradead.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ fs/jffs2/xattr.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/fs/jffs2/xattr.c b/fs/jffs2/xattr.c
+index 4c2c03663533..8e1427762eeb 100644
+--- a/fs/jffs2/xattr.c
++++ b/fs/jffs2/xattr.c
+@@ -1004,12 +1004,14 @@ ssize_t jffs2_listxattr(struct dentry *dentry, char *buffer, size_t size)
+ 			rc = xhandle->list(xhandle, dentry, buffer + len,
+ 					   size - len, xd->xname,
+ 					   xd->name_len);
++			if (rc > size - len) {
++				rc = -ERANGE;
++				goto out;
++			}
+ 		} else {
+ 			rc = xhandle->list(xhandle, dentry, NULL, 0,
+ 					   xd->xname, xd->name_len);
+ 		}
+-		if (rc < 0)
+-			goto out;
+ 		len += rc;
+ 	}
+ 	rc = len;
+-- 
+2.19.1
+

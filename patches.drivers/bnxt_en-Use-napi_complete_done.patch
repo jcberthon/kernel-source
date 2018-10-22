@@ -17,8 +17,8 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 
 --- a/drivers/net/ethernet/broadcom/bnxt/bnxt.c
 +++ b/drivers/net/ethernet/broadcom/bnxt/bnxt.c
-@@ -1780,8 +1780,9 @@ static int bnxt_poll(struct napi_struct
- 			break;
+@@ -1787,8 +1787,9 @@ static int bnxt_poll(struct napi_struct
+ 		}
  
  		if (!bnxt_has_work(bp, cpr)) {
 -			napi_complete(napi);
