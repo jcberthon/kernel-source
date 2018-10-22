@@ -126,12 +126,13 @@ diff --git a/drivers/pci/host/pci-hyperv.c b/drivers/pci/host/pci-hyperv.c
  /**
   * new_pcichild_device() - Create a new child device
   * @hbus:	The internal struct tracking this root PCI bus.
-@@ -1572,8 +1555,7 @@ static struct hv_pci_dev *new_pcichild_device(struct hv_pcibus_device *hbus,
+@@ -1572,8 +1555,8 @@ static struct hv_pci_dev *new_pcichild_device(struct hv_pcibus_device *hbus,
  	wait_for_completion(&comp_pkt.host_event);
  
  	hpdev->desc = *desc;
 -	get_pcichild(hpdev, hv_pcidev_ref_initial);
 -	get_pcichild(hpdev, hv_pcidev_ref_childlist);
++	atomic_set(&hpdev->refs, 1);
 +	get_pcichild(hpdev);
  	spin_lock_irqsave(&hbus->device_list_lock, flags);
  
