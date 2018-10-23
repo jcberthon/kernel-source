@@ -91,6 +91,7 @@ Git-commit: 4fd1bd443e80b12f0a01a45fb9a793206b41cb72
 Git-commit: b2504a5dbef3305ef41988ad270b0e8ec289331c
 Git-commit: 109704492ef637956265ec2eb72ae7b3b39eb6f4
 Git-commit: 89e357d83c06b6fac581c3ca7f0ee3ae7e67109e
+Git-commit: e47057151422a67ce08747176fa21cb3b526a2c9
 
 Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
