@@ -1,0 +1,91 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Date: Mon, 22 Oct 2018 08:39:21 +0200
+Subject: Revert "x86/fpu: Remove struct fpu::counter"
+Patch-mainline: never, kabi
+References: kabi
+
+This reverts commit 6e7d7bea15e866838110b7e12dcea9f4ca414b05, upstream
+commit 3913cc3507575273beb165a5e027a081913ed507. As we want to
+preserve both eager and lazy fpu in released SLE, revert this
+eagerfpu-only patch.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ arch/x86/include/asm/fpu/internal.h |  3 +++
+ arch/x86/include/asm/fpu/types.h    | 11 +++++++++++
+ arch/x86/kernel/fpu/core.c          |  3 +++
+ 3 files changed, 17 insertions(+)
+
+diff --git a/arch/x86/include/asm/fpu/internal.h b/arch/x86/include/asm/fpu/internal.h
+index 16825dda18dc..2ff03cca9254 100644
+--- a/arch/x86/include/asm/fpu/internal.h
++++ b/arch/x86/include/asm/fpu/internal.h
+@@ -575,12 +575,15 @@ switch_fpu_prepare(struct fpu *old_fpu, struct fpu *new_fpu, int cpu)
+ 
+ 		/* Don't change CR0.TS if we just switch! */
+ 		if (fpu.preload) {
++			new_fpu->counter++;
+ 			__fpregs_activate(new_fpu);
+ 			prefetch(&new_fpu->state);
+ 		}
+ 	} else {
++		old_fpu->counter = 0;
+ 		old_fpu->last_cpu = -1;
+ 		if (fpu.preload) {
++			new_fpu->counter++;
+ 			if (fpu_want_lazy_restore(new_fpu, cpu))
+ 				fpu.preload = 0;
+ 			else
+diff --git a/arch/x86/include/asm/fpu/types.h b/arch/x86/include/asm/fpu/types.h
+index dcb85a9ac9b4..1c6f6ac52ad0 100644
+--- a/arch/x86/include/asm/fpu/types.h
++++ b/arch/x86/include/asm/fpu/types.h
+@@ -302,6 +302,17 @@ struct fpu {
+ 	 */
+ 	unsigned char			fpregs_active;
+ 
++	/*
++	 * @counter:
++	 *
++	 * This counter contains the number of consecutive context switches
++	 * during which the FPU stays used. If this is over a threshold, the
++	 * lazy FPU restore logic becomes eager, to save the trap overhead.
++	 * This is an unsigned char so that after 256 iterations the counter
++	 * wraps and the context switch behavior turns lazy again; this is to
++	 * deal with bursty apps that only use the FPU for a short time:
++	 */
++	unsigned char			counter;
+ 	/*
+ 	 * @state:
+ 	 *
+diff --git a/arch/x86/kernel/fpu/core.c b/arch/x86/kernel/fpu/core.c
+index b322325424bc..b282364c075c 100644
+--- a/arch/x86/kernel/fpu/core.c
++++ b/arch/x86/kernel/fpu/core.c
+@@ -250,6 +250,7 @@ static void fpu_copy(struct fpu *dst_fpu, struct fpu *src_fpu)
+ 
+ int fpu__copy(struct fpu *dst_fpu, struct fpu *src_fpu)
+ {
++	dst_fpu->counter = 0;
+ 	dst_fpu->fpregs_active = 0;
+ 	dst_fpu->last_cpu = -1;
+ 
+@@ -352,6 +353,7 @@ void fpu__restore(struct fpu *fpu)
+ 	kernel_fpu_disable();
+ 	fpregs_activate(fpu);
+ 	copy_kernel_to_fpregs(&fpu->state);
++	fpu->counter++;
+ 	kernel_fpu_enable();
+ }
+ EXPORT_SYMBOL_GPL(fpu__restore);
+@@ -368,6 +370,7 @@ EXPORT_SYMBOL_GPL(fpu__restore);
+ void fpu__drop(struct fpu *fpu)
+ {
+ 	preempt_disable();
++	fpu->counter = 0;
+ 
+ 	if (fpu->fpregs_active) {
+ 		/* Ignore delayed exceptions from user space */
+-- 
+2.19.1
+
