@@ -76,9 +76,9 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  #define BNXT_GET_EVENT_PORT(data)	\
  	((data) &			\
  	 ASYNC_EVENT_CMPL_PORT_CONN_NOT_ALLOWED_EVENT_DATA1_PORT_ID_MASK)
-@@ -1748,7 +1787,11 @@ static int bnxt_poll_work(struct bnxt *b
- 			if (unlikely(tx_pkts > bp->tx_wake_thresh))
- 				rx_pkts = budget;
+@@ -1751,7 +1790,11 @@ static int bnxt_poll_work(struct bnxt *b
+ 				break;
+ 			}
  		} else if ((TX_CMP_TYPE(txcmp) & 0x30) == 0x10) {
 -			rc = bnxt_rx_pkt(bp, bnapi, &raw_cons, &event);
 +			if (likely(budget))
@@ -89,7 +89,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  			if (likely(rc >= 0))
  				rx_pkts += rc;
  			else if (rc == -EBUSY)	/* partial completion */
-@@ -6611,12 +6654,11 @@ static void bnxt_poll_controller(struct
+@@ -6623,12 +6666,11 @@ static void bnxt_poll_controller(struct
  	struct bnxt *bp = netdev_priv(dev);
  	int i;
  

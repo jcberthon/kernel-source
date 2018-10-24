@@ -1,0 +1,27 @@
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Date: Sat, 20 Oct 2018 09:52:38 +0200
+Subject: [PATCH] Linux 4.4.162
+References: bnc#1012382
+Patch-mainline: 4.4.162
+Git-commit: 24c2342b8e51ab3185e68470709904150a1e3ee0
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 57e4ff1a8b96..00ff2dd68ff1 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,6 +1,6 @@
+ VERSION = 4
+ PATCHLEVEL = 4
+-SUBLEVEL = 161
++SUBLEVEL = 162
+ EXTRAVERSION =
+ NAME = Blurry Fish Butt
+ 
+-- 
+2.19.1
+
