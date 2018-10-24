@@ -1,0 +1,60 @@
+From d049bf36034a5dacaf817f13f7b5d2e39b47e666 Mon Sep 17 00:00:00 2001
+From: Nicholas Piggin <npiggin@gmail.com>
+Date: Thu, 22 Mar 2018 20:41:46 +1000
+Subject: [PATCH] powerpc/64: Fix smp_wmb barrier definition use use lwsync
+ consistently
+
+References: bsc#1064861
+Patch-mainline: v4.17-rc1
+Git-commit: 0bfdf598900fd62869659f360d3387ed80eb71cf
+
+asm/barrier.h is not always included after asm/synch.h, which meant
+it was missing __SUBARCH_HAS_LWSYNC, so in some files smp_wmb() would
+be eieio when it should be lwsync. kernel/time/hrtimer.c is one case.
+
+__SUBARCH_HAS_LWSYNC is only used in one place, so just fold it in
+to where it's used. Previously with my small simulator config, 377
+instances of eieio in the tree. After this patch there are 55.
+
+Fixes: 46d075be585e ("powerpc: Optimise smp_wmb")
+Cc: stable@vger.kernel.org # v2.6.29+
+Signed-off-by: Nicholas Piggin <npiggin@gmail.com>
+Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/include/asm/synch.h  | 4 ----
+ arch/powerpc/include/asm/system.h | 3 ++-
+ 2 files changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/arch/powerpc/include/asm/synch.h b/arch/powerpc/include/asm/synch.h
+index e682a7143edb..e344d98239a7 100644
+--- a/arch/powerpc/include/asm/synch.h
++++ b/arch/powerpc/include/asm/synch.h
+@@ -5,10 +5,6 @@
+ #include <linux/stringify.h>
+ #include <asm/feature-fixups.h>
+ 
+-#if defined(__powerpc64__) || defined(CONFIG_PPC_E500MC)
+-#define __SUBARCH_HAS_LWSYNC
+-#endif
+-
+ #ifndef __ASSEMBLY__
+ extern unsigned int __start___lwsync_fixup, __stop___lwsync_fixup;
+ extern void do_lwsync_fixups(unsigned long value, void *fixup_start,
+diff --git a/arch/powerpc/include/asm/system.h b/arch/powerpc/include/asm/system.h
+index 659bd83def50..2b9d36f188d6 100644
+--- a/arch/powerpc/include/asm/system.h
++++ b/arch/powerpc/include/asm/system.h
+@@ -47,7 +47,8 @@
+ #define AT_VECTOR_SIZE_ARCH 6 /* entries in ARCH_DLINFO */
+ #ifdef CONFIG_SMP
+ 
+-#ifdef __SUBARCH_HAS_LWSYNC
++/* The sub-arch has lwsync */
++#if defined(__powerpc64__) || defined(CONFIG_PPC_E500MC)
+ #    define SMPWMB      LWSYNC
+ #else
+ #    define SMPWMB      eieio
+-- 
+2.13.7
+

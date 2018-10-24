@@ -1,0 +1,40 @@
+From a4fdc678881dfe9880541331ca37c6a2aea0893b Mon Sep 17 00:00:00 2001
+From: Oliver O'Halloran <oohall@gmail.com>
+Date: Thu, 6 Jul 2017 18:46:43 +1000
+Subject: [PATCH] powerpc/asm: Mark cr0 as clobbered in mftb()
+
+References: bsc#1049128
+Patch-mainline: v4.13-rc1
+Git-commit: 2400fd822f467cb4c886c879d8ad99feac9cf319
+
+The workaround for the CELL timebase bug does not correctly mark cr0 as
+being clobbered. This means GCC doesn't know that the asm block changes cr0 and
+might leave the result of an unrelated comparison in cr0 across the block, which
+we then trash, leading to basically random behaviour.
+
+Fixes: 859deea949c3 ("[POWERPC] Cell timebase bug workaround")
+Cc: stable@vger.kernel.org # v2.6.19+
+Signed-off-by: Oliver O'Halloran <oohall@gmail.com>
+[mpe: Tweak change log and flag for stable]
+Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/include/asm/reg.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/powerpc/include/asm/reg.h b/arch/powerpc/include/asm/reg.h
+index 7e8a66cd1487..9e0d8ed2da69 100644
+--- a/arch/powerpc/include/asm/reg.h
++++ b/arch/powerpc/include/asm/reg.h
+@@ -1087,7 +1087,7 @@
+ 				"	.llong 0\n"			\
+ 				"	.llong 0\n"			\
+ 				".previous"				\
+-			: "=r" (rval) : "i" (CPU_FTR_CELL_TB_BUG)); rval;})
++			: "=r" (rval) : "i" (CPU_FTR_CELL_TB_BUG) : "cr0"); rval;})
+ #else
+ #define mftb()		({unsigned long rval;	\
+ 			asm volatile("mftb %0" : "=r" (rval)); rval;})
+-- 
+2.13.7
+
