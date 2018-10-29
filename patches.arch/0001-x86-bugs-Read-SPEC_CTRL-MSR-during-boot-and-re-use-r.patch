@@ -61,7 +61,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 --- a/arch/x86/include/asm/nospec-branch.h
 +++ b/arch/x86/include/asm/nospec-branch.h
 @@ -171,6 +171,17 @@ enum spectre_v2_mitigation {
- };
+ extern char __indirect_thunk_end[];
  
  /*
 + * The Intel specification for the SPEC_CTRL MSR requires that we
