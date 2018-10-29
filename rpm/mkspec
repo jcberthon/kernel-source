@@ -20,6 +20,14 @@ my %flavor_archs = parse_config_conf();
 # subset to include in kernel-syms
 my %syms_flavor_archs = parse_config_conf("syms");
 
+my %all_archs = parse_config_conf("needs_updating");
+my @all_archs;
+	for my $flavor (keys(%all_archs)) {
+		push(@all_archs, arch2rpm(@{$all_archs{$flavor}}));
+	}
+@all_archs = sort(uniq(@all_archs));
+my $all_archs = join(" ", @all_archs);
+
 # template name -> template body
 my %templates = read_spec_templates();
 
@@ -34,7 +42,7 @@ if (!defined ($rpmrelease)) {
 	$rpmrelease = $vars{'RELEASE'} || 0;
 }
 
-# package name -> [summary, description]
+# package name -> [summary, description, extra kmp deps]
 my %binary_descriptions = parse_descriptions();
 
 # arch -> flavor -> [obsoleted packages]
@@ -75,6 +83,7 @@ if ($srcversion =~ /^(\d+)(?:\.\d+)*(-rc\d+)?$/) {
 }
 
 my $commit = get_commit();
+my $commit_full = get_commit(1);
 
 my %macros = (
 	VARIANT => $variant,
@@ -85,6 +94,7 @@ my %macros = (
 	TARBALL_URL => $tarball_url,
 	RELEASE => $rpmrelease,
 	COMMIT => $commit,
+	COMMIT_FULL => $commit_full,
 	SOURCES => $sources,
 	NOSOURCE => $nosource,
 	UNPACK_PATCHES => $unpack_patches,
@@ -96,20 +106,23 @@ my %macros = (
 my $kmp_definitions = "";
 my @kmp_definitions;
 for my $kmp (@kmps) {
-	my ($summary, $description);
+	my ($summary, $description, $deps);
 	if (!exists($binary_descriptions{$kmp})) {
 		print STDERR "warning: no description for $kmp found\n";
 		($summary = $kmp) =~ s/-kmp$//;
 		$summary .= " kernel modules";
 		$description = "$summary.";
+		$deps = "";
 	} else {
 		$summary = $binary_descriptions{$kmp}->[0];
 		$description = $binary_descriptions{$kmp}->[1];
+		$deps = $binary_descriptions{$kmp}->[2];
 	}
 	push(@kmp_definitions, expand_template("kmp",
 		KMP_NAME => $kmp,
 		KMP_SUMMARY => $summary,
-		KMP_DESCRIPTION => $description));
+		KMP_DESCRIPTION => $description,
+		KMP_DEPS => $deps));
 }
 $kmp_definitions = join("\n", @kmp_definitions);
 
@@ -145,43 +158,49 @@ for my $flavor (sort keys(%flavor_archs)) {
 # kernel-source.spec
 do_spec('source', "kernel-source$variant.spec", %macros);
 
-# kernel-docs.spec
-do_spec('docs', "kernel-docs$variant.spec", %macros);
+if ($variant eq "") {
+	# kernel-docs.spec
+	do_spec('docs', "kernel-docs$variant.spec", %macros);
+}
 
 # kernel-syms.spec
 {
 	my $requires = "";
-	my %all_archs;
-	my $all_archs;
+	my %syms_archs;
+	my $syms_archs;
 	for my $flavor (sort keys(%syms_flavor_archs)) {
 		next if $flavor eq "vanilla";
 		my @archs = arch2rpm(@{$syms_flavor_archs{$flavor}});
-		$all_archs{$_} = 1 for @archs;
+		$syms_archs{$_} = 1 for @archs;
 		$requires .= "%ifarch @archs\n";
 		$requires .= "Requires:       kernel-$flavor-devel = \%version-\%source_rel\n";
 		$requires .= "%endif\n";
 	}
 	chomp $requires;
-	$all_archs = join(" ", sort(keys(%all_archs)));
-	if (keys(%all_archs)) {
+	$syms_archs = join(" ", sort(keys(%syms_archs)));
+	if (keys(%syms_archs)) {
 		do_spec('syms', "kernel-syms$variant.spec", %macros,
 			REQUIRES => $requires,
-			ARCHS => $all_archs);
+			ARCHS => $syms_archs);
 	}
 }
 
 # kernel-obs-*.spec
-{
-	my @default_archs = arch2rpm(@{$flavor_archs{default}});
+if (!$variant) {
+	my @default_archs;
+
+	if ($vanilla_only) {
+		@default_archs = arch2rpm(@{$flavor_archs{vanilla}});
+	} else {
+		@default_archs = arch2rpm(@{$flavor_archs{default}});
+	}
 	# No kernel-obs-* for 32bit ppc
 	@default_archs = grep { $_ ne "ppc" } @default_archs;
 	my $default_archs = join(" ", @default_archs);
-	if (!$variant) {
-		do_spec('obs-build', "kernel-obs-build.spec", %macros,
-			ARCHS => $default_archs);
-		do_spec('obs-qa', "kernel-obs-qa.spec", %macros,
-			ARCHS => $default_archs);
-	}
+	do_spec('obs-build', "kernel-obs-build.spec", %macros,
+		ARCHS => $default_archs);
+	do_spec('obs-qa', "kernel-obs-qa.spec", %macros,
+		ARCHS => $default_archs);
 }
 
 copy_changes();
@@ -283,13 +302,15 @@ sub parse_descriptions {
 			if ($current) {
 				chomp $current->[1];
 			}
-			$current = ["", ""];
+			$current = ["", "", ""];
 			$res{$package} = $current;
 			$state = 0;
 			next;
 		}
 		if (/^$/) {
-			if ($state == 2) {
+			if ($state == 0) {
+				$state++;
+			} elsif ($state == 2) {
 				$blank .= $_;
 			}
 			next;
@@ -297,12 +318,27 @@ sub parse_descriptions {
 		# non-blank line and not === package ===
 		if ($state == 0) {
 			chomp;
-			$current->[0] = $_;
-			$state = 1;
+			if (s/^Requires: *//) {
+				# foo-kmp is a shorthand for another kmp
+				# from the same specfile
+				s/-kmp/-kmp-%build_flavor = %version-%release/g;
+				s/^/Requires:       /;
+				if ($current->[2]) {
+					$current->[2] .= "\n";
+				}
+				$current->[2] .= $_;
+			} else {
+				# The Summary: keyword is optional
+				s/^Summary: *//;
+				if ($current->[0]) {
+					print STDERR "warning: multi-line summary\n";
+				}
+				$current->[0] = $_;
+			}
 		} elsif ($state == 1) {
 			$current->[1] = $_;
 			$blank = "";
-			$state = 2;
+			$state++;
 		} else {
 			$current->[1] .= $blank;
 			$blank = "";
@@ -418,7 +454,9 @@ sub provides_obsoletes {
 }
 
 sub get_commit {
-	my ($commit, $fh);
+	my ($commit, $fh, $full);
+
+	$full = $_[0] // 0;
 
 	if (!open($fh, '<', "source-timestamp")) {
 		print STDERR "warning: source-timestamp: $!\n";
@@ -426,7 +464,7 @@ sub get_commit {
 		return "0000000";
 	}
 	while (<$fh>) {
-		if (/^GIT Revision: ([0-9a-f]{7})/) {
+		if ($full ? /^GIT Revision: ([0-9a-f]{40})/ : /^GIT Revision: ([0-9a-f]{7})/) {
 			$commit = $1;
 		}
 	}
@@ -487,3 +525,7 @@ sub xopen {
         open($_[0], $_[1], $_[2]) or die "$_[2]: $!\n";
 }
 
+sub uniq {
+	my %seen;
+	return grep { !$seen{$_}++ } @_;
+}

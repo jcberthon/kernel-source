@@ -81,7 +81,7 @@ BuildRequires:  libelf-devel
 Provides:       %name = %version-%source_rel
 # bnc#901925
 Provides:       %name-%version-%source_rel
-Provides:       %{name}_%_target_cpu = %version-%release
+Provides:       %{name}_%_target_cpu = %version-%source_rel
 Provides:       kernel-base = %version-%source_rel
 Provides:       multiversion(kernel)
 # In SLE11, kernel-$flavor complemented kernel-$flavor-base. With SLE12,
@@ -91,6 +91,7 @@ Provides:       multiversion(kernel)
 # owned by multiple packages now. The dependency is not correct wrt openSUSE
 # 11.2 - 11.4, but we primarily care about the supported upgrade path.
 Obsoletes:      %name-base < 3.1
+Recommends: kernel-firmware
 # The following is copied to the -base subpackage as well
 # BEGIN COMMON DEPS
 Requires(pre):  coreutils awk
@@ -153,7 +154,10 @@ Conflicts:      hyper-v < 4
 Conflicts:      libc.so.6()(64bit)
 %endif
 Provides:       kernel = %version-%source_rel
+Provides:       kernel-%build_flavor-base-srchash = @COMMIT_FULL@
+Provides:       kernel-srchash = @COMMIT_FULL@
 # END COMMON DEPS
+Provides:       %name-srchash = @COMMIT_FULL@
 @PROVIDES_OBSOLETES@
 @PROVIDES_OBSOLETES_BASE@
 %obsolete_rebuilds %name
@@ -280,7 +284,13 @@ awk '
 		print $(NF);
 	}
 ' >%kernel_build_dir/Module.supported
-for package in base @KMPS@; do
+subpackages=(
+	base
+%if %CONFIG_SUSE_KERNEL_SUPPORTED == "y"
+	@KMPS@
+%endif
+)
+for package in "${subpackages[@]}"; do
 	%_sourcedir/guards --default=0 "$package" \
 		<%_sourcedir/supported.conf | sed 's,.*/,,; s,\.ko$,,' | \
 		sort -u >%kernel_build_dir/Module."$package"
@@ -331,9 +341,18 @@ if test -e %my_builddir/config.addon/%cpu_arch_flavor; then
 	# the top of the specfile
 	../scripts/kconfig/merge_config.sh -m .config %my_builddir/config.addon/%cpu_arch_flavor
 fi
+
+CONFIG_SUSE_KERNEL_RELEASED="--disable CONFIG_SUSE_KERNEL_RELEASED"
+%if 0%{?_project:1}
+if echo %_project | egrep -qx -f %_sourcedir/release-projects; then
+	CONFIG_SUSE_KERNEL_RELEASED="--enable CONFIG_SUSE_KERNEL_RELEASED"
+fi
+%endif
+
 ../scripts/config \
 	--set-str CONFIG_LOCALVERSION -%source_rel-%build_flavor \
 	--enable  CONFIG_SUSE_KERNEL \
+	$CONFIG_SUSE_KERNEL_RELEASED \
 %if 0%{?__debug_package:1}
 	--enable  CONFIG_DEBUG_INFO
 %else
@@ -420,9 +439,12 @@ done
 %install
 
 # sign the modules, firmware and possibly the kernel in the buildservice
-export BRP_PESIGN_FILES="*.ko"
+BRP_PESIGN_FILES=""
 %if %CONFIG_EFI_STUB == "y"
-BRP_PESIGN_FILES="$BRP_PESIGN_FILES /boot/vmlinuz-%kernelrelease-%build_flavor"
+BRP_PESIGN_FILES="/boot/vmlinuz-%kernelrelease-%build_flavor"
+%endif
+%if %CONFIG_MODULE_SIG == "y"
+BRP_PESIGN_FILES="$BRP_PESIGN_FILES *.ko"
 %endif
 %ifarch %ix86
 # XXX: do not sign on x86, as the repackaging changes kernel-pae
@@ -442,6 +464,7 @@ export STRIP_KEEP_SYMTAB='*/vmlinux-*'
 export NO_BRP_STALE_LINK_ERROR=yes
 
 cd %kernel_build_dir
+source .kernel-binary.spec.buildenv
 
 mkdir -p %buildroot/boot
 # (Could strip out non-public symbols.)
@@ -702,11 +725,20 @@ if [ %CONFIG_MODULES = y ]; then
 	fi
     fi
 
-    # arch/powerpc/lib/crtsavres.o is required for building external
-    # modules on powerpc
-    if [ -f %kernel_build_dir/arch/powerpc/lib/crtsavres.o ]; then
-	echo arch/powerpc/lib/crtsavres.o >> %my_builddir/obj-files
+    # Check the license in each module
+    if ! sh %_sourcedir/check-module-license %buildroot; then
+	echo "Please fix the missing licenses!"
+%if %CONFIG_SUSE_KERNEL_SUPPORTED == "y"
+	exit 1
+%endif
     fi
+
+    # These files are required for building external modules
+    for FILE in arch/powerpc/lib/crtsavres.o arch/arm64/kernel/ftrace-mod.o; do
+	    if [ -f %kernel_build_dir/$FILE ]; then
+		echo $FILE >> %my_builddir/obj-files
+	    fi
+    done
 
     tar -cf - -T %my_builddir/obj-files | \
 	tar -xf - -C %rpm_install_dir/%cpu_arch_flavor
@@ -837,7 +869,7 @@ Group:          System/Kernel
 Url:            http://www.kernel.org/
 Provides:       kernel-base = %version-%source_rel
 Provides:       multiversion(kernel)
-Conflicts:      %name = %version-%release
+Conflicts:      %name = %version-%source_rel
 @COMMON_DEPS@
 @PROVIDES_OBSOLETES_BASE@
 %obsolete_rebuilds %name-base
@@ -868,10 +900,10 @@ This package contains only the base modules, required in all installs.
 Summary:        @SUMMARY@ - Unsupported kernel modules
 Group:          System/Kernel
 Url:            http://www.kernel.org/
-Provides:       %name-extra_%_target_cpu = %version-%release
+Provides:       %name-extra_%_target_cpu = %version-%source_rel
 Provides:       kernel-extra = %version-%source_rel
 Provides:       multiversion(kernel)
-Requires:       %{name}_%_target_cpu = %version-%release
+Requires:       %{name}_%_target_cpu = %version-%source_rel
 Requires(pre):  coreutils awk
 Requires(post): modutils
 Requires(post): perl-Bootloader
@@ -985,16 +1017,18 @@ static, unlike the kgraft-patch-<kernel-version>-flavor package names.
 %dir /lib/modules/%kernelrelease-%build_flavor
 %endif
 
+%if %CONFIG_SUSE_KERNEL_SUPPORTED == "y"
 # BEGIN KMP
 %package -n @KMP_NAME@-%build_flavor
 Summary:        @KMP_SUMMARY@
 Group:          System/Kernel
-Requires:       %name = %version-%release
-Provides:       @KMP_NAME@ = %version-%release
+Requires:       %name = %version-%source_rel
+Provides:       @KMP_NAME@ = %version-%source_rel
 Provides:       multiversion(kernel)
 # tell weak-modules2 to ignore this package
 Provides:       kmp_in_kernel
 Requires(post): suse-module-tools >= 12.4
+@KMP_DEPS@
 
 %description -n @KMP_NAME@-%build_flavor
 @KMP_DESCRIPTION@
@@ -1026,6 +1060,7 @@ rm -f "/var/run/rpm-$nvr-modules"
 %files -n @KMP_NAME@-%build_flavor -f @KMP_NAME@.files
 %defattr(-, root, root)
 # END KMP
+%endif # %CONFIG_SUSE_KERNEL_SUPPORTED
 %endif # %CONFIG_MODULES
 
 %changelog
