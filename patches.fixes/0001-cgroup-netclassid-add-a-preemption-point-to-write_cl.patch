@@ -2,7 +2,8 @@ From 9d53fadea1c1cbabbbdf3438d6b505638211102e Mon Sep 17 00:00:00 2001
 From: Michal Hocko <mhocko@suse.com>
 Date: Thu, 18 Oct 2018 10:47:03 +0200
 Subject: [PATCH] cgroup, netclassid: add a preemption point to write_classid
-Patch-mainline: not yet, posted for discussion
+Patch-mainline: 4.20-rc1
+Git-commit: a90e90b7d55e789c71d85b946ffb5c1ab2f137ca
 References: bnc#1098996
 
 We have seen a customer complaining about soft lockups on !PREEMPT
