@@ -64,7 +64,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  
  	atomic_switch_perf_msrs(vmx);
  
--	if (x86_ibrs_enabled())
+-	if (boot_cpu_has(X86_FEATURE_SPEC_CTRL))
 -		add_atomic_switch_msr(vmx, MSR_IA32_SPEC_CTRL,
 -				      vmx->spec_ctrl, SPEC_CTRL_IBRS);
 -
@@ -75,12 +75,13 @@ Acked-by: Borislav Petkov <bp@suse.de>
  	vmx->__launched = vmx->loaded_vmcs->launched;
  	asm(
  		/* Store host registers */
-@@ -8747,6 +8745,8 @@ static void __noclone vmx_vcpu_run(struc
- #endif
- 	      );
+@@ -8747,7 +8745,9 @@ static void __noclone vmx_vcpu_run(struc
  
-+	x86_spec_ctrl_restore_host(vmx->spec_ctrl);
+ 	if (boot_cpu_has(X86_FEATURE_MSR_SPEC_CTRL))
+ 		vmx->spec_ctrl = native_read_msr(MSR_IA32_SPEC_CTRL);
 +
++	x86_spec_ctrl_restore_host(vmx->spec_ctrl);
+ 
  	/* Eliminate branch target predictions from guest mode */
  	vmexit_fill_RSB();
  

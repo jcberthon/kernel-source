@@ -280,7 +280,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
 @@ -329,7 +329,7 @@ int nvme_setup_cmd(struct nvme_ns *ns, s
  
  	if (req->cmd_type == REQ_TYPE_DRV_PRIV)
- 		memcpy(cmd, nvme_req(req)->cmd, sizeof(*cmd));
+ 		memcpy(cmd, req->cmd, sizeof(*cmd));
 -	else if (req->cmd_flags & REQ_FLUSH)
 +	else if (req_op(req) == REQ_OP_FLUSH)
  		nvme_setup_flush(ns, cmd);

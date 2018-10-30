@@ -10,22 +10,24 @@ existing string, and writing the new value only if the old value is
 matching.
 
 Signed-off-by: David Disseldorp <ddiss@suse.de>
+[jeffm: folded in patches.suse/rbd-do-away-with-obj_request-in-cmpsetxattr.patch
+ for sorted series]
 ---
- drivers/block/rbd.c         |   58 ++++++++++++++++++++++++++++++++++++++++++++
+ drivers/block/rbd.c         |   46 ++++++++++++++++++++++++++++++++++++++++++++
  include/linux/ceph/librbd.h |    3 ++
- 2 files changed, 61 insertions(+)
+ 2 files changed, 49 insertions(+)
 
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1869,6 +1869,7 @@ static void rbd_osd_req_callback(struct
- 	case CEPH_OSD_OP_NOTIFY_ACK:
- 	case CEPH_OSD_OP_WATCH:
+@@ -1845,6 +1845,7 @@ static void rbd_osd_req_callback(struct
+ 		rbd_osd_call_callback(obj_request);
+ 		break;
  	case CEPH_OSD_OP_SETXATTR:
 +	case CEPH_OSD_OP_CMPXATTR:
- 		rbd_osd_trivial_callback(obj_request);
+ 		obj_request_done_set(obj_request);
  		break;
  	default:
-@@ -4147,6 +4148,63 @@ out:
+@@ -3972,6 +3973,51 @@ out:
  }
  EXPORT_SYMBOL(rbd_dev_setxattr);
  
@@ -33,23 +35,22 @@ Signed-off-by: David Disseldorp <ddiss@suse.de>
 +			int oldval_len, void *newval, int newval_len)
 +{
 +	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
-+	struct rbd_obj_request *obj_request;
++	struct ceph_osd_request *req;
 +	int ret;
 +
-+	obj_request = rbd_obj_request_create(rbd_dev->header_name, 0, 0,
-+					     OBJ_REQUEST_NODATA);
-+	if (!obj_request)
++	req = ceph_osdc_alloc_request(osdc, NULL, 2, false, GFP_KERNEL);
++	if (!req)
 +		return -ENOMEM;
 +
-+	/* XXX need a new op_type? CMPXATTR is a read operation */
-+	obj_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_WRITE, 2,
-+						  obj_request);
-+	if (!obj_request->osd_req) {
-+		ret = -ENOMEM;
-+		goto out;
-+	}
++	ceph_oid_copy(&req->r_base_oid, &rbd_dev->header_oid);
++	ceph_oloc_copy(&req->r_base_oloc, &rbd_dev->header_oloc);
++	req->r_flags = CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK;
 +
-+	ret = osd_req_op_xattr_init(obj_request->osd_req, 0,
++	ret = ceph_osdc_alloc_messages(req, GFP_KERNEL);
++	if (ret)
++		goto out;
++
++	ret = osd_req_op_xattr_init(req, 0,
 +				    CEPH_OSD_OP_CMPXATTR,
 +				    key, oldval, oldval_len,
 +				    CEPH_OSD_CMPXATTR_OP_EQ,
@@ -57,31 +58,20 @@ Signed-off-by: David Disseldorp <ddiss@suse.de>
 +	if (ret)
 +		goto out;
 +
-+	ret = osd_req_op_xattr_init(obj_request->osd_req, 1,
++	ret = osd_req_op_xattr_init(req, 1,
 +				    CEPH_OSD_OP_SETXATTR,
 +				    key, newval, newval_len, 0, 0);
 +	if (ret)
 +		goto out;
 +
-+	rbd_osd_req_format_write(obj_request);
-+
-+	ret = rbd_obj_request_submit(osdc, obj_request);
-+	if (ret)
++	ceph_osdc_start_request(osdc, req, false);
++	ret = ceph_osdc_wait_request(osdc, req);
++	if (ret < 0)
 +		goto out;
-+
-+	ret = rbd_obj_request_wait(obj_request);
-+	if (ret)
-+		goto out;
-+
-+	ret = obj_request->result;
-+	if (ret) {
-+		goto out;
-+	}
 +
 +	ret = 0;
 +out:
-+	rbd_obj_request_put(obj_request);
-+
++	ceph_osdc_put_request(req);
 +	return ret;
 +}
 +EXPORT_SYMBOL(rbd_dev_cmpsetxattr);
@@ -91,7 +81,7 @@ Signed-off-by: David Disseldorp <ddiss@suse.de>
   */
 --- a/include/linux/ceph/librbd.h
 +++ b/include/linux/ceph/librbd.h
-@@ -172,5 +172,8 @@ extern int rbd_img_request_submit(struct
+@@ -174,5 +174,8 @@ extern int rbd_img_request_submit(struct
  extern void rbd_img_request_put(struct rbd_img_request *img_request);
  extern int rbd_dev_setxattr(struct rbd_device *rbd_dev, char *key, void *val,
  			    int val_len);

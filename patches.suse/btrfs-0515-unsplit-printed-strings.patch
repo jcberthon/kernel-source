@@ -39,12 +39,12 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  fs/btrfs/transaction.c      |    6 --
  fs/btrfs/tree-log.c         |    8 +-
  fs/btrfs/uuid-tree.c        |   27 +++++----
- fs/btrfs/volumes.c          |   93 +++++++++++++++++----------------
- 26 files changed, 308 insertions(+), 371 deletions(-)
+ fs/btrfs/volumes.c          |   97 ++++++++++++++++++----------------
+ 26 files changed, 310 insertions(+), 373 deletions(-)
 
 --- a/fs/btrfs/backref.c
 +++ b/fs/btrfs/backref.c
-@@ -391,8 +391,7 @@ static int __resolve_indirect_ref(struct
+@@ -651,8 +651,7 @@ static int __resolve_indirect_ref(struct
  	/* root node has been locked, we can release @subvol_srcu safely here */
  	srcu_read_unlock(&fs_info->subvol_srcu, index);
  
@@ -54,7 +54,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		 ref->root_id, level, ref->count, ret,
  		 ref->key_for_search.objectid, ref->key_for_search.type,
  		 ref->key_for_search.offset);
-@@ -1518,8 +1517,7 @@ int extent_from_logical(struct btrfs_fs_
+@@ -1861,8 +1860,7 @@ int extent_from_logical(struct btrfs_fs_
  	ei = btrfs_item_ptr(eb, path->slots[0], struct btrfs_extent_item);
  	flags = btrfs_extent_flags(eb, ei);
  
@@ -64,7 +64,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		 logical, logical - found_key->objectid, found_key->objectid,
  		 found_key->offset, flags, item_size);
  
-@@ -1648,8 +1646,7 @@ static int iterate_leaf_refs(struct exte
+@@ -1991,8 +1989,7 @@ static int iterate_leaf_refs(struct exte
  	int ret = 0;
  
  	for (eie = inode_list; eie; eie = eie->next) {
@@ -74,7 +74,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			 eie->inum, eie->offset, root);
  		ret = iterate(eie->inum, eie->offset, root, ctx);
  		if (ret) {
-@@ -1708,8 +1705,7 @@ int iterate_extent_inodes(struct btrfs_f
+@@ -2051,8 +2048,7 @@ int iterate_extent_inodes(struct btrfs_f
  			break;
  		ULIST_ITER_INIT(&root_uiter);
  		while (!ret && (root_node = ulist_next(roots, &root_uiter))) {
@@ -84,7 +84,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				 ref_node->aux);
  			ret = iterate_leaf_refs((struct extent_inode_elem *)
  						(uintptr_t)ref_node->aux,
-@@ -1807,8 +1803,7 @@ static int iterate_inode_refs(u64 inum,
+@@ -2150,8 +2146,7 @@ static int iterate_inode_refs(u64 inum,
  		for (cur = 0; cur < btrfs_item_size(eb, item); cur += len) {
  			name_len = btrfs_inode_ref_name_len(eb, iref);
  			/* path must be released before calling iterate()! */
@@ -180,7 +180,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  					       next_bytenr,
  					       next_block_ctx.dev->name,
  					       next_block_ctx.dev_bytenr,
-@@ -1915,8 +1903,7 @@ again:
+@@ -1916,8 +1904,7 @@ again:
  			bytenr = block->logical_bytenr;
  			if (state->print_mask & BTRFSIC_PRINT_MASK_VERBOSE)
  				printk(KERN_INFO
@@ -190,7 +190,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				       bytenr, dev_state->name, dev_bytenr,
  				       block->mirror_num,
  				       btrfsic_get_block_type(state, block));
-@@ -1928,12 +1915,7 @@ again:
+@@ -1929,12 +1916,7 @@ again:
  			       list_empty(&block->ref_to_list) ? ' ' : '!',
  			       list_empty(&block->ref_from_list) ? ' ' : '!');
  		if (btrfsic_is_block_ref_by_superblock(state, block, 0)) {
@@ -204,7 +204,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			       btrfsic_get_block_type(state, block), bytenr,
  			       dev_state->name, dev_bytenr, block->mirror_num,
  			       block->generation,
-@@ -1947,9 +1929,7 @@ again:
+@@ -1948,9 +1930,7 @@ again:
  		}
  
  		if (!block->is_iodone && !block->never_written) {
@@ -215,7 +215,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			       btrfsic_get_block_type(state, block), bytenr,
  			       dev_state->name, dev_bytenr, block->mirror_num,
  			       block->generation,
-@@ -2066,8 +2046,7 @@ again:
+@@ -2067,8 +2047,7 @@ again:
  			}
  			if (ret)
  				printk(KERN_INFO
@@ -225,7 +225,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				       dev_bytenr);
  		} else {
  			block->is_metadata = 0;
-@@ -2094,8 +2073,7 @@ again:
+@@ -2095,8 +2074,7 @@ again:
  		if (!is_metadata) {
  			processed_len = state->datablock_size;
  			if (state->print_mask & BTRFSIC_PRINT_MASK_VERBOSE)
@@ -235,7 +235,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				       dev_state->name, dev_bytenr);
  			if (!state->include_extent_data) {
  				/* ignore that written D block */
-@@ -2114,8 +2092,7 @@ again:
+@@ -2115,8 +2093,7 @@ again:
  						       dev_bytenr);
  			if (state->print_mask & BTRFSIC_PRINT_MASK_VERBOSE)
  				printk(KERN_INFO
@@ -245,7 +245,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				       bytenr, dev_state->name, dev_bytenr);
  		}
  
-@@ -2192,8 +2169,7 @@ again:
+@@ -2193,8 +2170,7 @@ again:
  							&block_ctx, 0, 0);
  			if (ret)
  				printk(KERN_INFO
@@ -255,7 +255,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				       dev_bytenr);
  		}
  		btrfsic_release_block_ctx(&block_ctx);
-@@ -2301,8 +2277,7 @@ static int btrfsic_process_written_super
+@@ -2302,8 +2278,7 @@ static int btrfsic_process_written_super
  	      0 == state->max_superblock_generation)) {
  		if (state->print_mask & BTRFSIC_PRINT_MASK_SUPERBLOCK_WRITE)
  			printk(KERN_INFO
@@ -265,7 +265,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			       superblock->logical_bytenr,
  			       superblock->dev_state->name,
  			       superblock->dev_bytenr, superblock->mirror_num,
-@@ -2311,8 +2286,7 @@ static int btrfsic_process_written_super
+@@ -2312,8 +2287,7 @@ static int btrfsic_process_written_super
  	} else {
  		if (state->print_mask & BTRFSIC_PRINT_MASK_SUPERBLOCK_WRITE)
  			printk(KERN_INFO
@@ -275,7 +275,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			       superblock->logical_bytenr,
  			       superblock->dev_state->name,
  			       superblock->dev_bytenr, superblock->mirror_num,
-@@ -2382,16 +2356,14 @@ static int btrfsic_process_written_super
+@@ -2383,16 +2357,14 @@ static int btrfsic_process_written_super
  
  			if (state->print_mask & BTRFSIC_PRINT_MASK_VERBOSE)
  				printk(KERN_INFO
@@ -294,7 +294,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				       next_bytenr, mirror_num);
  				return -1;
  			}
-@@ -2484,9 +2456,7 @@ static int btrfsic_check_all_ref_blocks(
+@@ -2485,9 +2457,7 @@ static int btrfsic_check_all_ref_blocks(
  			       l->block_ref_to->dev_bytenr,
  			       l->block_ref_to->mirror_num);
  		if (l->block_ref_to->never_written) {
@@ -305,7 +305,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			       btrfsic_get_block_type(state, l->block_ref_to),
  			       l->block_ref_to->logical_bytenr,
  			       l->block_ref_to->dev_state->name,
-@@ -2494,9 +2464,7 @@ static int btrfsic_check_all_ref_blocks(
+@@ -2495,9 +2465,7 @@ static int btrfsic_check_all_ref_blocks(
  			       l->block_ref_to->mirror_num);
  			ret = -1;
  		} else if (!l->block_ref_to->is_iodone) {
@@ -316,7 +316,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			       btrfsic_get_block_type(state, l->block_ref_to),
  			       l->block_ref_to->logical_bytenr,
  			       l->block_ref_to->dev_state->name,
-@@ -2504,9 +2472,7 @@ static int btrfsic_check_all_ref_blocks(
+@@ -2505,9 +2473,7 @@ static int btrfsic_check_all_ref_blocks(
  			       l->block_ref_to->mirror_num);
  			ret = -1;
  		} else if (l->block_ref_to->iodone_w_error) {
@@ -327,7 +327,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			       btrfsic_get_block_type(state, l->block_ref_to),
  			       l->block_ref_to->logical_bytenr,
  			       l->block_ref_to->dev_state->name,
-@@ -2519,10 +2485,7 @@ static int btrfsic_check_all_ref_blocks(
+@@ -2520,10 +2486,7 @@ static int btrfsic_check_all_ref_blocks(
  			   l->parent_generation &&
  			   BTRFSIC_GENERATION_UNKNOWN !=
  			   l->block_ref_to->generation) {
@@ -339,7 +339,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			       btrfsic_get_block_type(state, l->block_ref_to),
  			       l->block_ref_to->logical_bytenr,
  			       l->block_ref_to->dev_state->name,
-@@ -2533,11 +2496,7 @@ static int btrfsic_check_all_ref_blocks(
+@@ -2534,11 +2497,7 @@ static int btrfsic_check_all_ref_blocks(
  			ret = -1;
  		} else if (l->block_ref_to->flush_gen >
  			   l->block_ref_to->dev_state->last_flush_gen) {
@@ -352,7 +352,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			       btrfsic_get_block_type(state, l->block_ref_to),
  			       l->block_ref_to->logical_bytenr,
  			       l->block_ref_to->dev_state->name,
-@@ -2615,8 +2574,7 @@ static void btrfsic_print_add_link(const
+@@ -2616,8 +2575,7 @@ static void btrfsic_print_add_link(const
  				   const struct btrfsic_block_link *l)
  {
  	printk(KERN_INFO
@@ -362,7 +362,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	       l->ref_cnt,
  	       btrfsic_get_block_type(state, l->block_ref_from),
  	       l->block_ref_from->logical_bytenr,
-@@ -2632,8 +2590,7 @@ static void btrfsic_print_rem_link(const
+@@ -2633,8 +2591,7 @@ static void btrfsic_print_rem_link(const
  				   const struct btrfsic_block_link *l)
  {
  	printk(KERN_INFO
@@ -372,7 +372,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	       l->ref_cnt,
  	       btrfsic_get_block_type(state, l->block_ref_from),
  	       l->block_ref_from->logical_bytenr,
-@@ -2750,7 +2707,7 @@ static struct btrfsic_block_link *btrfsi
+@@ -2751,7 +2708,7 @@ static struct btrfsic_block_link *btrfsi
  		l = btrfsic_block_link_alloc();
  		if (NULL == l) {
  			printk(KERN_INFO
@@ -381,7 +381,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			return NULL;
  		}
  
-@@ -2851,9 +2808,7 @@ static void btrfsic_cmp_log_and_dev_byte
+@@ -2852,9 +2809,7 @@ static void btrfsic_cmp_log_and_dev_byte
  		ret = btrfsic_map_block(state, bytenr, state->metablock_size,
  					&block_ctx, mirror_num);
  		if (ret) {
@@ -392,7 +392,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			       bytenr, mirror_num);
  			continue;
  		}
-@@ -2868,9 +2823,7 @@ static void btrfsic_cmp_log_and_dev_byte
+@@ -2869,9 +2824,7 @@ static void btrfsic_cmp_log_and_dev_byte
  	}
  
  	if (WARN_ON(!match)) {
@@ -403,7 +403,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		       bytenr, dev_state->name, dev_bytenr);
  		for (mirror_num = 1; mirror_num <= num_copies; mirror_num++) {
  			ret = btrfsic_map_block(state, bytenr,
-@@ -2879,8 +2832,7 @@ static void btrfsic_cmp_log_and_dev_byte
+@@ -2880,8 +2833,7 @@ static void btrfsic_cmp_log_and_dev_byte
  			if (ret)
  				continue;
  
@@ -413,7 +413,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			       bytenr, block_ctx.dev->name,
  			       block_ctx.dev_bytenr, mirror_num);
  		}
-@@ -2936,9 +2888,7 @@ int btrfsic_submit_bh(int rw, struct buf
+@@ -2937,9 +2889,7 @@ int btrfsic_submit_bh(int op, int op_fla
  			     (BTRFSIC_PRINT_MASK_SUBMIT_BIO_BH |
  			      BTRFSIC_PRINT_MASK_VERBOSE)))
  				printk(KERN_INFO
@@ -424,7 +424,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				       dev_state->name);
  		} else {
  			struct btrfsic_block *const block =
-@@ -3034,9 +2984,7 @@ static void __btrfsic_submit_bio(int rw,
+@@ -3035,9 +2985,7 @@ static void __btrfsic_submit_bio(struct
  			     (BTRFSIC_PRINT_MASK_SUBMIT_BIO_BH |
  			      BTRFSIC_PRINT_MASK_VERBOSE)))
  				printk(KERN_INFO
@@ -435,7 +435,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				       dev_state->name);
  		} else {
  			struct btrfsic_block *const block =
-@@ -3195,8 +3143,7 @@ void btrfsic_unmount(struct btrfs_root *
+@@ -3196,8 +3144,7 @@ void btrfsic_unmount(struct btrfs_root *
  
  	if (NULL == state) {
  		printk(KERN_INFO
@@ -445,7 +445,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		mutex_unlock(&btrfsic_mutex);
  		return;
  	}
-@@ -3231,9 +3178,7 @@ void btrfsic_unmount(struct btrfs_root *
+@@ -3232,9 +3179,7 @@ void btrfsic_unmount(struct btrfs_root *
  		if (b_all->is_iodone || b_all->never_written)
  			btrfsic_block_free(b_all);
  		else
@@ -458,7 +458,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			       b_all->dev_bytenr, b_all->mirror_num);
 --- a/fs/btrfs/ctree.c
 +++ b/fs/btrfs/ctree.c
-@@ -4770,8 +4770,9 @@ void setup_items_for_insert(struct btrfs
+@@ -4776,8 +4776,9 @@ void setup_items_for_insert(struct btrfs
  
  	if (btrfs_leaf_free_space(root, leaf) < total_size) {
  		btrfs_print_leaf(root, leaf);
@@ -470,7 +470,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		BUG();
  	}
  
-@@ -4780,8 +4781,9 @@ void setup_items_for_insert(struct btrfs
+@@ -4786,8 +4787,9 @@ void setup_items_for_insert(struct btrfs
  
  		if (old_data < data_end) {
  			btrfs_print_leaf(root, leaf);
@@ -552,7 +552,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			goto out;
  		}
  	}
-@@ -772,9 +774,10 @@ int btrfs_resume_dev_replace_async(struc
+@@ -778,9 +780,10 @@ int btrfs_resume_dev_replace_async(struc
  		break;
  	}
  	if (!dev_replace->tgtdev || !dev_replace->tgtdev->bdev) {
@@ -583,7 +583,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  
 --- a/fs/btrfs/disk-io.c
 +++ b/fs/btrfs/disk-io.c
-@@ -326,8 +326,7 @@ static int csum_tree_block(struct btrfs_
+@@ -325,8 +325,7 @@ static int csum_tree_block(struct btrfs_
  
  			read_extent_buffer(buf, &val, 0, csum_size);
  			btrfs_warn_rl(fs_info,
@@ -593,7 +593,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				fs_info->sb->s_id, buf->start,
  				val, found, btrfs_header_level(buf));
  			if (result != (char *)&inline_result)
-@@ -4007,8 +4006,7 @@ void btrfs_mark_buffer_dirty(struct exte
+@@ -4003,8 +4002,7 @@ void btrfs_mark_buffer_dirty(struct exte
  	root = BTRFS_I(buf->pages[0]->mapping->host)->root;
  	btrfs_assert_tree_locked(buf);
  	if (transid != root->fs_info->generation)
@@ -626,7 +626,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			return ret;
  		}
  
-@@ -6925,8 +6928,9 @@ static int __btrfs_free_extent(struct bt
+@@ -6927,8 +6930,9 @@ static int __btrfs_free_extent(struct bt
  			}
  
  			if (ret) {
@@ -638,7 +638,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				if (ret > 0)
  					btrfs_print_leaf(extent_root,
  							 path->nodes[0]);
-@@ -6972,7 +6976,8 @@ static int __btrfs_free_extent(struct bt
+@@ -6974,7 +6978,8 @@ static int __btrfs_free_extent(struct bt
  		ret = btrfs_search_slot(trans, extent_root, &key, path,
  					-1, 1);
  		if (ret) {
@@ -648,7 +648,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				ret, bytenr);
  			btrfs_print_leaf(extent_root, path->nodes[0]);
  		}
-@@ -6999,8 +7004,9 @@ static int __btrfs_free_extent(struct bt
+@@ -7001,8 +7006,9 @@ static int __btrfs_free_extent(struct bt
  
  	refs = btrfs_extent_refs(leaf, ei);
  	if (refs < refs_to_drop) {
@@ -660,7 +660,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		ret = -EINVAL;
  		btrfs_abort_transaction(trans, ret);
  		goto out;
-@@ -7901,8 +7907,7 @@ static void dump_space_info(struct btrfs
+@@ -7903,8 +7909,7 @@ static void dump_space_info(struct btrfs
  	       info->total_bytes - info->bytes_used - info->bytes_pinned -
  	       info->bytes_reserved - info->bytes_readonly -
  	       info->bytes_may_use, (info->full) ? "" : "not ");
@@ -670,7 +670,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	       info->total_bytes, info->bytes_used, info->bytes_pinned,
  	       info->bytes_reserved, info->bytes_may_use,
  	       info->bytes_readonly);
-@@ -7915,9 +7920,7 @@ static void dump_space_info(struct btrfs
+@@ -7917,9 +7922,7 @@ static void dump_space_info(struct btrfs
  again:
  	list_for_each_entry(cache, &info->block_groups[index], list) {
  		spin_lock(&cache->lock);
@@ -681,7 +681,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		       cache->key.objectid, cache->key.offset,
  		       btrfs_block_group_used(&cache->item), cache->pinned,
  		       cache->reserved, cache->ro ? "[readonly]" : "");
-@@ -7959,8 +7962,9 @@ again:
+@@ -7961,8 +7964,9 @@ again:
  			struct btrfs_space_info *sinfo;
  
  			sinfo = __find_space_info(root->fs_info, flags);
@@ -693,7 +693,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			if (sinfo)
  				dump_space_info(sinfo, num_bytes, 1);
  		}
-@@ -8957,10 +8961,8 @@ skip:
+@@ -8959,10 +8963,8 @@ skip:
  						     generation, level - 1);
  			if (ret) {
  				btrfs_err_rl(root->fs_info,
@@ -706,7 +706,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			}
  		}
  		ret = btrfs_free_extent(trans, root, bytenr, blocksize, parent,
-@@ -9056,10 +9058,8 @@ static noinline int walk_up_proc(struct
+@@ -9058,10 +9060,8 @@ static noinline int walk_up_proc(struct
  			ret = account_leaf_items(trans, root, eb);
  			if (ret) {
  				btrfs_err_rl(root->fs_info,
@@ -721,7 +721,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		/* make block locked assertion in clean_tree_block happy */
 --- a/fs/btrfs/extent_io.c
 +++ b/fs/btrfs/extent_io.c
-@@ -74,8 +74,7 @@ void btrfs_leak_debug_check(void)
+@@ -75,8 +75,7 @@ void btrfs_leak_debug_check(void)
  
  	while (!list_empty(&buffers)) {
  		eb = list_entry(buffers.next, struct extent_buffer, leak_list);
@@ -731,7 +731,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		       eb->start, eb->len, atomic_read(&eb->refs));
  		list_del(&eb->leak_list);
  		kmem_cache_free(extent_buffer_cache, eb);
-@@ -462,8 +461,7 @@ static int insert_state(struct extent_io
+@@ -463,8 +462,7 @@ static int insert_state(struct extent_io
  	if (node) {
  		struct extent_state *found;
  		found = rb_entry(node, struct extent_state, rb_node);
@@ -741,7 +741,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		       found->start, found->end, start, end);
  		return -EEXIST;
  	}
-@@ -574,9 +572,8 @@ alloc_extent_state_atomic(struct extent_
+@@ -575,9 +573,8 @@ alloc_extent_state_atomic(struct extent_
  
  static void extent_io_tree_panic(struct extent_io_tree *tree, int err)
  {
@@ -753,7 +753,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  }
  
  /*
-@@ -2485,8 +2482,7 @@ static void end_bio_extent_writepage(str
+@@ -2487,8 +2484,7 @@ static void end_bio_extent_writepage(str
  					bvec->bv_offset, bvec->bv_len);
  			else
  				btrfs_info(BTRFS_I(page->mapping->host)->root->fs_info,
@@ -763,7 +763,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  					bvec->bv_offset, bvec->bv_len);
  		}
  
-@@ -2543,8 +2539,8 @@ static void end_bio_extent_readpage(stru
+@@ -2545,8 +2541,8 @@ static void end_bio_extent_readpage(stru
  		struct page *page = bvec->bv_page;
  		struct inode *inode = page->mapping->host;
  
@@ -774,7 +774,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			 bio->bi_error, io_bio->mirror_num);
  		tree = &BTRFS_I(inode)->io_tree;
  
-@@ -2560,8 +2556,7 @@ static void end_bio_extent_readpage(stru
+@@ -2562,8 +2558,7 @@ static void end_bio_extent_readpage(stru
  					bvec->bv_offset, bvec->bv_len);
  			else
  				btrfs_info(BTRFS_I(page->mapping->host)->root->fs_info,
@@ -784,7 +784,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  					bvec->bv_offset, bvec->bv_len);
  		}
  
-@@ -5387,8 +5382,7 @@ int map_private_extent_buffer(struct ext
+@@ -5400,8 +5395,7 @@ int map_private_extent_buffer(struct ext
  	}
  
  	if (start + min_len > eb->len) {
@@ -794,7 +794,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		       eb->start, eb->len, start, min_len);
  		return -EINVAL;
  	}
-@@ -5569,14 +5563,14 @@ void memcpy_extent_buffer(struct extent_
+@@ -5582,14 +5576,14 @@ void memcpy_extent_buffer(struct extent_
  
  	if (src_offset + len > dst->len) {
  		btrfs_err(dst->fs_info,
@@ -813,7 +813,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		BUG_ON(1);
  	}
  
-@@ -5616,13 +5610,15 @@ void memmove_extent_buffer(struct extent
+@@ -5629,13 +5623,15 @@ void memmove_extent_buffer(struct extent
  	unsigned long src_i;
  
  	if (src_offset + len > dst->len) {
@@ -871,7 +871,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	iput(inode);
 --- a/fs/btrfs/inode.c
 +++ b/fs/btrfs/inode.c
-@@ -7042,8 +7042,9 @@ not_found_em:
+@@ -7096,8 +7096,9 @@ not_found_em:
  insert:
  	btrfs_release_path(path);
  	if (em->start > start || extent_map_end(em) <= start) {
@@ -883,7 +883,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		err = -EIO;
  		goto out;
  	}
-@@ -9410,8 +9411,9 @@ void btrfs_destroy_inode(struct inode *i
+@@ -9473,8 +9474,9 @@ void btrfs_destroy_inode(struct inode *i
  		if (!ordered)
  			break;
  		else {
@@ -909,7 +909,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			goto out;
  		}
  		btrfs_release_path(path);
-@@ -4210,8 +4211,8 @@ static long btrfs_ioctl_default_subvol(s
+@@ -4216,8 +4217,8 @@ static long btrfs_ioctl_default_subvol(s
  	if (IS_ERR_OR_NULL(di)) {
  		btrfs_free_path(path);
  		btrfs_end_transaction(trans, root);
@@ -920,7 +920,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		ret = -ENOENT;
  		goto out;
  	}
-@@ -5420,8 +5421,9 @@ static int btrfs_ioctl_set_fslabel(struc
+@@ -5426,8 +5427,9 @@ static int btrfs_ioctl_set_fslabel(struc
  		return -EFAULT;
  
  	if (strnlen(label, BTRFS_LABEL_SIZE) == BTRFS_LABEL_SIZE) {
@@ -1162,7 +1162,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		kfree(node);
  		return -EEXIST;
  	}
-@@ -4377,8 +4378,9 @@ int btrfs_relocate_block_group(struct bt
+@@ -4378,8 +4379,9 @@ int btrfs_relocate_block_group(struct bt
  		goto out;
  	}
  
@@ -1274,7 +1274,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				rcu_str_deref(dev->name),
  				(unsigned long long)swarn.sector,
  				ref_level ? "node" : "leaf",
-@@ -1575,8 +1576,7 @@ static int scrub_repair_page_from_good_c
+@@ -1576,8 +1577,7 @@ static int scrub_repair_page_from_good_c
  
  		if (!page_bad->dev->bdev) {
  			btrfs_warn_rl(sblock_bad->sctx->dev_root->fs_info,
@@ -1284,7 +1284,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			return -EIO;
  		}
  
-@@ -2959,7 +2959,8 @@ static noinline_for_stack int scrub_raid
+@@ -2963,7 +2963,8 @@ static noinline_for_stack int scrub_raid
  			    (key.objectid < logic_start ||
  			     key.objectid + bytes >
  			     logic_start + map->stripe_len)) {
@@ -1294,7 +1294,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  					  key.objectid, logic_start);
  				spin_lock(&sctx->stat_lock);
  				sctx->stat.uncorrectable_errors++;
-@@ -3310,8 +3311,7 @@ static noinline_for_stack int scrub_stri
+@@ -3314,8 +3315,7 @@ static noinline_for_stack int scrub_stri
  			     key.objectid + bytes >
  			     logical + map->stripe_len)) {
  				btrfs_err(fs_info,
@@ -1304,7 +1304,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				       key.objectid, logical);
  				spin_lock(&sctx->stat_lock);
  				sctx->stat.uncorrectable_errors++;
-@@ -3638,7 +3638,8 @@ int scrub_enumerate_chunks(struct scrub_
+@@ -3642,7 +3642,8 @@ int scrub_enumerate_chunks(struct scrub_
  			 */
  			ro_set = 0;
  		} else {
@@ -1314,7 +1314,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				   ret);
  			btrfs_put_block_group(cache);
  			break;
-@@ -3859,8 +3860,7 @@ int btrfs_scrub_dev(struct btrfs_fs_info
+@@ -3863,8 +3864,7 @@ int btrfs_scrub_dev(struct btrfs_fs_info
  	if (fs_info->chunk_root->sectorsize != PAGE_SIZE) {
  		/* not supported for data w/o checksums */
  		btrfs_err_rl(fs_info,
@@ -1324,7 +1324,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		       fs_info->chunk_root->sectorsize, PAGE_SIZE);
  		return -EINVAL;
  	}
-@@ -3873,8 +3873,8 @@ int btrfs_scrub_dev(struct btrfs_fs_info
+@@ -3877,8 +3877,8 @@ int btrfs_scrub_dev(struct btrfs_fs_info
  		 * would exhaust the array bounds of pagev member in
  		 * struct scrub_block
  		 */
@@ -1335,7 +1335,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		       fs_info->chunk_root->nodesize,
  		       SCRUB_MAX_PAGES_PER_BLOCK,
  		       fs_info->chunk_root->sectorsize,
-@@ -4200,10 +4200,10 @@ static void copy_nocow_pages_worker(stru
+@@ -4204,10 +4204,10 @@ static void copy_nocow_pages_worker(stru
  	ret = iterate_inodes_from_logical(logical, fs_info, path,
  					  record_inode_for_nocow, nocow_ctx);
  	if (ret != 0 && ret != -ENOENT) {
@@ -1372,7 +1372,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		data_offset, ino, num_bytes, logical);
  
  	if (!backref_ctx->found)
-@@ -4713,9 +4710,8 @@ static int send_clone(struct send_ctx *s
+@@ -4716,9 +4713,8 @@ static int send_clone(struct send_ctx *s
  	struct fs_path *p;
  	u64 gen;
  
@@ -1482,7 +1482,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			break;
  		case Opt_device:
  			device_name = match_strdup(&args[0]);
-@@ -1766,7 +1774,9 @@ static int btrfs_remount(struct super_bl
+@@ -1768,7 +1776,9 @@ static int btrfs_remount(struct super_bl
  			btrfs_info(fs_info, "creating UUID tree");
  			ret = btrfs_create_uuid_tree(fs_info);
  			if (ret) {
@@ -1533,7 +1533,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	spin_lock_init(&cur_trans->delayed_refs.lock);
 --- a/fs/btrfs/tree-log.c
 +++ b/fs/btrfs/tree-log.c
-@@ -5582,8 +5582,8 @@ int btrfs_recover_log_trees(struct btrfs
+@@ -5611,8 +5611,8 @@ int btrfs_recover_log_trees(struct btrfs
  
  	ret = walk_log_tree(trans, log_root_tree, &wc);
  	if (ret) {
@@ -1544,7 +1544,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		goto error;
  	}
  
-@@ -5629,8 +5629,8 @@ again:
+@@ -5658,8 +5658,8 @@ again:
  			free_extent_buffer(log->node);
  			free_extent_buffer(log->commit_root);
  			kfree(log);
@@ -1621,7 +1621,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		while (item_size) {
 --- a/fs/btrfs/volumes.c
 +++ b/fs/btrfs/volumes.c
-@@ -2479,9 +2479,7 @@ int btrfs_init_new_device(struct btrfs_r
+@@ -2480,9 +2480,7 @@ int btrfs_init_new_device(struct btrfs_r
  		ret = btrfs_relocate_sys_chunks(root);
  		if (ret < 0)
  			btrfs_handle_fs_error(root->fs_info, ret,
@@ -1632,7 +1632,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		trans = btrfs_attach_transaction(root);
  		if (IS_ERR(trans)) {
  			if (PTR_ERR(trans) == -ENOENT)
-@@ -2540,7 +2538,8 @@ int btrfs_init_dev_replace_tgtdev(struct
+@@ -2541,7 +2539,8 @@ int btrfs_init_dev_replace_tgtdev(struct
  	devices = &fs_info->fs_devices->devices;
  	list_for_each_entry(device, devices, dev_list) {
  		if (device->bdev == bdev) {
@@ -1642,7 +1642,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			ret = -EEXIST;
  			goto error;
  		}
-@@ -2549,7 +2548,8 @@ int btrfs_init_dev_replace_tgtdev(struct
+@@ -2550,7 +2549,8 @@ int btrfs_init_dev_replace_tgtdev(struct
  
  	if (i_size_read(bdev->bd_inode) <
  	    btrfs_device_get_total_bytes(srcdev)) {
@@ -1652,7 +1652,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		ret = -EINVAL;
  		goto error;
  	}
-@@ -3683,7 +3683,7 @@ error:
+@@ -3684,7 +3684,7 @@ error:
  	btrfs_free_path(path);
  	if (enospc_errors) {
  		btrfs_info(fs_info, "%d enospc errors during balance",
@@ -1661,7 +1661,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		if (!ret)
  			ret = -ENOSPC;
  	}
-@@ -3777,8 +3777,8 @@ int btrfs_balance(struct btrfs_balance_c
+@@ -3778,8 +3778,8 @@ int btrfs_balance(struct btrfs_balance_c
  		if (!(bctl->flags & BTRFS_BALANCE_DATA) ||
  		    !(bctl->flags & BTRFS_BALANCE_METADATA) ||
  		    memcmp(&bctl->data, &bctl->meta, sizeof(bctl->data))) {
@@ -1672,7 +1672,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			ret = -EINVAL;
  			goto out;
  		}
-@@ -3800,23 +3800,23 @@ int btrfs_balance(struct btrfs_balance_c
+@@ -3801,23 +3801,23 @@ int btrfs_balance(struct btrfs_balance_c
  		allowed |= (BTRFS_BLOCK_GROUP_RAID10 |
  			    BTRFS_BLOCK_GROUP_RAID6);
  	if (validate_convert_profile(&bctl->data, allowed)) {
@@ -1703,7 +1703,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		ret = -EINVAL;
  		goto out;
  	}
-@@ -3836,10 +3836,11 @@ int btrfs_balance(struct btrfs_balance_c
+@@ -3837,10 +3837,11 @@ int btrfs_balance(struct btrfs_balance_c
  		     (fs_info->avail_metadata_alloc_bits & allowed) &&
  		     !(bctl->meta.target & allowed))) {
  			if (bctl->flags & BTRFS_BALANCE_FORCE) {
@@ -1718,7 +1718,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				ret = -EINVAL;
  				goto out;
  			}
-@@ -3849,8 +3850,8 @@ int btrfs_balance(struct btrfs_balance_c
+@@ -3850,8 +3851,8 @@ int btrfs_balance(struct btrfs_balance_c
  	if (btrfs_get_num_tolerated_disk_barrier_failures(bctl->meta.target) <
  		btrfs_get_num_tolerated_disk_barrier_failures(bctl->data.target)) {
  		btrfs_warn(fs_info,
@@ -1729,7 +1729,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	}
  
  	if (bctl->sys.flags & BTRFS_BALANCE_ARGS_CONVERT) {
-@@ -4898,15 +4899,16 @@ int btrfs_finish_chunk_alloc(struct btrf
+@@ -4909,15 +4910,16 @@ int btrfs_finish_chunk_alloc(struct btrf
  	read_unlock(&em_tree->lock);
  
  	if (!em) {
@@ -1751,7 +1751,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		free_extent_map(em);
  		return -EINVAL;
  	}
-@@ -5139,9 +5141,9 @@ int btrfs_num_copies(struct btrfs_fs_inf
+@@ -5150,9 +5152,9 @@ int btrfs_num_copies(struct btrfs_fs_inf
  	}
  
  	if (em->start > logical || em->start + em->len < logical) {
@@ -1764,7 +1764,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		free_extent_map(em);
  		return 1;
  	}
-@@ -5355,9 +5357,9 @@ static int __btrfs_map_block(struct btrf
+@@ -5373,9 +5375,9 @@ static int __btrfs_map_block(struct btrf
  	}
  
  	if (em->start > logical || em->start + em->len < logical) {
@@ -1777,7 +1777,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		free_extent_map(em);
  		return -EINVAL;
  	}
-@@ -5375,9 +5377,8 @@ static int __btrfs_map_block(struct btrf
+@@ -5393,9 +5395,8 @@ static int __btrfs_map_block(struct btrf
  
  	stripe_offset = stripe_nr * stripe_len;
  	if (offset < stripe_offset) {
@@ -1789,7 +1789,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			   stripe_offset, offset, em->start, logical,
  			   stripe_len);
  		free_extent_map(em);
-@@ -5626,8 +5627,8 @@ static int __btrfs_map_block(struct btrf
+@@ -5647,8 +5648,8 @@ static int __btrfs_map_block(struct btrf
  		mirror_num = stripe_index + 1;
  	}
  	if (stripe_index >= map->num_stripes) {
@@ -1800,18 +1800,22 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			   stripe_index, map->num_stripes);
  		ret = -EINVAL;
  		goto out;
-@@ -6120,8 +6121,8 @@ static void submit_stripe_bio(struct btr
+@@ -6142,10 +6143,10 @@ static void submit_stripe_bio(struct btr
  
  		rcu_read_lock();
  		name = rcu_dereference(dev->name);
--		pr_debug("btrfs_map_bio: rw %d, sector=%llu, dev=%lu "
--			 "(%s id %llu), size=%u\n", rw,
-+		pr_debug("btrfs_map_bio: rw %d, sector=%llu, dev=%lu (%s id %llu), size=%u\n",
-+			rw,
- 			 (u64)bio->bi_iter.bi_sector, (u_long)dev->bdev->bd_dev,
- 			 name->str, dev->devid, bio->bi_iter.bi_size);
+-		pr_debug("btrfs_map_bio: rw %d 0x%x, sector=%llu, dev=%lu "
+-			 "(%s id %llu), size=%u\n", bio_op(bio), bio->bi_opf,
+-			 (u64)bio->bi_iter.bi_sector, (u_long)dev->bdev->bd_dev,
+-			 name->str, dev->devid, bio->bi_iter.bi_size);
++		pr_debug("btrfs_map_bio: rw %d 0x%x, sector=%llu, dev=%lu (%s id %llu), size=%u\n",
++			 bio_op(bio), bio->bi_opf, (u64)bio->bi_iter.bi_sector,
++			 (u_long)dev->bdev->bd_dev, name->str, dev->devid,
++			 bio->bi_iter.bi_size);
  		rcu_read_unlock();
-@@ -6197,8 +6198,9 @@ int btrfs_map_bio(struct btrfs_root *roo
+ 	}
+ #endif
+@@ -6219,8 +6220,9 @@ int btrfs_map_bio(struct btrfs_root *roo
  	}
  
  	if (map_length < length) {
@@ -1823,7 +1827,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		BUG();
  	}
  
-@@ -6463,8 +6465,9 @@ static int read_one_chunk(struct btrfs_r
+@@ -6486,8 +6488,9 @@ static int read_one_chunk(struct btrfs_r
  				free_extent_map(em);
  				return -EIO;
  			}
@@ -1835,7 +1839,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		}
  		map->stripes[i].dev->in_fs_metadata = 1;
  	}
-@@ -7075,10 +7078,12 @@ int btrfs_get_dev_stats(struct btrfs_roo
+@@ -7098,10 +7101,12 @@ int btrfs_get_dev_stats(struct btrfs_roo
  	mutex_unlock(&fs_devices->device_list_mutex);
  
  	if (!dev) {

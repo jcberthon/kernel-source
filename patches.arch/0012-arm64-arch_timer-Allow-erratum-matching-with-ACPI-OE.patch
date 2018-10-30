@@ -28,8 +28,8 @@ index 3cba3a5..a79c693 100644
 --- a/arch/arm64/include/asm/arch_timer.h
 +++ b/arch/arm64/include/asm/arch_timer.h
 @@ -42,6 +42,7 @@ enum arch_timer_erratum_match_type {
+ enum arch_timer_erratum_match_type {
  	ate_match_dt,
- 	ate_match_global_cap_id,
  	ate_match_local_cap_id,
 +	ate_match_acpi_oem_info,
  };
@@ -91,14 +91,16 @@ index ba4be58..9e8cef6 100644
  	}
  
  	wa = arch_timer_iterate_errata(type, match_fn, arg);
-@@ -1286,6 +1317,7 @@ static int __init arch_timer_acpi_init(struct acpi_table_header *table)
+@@ -1286,6 +1317,9 @@ static int __init arch_timer_acpi_init(struct acpi_table_header *table)
+ 	/* Always-on capability */
+ 	arch_timer_c3stop = !(gtdt->non_secure_el1_flags & ACPI_GTDT_ALWAYS_ON);
  
- 	/* Check for globally applicable workarounds */
- 	arch_timer_check_ool_workaround(ate_match_global_cap_id, NULL);
++	/* Check for globally applicable workarounds */
 +	arch_timer_check_ool_workaround(ate_match_acpi_oem_info, table);
- 
++
  	arch_timer_init();
  	return 0;
+ }
 -- 
 2.10.2
 

@@ -36,9 +36,9 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  
 +#include <linux/jump_label.h>
 +
- #include <asm/cpucaps.h>
  #include <asm/hwcap.h>
  #include <asm/sysreg.h>
+ 
 @@ -92,6 +94,7 @@ struct arm64_cpu_capabilities {
  };
  

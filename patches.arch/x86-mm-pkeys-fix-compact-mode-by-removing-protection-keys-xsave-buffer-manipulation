@@ -65,7 +65,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 
 --- a/arch/x86/kernel/fpu/xstate.c
 +++ b/arch/x86/kernel/fpu/xstate.c
-@@ -776,106 +776,18 @@ const void *get_xsave_field_ptr(int xsav
+@@ -776,105 +776,17 @@ const void *get_xsave_field_ptr(int xsav
  	return get_xsave_addr(&fpu->state.xsave, xsave_state);
  }
  
@@ -151,10 +151,9 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 -	fpu__current_fpstate_write_end();
 -}
 -
- #ifdef CONFIG_ARCH_HAS_PKEYS
- 
  #define NR_VALID_PKRU_BITS (CONFIG_NR_PROTECTION_KEYS * 2)
  #define PKRU_VALID_MASK (NR_VALID_PKRU_BITS - 1)
+ 
  /*
 - * This will go out and modify the XSAVE buffer so that PKRU is
 - * set to a particular state for access to 'pkey'.

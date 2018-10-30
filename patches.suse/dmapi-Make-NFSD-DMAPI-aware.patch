@@ -87,7 +87,7 @@ Conflicts:
 
 --- a/fs/nfsd/vfs.c
 +++ b/fs/nfsd/vfs.c
-@@ -379,6 +379,15 @@ nfsd_setattr(struct svc_rqst *rqstp, str
+@@ -395,6 +395,15 @@ nfsd_setattr(struct svc_rqst *rqstp, str
  	/* Callers that do fh_verify should do the fh_want_write: */
  	get_write_count = !fhp->fh_dentry;
  
@@ -103,7 +103,7 @@ Conflicts:
  	/* Get inode */
  	err = fh_verify(rqstp, fhp, ftype, accmode);
  	if (err)
-@@ -864,6 +873,10 @@ static __be32
+@@ -895,6 +904,10 @@ static __be32
  nfsd_vfs_read(struct svc_rqst *rqstp, struct file *file,
  	      loff_t offset, struct kvec *vec, int vlen, unsigned long *count)
  {
@@ -114,7 +114,7 @@ Conflicts:
  	if (file->f_op->splice_read && test_bit(RQ_SPLICE_OK, &rqstp->rq_flags))
  		return nfsd_splice_read(rqstp, file, offset, count);
  	else
-@@ -940,6 +953,10 @@ nfsd_vfs_write(struct svc_rqst *rqstp, s
+@@ -971,6 +984,10 @@ nfsd_vfs_write(struct svc_rqst *rqstp, s
  	if (!EX_ISSYNC(exp))
  		stable = 0;
  
@@ -122,12 +122,12 @@ Conflicts:
 +	if (rqstp->rq_vers >= 3)
 +		file->f_flags |= O_NONBLOCK;
 +
- 	/* Write the data. */
- 	oldfs = get_fs(); set_fs(KERNEL_DS);
- 	host_err = vfs_writev(file, (struct iovec __user *)vec, vlen, &pos);
+ 	if (stable && !use_wgather)
+ 		flags |= RWF_SYNC;
+ 
 --- a/include/linux/fs.h
 +++ b/include/linux/fs.h
-@@ -226,7 +226,8 @@ typedef void (dax_iodone_t)(struct buffe
+@@ -172,7 +172,8 @@ typedef int (dio_iodone_t)(struct kiocb
  #define ATTR_KILL_PRIV	(1 << 14)
  #define ATTR_OPEN	(1 << 15) /* Truncating from open(O_TRUNC) */
  #define ATTR_TIMES_SET	(1 << 16)

@@ -26,7 +26,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 +++ b/fs/btrfs/extent_io.c
 @@ -2752,7 +2752,6 @@ static int merge_bio(int rw, struct exte
  	if (tree->ops && tree->ops->merge_bio_hook)
- 		ret = tree->ops->merge_bio_hook(rw, page, offset, size, bio,
+ 		ret = tree->ops->merge_bio_hook(page, offset, size, bio,
  						bio_flags);
 -	BUG_ON(ret < 0);
  	return ret;
@@ -43,11 +43,11 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 + * return 0 if page can be merged to bio
 + * return error otherwise
   */
- int btrfs_merge_bio_hook(int rw, struct page *page, unsigned long offset,
+ int btrfs_merge_bio_hook(struct page *page, unsigned long offset,
  			 size_t size, struct bio *bio,
 @@ -1840,8 +1844,8 @@ int btrfs_merge_bio_hook(int rw, struct
  	map_length = length;
- 	ret = btrfs_map_block(root->fs_info, rw, logical,
+ 	ret = btrfs_map_block(root->fs_info, bio_op(bio), logical,
  			      &map_length, NULL, 0);
 -	/* Will always return 0 with map_multi == NULL */
 -	BUG_ON(ret < 0);

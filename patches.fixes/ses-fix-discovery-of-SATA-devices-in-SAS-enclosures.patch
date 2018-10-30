@@ -49,7 +49,7 @@ index 99624bd..53ef1cb6 100644
  				   struct scsi_device *sdev)
  {
 -	unsigned char *desc;
--	struct scsi_vpd_pg *vpd_pg83;
+-	unsigned char __rcu *vpd_pg83;
  	struct efd efd = {
  		.addr = 0,
  	};
@@ -65,8 +65,8 @@ index 99624bd..53ef1cb6 100644
 +	if (is_sas_attached(sdev))
 +		efd.addr = sas_get_address(sdev);
  
--	desc = vpd_pg83->buf + 4;
--	while (desc < vpd_pg83->buf + vpd_pg83->len) {
+-	desc = vpd_pg83 + 4;
+-	while (desc < vpd_pg83 + sdev->vpd_pg83_len) {
 -		enum scsi_protocol proto = desc[0] >> 4;
 -		u8 code_set = desc[0] & 0x0f;
 -		u8 piv = desc[1] & 0x80;

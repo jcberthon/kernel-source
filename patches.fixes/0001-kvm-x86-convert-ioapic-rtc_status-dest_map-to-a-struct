@@ -95,7 +95,7 @@ Signed-off-by: Joerg Roedel <jroedel@suse.de>
 +			     struct dest_map *dest_map);
  int kvm_get_ioapic(struct kvm *kvm, struct kvm_ioapic_state *state);
  int kvm_set_ioapic(struct kvm *kvm, struct kvm_ioapic_state *state);
- void kvm_ioapic_scan_entry(struct kvm_vcpu *vcpu, u64 *eoi_exit_bitmap);
+ void kvm_ioapic_scan_entry(struct kvm_vcpu *vcpu,
 --- a/arch/x86/kvm/irq_comm.c
 +++ b/arch/x86/kvm/irq_comm.c
 @@ -51,7 +51,7 @@ static int kvm_set_ioapic_irq(struct kvm

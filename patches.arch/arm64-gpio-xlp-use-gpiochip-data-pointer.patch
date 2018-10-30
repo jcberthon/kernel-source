@@ -104,7 +104,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	BUG_ON(gpio >= gc->ngpio);
  	xlp_gpio_set_reg(priv->gpio_paddrv, gpio, state);
 @@ -403,7 +398,7 @@ static int xlp_gpio_probe(struct platfor
- 		return irq_base;
+ 		return -ENODEV;
  	}
  
 -	err = gpiochip_add(gc);

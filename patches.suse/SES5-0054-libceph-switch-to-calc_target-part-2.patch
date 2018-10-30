@@ -40,23 +40,7 @@ Acked-by: David Disseldorp <ddiss@suse.de>
 
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1922,42 +1922,30 @@ static void rbd_osd_req_format_rw(struct
- 	struct rbd_img_request *img_request = obj_request->img_request;
- 	struct ceph_osd_request *osd_req = obj_request->osd_req;
- 	struct ceph_snap_context *snapc;
--	struct timespec mtime = CURRENT_TIME;
- 	u64 snap_id;
- 
- 	rbd_assert(osd_req != NULL);
- 
- 	snapc = img_request ? img_request->snapc : NULL;
- 	snap_id = img_request ? img_request->snap_id : CEPH_NOSNAP;
--	ceph_osdc_build_request(osd_req, obj_request->offset,
--				snapc, snap_id, &mtime);
-+	osd_req->r_mtime = CURRENT_TIME;
- }
- 
- static void rbd_osd_req_format_read(struct rbd_obj_request *obj_request)
+@@ -1922,27 +1922,17 @@ static void rbd_osd_req_format_rw(struct
  {
  	struct rbd_img_request *img_request = obj_request->img_request;
  	struct ceph_osd_request *osd_req = obj_request->osd_req;
@@ -88,25 +72,6 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  }
  
  /*
-@@ -3163,7 +3151,6 @@ rbd_img_obj_creatrunc_submit(struct rbd_
- 	struct ceph_osd_request *osd_req;
- 	struct rbd_device *rbd_dev;
- 	struct ceph_osd_client *osdc;
--	struct timespec mtime;
- 	u64 object_size;
- 	int ret;
- 
-@@ -3209,9 +3196,7 @@ rbd_img_obj_creatrunc_submit(struct rbd_
- 				object_size, 0, 0, 0);
- 
- 	/* rbd_osd_req_format_write() using snapc from img_request */
--	mtime = CURRENT_TIME;
--	ceph_osdc_build_request(creatrunc_req->osd_req, creatrunc_req->offset,
--			img_request->snapc, CEPH_NOSNAP, &mtime);
-+	creatrunc_req->osd_req->r_mtime = CURRENT_TIME;
- 
- 	ret = rbd_obj_request_submit(osdc, creatrunc_req);
- 	if (ret) {
 --- a/fs/ceph/addr.c
 +++ b/fs/ceph/addr.c
 @@ -375,8 +375,6 @@ static int start_read(struct inode *inod
@@ -441,28 +406,25 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  		break;
  	case CEPH_OSD_OP_READ:
  	case CEPH_OSD_OP_WRITE:
-@@ -895,44 +886,11 @@ static u64 osd_req_encode_op(struct ceph
+@@ -895,41 +886,17 @@ static u64 osd_req_encode_op(struct ceph
+ 	case CEPH_OSD_OP_WRITEFULL:
+ 	case CEPH_OSD_OP_ZERO:
+ 	case CEPH_OSD_OP_TRUNCATE:
+-		if (src->op == CEPH_OSD_OP_WRITE ||
+-		    src->op == CEPH_OSD_OP_WRITEFULL)
+-			request_data_len = src->extent.length;
+ 		dst->extent.offset = cpu_to_le64(src->extent.offset);
+ 		dst->extent.length = cpu_to_le64(src->extent.length);
+ 		dst->extent.truncate_size =
  			cpu_to_le64(src->extent.truncate_size);
  		dst->extent.truncate_seq =
  			cpu_to_le32(src->extent.truncate_seq);
+-		osd_data = &src->extent.osd_data;
 -		if (src->op == CEPH_OSD_OP_WRITE ||
--		    src->op == CEPH_OSD_OP_WRITEFULL) {
--			osd_data = &src->extent.request_data;
+-		    src->op == CEPH_OSD_OP_WRITEFULL)
 -			ceph_osdc_msg_data_add(req->r_request, osd_data);
--
--			request_data_len = src->extent.length;
--		} else if (src->op == CEPH_OSD_OP_CMPEXT) {
--			osd_data = &src->extent.request_data;
--			ceph_osdc_msg_data_add(req->r_request, osd_data);
--
--			osd_data = &src->extent.response_data;
+-		else
 -			ceph_osdc_msg_data_add(req->r_reply, osd_data);
--
--			request_data_len = src->extent.length;
--		} else {
--			osd_data = &src->extent.response_data;
--			ceph_osdc_msg_data_add(req->r_reply, osd_data);
--		}
  		break;
  	case CEPH_OSD_OP_CALL:
  		dst->cls.class_len = src->cls.class_len;
@@ -487,31 +449,16 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  		break;
  	case CEPH_OSD_OP_STARTSYNC:
  		break;
-@@ -955,24 +913,15 @@ static u64 osd_req_encode_op(struct ceph
+@@ -955,9 +913,6 @@ static u64 osd_req_encode_op(struct ceph
  		dst->xattr.value_len = cpu_to_le32(src->xattr.value_len);
  		dst->xattr.cmp_op = src->xattr.cmp_op;
  		dst->xattr.cmp_mode = src->xattr.cmp_mode;
--		osd_data = &src->xattr.request_data;
+-		osd_data = &src->xattr.osd_data;
 -		ceph_osdc_msg_data_add(req->r_request, osd_data);
 -		request_data_len = osd_data->pagelist->length;
--		osd_data = &src->xattr.response_data;
--		ceph_osdc_msg_data_add(req->r_reply, osd_data);
  		break;
  	case CEPH_OSD_OP_CREATE:
  	case CEPH_OSD_OP_DELETE:
- 		break;
- 	case CEPH_OSD_OP_WRITESAME:
--		osd_data = &src->writesame.request_data;
--		ceph_osdc_msg_data_add(req->r_request, osd_data);
--
- 		dst->writesame.offset = cpu_to_le64(src->writesame.offset);
- 		dst->writesame.length = cpu_to_le64(src->writesame.length);
- 		dst->writesame.data_length =
- 				cpu_to_le64(src->writesame.data_length);
--		request_data_len = src->writesame.data_length;;
- 		break;
- 	default:
- 		pr_err("unsupported osd opcode %s\n",
 @@ -986,7 +935,7 @@ static u64 osd_req_encode_op(struct ceph
  	dst->flags = cpu_to_le32(src->flags);
  	dst->payload_len = cpu_to_le32(src->indata_len);
@@ -545,7 +492,7 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  	r = ceph_osdc_alloc_messages(req, GFP_NOFS);
  	if (r)
  		goto fail;
-@@ -1686,37 +1638,185 @@ out:
+@@ -1686,37 +1638,173 @@ out:
  	return err;
  }
  
@@ -573,16 +520,13 @@ Acked-by: David Disseldorp <ddiss@suse.de>
 +		case CEPH_OSD_OP_WRITE:
 +		case CEPH_OSD_OP_WRITEFULL:
 +			WARN_ON(op->indata_len != op->extent.length);
-+			ceph_osdc_msg_data_add(msg, &op->extent.request_data);
++			ceph_osdc_msg_data_add(msg, &op->extent.osd_data);
 +			break;
 +		case CEPH_OSD_OP_SETXATTR:
 +		case CEPH_OSD_OP_CMPXATTR:
-+		case CEPH_OSD_OP_GETXATTR:
 +			WARN_ON(op->indata_len != op->xattr.name_len +
 +						  op->xattr.value_len);
-+			ceph_osdc_msg_data_add(msg, &op->xattr.request_data);
-+			ceph_osdc_msg_data_add(req->r_reply,
-+					       &op->xattr.response_data);
++			ceph_osdc_msg_data_add(msg, &op->xattr.osd_data);
 +			break;
  
 -	dout("send_request %p tid %llu to osd%d flags %d pg %lld.%x\n",
@@ -601,7 +545,7 @@ Acked-by: David Disseldorp <ddiss@suse.de>
 +			break;
 +		case CEPH_OSD_OP_READ:
 +			ceph_osdc_msg_data_add(req->r_reply,
-+					       &op->extent.response_data);
++					       &op->extent.osd_data);
 +			break;
 +
 +		/* both */
@@ -615,15 +559,6 @@ Acked-by: David Disseldorp <ddiss@suse.de>
 +			/* optional, can be NONE */
 +			ceph_osdc_msg_data_add(req->r_reply,
 +					       &op->cls.response_data);
-+			break;
-+		case CEPH_OSD_OP_CMPEXT:
-+			ceph_osdc_msg_data_add(msg, &op->extent.request_data);
-+			ceph_osdc_msg_data_add(req->r_reply,
-+					       &op->extent.response_data);
-+			break;
-+		case CEPH_OSD_OP_WRITESAME:
-+			ceph_osdc_msg_data_add(req->r_request,
-+					       &op->writesame.request_data);
 +			break;
 +		}
 +

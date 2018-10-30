@@ -82,7 +82,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			goto out_fail;
 @@ -6047,7 +6047,8 @@ int btrfs_delalloc_reserve_metadata(stru
  
- 	ret = btrfs_block_rsv_add(root, block_rsv, to_reserve, flush);
+ 	ret = btrfs_inode_rsv_refill(BTRFS_I(inode), flush);
  	if (unlikely(ret)) {
 -		btrfs_qgroup_free_meta(root, nr_extents * root->nodesize);
 +		btrfs_qgroup_free_meta_prealloc(root,

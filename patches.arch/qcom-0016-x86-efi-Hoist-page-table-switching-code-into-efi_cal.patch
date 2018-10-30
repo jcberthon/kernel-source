@@ -47,15 +47,15 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 
 --- a/arch/x86/include/asm/efi.h
 +++ b/arch/x86/include/asm/efi.h
-@@ -4,6 +4,7 @@
+@@ -3,6 +3,7 @@
+ 
  #include <asm/fpu/api.h>
  #include <asm/pgtable.h>
- #include <asm/processor-flags.h>
 +#include <asm/tlb.h>
  #include <asm/nospec-branch.h>
  
  /*
-@@ -66,12 +67,29 @@ extern u64 asmlinkage efi_call(void *fp,
+@@ -71,6 +72,17 @@ extern u64 asmlinkage efi_call(void *fp,
  
  #define efi_call_phys(f, args...)		efi_call((f), args)
  
@@ -70,9 +70,10 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	u64	phys_stack;
 +} __packed;
 +
- #define arch_efi_call_virt_setup()					\
+ #define efi_call_virt(f, ...)						\
  ({									\
- 	efi_sync_low_kernel_mappings();					\
+ 	efi_status_t __s;						\
+@@ -79,7 +91,20 @@ extern u64 asmlinkage efi_call(void *fp,
  	preempt_disable();						\
  	__kernel_fpu_begin();						\
  	firmware_restrict_branch_speculation_start();			\
@@ -82,13 +83,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +		write_cr3((unsigned long)efi_scratch.efi_pgt);		\
 +		__flush_tlb_all();					\
 +	}								\
- })
- 
- #define arch_efi_call_virt(f, args...)					\
-@@ -79,6 +98,11 @@ extern u64 asmlinkage efi_call(void *fp,
- 
- #define arch_efi_call_virt_teardown()					\
- ({									\
++									\
+ 	__s = efi_call((void *)efi.systab->runtime->f, __VA_ARGS__);	\
++									\
 +	if (efi_scratch.use_pgd) {					\
 +		write_cr3(efi_scratch.prev_cr3);			\
 +		__flush_tlb_all();					\

@@ -66,9 +66,9 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 +	struct diag204_x_phys_cpu cpus[];
 +} __packed;
 +
- enum diag26c_sc {
- 	DIAG26C_MAC_SERVICES = 0x00000030
- };
+ int diag204(unsigned long subcode, unsigned long size, void *addr);
+ int diag224(void *ptr);
+ #endif /* _ASM_S390_DIAG_H */
 --- a/arch/s390/include/asm/kvm_host.h
 +++ b/arch/s390/include/asm/kvm_host.h
 @@ -114,6 +114,7 @@ struct kvm_s390_sie_block {

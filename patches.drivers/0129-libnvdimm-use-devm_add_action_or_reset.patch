@@ -43,11 +43,11 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 -		return -ENOMEM;
 -	}
  
- 	disk->driverfs_dev	= dev;
  	disk->first_minor	= 0;
+ 	disk->fops		= &nd_blk_fops;
 @@ -296,6 +290,9 @@ static int nsblk_attach_disk(struct nd_n
  	set_capacity(disk, 0);
- 	add_disk(disk);
+ 	device_add_disk(dev, disk);
  
 +	if (devm_add_action_or_reset(dev, nd_blk_release_disk, disk))
 +		return -ENOMEM;
@@ -90,7 +90,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
  	disk->fops		= &pmem_fops;
  	disk->queue		= q;
 @@ -298,6 +292,10 @@ static int pmem_attach_disk(struct devic
- 	add_disk(disk);
+ 	device_add_disk(dev, disk);
  	revalidate_disk(disk);
  
 +	if (devm_add_action_or_reset(dev, pmem_release_disk, disk))

@@ -54,7 +54,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
 +	mb->checksum = cpu_to_le32(crc32c_le(log->uuid_checksum,
 +					     mb, PAGE_SIZE));
  	if (!sync_page_io(log->rdev, pos, PAGE_SIZE, page, REQ_OP_WRITE,
- 			  WRITE_FUA, false)) {
+ 			  REQ_FUA, false)) {
  		__free_page(page);
 @@ -2118,7 +2119,8 @@ r5c_recovery_rewrite_data_only_stripes(s
  			}

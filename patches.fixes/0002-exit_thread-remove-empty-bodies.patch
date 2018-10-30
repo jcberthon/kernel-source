@@ -532,7 +532,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 +	select HAVE_EXIT_THREAD
  	select HAVE_PERF_EVENTS
  	select USE_PMC if PERF_EVENTS
- 	select HAVE_DMA_ATTRS
+ 	select HAVE_DMA_API_DEBUG
 --- a/arch/um/kernel/process.c
 +++ b/arch/um/kernel/process.c
 @@ -103,10 +103,6 @@ void interrupt_end(void)
@@ -575,9 +575,9 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 --- a/arch/xtensa/Kconfig
 +++ b/arch/xtensa/Kconfig
 @@ -16,6 +16,7 @@ config XTENSA
+ 	select GENERIC_PCI_IOMAP
  	select GENERIC_SCHED_CLOCK
  	select HAVE_DMA_API_DEBUG
- 	select HAVE_DMA_ATTRS
 +	select HAVE_EXIT_THREAD
  	select HAVE_FUNCTION_TRACER
  	select HAVE_FUTEX_CMPXCHG if !MMU

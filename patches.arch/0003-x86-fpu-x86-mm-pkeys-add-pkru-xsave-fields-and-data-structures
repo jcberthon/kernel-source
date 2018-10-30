@@ -93,14 +93,14 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  };
  
  /*
-@@ -56,6 +58,7 @@ void fpu__xstate_clear_all_cpu_caps(void
+@@ -58,6 +60,7 @@ void fpu__xstate_clear_all_cpu_caps(void
  	setup_clear_cpu_cap(X86_FEATURE_AVX512VL);
  	setup_clear_cpu_cap(X86_FEATURE_MPX);
  	setup_clear_cpu_cap(X86_FEATURE_XGETBV1);
 +	setup_clear_cpu_cap(X86_FEATURE_PKU);
- 	setup_clear_cpu_cap(X86_FEATURE_AVX512_4VNNIW);
- 	setup_clear_cpu_cap(X86_FEATURE_AVX512_4FMAPS);
  }
+ 
+ /*
 @@ -236,7 +239,7 @@ static void __init print_xstate_feature(
  	const char *feature_name;
  

@@ -216,9 +216,9 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 -	return ibmr;
 -}
 -
- static struct ib_mw *iwch_alloc_mw(struct ib_pd *pd, enum ib_mw_type type,
- 				   struct ib_udata *udata)
+ static struct ib_mw *iwch_alloc_mw(struct ib_pd *pd, enum ib_mw_type type)
  {
+ 	struct iwch_dev *rhp;
 --- a/drivers/infiniband/hw/cxgb3/iwch_provider.h
 +++ b/drivers/infiniband/hw/cxgb3/iwch_provider.h
 @@ -341,14 +341,6 @@ int iwch_register_mem(struct iwch_dev *r

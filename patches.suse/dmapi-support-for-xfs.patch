@@ -466,7 +466,7 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 +
 +	switch (dic->di_format) {
 +	case XFS_DINODE_FMT_DEV:
-+		buf->dt_rdev = ip->i_df.if_u2.if_rdev;
++		buf->dt_rdev = sysv_encode_dev(VFS_I(ip)->i_rdev);
 +		buf->dt_blksize = BLKDEV_IOSIZE;
 +		buf->dt_blocks = 0;
 +		break;
@@ -3368,9 +3368,9 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
  /* Kernel only BMAP related definitions and functions */
  
 @@ -559,6 +561,28 @@ xfs_getbmap(
- 		prealloced = 0;
- 		fixlen = 1LL << 32;
- 	} else {
+ 		lock = xfs_ilock_attr_map_shared(ip);
+ 		break;
+ 	case XFS_DATA_FORK:
 +		/*
 +		 * If the BMV_IF_NO_DMAPI_READ interface bit specified, do
 +		 * not generate a DMAPI read event.  Otherwise, if the
@@ -3393,9 +3393,9 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 +				return error;
 +		}
 +
- 		if (ip->i_d.di_format != XFS_DINODE_FMT_EXTENTS &&
- 		    ip->i_d.di_format != XFS_DINODE_FMT_BTREE &&
- 		    ip->i_d.di_format != XFS_DINODE_FMT_LOCAL)
+ 		if (!(iflags & BMV_IF_DELALLOC) &&
+ 		    (ip->i_delayed_blks || XFS_ISIZE(ip) > ip->i_d.di_size)) {
+ 			error = filemap_write_and_wait(VFS_I(ip)->i_mapping);
 @@ -993,9 +1017,25 @@ xfs_alloc_file_space(
  	startoffset_fsb	= XFS_B_TO_FSBT(mp, offset);
  	allocatesize_fsb = XFS_B_TO_FSB(mp, count);
@@ -3936,8 +3936,8 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
  xfs_file_read_iter(
  	struct kiocb		*iocb,
 @@ -338,6 +357,24 @@ xfs_file_read_iter(
- 	 * serialisation.
- 	 */
+ 		return -EIO;
+ 
  	xfs_rw_ilock(ip, XFS_IOLOCK_SHARED);
 +
 +	if (DM_EVENT_ENABLED(ip, DM_EVENT_READ) && !(ioflags & XFS_IO_INVIS)) {
@@ -3958,8 +3958,8 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 +	}
 +
  	if ((ioflags & XFS_IO_ISDIRECT) && inode->i_mapping->nrpages) {
- 		xfs_rw_iunlock(ip, XFS_IOLOCK_SHARED);
- 		xfs_rw_ilock(ip, XFS_IOLOCK_EXCL);
+ 		ret = filemap_write_and_wait_range(mapping, iocb->ki_pos, end);
+ 		if (ret)
 @@ -404,6 +441,19 @@ xfs_file_splice_read(
  
  	xfs_rw_ilock(ip, XFS_IOLOCK_SHARED);
@@ -4096,7 +4096,7 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 +		return ret;
  
  	if (ret > 0) {
- 		ssize_t err;
+ 		XFS_STATS_ADD(ip->i_mount, xs_write_bytes, ret);
 @@ -1086,6 +1181,23 @@ xfs_file_release(
  	return xfs_release(XFS_I(inode));
  }
@@ -4207,9 +4207,9 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 --- a/fs/xfs/xfs_inode.c
 +++ b/fs/xfs/xfs_inode.c
 @@ -48,6 +48,7 @@
- #include "xfs_trans_priv.h"
  #include "xfs_log.h"
  #include "xfs_bmap_btree.h"
+ #include "xfs_dir2_priv.h"
 +#include "xfs_dmapi.h"
  
  kmem_zone_t *xfs_inode_zone;
@@ -4818,17 +4818,17 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
  	struct xfs_mru_cache	*m_filestream;  /* per-mount filestream data */
  	struct delayed_work	m_reclaim_work;	/* background inode reclaim */
 @@ -147,6 +150,7 @@ typedef struct xfs_mount {
- 	 * to various other kinds of pain inflicted on the pNFS server.
- 	 */
  	__uint32_t		m_generation;
+ 
+ 	bool			m_fail_unmount;
 +	const char		*m_mtpt;
  } xfs_mount_t;
  
  /*
 @@ -155,6 +159,7 @@ typedef struct xfs_mount {
- #define XFS_MOUNT_WSYNC		(1ULL << 0)	/* for nfs - all metadata ops
  						   must be synchronous except
  						   for space allocations */
+ #define XFS_MOUNT_UNMOUNTING	(1ULL << 1)	/* filesystem is unmounting */
 +#define XFS_MOUNT_DMAPI		(1ULL << 2)	/* dmapi is enabled */
  #define XFS_MOUNT_WAS_CLEAN	(1ULL << 3)
  #define XFS_MOUNT_FS_SHUTDOWN	(1ULL << 4)	/* atomic stop of all filesystem
@@ -4844,7 +4844,7 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 +
  int	xfs_zero_extent(struct xfs_inode *ip, xfs_fsblock_t start_fsb,
  			xfs_off_t count_fsb);
- 
+ struct xfs_error_cfg * xfs_error_get_cfg(struct xfs_mount *mp,
 --- a/fs/xfs/xfs_qm.c
 +++ b/fs/xfs/xfs_qm.c
 @@ -1125,6 +1125,7 @@ xfs_qm_dqusage_adjust(

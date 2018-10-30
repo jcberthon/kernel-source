@@ -77,7 +77,7 @@ index 7b33d40b35de..fee859875bd2 100644
  		struct page *page = get_current_nat_page(sbi, nid);
  
 @@ -1582,6 +1582,7 @@ static void build_free_nids(struct f2fs_sb_info *sbi)
- 			remove_free_nid(sbi, nid);
+ 			remove_free_nid(nm_i, nid);
  	}
  	mutex_unlock(&curseg->curseg_mutex);
 +	up_read(&nm_i->nat_tree_lock);

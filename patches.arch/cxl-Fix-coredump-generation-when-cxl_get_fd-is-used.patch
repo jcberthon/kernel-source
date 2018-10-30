@@ -335,4 +335,4 @@ Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
 +
  	pr_devel("afu_open pe: %i\n", ctx->pe);
  	file->private_data = ctx;
- 
+ 	cxl_ctx_get();

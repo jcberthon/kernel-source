@@ -18,14 +18,15 @@ diff --git a/drivers/scsi/libfc/fc_rport.c b/drivers/scsi/libfc/fc_rport.c
 index 0ea0d4f..bfad971 100644
 --- a/drivers/scsi/libfc/fc_rport.c
 +++ b/drivers/scsi/libfc/fc_rport.c
-@@ -593,15 +593,23 @@ static void fc_rport_timeout(struct work_struct *work)
+@@ -593,16 +593,24 @@ static void fc_rport_timeout(struct work_struct *work)
   */
- static void fc_rport_error(struct fc_rport_priv *rdata, int err)
+ static void fc_rport_error(struct fc_rport_priv *rdata, struct fc_frame *fp)
  {
 +	struct fc_lport *lport = rdata->local_port;
 +
- 	FC_RPORT_DBG(rdata, "Error %d in state %s, retries %d\n",
- 		     -err, fc_rport_state(rdata), rdata->retries);
+ 	FC_RPORT_DBG(rdata, "Error %ld in state %s, retries %d\n",
+ 		     IS_ERR(fp) ? -PTR_ERR(fp) : 0,
+ 		     fc_rport_state(rdata), rdata->retries);
  
  	switch (rdata->rp_state) {
  	case RPORT_ST_FLOGI:

@@ -152,8 +152,8 @@ index 8e48dc3..ebcbee4 100644
  		if (dev->in_reset)
  			return -1;
 @@ -2671,10 +2687,8 @@ int aac_scsi_cmd(struct scsi_cmnd * scsicmd)
- 			/* Do not cache partition table for arrays */
- 			scsicmd->device->removable = 1;
+ 		/* Do not cache partition table for arrays */
+ 		scsicmd->device->removable = 1;
  
 -		scsicmd->result = DID_OK << 16 | COMMAND_COMPLETE << 8 | SAM_STAT_GOOD;
 -		scsicmd->scsi_done(scsicmd);
@@ -165,9 +165,9 @@ index 8e48dc3..ebcbee4 100644
  
  	case READ_CAPACITY:
 @@ -2700,11 +2714,8 @@ int aac_scsi_cmd(struct scsi_cmnd * scsicmd)
- 		if (!aac_export_fixed)
- 			/* Do not cache partition table for arrays */
- 			scsicmd->device->removable = 1;
+ 		scsi_sg_copy_from_buffer(scsicmd, cp, sizeof(cp));
+ 		/* Do not cache partition table for arrays */
+ 		scsicmd->device->removable = 1;
 -		scsicmd->result = DID_OK << 16 | COMMAND_COMPLETE << 8 |
 -		  SAM_STAT_GOOD;
 -		scsicmd->scsi_done(scsicmd);

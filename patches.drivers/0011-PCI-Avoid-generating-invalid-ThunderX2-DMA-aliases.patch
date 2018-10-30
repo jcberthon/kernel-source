@@ -67,6 +67,6 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_BROADCOM, 0x9084,
 +				quirk_bridge_cavm_thrx2_pcie_root);
 +
- #if IS_ENABLED(CONFIG_ARM64)
  /*
-  * PCI BAR 5 is not setup correctly for the on-board AHCI controller
+  * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
+  * class code.  Fix it.

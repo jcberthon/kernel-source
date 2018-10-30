@@ -84,13 +84,13 @@ index 20ee1fe..6b8a7f6 100644
  	uap->lcrh_rx = vendor->lcrh_rx;
  	uap->lcrh_tx = vendor->lcrh_tx;
 @@ -2539,6 +2569,7 @@ static int sbsa_uart_probe(struct platform_device *pdev)
- 	}
- 	uap->port.irq	= ret;
+ 	if (!uap)
+ 		return -ENOMEM;
  
 +	uap->reg_offset = pl011_std_offsets;
  	uap->vendor	= &vendor_sbsa;
  	uap->fifosize	= 32;
- 	uap->port.ops	= &sbsa_uart_pops;
+ 	uap->port.irq	= platform_get_irq(pdev, 0);
 diff --git a/drivers/tty/serial/amba-pl011.h b/drivers/tty/serial/amba-pl011.h
 index b7eb1bc..0c6756d 100644
 --- a/drivers/tty/serial/amba-pl011.h

@@ -22,7 +22,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 
 --- a/include/linux/arm-smccc.h
 +++ b/include/linux/arm-smccc.h
-@@ -121,4 +121,145 @@ asmlinkage void arm_smccc_hvc(unsigned l
+@@ -121,5 +121,146 @@ asmlinkage void arm_smccc_hvc(unsigned l
  			unsigned long a5, unsigned long a6, unsigned long a7,
  			struct arm_smccc_res *res);
  
@@ -167,4 +167,5 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 + */
 +#define arm_smccc_1_1_hvc(...)	__arm_smccc_1_1(SMCCC_HVC_INST, __VA_ARGS__)
 +
+ #endif /*__ASSEMBLY__*/
  #endif /*__LINUX_ARM_SMCCC_H*/

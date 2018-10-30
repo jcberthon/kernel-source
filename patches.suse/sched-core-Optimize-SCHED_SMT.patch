@@ -49,15 +49,16 @@ index 0d0e58d..f5b2354 100644
  void __init sched_init_smp(void)
  {
  	cpumask_var_t non_isolated_cpus;
-@@ -7704,6 +7720,8 @@ void __init sched_init_smp(void)
+@@ -7704,6 +7720,9 @@ void __init sched_init_smp(void)
  
  	init_sched_rt_class();
  	init_sched_dl_class();
 +
 +	sched_init_smt();
++
+ 	sched_smp_initialized = true;
  }
- #else
- void __init sched_init_smp(void)
+ 
 diff --git a/kernel/sched/fair.c b/kernel/sched/fair.c
 index 54d0f8b..88d70f3 100644
 --- a/kernel/sched/fair.c

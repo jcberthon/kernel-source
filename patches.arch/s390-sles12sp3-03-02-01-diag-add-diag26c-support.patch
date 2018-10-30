@@ -62,9 +62,9 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	DIAG_STAT_X288,
  	DIAG_STAT_X2C4,
  	DIAG_STAT_X2FC,
-@@ -78,4 +80,28 @@ struct diag210 {
- 
- extern int diag210(struct diag210 *addr);
+@@ -78,6 +80,30 @@ struct diag210 {
+ 	struct diag204_x_phys_cpu cpus[];
+ } __packed;
  
 +enum diag26c_sc {
 +	DIAG26C_MAC_SERVICES = 0x00000030
@@ -89,6 +89,8 @@ Acked-by: Hannes Reinecke <hare@suse.com>
 +	u8	res[2];
 +} __aligned(8);
 +
+ int diag204(unsigned long subcode, unsigned long size, void *addr);
+ int diag224(void *ptr);
 +int diag26c(void *req, void *resp, enum diag26c_sc subcode);
  #endif /* _ASM_S390_DIAG_H */
 --- a/arch/s390/kernel/diag.c
@@ -102,9 +104,9 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	[DIAG_STAT_X2C4] = { .code = 0x2c4, .name = "FTP Services" },
  	[DIAG_STAT_X2FC] = { .code = 0x2fc, .name = "Guest Performance Data" },
 @@ -196,3 +197,31 @@ int diag210(struct diag210 *addr)
- 	return ccode;
+ 	return rc;
  }
- EXPORT_SYMBOL(diag210);
+ EXPORT_SYMBOL(diag224);
 +
 +/*
 + * Diagnose 26C: Access Certain System Information

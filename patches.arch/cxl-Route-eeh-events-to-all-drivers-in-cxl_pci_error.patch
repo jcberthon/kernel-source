@@ -67,8 +67,8 @@ index 60632507d99f..728765d5b3e7 100644
 +			 (result == PCI_ERS_RESULT_NEED_RESET))
 +			result = PCI_ERS_RESULT_NONE;
  	}
- 	cxl_deconfigure_adapter(adapter);
  
+ 	/* should take the context lock here */
 -- 
 2.13.6
 

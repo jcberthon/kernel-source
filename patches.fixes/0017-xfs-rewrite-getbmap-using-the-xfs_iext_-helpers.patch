@@ -152,7 +152,7 @@ index 2501b6e42d87..634d4ebacdf5 100644
  }
  
  /*
-@@ -522,108 +550,49 @@ xfs_getbmap(
+@@ -522,86 +550,49 @@ xfs_getbmap(
  	xfs_bmap_format_t	formatter,	/* format to user */
  	void			*arg)		/* formatter arg */
  {
@@ -196,28 +196,6 @@ index 2501b6e42d87..634d4ebacdf5 100644
 -		prealloced = 0;
 -		fixlen = 1LL << 32;
 -	} else {
--		/*
--		 * If the BMV_IF_NO_DMAPI_READ interface bit specified, do
--		 * not generate a DMAPI read event.  Otherwise, if the
--		 * DM_EVENT_READ bit is set for the file, generate a read
--		 * event in order that the DMAPI application may do its thing
--		 * before we return the extents.  Usually this means restoring
--		 * user file data to regions of the file that look like holes.
--		 *
--		 * The "old behavior" (from XFS_IOC_GETBMAP) is to not specify
--		 * BMV_IF_NO_DMAPI_READ so that read events are generated.
--		 * If this were not true, callers of ioctl(XFS_IOC_GETBMAP)
--		 * could misinterpret holes in a DMAPI file as true holes,
--		 * when in fact they may represent offline user data.
--		 */
--		if (DM_EVENT_ENABLED(ip, DM_EVENT_READ) &&
--		    !(iflags & BMV_IF_NO_DMAPI_READ)) {
--			error = XFS_SEND_DATA(mp, DM_EVENT_READ, ip,
--					      0, 0, 0, NULL);
--			if (error)
--				return error;
--		}
--
 -		if (ip->i_d.di_format != XFS_DINODE_FMT_EXTENTS &&
 -		    ip->i_d.di_format != XFS_DINODE_FMT_BTREE &&
 -		    ip->i_d.di_format != XFS_DINODE_FMT_LOCAL)

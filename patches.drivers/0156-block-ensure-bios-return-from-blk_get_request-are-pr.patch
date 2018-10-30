@@ -86,6 +86,6 @@ Acked-by: Hannes Reinecke <hare@suse.de>
 -	req->__sector = (sector_t) -1;
 -	req->bio = req->biotail = NULL;
 -
- 	nvme_req(req)->cmd = cmd;
+ 	req->cmd = (unsigned char *)cmd;
+ 	req->cmd_len = sizeof(struct nvme_command);
  
- 	return req;

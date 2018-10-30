@@ -123,7 +123,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  }
  
  int nvme_get_features(struct nvme_ctrl *dev, unsigned fid, unsigned nsid,
-@@ -997,32 +1002,21 @@ static void nvme_config_discard(struct n
+@@ -997,33 +1002,21 @@ static void nvme_config_discard(struct n
  	queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, ns->queue);
  }
  
@@ -136,6 +136,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 -				__func__);
 -		return -ENODEV;
 -	}
+-
 -	if ((*id)->ncap == 0) {
 -		kfree(*id);
 -		return -ENODEV;

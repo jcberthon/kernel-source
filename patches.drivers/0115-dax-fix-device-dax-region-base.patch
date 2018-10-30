@@ -52,8 +52,8 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 --- a/drivers/dax/pmem.c
 +++ b/drivers/dax/pmem.c
 @@ -118,6 +118,9 @@ static int dax_pmem_probe(struct device
+ 	if (rc)
  		return rc;
- 	}
  
 +	/* adjust the dax_region resource to the start of data */
 +	res.start += le64_to_cpu(pfn_sb->dataoff);

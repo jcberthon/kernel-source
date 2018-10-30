@@ -42,8 +42,8 @@ index 4db1c77a4810..9ba096af440f 100644
  #define _COMPONENT	ACPI_NUMA
  ACPI_MODULE_NAME("numa");
 @@ -203,9 +204,8 @@ acpi_table_print_srat_entry(struct acpi_subtable_header *header)
+ #endif				/* ACPI_DEBUG_OUTPUT */
  		break;
- 
  	default:
 -		printk(KERN_WARNING PREFIX
 -		       "Found unsupported SRAT entry (type = 0x%x)\n",

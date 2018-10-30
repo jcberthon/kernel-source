@@ -95,7 +95,7 @@ index a0b42d8dc9be..ce1a48bdeeae 100644
 -							ifp->if_real_bytes,
  							KM_SLEEP | KM_NOFS);
  			}
- 		}
+ 		} else {
 @@ -1212,8 +1210,7 @@ xfs_iext_realloc_direct(
  		if (rnew_size != ifp->if_real_bytes) {
  			ifp->if_u1.if_extents =

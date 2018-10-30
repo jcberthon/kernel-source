@@ -26,17 +26,17 @@ index 4c41f94..4864e66 100644
  
  /* Common capabilities of RK3288 SoC */
  static unsigned long dw_mci_rk3288_dwmmc_caps[4] = {
--	MMC_CAP_RUNTIME_RESUME | MMC_CAP_ERASE | MMC_CAP_CMD23, /* emmc */
--	MMC_CAP_RUNTIME_RESUME | MMC_CAP_ERASE | MMC_CAP_CMD23, /* sdmmc */
--	MMC_CAP_RUNTIME_RESUME | MMC_CAP_ERASE | MMC_CAP_CMD23, /* sdio0 */
--	MMC_CAP_RUNTIME_RESUME | MMC_CAP_ERASE | MMC_CAP_CMD23, /* sdio1 */
-+	MMC_CAP_RUNTIME_RESUME | MMC_CAP_CMD23, /* emmc */
-+	MMC_CAP_RUNTIME_RESUME | MMC_CAP_CMD23, /* sdmmc */
-+	MMC_CAP_RUNTIME_RESUME | MMC_CAP_CMD23, /* sdio0 */
-+	MMC_CAP_RUNTIME_RESUME | MMC_CAP_CMD23, /* sdio1 */
+-	MMC_CAP_ERASE | MMC_CAP_CMD23, /* emmc */
+-	MMC_CAP_ERASE | MMC_CAP_CMD23, /* sdmmc */
+-	MMC_CAP_ERASE | MMC_CAP_CMD23, /* sdio0 */
+-	MMC_CAP_ERASE | MMC_CAP_CMD23, /* sdio1 */
++	MMC_CAP_CMD23, /* emmc */
++	MMC_CAP_CMD23, /* sdmmc */
++	MMC_CAP_CMD23, /* sdio0 */
++	MMC_CAP_CMD23, /* sdio1 */
  };
+ 
  static const struct dw_mci_drv_data rk2928_drv_data = {
- 	.init			= dw_mci_rockchip_init,
 -- 
 2.11.0
 

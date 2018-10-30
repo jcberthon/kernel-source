@@ -34,7 +34,7 @@ index bf4bbb6052b5..9c102d49eb13 100644
  #include <linux/slab.h>
 +#include <linux/topology.h>
  
- #include <asm/uaccess.h>
+ #include <linux/uaccess.h>
  #include <asm/io.h>
 @@ -282,6 +283,7 @@ static void prrn_work_fn(struct work_struct *work)
  	 * the RTAS event.

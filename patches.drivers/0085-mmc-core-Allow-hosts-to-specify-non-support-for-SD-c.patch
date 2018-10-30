@@ -26,7 +26,7 @@ diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
 index 897316d..96f9a6f 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -2492,15 +2492,17 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+@@ -2492,15 +2492,18 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
  
  	mmc_go_idle(host);
  
@@ -44,9 +44,10 @@ index 897316d..96f9a6f 100644
 +	if (!(host->caps2 & MMC_CAP2_NO_SD))
 +		if (!mmc_attach_sd(host))
 +			return 0;
++
+ 	if (!mmc_attach_mmc(host))
+ 		return 0;
  
- 	if (!(host->caps2 & MMC_CAP2_NO_MMC))
- 		if (!mmc_attach_mmc(host))
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
 index 6449b67..67fee62 100644
 --- a/include/linux/mmc/host.h
@@ -56,9 +57,9 @@ index 6449b67..67fee62 100644
  #define MMC_CAP2_NO_SDIO	(1 << 19)	/* Do not send SDIO commands during initialization */
  #define MMC_CAP2_HS400_ES	(1 << 20)	/* Host supports enhanced strobe */
 +#define MMC_CAP2_NO_SD		(1 << 21)	/* Do not send SD commands during initialization */
- #define MMC_CAP2_NO_MMC		(1 << 22)	/* Do not send (e)MMC commands during initialization */
  
  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 
 -- 
 2.11.0
 

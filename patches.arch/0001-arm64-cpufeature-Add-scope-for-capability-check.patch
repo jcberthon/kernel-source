@@ -170,7 +170,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +static bool has_no_hw_prefetch(const struct arm64_cpu_capabilities *entry, int __unused)
  {
  	u32 midr = read_cpuid_id();
- 
+ 	u32 rv_min, rv_max;
 @@ -677,6 +726,7 @@ static const struct arm64_cpu_capabiliti
  	{
  		.desc = "GIC system register CPU interface",

@@ -13,14 +13,12 @@ This is based on a patch from Mike Christie <michaelc@cs.wisc.edu>.
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 Acked-by: Luis Henriques <lhenriques@suse.com>
 ---
- include/linux/ceph/decode.h | 54 +++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/ceph/decode.h |   54 ++++++++++++++++++++++++++++++++++++++++++++
  1 file changed, 54 insertions(+)
 
-diff --git a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h
-index e83f3c81ef43..f990f2cc907a 100644
 --- a/include/linux/ceph/decode.h
 +++ b/include/linux/ceph/decode.h
-@@ -218,6 +218,60 @@ static inline void ceph_encode_string(void **p, void *end,
+@@ -218,6 +218,60 @@ static inline void ceph_encode_string(vo
  	*p += len;
  }
  
@@ -81,4 +79,3 @@ index e83f3c81ef43..f990f2cc907a 100644
  #define ceph_encode_need(p, end, n, bad)			\
  	do {							\
  		if (!likely(ceph_has_room(p, end, n)))		\
-

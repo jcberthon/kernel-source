@@ -67,9 +67,9 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 -	.endm
 -
 -/*
-  * Return the current thread_info.
+  * Errata workaround post TTBR0_EL1 update.
   */
- 	.macro	get_thread_info, rd
+ 	.macro	post_ttbr0_update_workaround
 --- a/arch/arm64/include/asm/mmu_context.h
 +++ b/arch/arm64/include/asm/mmu_context.h
 @@ -19,8 +19,6 @@

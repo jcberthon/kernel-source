@@ -65,9 +65,9 @@ Acked-by: Borislav Petkov <bp@suse.de>
 --- a/arch/x86/kernel/fpu/xstate.c
 +++ b/arch/x86/kernel/fpu/xstate.c
 @@ -56,6 +56,8 @@ void fpu__xstate_clear_all_cpu_caps(void
- 	setup_clear_cpu_cap(X86_FEATURE_AVX512VL);
  	setup_clear_cpu_cap(X86_FEATURE_MPX);
  	setup_clear_cpu_cap(X86_FEATURE_XGETBV1);
+ 	setup_clear_cpu_cap(X86_FEATURE_PKU);
 +	setup_clear_cpu_cap(X86_FEATURE_AVX512_4VNNIW);
 +	setup_clear_cpu_cap(X86_FEATURE_AVX512_4FMAPS);
  }

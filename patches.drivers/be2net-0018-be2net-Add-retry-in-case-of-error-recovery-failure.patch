@@ -36,8 +36,8 @@ Acked-by: David Chang <dchang@suse.com>
  	struct delayed_work be_err_detection_work;
 +	u8 recovery_retries;
  	u8 err_flags;
+ 	bool pcicfg_mapped;	/* pcicfg obtained via pci_iomap() */
  	u32 flags;
- 	u32 cmd_privileges;
 --- a/drivers/net/ethernet/emulex/benet/be_main.c
 +++ b/drivers/net/ethernet/emulex/benet/be_main.c
 @@ -4265,10 +4265,10 @@ static void be_schedule_worker(struct be

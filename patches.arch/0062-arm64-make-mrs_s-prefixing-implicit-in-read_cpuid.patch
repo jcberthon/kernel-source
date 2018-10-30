@@ -45,7 +45,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +	return id_aa64mmfr0_mixed_endian_el0(read_cpuid(ID_AA64MMFR0_EL1));
  }
  
- static inline bool system_supports_32bit_el0(void)
+ static inline bool system_supports_mixed_endian_el0(void)
 --- a/arch/arm64/include/asm/cputype.h
 +++ b/arch/arm64/include/asm/cputype.h
 @@ -104,7 +104,7 @@

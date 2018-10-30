@@ -35,4 +35,4 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz> [updates above]
 +#endif
  };
  
- #define X86_VENDOR_INTEL	0
+ struct cpuid_regs {

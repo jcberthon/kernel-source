@@ -12,19 +12,24 @@ This is the wrong GPIO, but it means vc4 probes and turns on hdmi.
 
 Acked-by: Michal Marek <mmarek@suse.cz>
 ---
- arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts |    4 ++++
+ arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts | 4 ++++
  1 file changed, 4 insertions(+)
 
+diff --git a/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts b/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts
+index 6f47dd2bb1db..e2c3801dd6ae 100644
 --- a/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts
 +++ b/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts
-@@ -24,6 +24,10 @@
+@@ -28,6 +28,10 @@
+ 		};
  	};
  };
- 
++
 +&hdmi {
 +	hpd-gpios = <&gpio 46 GPIO_ACTIVE_HIGH>;
 +};
-+
- &uart1 {
- 	status = "okay";
- };
+ 
+ /* uart0 communicates with the BT module */
+ &uart0 {
+-- 
+1.8.5.6
+

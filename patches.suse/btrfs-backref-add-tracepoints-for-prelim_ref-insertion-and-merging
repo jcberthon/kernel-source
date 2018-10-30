@@ -332,15 +332,15 @@ Signed-off-by: Jeff Mahoney <jeffm@suse.com>
 --- a/include/trace/events/btrfs.h
 +++ b/include/trace/events/btrfs.h
 @@ -24,6 +24,7 @@ struct extent_buffer;
- struct btrfs_work;
  struct __btrfs_workqueue;
  struct btrfs_qgroup_extent_record;
+ struct btrfs_qgroup;
 +struct prelim_ref;
  
  #define show_ref_type(type)						\
  	__print_symbolic(type,						\
 @@ -1485,6 +1486,63 @@ TRACE_EVENT(qgroup_update_counters,
- 		  __entry->cur_new_count)
+ 		show_root_type(__entry->refroot), __entry->diff)
  );
  
 +DECLARE_EVENT_CLASS(btrfs__prelim_ref,

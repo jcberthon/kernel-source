@@ -146,11 +146,11 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  
  	/* device_declaration means Device object in DSDT, in the
 @@ -108,7 +111,7 @@ static int map_gicc_mpidr(struct acpi_su
- 	return -EINVAL;
  }
  
--static phys_cpuid_t map_madt_entry(int type, u32 acpi_id)
-+static phys_cpuid_t map_madt_entry(int type, u32 acpi_id, bool ignore_disabled)
+ static phys_cpuid_t map_madt_entry(struct acpi_table_madt *madt,
+-				   int type, u32 acpi_id)
++				   int type, u32 acpi_id, bool ignore_disabled)
  {
  	unsigned long madt_end, entry;
  	phys_cpuid_t phys_id = PHYS_CPUID_INVALID;	/* CPU hardware ID */
@@ -180,7 +180,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  		}
  		entry += header->length;
 @@ -145,7 +152,8 @@ static phys_cpuid_t map_madt_entry(int t
- 	return phys_id;
+ 	return rv;
  }
  
 -static phys_cpuid_t map_mat_entry(acpi_handle handle, int type, u32 acpi_id)
@@ -189,7 +189,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  {
  	struct acpi_buffer buffer = { ACPI_ALLOCATE_BUFFER, NULL };
  	union acpi_object *obj;
-@@ -166,30 +174,37 @@ static phys_cpuid_t map_mat_entry(acpi_h
+@@ -166,30 +174,38 @@ static phys_cpuid_t map_mat_entry(acpi_h
  
  	header = (struct acpi_subtable_header *)obj->buffer.pointer;
  	if (header->type == ACPI_MADT_TYPE_LOCAL_APIC)
@@ -220,8 +220,9 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
 -	phys_id = map_mat_entry(handle, type, acpi_id);
 +	phys_id = map_mat_entry(handle, type, acpi_id, ignore_disabled);
  	if (invalid_phys_cpuid(phys_id))
--		phys_id = map_madt_entry(type, acpi_id);
-+		phys_id = map_madt_entry(type, acpi_id, ignore_disabled);
+-		phys_id = map_madt_entry(get_madt_table(), type, acpi_id);
++		phys_id = map_madt_entry(get_madt_table(), type, acpi_id,
++					 ignore_disabled);
  
  	return phys_id;
  }

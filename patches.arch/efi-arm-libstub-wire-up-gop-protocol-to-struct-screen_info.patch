@@ -3,6 +3,7 @@ Subject: efi/arm*/libstub: Wire up GOP protocol to 'struct screen_info'
 Git-commit: f0827e18a7a1da574ba8201a8b18f63778451aae
 Patch-mainline: v4.7-rc1
 References: bnc#974215
+Backport-note: jeffm: The upstream version is placed after kASLR setup.
 
 This adds the code to the ARM and arm64 versions of the UEFI stub to
 populate struct screen_info based on the information received from the
@@ -26,11 +27,9 @@ Signed-off-by: Matt Fleming <mfleming@suse.de>
  drivers/firmware/efi/libstub/arm-stub.c |   24 ++++++++++++++++++++++++
  1 file changed, 24 insertions(+)
 
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index a3a447c..523c1ca 100644
 --- a/drivers/firmware/efi/libstub/arm-stub.c
 +++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -145,6 +145,25 @@ void efi_char16_printk(efi_system_table_t *sys_table_arg,
+@@ -147,6 +147,25 @@ void efi_char16_printk(efi_system_table_
  	out->output_string(out, str);
  }
  
@@ -56,7 +55,7 @@ index a3a447c..523c1ca 100644
  
  /*
   * This function handles the architcture specific differences between arm and
-@@ -183,6 +202,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+@@ -185,6 +204,7 @@ unsigned long efi_entry(void *handle, ef
  	efi_guid_t loaded_image_proto = LOADED_IMAGE_PROTOCOL_GUID;
  	unsigned long reserve_addr = 0;
  	unsigned long reserve_size = 0;
@@ -64,24 +63,21 @@ index a3a447c..523c1ca 100644
  
  	/* Check if we were booted by the EFI firmware */
  	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
-@@ -207,6 +227,9 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+@@ -213,6 +233,9 @@ unsigned long efi_entry(void *handle, ef
  		pr_efi_err(sys_table, "Failed to find DRAM base\n");
  		goto fail;
  	}
 +
 +	si = setup_graphics(sys_table);
 +
- 	status = handle_kernel_image(sys_table, image_addr, &image_size,
- 				     &reserve_addr,
- 				     &reserve_size,
-@@ -286,6 +309,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
- 	efi_free(sys_table, fdt_size, fdt_addr);
- 
+ 	/*
+ 	 * Get the command line from EFI, using the LOADED_IMAGE
+ 	 * protocol. We are going to copy the command line into the
+@@ -308,6 +331,7 @@ fail_free_image:
+ 	efi_free(sys_table, image_size, *image_addr);
+ 	efi_free(sys_table, reserve_size, reserve_addr);
  fail_free_cmdline:
 +	free_screen_info(sys_table, si);
  	efi_free(sys_table, cmdline_size, (unsigned long)cmdline_ptr);
- 
- fail_free_image:
--- 
-2.7.3
-
+ fail:
+ 	return EFI_ERROR;

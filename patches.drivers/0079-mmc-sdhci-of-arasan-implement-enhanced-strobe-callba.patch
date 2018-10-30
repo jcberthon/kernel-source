@@ -61,8 +61,8 @@ index a77e8c3..4fda2ec 100644
  	.set_clock = sdhci_arasan_set_clock,
  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
 @@ -463,6 +480,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 			dev_err(&pdev->dev, "phy_init err.\n");
- 			goto clk_disable_all;
+ 			dev_err(&pdev->dev, "phy_power_on err.\n");
+ 			goto err_phy_power;
  		}
 +
 +		host->mmc_host_ops.hs400_enhanced_strobe =

@@ -46,7 +46,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
 --- a/drivers/nvdimm/pmem.c
 +++ b/drivers/nvdimm/pmem.c
 @@ -75,7 +75,7 @@ static int pmem_do_bvec(struct pmem_devi
- 		if (unlikely(is_bad_pmem(&pmem->bb, sector, len)))
+ 		if (unlikely(bad_pmem))
  			rc = -EIO;
  		else {
 -			memcpy_from_pmem(mem + off, pmem_addr, len);

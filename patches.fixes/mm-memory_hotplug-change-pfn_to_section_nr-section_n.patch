@@ -68,4 +68,4 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 +	start_pfn = section_nr_to_pfn((unsigned long)scn_nr);
  	__remove_zone(zone, start_pfn);
  
- 	sparse_remove_one_section(zone, ms);
+ 	sparse_remove_one_section(zone, ms, map_offset);

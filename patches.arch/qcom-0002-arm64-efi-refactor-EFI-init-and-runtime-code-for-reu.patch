@@ -13,22 +13,21 @@ Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: Will Deacon <will.deacon@arm.com>
 Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 ---
- arch/arm64/include/asm/efi.h       |    9 ++++++
- arch/arm64/kernel/efi.c            |   23 +++++++++++++++++
- drivers/firmware/efi/arm-init.c    |    7 +++--
- drivers/firmware/efi/arm-runtime.c |   48 ++++++++++++-------------------------
+ arch/arm64/include/asm/efi.h       |    9 +++++++
+ arch/arm64/kernel/efi.c            |   23 +++++++++++++++++++
+ drivers/firmware/efi/arm-init.c    |    7 +++---
+ drivers/firmware/efi/arm-runtime.c |   43 +++++++++++++------------------------
  drivers/firmware/efi/efi.c         |    2 +
- 5 files changed, 54 insertions(+), 35 deletions(-)
+ 5 files changed, 54 insertions(+), 30 deletions(-)
 
 --- a/arch/arm64/include/asm/efi.h
 +++ b/arch/arm64/include/asm/efi.h
-@@ -2,8 +2,10 @@
+@@ -2,7 +2,9 @@
  #define _ASM_EFI_H
  
  #include <asm/io.h>
 +#include <asm/mmu_context.h>
  #include <asm/neon.h>
- #include <asm/ptrace.h>
 +#include <asm/tlbflush.h>
  
  #ifdef CONFIG_EFI
@@ -39,9 +38,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
 +int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
 +
- #define arch_efi_call_virt_setup()					\
+ #define efi_call_virt(f, ...)						\
  ({									\
- 	kernel_neon_begin();						\
+ 	efi_##f##_t *__f;						\
 @@ -68,6 +72,11 @@ static inline void efifb_setup_from_dmi(
   *   Services are enabled and the EFI_RUNTIME_SERVICES bit set.
   */
@@ -57,9 +56,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/arch/arm64/kernel/efi.c
 +++ b/arch/arm64/kernel/efi.c
 @@ -20,6 +20,29 @@
- /* we will fill this structure from the stub, so don't put it in .bss */
- struct screen_info screen_info __section(.data);
  
+ #include <asm/efi.h>
+
 +int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
 +{
 +	pteval_t prot_val;
@@ -203,7 +202,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  {
  	u64 mapsize;
  
-@@ -131,12 +120,7 @@ static int __init arm64_enable_runtime_s
+@@ -131,12 +120,7 @@ static int __init arm64_enable_runtime_services(void)
  
  	return 0;
  }

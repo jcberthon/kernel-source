@@ -45,10 +45,10 @@ Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
 
 --- a/Documentation/virtual/kvm/api.txt
 +++ b/Documentation/virtual/kvm/api.txt
-@@ -3761,3 +3761,12 @@ Currently the following bits are defined
- Future versions of kvm may implement additional events. These will get
- indicated by returning a higher number from KVM_CHECK_EXTENSION and will be
- listed above.
+@@ -3792,3 +3792,12 @@ In order to use SynIC, it has to be acti
+ capability via KVM_ENABLE_CAP ioctl on the vcpu fd. Note that this
+ will disable the use of APIC hardware virtualization even if supported
+ by the CPU, as it's incompatible with SynIC auto-EOI behavior.
 +
 +8.8 KVM_CAP_X86_GUEST_MWAIT
 +
@@ -78,7 +78,7 @@ Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
  	control->int_ctl = V_INTR_MASKING_MASK;
 --- a/arch/x86/kvm/vmx.c
 +++ b/arch/x86/kvm/vmx.c
-@@ -3161,11 +3161,13 @@ static __init int setup_vmcs_config(stru
+@@ -3173,11 +3173,13 @@ static __init int setup_vmcs_config(stru
  	      CPU_BASED_USE_IO_BITMAPS |
  	      CPU_BASED_MOV_DR_EXITING |
  	      CPU_BASED_USE_TSC_OFFSETING |
@@ -96,7 +96,7 @@ Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
  	      CPU_BASED_ACTIVATE_SECONDARY_CONTROLS;
 --- a/arch/x86/kvm/x86.c
 +++ b/arch/x86/kvm/x86.c
-@@ -2580,6 +2580,9 @@ int kvm_vm_ioctl_check_extension(struct
+@@ -2588,6 +2588,9 @@ int kvm_vm_ioctl_check_extension(struct
  #endif
  		r = 1;
  		break;
@@ -117,7 +117,7 @@ Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
  #include <linux/kvm_host.h>
  #include "kvm_cache_regs.h"
  
-@@ -193,4 +195,39 @@ extern unsigned int min_timer_period_us;
+@@ -194,4 +196,39 @@ extern unsigned int min_timer_period_us;
  extern unsigned int lapic_timer_advance_ns;
  
  extern struct static_key kvm_no_apic_vcpu;
@@ -159,10 +159,10 @@ Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
  #endif
 --- a/include/uapi/linux/kvm.h
 +++ b/include/uapi/linux/kvm.h
-@@ -835,6 +835,7 @@ struct kvm_ppc_smmu_info {
- #define KVM_CAP_VCPU_ATTRIBUTES 126
+@@ -837,6 +837,7 @@ struct kvm_ppc_smmu_info {
+ #define KVM_CAP_MAX_VCPU_ID 128
+ #define KVM_CAP_X2APIC_API 129
  #define KVM_CAP_MSI_DEVID 131
- #define KVM_CAP_ARM_USER_IRQ (0x1000 | 137) /* Will only be fixed in 4.12 */
 +#define KVM_CAP_X86_GUEST_MWAIT 143
  #define KVM_CAP_S390_BPB 152
  

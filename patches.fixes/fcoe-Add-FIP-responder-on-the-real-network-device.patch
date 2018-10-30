@@ -10,15 +10,13 @@ not the VLAN device.
 
 Signed-off-by: Hannes Reinecke <hare@suse.com>
 ---
- drivers/scsi/fcoe/fcoe.c | 63 +++++++++++++++++++++++++++++++++++++++++++++++-
- drivers/scsi/fcoe/fcoe.h |  2 ++
- 2 files changed, 64 insertions(+), 1 deletion(-)
+ drivers/scsi/fcoe/fcoe.c |   71 ++++++++++++++++++++++++++++++++++++++++++++++-
+ drivers/scsi/fcoe/fcoe.h |    2 +
+ 2 files changed, 72 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/scsi/fcoe/fcoe.c b/drivers/scsi/fcoe/fcoe.c
-index 8c85a7e..d8fe6b4 100644
 --- a/drivers/scsi/fcoe/fcoe.c
 +++ b/drivers/scsi/fcoe/fcoe.c
-@@ -98,6 +98,8 @@ static void fcoe_dev_cleanup(void);
+@@ -90,6 +90,8 @@ static void fcoe_dev_cleanup(void);
  static struct fcoe_interface
  *fcoe_hostlist_lookup_port(const struct net_device *);
  
@@ -27,7 +25,7 @@ index 8c85a7e..d8fe6b4 100644
  static int fcoe_fip_recv(struct sk_buff *, struct net_device *,
  			 struct packet_type *, struct net_device *);
  
-@@ -371,6 +373,12 @@ static int fcoe_interface_setup(struct fcoe_interface *fcoe,
+@@ -363,6 +365,12 @@ static int fcoe_interface_setup(struct f
  	fcoe->fip_packet_type.dev = netdev;
  	dev_add_pack(&fcoe->fip_packet_type);
  
@@ -40,7 +38,7 @@ index 8c85a7e..d8fe6b4 100644
  	return 0;
  }
  
-@@ -458,6 +466,8 @@ static void fcoe_interface_remove(struct fcoe_interface *fcoe)
+@@ -450,6 +458,8 @@ static void fcoe_interface_remove(struct
  	 */
  	__dev_remove_pack(&fcoe->fcoe_packet_type);
  	__dev_remove_pack(&fcoe->fip_packet_type);
@@ -49,7 +47,7 @@ index 8c85a7e..d8fe6b4 100644
  	synchronize_net();
  
  	/* Delete secondary MAC addresses */
-@@ -505,6 +515,51 @@ static void fcoe_interface_cleanup(struct fcoe_interface *fcoe)
+@@ -497,6 +507,51 @@ static void fcoe_interface_cleanup(struc
  }
  
  /**
@@ -101,26 +99,32 @@ index 8c85a7e..d8fe6b4 100644
   * fcoe_fip_recv() - Handler for received FIP frames
   * @skb:      The receive skb
   * @netdev:   The associated net device
-@@ -547,7 +602,13 @@ static void fcoe_port_send(struct fcoe_port *port, struct sk_buff *skb)
+@@ -539,7 +594,21 @@ static void fcoe_port_send(struct fcoe_p
   */
  static void fcoe_fip_send(struct fcoe_ctlr *fip, struct sk_buff *skb)
  {
 -	skb->dev = fcoe_from_ctlr(fip)->netdev;
-+	struct fip_header *fiph = (struct fip_header *)skb->data;
++	struct fcoe_interface *fcoe = fcoe_from_ctlr(fip);
++	struct fip_frame {
++		struct ethhdr eth;
++		struct fip_header fip;
++	} __packed *frame;
 +
-+	if (ntohs(fiph->fip_op) == FIP_OP_VLAN) {
-+		skb->dev = fcoe_from_ctlr(fip)->realdev;
-+	} else {
-+		skb->dev = fcoe_from_ctlr(fip)->netdev;
-+	}
++	/*
++	 * Use default VLAN for FIP VLAN discovery protocol
++	 */
++	frame = (struct fip_frame *)skb->data;
++	if (frame->fip.fip_op == ntohs(FIP_OP_VLAN) &&
++	    fcoe->realdev != fcoe->netdev)
++		skb->dev = fcoe->realdev;
++	else
++		skb->dev = fcoe->netdev;
  	fcoe_port_send(lport_priv(fip->lp), skb);
  }
  
-diff --git a/drivers/scsi/fcoe/fcoe.h b/drivers/scsi/fcoe/fcoe.h
-index 2b53672..cfa1ae9 100644
 --- a/drivers/scsi/fcoe/fcoe.h
 +++ b/drivers/scsi/fcoe/fcoe.h
-@@ -68,6 +68,7 @@ do {                                                            	\
+@@ -68,6 +68,7 @@ do {
   * @netdev:	      The associated net device
   * @fcoe_packet_type: FCoE packet type
   * @fip_packet_type:  FIP packet type
@@ -136,6 +140,3 @@ index 2b53672..cfa1ae9 100644
  	struct fc_exch_mgr *oem;
  	u8	removed;
  	u8	priority;
--- 
-1.8.5.6
-

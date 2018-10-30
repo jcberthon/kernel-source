@@ -33,5 +33,5 @@ Signed-off-by: Takashi Iwai <tiwai@suse.de>
 +		.chained = true,
 +		.chain_id = ALC269_FIXUP_HEADSET_MIC
  	},
- 	[ALC295_FIXUP_HP_X360] = {
- 		.type = HDA_FIXUP_FUNC,
+ };
+ 

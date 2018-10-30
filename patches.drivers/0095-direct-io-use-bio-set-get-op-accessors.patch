@@ -89,14 +89,14 @@ index 67c31f2..bc41980 100644
  	}
  
 @@ -265,7 +267,7 @@ static ssize_t dio_complete(struct dio *dio, loff_t offset, ssize_t ret,
- 		inode_dio_end(dio->inode);
+ 		 */
+ 		dio->iocb->ki_pos += transferred;
  
- 	if (is_async) {
--		if (dio->rw & WRITE) {
-+		if (dio->op == REQ_OP_WRITE) {
- 			int err;
- 
- 			err = generic_write_sync(dio->iocb->ki_filp, offset,
+-		if (dio->rw & WRITE)
++		if (dio->op == REQ_OP_WRITE)
+ 			ret = generic_write_sync(dio->iocb,  transferred);
+ 		dio->iocb->ki_complete(dio->iocb, ret, 0);
+ 	}
 @@ -374,7 +376,7 @@ dio_bio_alloc(struct dio *dio, struct dio_submit *sdio,
  
  	bio->bi_bdev = bdev;
@@ -147,8 +147,8 @@ index 67c31f2..bc41980 100644
 -		create = dio->rw & WRITE;
 +		create = dio->op == REQ_OP_WRITE;
  		if (dio->flags & DIO_SKIP_HOLES) {
- 			if (sdio->block_in_file < (i_size_read(dio->inode) >>
- 							sdio->blkbits))
+ 			if (fs_startblk <= ((i_size_read(dio->inode) - 1) >>
+ 							i_blkbits))
 @@ -787,7 +788,7 @@ submit_page_section(struct dio *dio, struct dio_submit *sdio, struct page *page,
  {
  	int ret = 0;

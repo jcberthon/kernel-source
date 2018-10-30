@@ -34,9 +34,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +}
 +EXPORT_SYMBOL_GPL(clk_unregister_fixed_factor);
 +
- void clk_hw_unregister_fixed_factor(struct clk_hw *hw)
- {
- 	struct clk_fixed_factor *fix;
+ #ifdef CONFIG_OF
+ /**
+  * of_fixed_factor_clk_setup() - Setup function for simple fixed factor clock
 --- a/include/linux/clk-provider.h
 +++ b/include/linux/clk-provider.h
 @@ -531,6 +531,7 @@ extern const struct clk_ops clk_fixed_fa
@@ -44,6 +44,6 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  		const char *parent_name, unsigned long flags,
  		unsigned int mult, unsigned int div);
 +void clk_unregister_fixed_factor(struct clk *clk);
- struct clk_hw *clk_hw_register_fixed_factor(struct device *dev,
- 		const char *name, const char *parent_name, unsigned long flags,
- 		unsigned int mult, unsigned int div);
+ 
+ /**
+  * struct clk_fractional_divider - adjustable fractional divider clock

@@ -182,8 +182,8 @@ index b807c8a69dca..7983390ff0a9 100644
 +extern long __start___stf_entry_barrier_fixup, __stop___stf_entry_barrier_fixup;
 +extern long __start___stf_exit_barrier_fixup, __stop___stf_exit_barrier_fixup;
  extern long __start___rfi_flush_fixup, __stop___rfi_flush_fixup;
- extern long __start___barrier_nospec_fixup, __stop___barrier_nospec_fixup;
  
+ #endif
 diff --git a/arch/powerpc/include/asm/security_features.h b/arch/powerpc/include/asm/security_features.h
 index fa4d2e1cf772..44989b22383c 100644
 --- a/arch/powerpc/include/asm/security_features.h
@@ -269,13 +269,12 @@ index aab556f0ebd4..7d3d6eb4975b 100644
  	SYSCALL_PSERIES_1
  	SYSCALL_PSERIES_2_DIRECT
  	SYSCALL_PSERIES_3
-@@ -1575,6 +1596,22 @@ power4_fixup_nap:
+@@ -1575,6 +1596,21 @@ power4_fixup_nap:
  	blr
  #endif
  
 +	.globl stf_barrier_fallback
 +stf_barrier_fallback:
-+	ld	r13,PACA_AUX_PTR(r13) /* r13 now = paca_aux pointer */
 +	std	r9,PACA_EXRFI+EX_R9(r13)
 +	std	r10,PACA_EXRFI+EX_R10(r13)
 +	sync

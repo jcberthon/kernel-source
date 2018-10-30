@@ -83,7 +83,7 @@ index b9ad0e8..390be84 100644
 +		return -ENOMEM;
 +	r5l_recovery_create_empty_meta_block(log, page, pos, seq);
  	if (!sync_page_io(log->rdev, pos, PAGE_SIZE, page, REQ_OP_WRITE,
- 			  WRITE_FUA, false)) {
+ 			  REQ_FUA, false)) {
  		__free_page(page);
 -- 
 2.10.2

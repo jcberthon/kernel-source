@@ -27,12 +27,12 @@ Acked-by: John Jolly <jjolly@suse.com>
 ---
  arch/s390/include/asm/hugetlb.h |    5 +
  arch/s390/include/asm/page.h    |    1 
- arch/s390/include/asm/pgtable.h |  108 ++++++++++++++++++++++++++-------
+ arch/s390/include/asm/pgtable.h |  105 +++++++++++++++++++++++++-------
  arch/s390/mm/gup.c              |   45 +++++++++++++
  arch/s390/mm/hugetlbpage.c      |  129 ++++++++++++++++++++++++++++------------
  arch/s390/mm/pgtable.c          |    3 
  mm/hugetlb.c                    |    4 -
- 7 files changed, 232 insertions(+), 63 deletions(-)
+ 7 files changed, 229 insertions(+), 63 deletions(-)
 
 --- a/arch/s390/include/asm/hugetlb.h
 +++ b/arch/s390/include/asm/hugetlb.h
@@ -60,15 +60,9 @@ Acked-by: John Jolly <jjolly@suse.com>
  #define ARCH_HAS_HUGE_PTE_TYPE
 --- a/arch/s390/include/asm/pgtable.h
 +++ b/arch/s390/include/asm/pgtable.h
-@@ -270,9 +270,15 @@ static inline int is_module_addr(void *a
- #define _REGION3_ENTRY		(_REGION_ENTRY_TYPE_R3 | _REGION_ENTRY_LENGTH)
- #define _REGION3_ENTRY_EMPTY	(_REGION_ENTRY_TYPE_R3 | _REGION_ENTRY_INVALID)
- 
-+#define _REGION3_ENTRY_ORIGIN_LARGE ~0x7fffffffUL /* large page address	     */
-+#define _REGION3_ENTRY_ORIGIN  ~0x7ffUL/* region third table origin	     */
-+
- #define _REGION3_ENTRY_LARGE	0x400	/* RTTE-format control, large page  */
- #define _REGION3_ENTRY_RO	0x200	/* page protection bit		    */
+@@ -279,6 +279,9 @@ static inline int is_module_addr(void *a
+ #define _REGION3_ENTRY_READ	0x0002	/* SW region read bit */
+ #define _REGION3_ENTRY_WRITE	0x0001	/* SW region write bit */
  
 +#define _REGION_ENTRY_BITS	0xfffffffffffff227UL
 +#define _REGION_ENTRY_BITS_LARGE 0xffffffff8000fe27UL
@@ -76,7 +70,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  /* Bits in the segment table entry */
  #define _SEGMENT_ENTRY_BITS	0xfffffffffffffe33UL
  #define _SEGMENT_ENTRY_BITS_LARGE 0xfffffffffff0ff33UL
-@@ -468,7 +474,7 @@ static inline int pud_none(pud_t pud)
+@@ -548,7 +551,7 @@ static inline int pud_none(pud_t pud)
  {
  	if ((pud_val(pud) & _REGION_ENTRY_TYPE_MASK) < _REGION_ENTRY_TYPE_R3)
  		return 0;
@@ -85,7 +79,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  }
  
  static inline int pud_large(pud_t pud)
-@@ -478,17 +484,35 @@ static inline int pud_large(pud_t pud)
+@@ -558,17 +561,35 @@ static inline int pud_large(pud_t pud)
  	return !!(pud_val(pud) & _REGION3_ENTRY_LARGE);
  }
  
@@ -130,7 +124,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  }
  
  static inline int pmd_present(pmd_t pmd)
-@@ -501,11 +525,6 @@ static inline int pmd_none(pmd_t pmd)
+@@ -581,11 +602,6 @@ static inline int pmd_none(pmd_t pmd)
  	return pmd_val(pmd) == _SEGMENT_ENTRY_INVALID;
  }
  
@@ -142,7 +136,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  static inline unsigned long pmd_pfn(pmd_t pmd)
  {
  	unsigned long origin_mask;
-@@ -516,13 +535,6 @@ static inline unsigned long pmd_pfn(pmd_
+@@ -596,13 +612,6 @@ static inline unsigned long pmd_pfn(pmd_
  	return (pmd_val(pmd) & origin_mask) >> PAGE_SHIFT;
  }
  
@@ -156,7 +150,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  #define __HAVE_ARCH_PMDP_SPLITTING_FLUSH
  extern void pmdp_splitting_flush(struct vm_area_struct *vma,
  				 unsigned long addr, pmd_t *pmdp);
-@@ -1343,6 +1355,7 @@ static inline pmd_t *pmd_offset(pud_t *p
+@@ -1425,6 +1434,7 @@ static inline pmd_t *pmd_offset(pud_t *p
  #define pte_page(x) pfn_to_page(pte_pfn(x))
  
  #define pmd_page(pmd) pfn_to_page(pmd_pfn(pmd))
@@ -164,7 +158,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  
  /* Find an entry in the lowest level page table.. */
  #define pte_offset(pmd, addr) ((pte_t *) pmd_deref(*(pmd)) + pte_index(addr))
-@@ -1472,6 +1485,19 @@ static inline void __pmdp_idte(unsigned
+@@ -1582,6 +1592,19 @@ static inline void __pmdp_idte(unsigned
  		: "cc" );
  }
  
@@ -184,7 +178,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  static inline void __pmdp_idte_local(unsigned long address, pmd_t *pmdp)
  {
  	unsigned long sto;
-@@ -1484,6 +1510,19 @@ static inline void __pmdp_idte_local(uns
+@@ -1594,6 +1617,19 @@ static inline void __pmdp_idte_local(uns
  		: "cc" );
  }
  
@@ -204,7 +198,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  static inline void pmdp_flush_direct(struct mm_struct *mm,
  				     unsigned long address, pmd_t *pmdp)
  {
-@@ -1505,6 +1544,31 @@ static inline void pmdp_flush_direct(str
+@@ -1615,6 +1651,31 @@ static inline void pmdp_flush_direct(str
  	atomic_sub(0x10000, &mm->context.attach_count);
  }
  
@@ -519,12 +513,14 @@ Acked-by: John Jolly <jjolly@suse.com>
  	/* large pmds cannot yet be handled */
 --- a/mm/hugetlb.c
 +++ b/mm/hugetlb.c
-@@ -1003,7 +1003,7 @@ static int hstate_next_node_to_free(stru
+@@ -1000,7 +1000,9 @@ static int hstate_next_node_to_free(stru
  		((node = hstate_next_node_to_free(hs, mask)) || 1);	\
  		nr_nodes--)
  
--#if defined(CONFIG_CMA) && defined(CONFIG_X86_64)
-+#if defined(CONFIG_CMA) && (defined(CONFIG_X86_64) || defined(CONFIG_S390))
+-#if defined(CONFIG_X86_64) && ((defined(CONFIG_MEMORY_ISOLATION) && defined(CONFIG_COMPACTION)) || defined(CONFIG_CMA))
++#if (defined(CONFIG_X86_64) || defined(CONFIG_S390)) && \
++	((defined(CONFIG_MEMORY_ISOLATION) && defined(CONFIG_COMPACTION)) || \
++	defined(CONFIG_CMA))
  static void destroy_compound_gigantic_page(struct page *page,
  					unsigned int order)
  {

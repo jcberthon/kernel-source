@@ -37,8 +37,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/drivers/acpi/numa.c
 +++ b/drivers/acpi/numa.c
 @@ -186,6 +186,19 @@ acpi_table_print_srat_entry(struct acpi_
+ 				 "enabled" : "disabled");
  		}
- #endif				/* ACPI_DEBUG_OUTPUT */
  		break;
 +
 +	case ACPI_SRAT_TYPE_GICC_AFFINITY:
@@ -54,8 +54,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +		break;
 +
  	default:
- 		printk(KERN_WARNING PREFIX
- 		       "Found unsupported SRAT entry (type = 0x%x)\n",
+ 		pr_warn("Found unsupported SRAT entry (type = 0x%x)\n",
+ 			header->type);
 @@ -275,6 +287,24 @@ acpi_parse_processor_affinity(struct acp
  	return 0;
  }

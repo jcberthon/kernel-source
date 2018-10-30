@@ -99,7 +99,7 @@ index b46fdd26ff42..d2d972dbf334 100644
  STATIC int
  xlog_recover_process(
 @@ -4276,6 +4231,31 @@ xlog_recover_process(
- 	struct list_head	*buffer_list)
+ 	int			pass)
  {
  	int			error;
 +	__le32			crc;

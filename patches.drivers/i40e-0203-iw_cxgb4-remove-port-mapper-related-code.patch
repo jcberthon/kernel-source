@@ -361,8 +361,8 @@ Acked-by: David Chang <dchang@suse.com>
 -				    &ep->com.mapped_local_addr;
 +				    &ep->com.local_addr;
  
- 	c4iw_init_wr_wait(&ep->com.wr_wait);
- 	err = cxgb4_create_server6(ep->com.dev->rdev.lldi.ports[0],
+ 	if (ipv6_addr_type(&sin6->sin6_addr) != IPV6_ADDR_ANY) {
+ 		err = cxgb4_clip_get(ep->com.dev->rdev.lldi.ports[0],
 @@ -3296,7 +3197,7 @@ static int create_server4(struct c4iw_de
  {
  	int err;

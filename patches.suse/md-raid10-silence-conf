@@ -17,12 +17,12 @@ Signed-off-by: Neil Brown <neilb@suse.de>
 +++ b/drivers/md/raid10.c
 @@ -1665,6 +1665,10 @@ static void print_conf(struct r10conf *c
  	int i;
- 	struct raid10_info *tmp;
+ 	struct md_rdev *rdev;
  
 +	if (conf && conf->geo.raid_disks >= 16)
 +		/* Too many disks, too noisy */
 +		return;
 +
- 	printk(KERN_DEBUG "RAID10 conf printout:\n");
+ 	pr_debug("RAID10 conf printout:\n");
  	if (!conf) {
- 		printk(KERN_DEBUG "(!conf)\n");
+ 		pr_debug("(!conf)\n");

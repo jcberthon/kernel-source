@@ -25,5 +25,5 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  	unsigned long static_init_pgcnt;
 +#endif
  #endif /* CONFIG_DEFERRED_STRUCT_PAGE_INIT */
- 	void *suse_kabi_padding;
  } pg_data_t;
+

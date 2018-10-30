@@ -266,8 +266,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  			continue;
  		if (md->virt_addr == 0)
 @@ -154,7 +152,7 @@ static __init void reserve_regions(void)
- 	memblock_dump_all();
- 	memblock_remove(0, (phys_addr_t)ULLONG_MAX);
+ 	if (efi_enabled(EFI_DBG))
+ 		pr_info("Processing EFI memory map:\n");
  
 -	for_each_efi_memory_desc_in_map(&memmap, md) {
 +	for_each_efi_memory_desc(md) {

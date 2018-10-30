@@ -50,9 +50,9 @@ index 229f4a7a18fb..b46fdd26ff42 100644
  	xfs_buf_t		*hbp, *dbp;
 -	int			error = 0, h_size;
 +	int			error = 0, h_size, h_len;
- 	int			error2 = 0;
  	int			bblks, split_bblks;
  	int			hblks, split_hblks, wrapped_hblks;
+ 	struct hlist_head	rhash[XLOG_RHASH_SIZE];
 @@ -4371,7 +4371,31 @@ xlog_do_recovery_pass(
  		error = xlog_valid_rec_header(log, rhead, tail_blk);
  		if (error)

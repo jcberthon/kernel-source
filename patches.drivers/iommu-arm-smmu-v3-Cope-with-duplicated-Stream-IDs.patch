@@ -33,7 +33,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +++ b/drivers/iommu/arm-smmu-v3.c
 @@ -1585,7 +1585,7 @@ static __le64 *arm_smmu_get_step_for_sid
  
- static int arm_smmu_install_ste_for_dev(struct iommu_fwspec *fwspec)
+ static void arm_smmu_install_ste_for_dev(struct iommu_fwspec *fwspec)
  {
 -	int i;
 +	int i, j;
@@ -53,4 +53,4 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +
  		arm_smmu_write_strtab_ent(smmu, sid, step, &master->ste);
  	}
- 
+ }

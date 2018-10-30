@@ -68,7 +68,7 @@ index 579d43c..5492e4b 100644
 +	.remove		= dw_mci_exynos_remove,
  	.driver		= {
  		.name		= "dwmmc_exynos",
- 		.owner		= THIS_MODULE,
+ 		.of_match_table	= dw_mci_exynos_match,
 -- 
 2.11.0
 

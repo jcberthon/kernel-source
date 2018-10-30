@@ -61,7 +61,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
 +	return 0;
  }
  
- #ifdef CONFIG_64BIT
+ /*
 @@ -374,7 +374,7 @@ static void irqtime_account_process_tick
  	u64 cputime = (__force u64) cputime_one_jiffy;
  	u64 *cpustat = kcpustat_this_cpu->cpustat;

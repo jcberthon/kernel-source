@@ -24,7 +24,7 @@ diff --git a/arch/x86/entry/syscalls/syscall_32.tbl b/arch/x86/entry/syscalls/sy
 index 009bb88..2a47e9a 100644
 --- a/arch/x86/entry/syscalls/syscall_32.tbl
 +++ b/arch/x86/entry/syscalls/syscall_32.tbl
-@@ -383,8 +383,8 @@
+@@ -383,5 +383,5 @@
  374	i386	userfaultfd		sys_userfaultfd
  375	i386	membarrier		sys_membarrier
  376	i386	mlock2			sys_mlock2
@@ -32,9 +32,6 @@ index 009bb88..2a47e9a 100644
 -379	i386	pwritev2		sys_pwritev2
 +378	i386	preadv2			sys_preadv2			compat_sys_preadv2
 +379	i386	pwritev2		sys_pwritev2			compat_sys_pwritev2
- 380	i386	pkey_mprotect		sys_pkey_mprotect
- 381	i386	pkey_alloc		sys_pkey_alloc
- 382	i386	pkey_free		sys_pkey_free
 -- 
 1.8.5.6
 

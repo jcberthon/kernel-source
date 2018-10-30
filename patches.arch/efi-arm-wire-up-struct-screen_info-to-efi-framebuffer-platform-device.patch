@@ -30,24 +30,24 @@ Signed-off-by: Matt Fleming <mfleming@suse.de>
 
 diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
 index 4da1b27..56a76b6 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
 @@ -26,6 +26,7 @@
- #include <linux/sched.h>
- #include <linux/slab.h>
- #include <linux/spinlock.h>
+ #include <linux/mm_types.h>
+ #include <linux/of.h>
+ #include <linux/of_fdt.h>
 +#include <linux/platform_device.h>
  
- #include <asm/cacheflush.h>
  #include <asm/efi.h>
-@@ -244,7 +245,23 @@ void __init efi_init_fdt(void *fdt)
  
- 	reserve_regions();
- 	early_memunmap(memmap.map, params.mmap_size);
+@@ -244,4 +245,20 @@ void __init efi_init_fdt(void *fdt)
+ 	memblock_reserve(params.mmap & PAGE_MASK,
+ 			 PAGE_ALIGN(params.mmap_size +
+ 				    (params.mmap & ~PAGE_MASK)));
 +
 +	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI)
 +		memblock_reserve(screen_info.lfb_base, screen_info.lfb_size);
-+}
+ }
 +
 +static int __init register_gop_device(void)
 +{
@@ -59,8 +59,5 @@ index 4da1b27..56a76b6 100644
 +	/* the efifb driver accesses screen_info directly, no need to pass it */
 +	pd = platform_device_register_simple("efi-framebuffer", 0, NULL, 0);
 +	return PTR_ERR_OR_ZERO(pd);
- }
++}
 +subsys_initcall(register_gop_device);
- 
- static bool __init efi_virtmap_init(void)
- {

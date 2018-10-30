@@ -22,7 +22,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 @@ -402,7 +402,10 @@ int btrfs_submit_compressed_write(struct
  			}
  
- 			ret = btrfs_map_bio(root, WRITE, bio, 0, 1);
+ 			ret = btrfs_map_bio(root, bio, 0, 1);
 -			BUG_ON(ret); /* -ENOMEM */
 +			if (ret) {
 +				bio->bi_error = ret;
@@ -34,7 +34,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 @@ -432,7 +435,10 @@ int btrfs_submit_compressed_write(struct
  	}
  
- 	ret = btrfs_map_bio(root, WRITE, bio, 0, 1);
+ 	ret = btrfs_map_bio(root, bio, 0, 1);
 -	BUG_ON(ret); /* -ENOMEM */
 +	if (ret) {
 +		bio->bi_error = ret;

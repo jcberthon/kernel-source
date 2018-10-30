@@ -167,6 +167,6 @@ Signed-off-by: Joerg Roedel <jroedel@suse.de>
 +		if (IS_ERR_VALUE(devid))
 +			return NULL;
 +
- 		if (devid >= 0) {
- 			iommu = amd_iommu_rlookup_table[devid];
- 			if (iommu)
+ 		iommu = amd_iommu_rlookup_table[devid];
+ 		if (iommu)
+ 			return iommu->msi_domain;

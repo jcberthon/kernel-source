@@ -36,19 +36,6 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  net/sunrpc/xprtrdma/svc_rdma_recvfrom.c     |  2 +-
  21 files changed, 68 insertions(+), 78 deletions(-)
 
-diff --git a/drivers/infiniband/core/rw.c b/drivers/infiniband/core/rw.c
-index 64d501b..bd700ff 100644
---- a/drivers/infiniband/core/rw.c
-+++ b/drivers/infiniband/core/rw.c
-@@ -91,7 +91,7 @@ static int rdma_rw_init_one_mr(struct ib_qp *qp, u8 port_num,
- 		reg->inv_wr.next = NULL;
- 	}
- 
--	ret = ib_map_mr_sg(reg->mr, sg, nents, PAGE_SIZE);
-+	ret = ib_map_mr_sg(reg->mr, sg, nents, offset, PAGE_SIZE);
- 	if (ret < nents) {
- 		ib_mr_pool_put(qp, &qp->rdma_mrs, reg->mr);
- 		return -EINVAL;
 diff --git a/drivers/infiniband/core/verbs.c b/drivers/infiniband/core/verbs.c
 index 4147abd..0f2e6d9 100644
 --- a/drivers/infiniband/core/verbs.c

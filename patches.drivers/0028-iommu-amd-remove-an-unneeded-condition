@@ -17,9 +17,9 @@ Signed-off-by: Joerg Roedel <jroedel@suse.de>
 --- a/drivers/iommu/amd_iommu.c
 +++ b/drivers/iommu/amd_iommu.c
 @@ -4067,11 +4067,9 @@ static struct irq_domain *get_irq_domain
- 		if (devid < 0)
- 			return NULL;
- 
+ 	case X86_IRQ_ALLOC_TYPE_MSI:
+ 	case X86_IRQ_ALLOC_TYPE_MSIX:
+ 		devid = get_device_id(&info->msi_dev->dev);
 -		if (devid >= 0) {
 -			iommu = amd_iommu_rlookup_table[devid];
 -			if (iommu)

@@ -77,7 +77,7 @@ index 6588ec567d93..894e4654ad47 100644
   * ACPI _CPC structures.
 @@ -32,6 +41,39 @@
   */
- static struct cppc_cpudata **all_cpu_data;
+ static struct cpudata **all_cpu_data;
  
 +/* Capture the max KHz from DMI */
 +static u64 cppc_dmi_max_khz;
@@ -136,7 +136,7 @@ index 6588ec567d93..894e4654ad47 100644
 +	policy->max = cppc_dmi_max_khz;
  	policy->cpuinfo.min_freq = policy->min;
  	policy->cpuinfo.max_freq = policy->max;
- 	policy->cpuinfo.transition_latency = cppc_get_transition_latency(cpu_num);
+ 	policy->shared_type = cpu->shared_type;
 @@ -113,7 +157,8 @@ static int cppc_cpufreq_cpu_init(struct cpufreq_policy *policy)
  	cpu->cur_policy = policy;
  

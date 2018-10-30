@@ -23,12 +23,12 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 --- a/arch/arm64/mm/mmu.c
 +++ b/arch/arm64/mm/mmu.c
 @@ -410,6 +410,9 @@ static void __init map_mem(pgd_t *pgd)
- 	}
+ #endif
  }
  
 +/* Hardcode rodata=true to fix compilation errors */
 +static const bool rodata_enabled = true;
 +
+ #ifdef CONFIG_DEBUG_RODATA
  void mark_rodata_ro(void)
  {
- 	unsigned long section_size;

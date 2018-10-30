@@ -104,7 +104,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  static int ibpb_state = -1;
  
  unsigned int notrace x86_ibrs_enabled(void)
-@@ -52,18 +55,21 @@ EXPORT_SYMBOL_GPL(x86_enable_ibrs);
+@@ -52,19 +55,22 @@ EXPORT_SYMBOL_GPL(x86_enable_ibrs);
  void x86_spec_check(void)
  {
  
@@ -125,6 +125,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  		ibpb_state = 1;
  
  		setup_force_cpu_cap(X86_FEATURE_SPEC_CTRL);
+ 		setup_force_cpu_cap(X86_FEATURE_MSR_SPEC_CTRL);
 -
 -		printk_once(KERN_INFO "IBRS/IBPB: Initialized\n");
  	}

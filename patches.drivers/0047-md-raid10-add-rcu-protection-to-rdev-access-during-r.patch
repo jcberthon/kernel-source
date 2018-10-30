@@ -97,7 +97,7 @@ index 0e937d7..c2828d7 100644
  					       addr,
  					       s << 9,
  					       bvec[idx].bv_page,
- 					       READ, false);
+ 					       REQ_OP_READ, 0, false);
 +			rdev_dec_pending(rdev, mddev);
 +			rcu_read_lock();
  			if (success)

@@ -236,8 +236,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	if (!mv_chan->dma_desc_pool_virt)
  		return ERR_PTR(-ENOMEM);
  
---- a/drivers/dma/qcom/bam_dma.c
-+++ b/drivers/dma/qcom/bam_dma.c
+--- a/drivers/dma/qcom_bam_dma.c
++++ b/drivers/dma/qcom_bam_dma.c
 @@ -502,8 +502,8 @@ static int bam_alloc_chan(struct dma_cha
  		return 0;
  

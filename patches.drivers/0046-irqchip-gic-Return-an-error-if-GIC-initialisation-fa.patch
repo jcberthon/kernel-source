@@ -49,9 +49,9 @@ index a6ac405..f145a6b 100644
 +		if (WARN_ON(cpu >= NR_GIC_CPU_IF))
 +			return -EINVAL;
 +
+ 		gic_check_cpu_features();
  		cpu_mask = gic_get_cpumask(gic);
  		gic_cpu_map[cpu] = cpu_mask;
- 
 @@ -502,6 +504,8 @@ static void gic_cpu_init(struct gic_chip_data *gic)
  
  	writel_relaxed(GICC_INT_PRI_THRESHOLD, base + GIC_CPU_PRIMASK);
@@ -228,9 +228,9 @@ index a6ac405..f145a6b 100644
 +		return ret;
 +	}
 +
- 	if (!gic_cnt) {
+ 	if (!gic_cnt)
  		gic_init_physaddr(node);
- 		gic_of_setup_kvm_info(node);
+ 
 @@ -1383,7 +1423,7 @@ static int __init gic_v2_acpi_init(struct acpi_subtable_header *header,
  	struct acpi_madt_generic_distributor *dist;
  	void __iomem *cpu_base, *dist_base;

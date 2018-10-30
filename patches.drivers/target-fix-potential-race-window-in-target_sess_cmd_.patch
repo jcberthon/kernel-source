@@ -51,10 +51,10 @@ index b9be908..bae615a 100644
 +				 &se_sess->sess_wait_list, se_cmd_list) {
  		rc = kref_get_unless_zero(&se_cmd->cmd_kref);
  		if (rc) {
- 			spin_lock(&se_cmd->t_state_lock);
+ 			se_cmd->cmd_wait_set = 1;
 @@ -2673,7 +2676,8 @@ void target_sess_cmd_list_set_waiting(struct se_session *se_sess)
- 				se_cmd->transport_state |= CMD_T_FABRIC_STOP;
- 			}
+ 			spin_lock(&se_cmd->t_state_lock);
+ 			se_cmd->transport_state |= CMD_T_FABRIC_STOP;
  			spin_unlock(&se_cmd->t_state_lock);
 -		}
 +		} else

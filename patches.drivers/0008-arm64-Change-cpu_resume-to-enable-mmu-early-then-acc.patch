@@ -96,7 +96,7 @@ index b81abe2ef4d5..7e1b34b88ec9 100644
  	.section	".idmap.text", "ax"
 -__enable_mmu:
 +ENTRY(__enable_mmu)
- 	mrs	x18, sctlr_el1			// preserve old SCTLR_EL1 value
+ 	mrs	x22, sctlr_el1			// preserve old SCTLR_EL1 value
  	mrs	x1, ID_AA64MMFR0_EL1
  	ubfx	x2, x1, #ID_AA64MMFR0_TGRAN_SHIFT, 4
 diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c

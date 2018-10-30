@@ -661,7 +661,7 @@ index 2eae3d5..6610c5c 100644
  	kfree(tags);
  	return NULL;
  }
-@@ -673,8 +429,8 @@ struct blk_mq_tags *blk_mq_init_tags(unsigned int total_tags,
+@@ -673,9 +429,9 @@ struct blk_mq_tags *blk_mq_init_tags(unsigned int total_tags,
  
  void blk_mq_free_tags(struct blk_mq_tags *tags)
  {
@@ -669,6 +669,7 @@ index 2eae3d5..6610c5c 100644
 -	bt_free(&tags->breserved_tags);
 +	sbitmap_queue_free(&tags->bitmap_tags);
 +	sbitmap_queue_free(&tags->breserved_tags);
+ 	free_cpumask_var(tags->cpumask);
  	kfree(tags);
  }
  

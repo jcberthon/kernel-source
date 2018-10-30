@@ -79,7 +79,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 +	rxe_drop_ref(qp);
  }
  
- static int send(struct rxe_dev *rxe, struct rxe_pkt_info *pkt,
+ int rxe_send(struct rxe_dev *rxe, struct rxe_pkt_info *pkt, struct sk_buff *skb)
 @@ -502,6 +504,7 @@ static int send(struct rxe_dev *rxe, str
  		return -EAGAIN;
  	}

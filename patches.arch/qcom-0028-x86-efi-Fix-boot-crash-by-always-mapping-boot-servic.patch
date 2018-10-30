@@ -121,7 +121,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
   * whatever it wants with boot services code after ExitBootServices() has been
   * called. Ignoring this recommendation a significant bunch of EFI implementations 
 @@ -145,26 +166,50 @@ void __init efi_reserve_boot_services(vo
- 	for_each_efi_memory_desc(md) {
+ 		efi_memory_desc_t *md = p;
  		u64 start = md->phys_addr;
  		u64 size = md->num_pages << EFI_PAGE_SHIFT;
 +		bool already_reserved;

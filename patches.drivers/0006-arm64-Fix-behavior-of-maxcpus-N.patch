@@ -35,11 +35,11 @@ index 0faba2d18b6e..b730b6f7c0f4 100644
  	int err;
 -	unsigned int cpu, ncores = num_possible_cpus();
 +	unsigned int cpu;
- 	unsigned int this_cpu;
  
  	init_cpu_topology();
+ 
 @@ -591,26 +591,11 @@ void __init smp_prepare_cpus(unsigned int max_cpus)
- 	numa_store_cpu_info(this_cpu);
+ 	smp_store_cpu_info(smp_processor_id());
  
  	/*
 -	 * are we trying to boot more cores than exist?
@@ -66,9 +66,9 @@ index 0faba2d18b6e..b730b6f7c0f4 100644
  		if (cpu == smp_processor_id())
  			continue;
 @@ -624,7 +609,6 @@ void __init smp_prepare_cpus(unsigned int max_cpus)
+ 			continue;
  
  		set_cpu_present(cpu, true);
- 		numa_store_cpu_info(cpu);
 -		max_cpus--;
  	}
  }

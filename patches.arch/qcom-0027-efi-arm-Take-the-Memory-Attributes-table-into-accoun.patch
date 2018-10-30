@@ -39,9 +39,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
 +#define efi_set_mapping_permissions	efi_create_mapping
 +
- #define arch_efi_call_virt_setup()					\
+ #define efi_call_virt(f, ...)						\
  ({									\
- 	kernel_neon_begin();						\
+ 	efi_##f##_t *__f;						\
 --- a/drivers/firmware/efi/arm-init.c
 +++ b/drivers/firmware/efi/arm-init.c
 @@ -271,6 +271,7 @@ void __init efi_init_fdt(void *fdt)

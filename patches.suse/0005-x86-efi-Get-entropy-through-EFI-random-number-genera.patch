@@ -198,13 +198,4 @@ Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
  /*
   * Types and defines for EFI ResetSystem
   */
-@@ -629,6 +634,9 @@ typedef struct {
- #define EFI_1_10_SYSTEM_TABLE_REVISION  ((1 << 16) | (10))
- #define EFI_1_02_SYSTEM_TABLE_REVISION  ((1 << 16) | (02))
- 
-+#define EFI_RNG_PROTOCOL_GUID \
-+    EFI_GUID(  0x3152bca5, 0xeade, 0x433d, 0x86, 0x2e, 0xc0, 0x1c, 0xdc, 0x29, 0x1f, 0x44 )
-+
- typedef struct {
- 	efi_table_hdr_t hdr;
- 	u64 fw_vendor;	/* physical addr of CHAR16 vendor string */
+

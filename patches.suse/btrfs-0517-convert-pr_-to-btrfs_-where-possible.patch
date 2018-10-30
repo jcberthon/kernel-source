@@ -34,9 +34,9 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  fs/btrfs/super.c            |   10 ++--
  fs/btrfs/transaction.c      |   14 +++---
  fs/btrfs/transaction.h      |    1 
- fs/btrfs/volumes.c          |   32 +++++++++------
+ fs/btrfs/volumes.c          |   34 +++++++++-------
  fs/btrfs/volumes.h          |    2 
- 19 files changed, 226 insertions(+), 172 deletions(-)
+ 19 files changed, 227 insertions(+), 173 deletions(-)
 
 --- a/fs/btrfs/backref.c
 +++ b/fs/btrfs/backref.c
@@ -141,7 +141,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			if (ret)
 --- a/fs/btrfs/compression.c
 +++ b/fs/btrfs/compression.c
-@@ -850,7 +850,7 @@ again:
+@@ -853,7 +853,7 @@ again:
  					/* no burst */ 1);
  
  			if (__ratelimit(&_rs)) {
@@ -192,7 +192,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  
 --- a/fs/btrfs/disk-io.c
 +++ b/fs/btrfs/disk-io.c
-@@ -401,7 +401,8 @@ out:
+@@ -400,7 +400,8 @@ out:
   * Return 0 if the superblock checksum type matches the checksum value of that
   * algorithm. Pass the raw disk superblock data.
   */
@@ -202,7 +202,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  {
  	struct btrfs_super_block *disk_sb =
  		(struct btrfs_super_block *)raw_disk_sb;
-@@ -427,7 +428,7 @@ static int btrfs_check_super_csum(char *
+@@ -426,7 +427,7 @@ static int btrfs_check_super_csum(char *
  	}
  
  	if (csum_type >= ARRAY_SIZE(btrfs_csum_sizes)) {
@@ -211,7 +211,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				csum_type);
  		ret = 1;
  	}
-@@ -2768,7 +2769,7 @@ int open_ctree(struct super_block *sb,
+@@ -2762,7 +2763,7 @@ int open_ctree(struct super_block *sb,
  	 * We want to check superblock checksum, the type is stored inside.
  	 * Pass the whole disk block of size BTRFS_SUPER_INFO_SIZE (4k).
  	 */
@@ -220,7 +220,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		btrfs_err(fs_info, "superblock checksum mismatch");
  		err = -EINVAL;
  		brelse(bh);
-@@ -3580,7 +3581,7 @@ int btrfs_get_num_tolerated_disk_barrier
+@@ -3575,7 +3576,7 @@ int btrfs_get_num_tolerated_disk_barrier
  	}
  
  	if (min_tolerated == INT_MAX) {
@@ -229,7 +229,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		min_tolerated = 0;
  	}
  
-@@ -4072,24 +4073,24 @@ static int btrfs_check_super_valid(struc
+@@ -4067,24 +4068,24 @@ static int btrfs_check_super_valid(struc
  	int ret = 0;
  
  	if (btrfs_super_magic(sb) != BTRFS_MAGIC) {
@@ -259,7 +259,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				btrfs_super_log_root_level(sb), BTRFS_MAX_LEVEL);
  		ret = -EINVAL;
  	}
-@@ -4100,47 +4101,48 @@ static int btrfs_check_super_valid(struc
+@@ -4095,47 +4096,48 @@ static int btrfs_check_super_valid(struc
  	 */
  	if (!is_power_of_2(sectorsize) || sectorsize < 4096 ||
  	    sectorsize > BTRFS_MAX_METADATA_BLOCKSIZE) {
@@ -323,7 +323,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		ret = -EINVAL;
  	}
  
-@@ -4150,25 +4152,25 @@ static int btrfs_check_super_valid(struc
+@@ -4145,25 +4147,25 @@ static int btrfs_check_super_valid(struc
  	 */
  	if (btrfs_super_bytes_used(sb) < 6 * btrfs_super_nodesize(sb)) {
  		btrfs_err(fs_info, "bytes_used is too small %llu",
@@ -356,7 +356,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		ret = -EINVAL;
  	}
  
-@@ -4177,17 +4179,17 @@ static int btrfs_check_super_valid(struc
+@@ -4172,17 +4174,17 @@ static int btrfs_check_super_valid(struc
  	 * and one chunk
  	 */
  	if (btrfs_super_sys_array_size(sb) > BTRFS_SYSTEM_CHUNK_ARRAY_SIZE) {
@@ -381,7 +381,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		ret = -EINVAL;
  	}
  
-@@ -4196,12 +4198,16 @@ static int btrfs_check_super_valid(struc
+@@ -4191,12 +4193,16 @@ static int btrfs_check_super_valid(struc
  	 * but it's still possible that it's the one that's wrong.
  	 */
  	if (btrfs_super_generation(sb) < btrfs_super_chunk_root_generation(sb))
@@ -580,7 +580,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  static struct btrfs_block_group_cache *
 --- a/fs/btrfs/extent_io.c
 +++ b/fs/btrfs/extent_io.c
-@@ -2121,8 +2121,9 @@ int clean_io_failure(struct inode *inode
+@@ -2122,8 +2122,9 @@ int clean_io_failure(struct inode *inode
  
  	if (failrec->in_validation) {
  		/* there was no real error, just free the record */
@@ -592,7 +592,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		goto out;
  	}
  	if (fs_info->sb->s_flags & MS_RDONLY)
-@@ -2188,6 +2189,7 @@ void btrfs_free_io_failure_record(struct
+@@ -2189,6 +2190,7 @@ void btrfs_free_io_failure_record(struct
  int btrfs_get_io_failure_record(struct inode *inode, u64 start, u64 end,
  		struct io_failure_record **failrec_ret)
  {
@@ -600,7 +600,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	struct io_failure_record *failrec;
  	struct extent_map *em;
  	struct extent_io_tree *failure_tree = &BTRFS_I(inode)->io_failure_tree;
-@@ -2235,8 +2237,9 @@ int btrfs_get_io_failure_record(struct i
+@@ -2236,8 +2238,9 @@ int btrfs_get_io_failure_record(struct i
  						 em->compress_type);
  		}
  
@@ -612,7 +612,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  
  		failrec->logical = logical;
  		free_extent_map(em);
-@@ -2254,9 +2257,10 @@ int btrfs_get_io_failure_record(struct i
+@@ -2255,9 +2258,10 @@ int btrfs_get_io_failure_record(struct i
  			return ret;
  		}
  	} else {
@@ -626,7 +626,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		/*
  		 * when data can be on disk more than twice, add to failrec here
  		 * (e.g. with a list for failed_mirror) to make
-@@ -2272,18 +2276,19 @@ int btrfs_get_io_failure_record(struct i
+@@ -2273,18 +2277,19 @@ int btrfs_get_io_failure_record(struct i
  int btrfs_check_repairable(struct inode *inode, struct bio *failed_bio,
  			   struct io_failure_record *failrec, int failed_mirror)
  {
@@ -650,7 +650,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		return 0;
  	}
  
-@@ -2322,8 +2327,9 @@ int btrfs_check_repairable(struct inode
+@@ -2323,8 +2328,9 @@ int btrfs_check_repairable(struct inode
  	}
  
  	if (failrec->this_mirror > num_copies) {
@@ -662,9 +662,9 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		return 0;
  	}
  
-@@ -2413,8 +2419,9 @@ static int bio_readpage_error(struct bio
- 		return -EIO;
+@@ -2415,8 +2421,9 @@ static int bio_readpage_error(struct bio
  	}
+ 	bio_set_op_attrs(bio, REQ_OP_READ, read_mode);
  
 -	pr_debug("Repair Read Error: submitting new read[%#x] to this_mirror=%d, in_validation=%d\n",
 -		 read_mode, failrec->this_mirror, failrec->in_validation);
@@ -672,9 +672,9 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 +		"Repair Read Error: submitting new read[%#x] to this_mirror=%d, in_validation=%d",
 +		read_mode, failrec->this_mirror, failrec->in_validation);
  
- 	ret = tree->ops->submit_bio_hook(inode, read_mode, bio,
- 					 failrec->this_mirror,
-@@ -2539,10 +2546,12 @@ static void end_bio_extent_readpage(stru
+ 	ret = tree->ops->submit_bio_hook(inode, bio, failrec->this_mirror,
+ 					 failrec->bio_flags, 0);
+@@ -2540,10 +2547,12 @@ static void end_bio_extent_readpage(stru
  	bio_for_each_segment_all(bvec, bio, i) {
  		struct page *page = bvec->bv_page;
  		struct inode *inode = page->mapping->host;
@@ -690,7 +690,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		tree = &BTRFS_I(inode)->io_tree;
  
  		/* We always issue full-page reads, but if some block
-@@ -2552,12 +2561,12 @@ static void end_bio_extent_readpage(stru
+@@ -2553,12 +2562,12 @@ static void end_bio_extent_readpage(stru
  		 * if they don't add up to a full page.  */
  		if (bvec->bv_offset || bvec->bv_len != PAGE_CACHE_SIZE) {
  			if (bvec->bv_offset + bvec->bv_len != PAGE_CACHE_SIZE)
@@ -861,7 +861,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  }
 --- a/fs/btrfs/inode.c
 +++ b/fs/btrfs/inode.c
-@@ -2360,7 +2360,7 @@ static noinline int record_one_backref(u
+@@ -2359,7 +2359,7 @@ static noinline int record_one_backref(u
  		if (PTR_ERR(root) == -ENOENT)
  			return 0;
  		WARN_ON(1);
@@ -870,7 +870,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			 inum, offset, root_id);
  		return PTR_ERR(root);
  	}
-@@ -7958,18 +7958,19 @@ static int btrfs_check_dio_repairable(st
+@@ -7957,18 +7957,19 @@ static int btrfs_check_dio_repairable(st
  				      struct io_failure_record *failrec,
  				      int failed_mirror)
  {
@@ -894,7 +894,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		return 0;
  	}
  
-@@ -7979,8 +7980,9 @@ static int btrfs_check_dio_repairable(st
+@@ -7978,8 +7979,9 @@ static int btrfs_check_dio_repairable(st
  		failrec->this_mirror++;
  
  	if (failrec->this_mirror > num_copies) {
@@ -1051,7 +1051,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  #define __TRANS_FREEZABLE	(1U << 0)
 --- a/fs/btrfs/volumes.c
 +++ b/fs/btrfs/volumes.c
-@@ -5908,10 +5908,11 @@ int btrfs_map_sblock(struct btrfs_fs_inf
+@@ -5913,10 +5913,11 @@ int btrfs_map_sblock(struct btrfs_fs_inf
  				 mirror_num, need_raid_map);
  }
  
@@ -1064,7 +1064,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	struct extent_map_tree *em_tree = &map_tree->map_tree;
  	struct extent_map *em;
  	struct map_lookup *map;
-@@ -5927,13 +5928,13 @@ int btrfs_rmap_block(struct btrfs_mappin
+@@ -5932,13 +5933,13 @@ int btrfs_rmap_block(struct btrfs_mappin
  	read_unlock(&em_tree->lock);
  
  	if (!em) {
@@ -1081,23 +1081,24 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		       em->start, chunk_start);
  		free_extent_map(em);
  		return -EIO;
-@@ -6139,10 +6140,12 @@ static void submit_stripe_bio(struct btr
+@@ -6143,10 +6144,12 @@ static void submit_stripe_bio(struct btr
  
  		rcu_read_lock();
  		name = rcu_dereference(dev->name);
--		pr_debug("btrfs_map_bio: rw %d, sector=%llu, dev=%lu (%s id %llu), size=%u\n",
+-		pr_debug("btrfs_map_bio: rw %d 0x%x, sector=%llu, dev=%lu (%s id %llu), size=%u\n",
+-			 bio_op(bio), bio->bi_opf, (u64)bio->bi_iter.bi_sector,
+-			 (u_long)dev->bdev->bd_dev, name->str, dev->devid,
+-			 bio->bi_iter.bi_size);
 +		btrfs_debug(fs_info,
-+			"btrfs_map_bio: rw %d, sector=%llu, dev=%lu (%s id %llu), size=%u",
- 			rw,
--			 (u64)bio->bi_iter.bi_sector, (u_long)dev->bdev->bd_dev,
--			 name->str, dev->devid, bio->bi_iter.bi_size);
++			"btrfs_map_bio: rw %d 0x%x, sector=%llu, dev=%lu (%s id %llu), size=%u",
++			bio_op(bio), bio->bi_opf,
 +			(u64)bio->bi_iter.bi_sector,
 +			(u_long)dev->bdev->bd_dev, name->str, dev->devid,
 +			bio->bi_iter.bi_size);
  		rcu_read_unlock();
  	}
  #endif
-@@ -6662,7 +6665,8 @@ static int read_one_dev(struct btrfs_roo
+@@ -6667,7 +6670,8 @@ static int read_one_dev(struct btrfs_roo
  
  int btrfs_read_sys_array(struct btrfs_root *root)
  {
@@ -1107,7 +1108,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	struct extent_buffer *sb;
  	struct btrfs_disk_key *disk_key;
  	struct btrfs_chunk *chunk;
-@@ -6733,7 +6737,8 @@ int btrfs_read_sys_array(struct btrfs_ro
+@@ -6738,7 +6742,8 @@ int btrfs_read_sys_array(struct btrfs_ro
  
  			num_stripes = btrfs_chunk_num_stripes(sb, chunk);
  			if (!num_stripes) {
@@ -1117,7 +1118,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  					num_stripes, cur_offset);
  				ret = -EIO;
  				break;
-@@ -6741,7 +6746,7 @@ int btrfs_read_sys_array(struct btrfs_ro
+@@ -6746,7 +6751,7 @@ int btrfs_read_sys_array(struct btrfs_ro
  
  			type = btrfs_chunk_type(sb, chunk);
  			if ((type & BTRFS_BLOCK_GROUP_SYSTEM) == 0) {
@@ -1126,7 +1127,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			    "invalid chunk type %llu in sys_array at offset %u",
  					type, cur_offset);
  				ret = -EIO;
-@@ -6756,8 +6761,9 @@ int btrfs_read_sys_array(struct btrfs_ro
+@@ -6761,8 +6766,9 @@ int btrfs_read_sys_array(struct btrfs_ro
  			if (ret)
  				break;
  		} else {
@@ -1138,7 +1139,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			ret = -EIO;
  			break;
  		}
-@@ -6770,7 +6776,7 @@ int btrfs_read_sys_array(struct btrfs_ro
+@@ -6775,7 +6781,7 @@ int btrfs_read_sys_array(struct btrfs_ro
  	return ret;
  
  out_short_read:

@@ -182,7 +182,7 @@ index bff21905b164..0506382de591 100644
 +
  static void pl011_putc(struct uart_port *port, int c)
  {
- 	struct uart_amba_port *uap =
+ 	while (readl(port->membase + UART01x_FR) & UART01x_FR_TXFF)
 @@ -2409,7 +2459,8 @@ static int __init pl011_early_console_setup(struct earlycon_device *device,
  	if (!device->port.membase)
  		return -ENODEV;

@@ -86,14 +86,14 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
 --- a/block/blk-sysfs.c
 +++ b/block/blk-sysfs.c
 @@ -708,7 +708,7 @@ int blk_register_queue(struct gendisk *d
- 		return ret;
+ 	kobject_uevent(&q->kobj, KOBJ_ADD);
  
  	if (q->mq_ops)
 -		blk_mq_register_disk(disk);
 +		blk_mq_register_dev(dev, q);
  
- 	/* Prevent changes through sysfs until registration is completed. */
- 	mutex_lock(&q->sysfs_lock);
+ 	if (!q->request_fn)
+ 		return 0;
 @@ -735,7 +735,7 @@ void blk_unregister_queue(struct gendisk
  		return;
  

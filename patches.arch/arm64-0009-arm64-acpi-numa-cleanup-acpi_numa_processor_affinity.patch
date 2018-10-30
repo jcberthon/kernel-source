@@ -20,17 +20,18 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 
 --- a/arch/x86/mm/srat.c
 +++ b/arch/x86/mm/srat.c
-@@ -24,10 +24,6 @@
- #include <asm/apic.h>
- #include <asm/uv/uv.h>
+@@ -24,11 +24,6 @@
+ 
+ int acpi_numa __initdata;
  
 -static __init int setup_node(int pxm)
 -{
 -	return acpi_map_pxm_to_node(pxm);
 -}
- 
- /* Callback for Proximity Domain -> x2APIC mapping */
- void __init
+-
+ static __init void bad_srat(void)
+ {
+ 	printk(KERN_ERR "SRAT: SRAT not used.\n");
 @@ -51,7 +47,7 @@ acpi_numa_x2apic_affinity_init(struct ac
  			 pxm, apic_id);
  		return;

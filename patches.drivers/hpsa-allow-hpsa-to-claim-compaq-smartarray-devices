@@ -2,6 +2,7 @@ From: Jeff Mahoney <jeffm@suse.com>
 Subject: hpsa: allow hpsa to claim Compaq SmartArray devices
 Patch-mainline: Submitted to linux-scsi (and maintainer), 8 Apr 2014
 References: bnc#869383
+X-notes: This should be replaced by 135ae6edeb519
 
 The hpsa driver has a wildcard entry to support older HP SmartArray devices
 as unsupported. There are devices still in use that bear the Compaq vendor

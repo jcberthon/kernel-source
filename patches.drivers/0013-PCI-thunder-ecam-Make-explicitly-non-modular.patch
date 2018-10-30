@@ -52,7 +52,7 @@ index 674a5a1ea79e..3f54a43bbbea 100644
  
  static int thunder_ecam_probe(struct platform_device *pdev)
  {
-@@ -377,10 +376,7 @@ static struct platform_driver thunder_ecam_driver = {
+@@ -377,7 +376,4 @@ static struct platform_driver thunder_ecam_driver = {
  	},
  	.probe = thunder_ecam_probe,
  };
@@ -61,9 +61,6 @@ index 674a5a1ea79e..3f54a43bbbea 100644
 -MODULE_DESCRIPTION("Thunder ECAM PCI host driver");
 -MODULE_LICENSE("GPL v2");
 +builtin_platform_driver(thunder_ecam_driver);
- 
- #endif
- #endif
 -- 
 2.11.0
 

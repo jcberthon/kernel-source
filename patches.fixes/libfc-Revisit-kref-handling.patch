@@ -19,11 +19,9 @@ the kref handling according to the following rules:
 Signed-off-by: Hannes Reinecke <hare@suse.com>
 Acked-by: Hannes Reinecke <hare@suse.de>
 ---
- drivers/scsi/libfc/fc_rport.c | 134 ++++++++++++++++++++++++++++++++----------
- 1 file changed, 103 insertions(+), 31 deletions(-)
+ drivers/scsi/libfc/fc_rport.c |  129 ++++++++++++++++++++++++++++++++----------
+ 1 file changed, 99 insertions(+), 30 deletions(-)
 
-diff --git a/drivers/scsi/libfc/fc_rport.c b/drivers/scsi/libfc/fc_rport.c
-index 93f5961..6a98bb8 100644
 --- a/drivers/scsi/libfc/fc_rport.c
 +++ b/drivers/scsi/libfc/fc_rport.c
 @@ -44,6 +44,17 @@
@@ -44,7 +42,7 @@ index 93f5961..6a98bb8 100644
  #include <linux/kernel.h>
  #include <linux/spinlock.h>
  #include <linux/interrupt.h>
-@@ -242,6 +253,8 @@ static void fc_rport_state_enter(struct fc_rport_priv *rdata,
+@@ -242,6 +253,8 @@ static void fc_rport_state_enter(struct
  /**
   * fc_rport_work() - Handler for remote port events in the rport_event_queue
   * @work: Handle to the remote port being dequeued
@@ -53,19 +51,7 @@ index 93f5961..6a98bb8 100644
   */
  static void fc_rport_work(struct work_struct *work)
  {
-@@ -272,8 +285,10 @@ static void fc_rport_work(struct work_struct *work)
- 		kref_get(&rdata->kref);
- 		mutex_unlock(&rdata->rp_mutex);
- 
--		if (!rport)
-+		if (!rport) {
-+			FC_RPORT_DBG(rdata, "No rport!\n");
- 			rport = fc_remote_port_add(lport->host, 0, &ids);
-+		}
- 		if (!rport) {
- 			FC_RPORT_DBG(rdata, "Failed to add the rport\n");
- 			lport->tt.rport_logoff(rdata);
-@@ -329,7 +344,8 @@ static void fc_rport_work(struct work_struct *work)
+@@ -329,7 +342,8 @@ static void fc_rport_work(struct work_st
  			FC_RPORT_DBG(rdata, "lld callback ev %d\n", event);
  			rdata->lld_event_callback(lport, rdata, event);
  		}
@@ -75,7 +61,7 @@ index 93f5961..6a98bb8 100644
  
  		/*
  		 * Reset any outstanding exchanges before freeing rport.
-@@ -381,6 +397,7 @@ static void fc_rport_work(struct work_struct *work)
+@@ -381,6 +395,7 @@ static void fc_rport_work(struct work_st
  		mutex_unlock(&rdata->rp_mutex);
  		break;
  	}
@@ -83,7 +69,7 @@ index 93f5961..6a98bb8 100644
  }
  
  /**
-@@ -431,10 +448,14 @@ static int fc_rport_login(struct fc_rport_priv *rdata)
+@@ -431,10 +446,14 @@ static int fc_rport_login(struct fc_rpor
   * Set the new event so that the old pending event will not occur.
   * Since we have the mutex, even if fc_rport_work() is already started,
   * it'll see the new event.
@@ -98,7 +84,7 @@ index 93f5961..6a98bb8 100644
  	if (rdata->rp_state == RPORT_ST_DELETE)
  		return;
  
-@@ -442,8 +463,11 @@ static void fc_rport_enter_delete(struct fc_rport_priv *rdata,
+@@ -442,8 +461,11 @@ static void fc_rport_enter_delete(struct
  
  	fc_rport_state_enter(rdata, RPORT_ST_DELETE);
  
@@ -112,7 +98,7 @@ index 93f5961..6a98bb8 100644
  	rdata->event = event;
  }
  
-@@ -484,15 +508,22 @@ out:
+@@ -498,15 +520,22 @@ out:
   *
   * Locking Note: The rport lock is expected to be held before calling
   * this routine.
@@ -137,7 +123,7 @@ index 93f5961..6a98bb8 100644
  	rdata->event = RPORT_EV_READY;
  }
  
-@@ -503,13 +534,17 @@ static void fc_rport_enter_ready(struct fc_rport_priv *rdata)
+@@ -517,11 +546,14 @@ static void fc_rport_enter_ready(struct
   * Locking Note: Called without the rport lock held. This
   * function will hold the rport lock, call an _enter_*
   * function and then unlock the rport.
@@ -151,11 +137,8 @@ index 93f5961..6a98bb8 100644
 +	struct fc_lport *lport = rdata->local_port;
  
  	mutex_lock(&rdata->rp_mutex);
-+	FC_RPORT_DBG(rdata, "Port timeout, state %s\n", fc_rport_state(rdata));
  
- 	switch (rdata->rp_state) {
- 	case RPORT_ST_FLOGI:
-@@ -535,6 +570,7 @@ static void fc_rport_timeout(struct work_struct *work)
+@@ -549,6 +581,7 @@ static void fc_rport_timeout(struct work
  	}
  
  	mutex_unlock(&rdata->rp_mutex);
@@ -163,7 +146,7 @@ index 93f5961..6a98bb8 100644
  }
  
  /**
-@@ -544,6 +580,8 @@ static void fc_rport_timeout(struct work_struct *work)
+@@ -558,6 +591,8 @@ static void fc_rport_timeout(struct work
   *
   * Locking Note: The rport lock is expected to be held before
   * calling this routine
@@ -172,7 +155,7 @@ index 93f5961..6a98bb8 100644
   */
  static void fc_rport_error(struct fc_rport_priv *rdata, struct fc_frame *fp)
  {
-@@ -582,11 +620,14 @@ static void fc_rport_error(struct fc_rport_priv *rdata, struct fc_frame *fp)
+@@ -604,11 +639,14 @@ static void fc_rport_error(struct fc_rpo
   *
   * Locking Note: The rport lock is expected to be held before
   * calling this routine
@@ -187,7 +170,7 @@ index 93f5961..6a98bb8 100644
  
  	/* make sure this isn't an FC_EX_CLOSED error, never retry those */
  	if (PTR_ERR(fp) == -FC_EX_CLOSED)
-@@ -599,7 +640,9 @@ static void fc_rport_error_retry(struct fc_rport_priv *rdata,
+@@ -621,7 +659,9 @@ static void fc_rport_error_retry(struct
  		/* no additional delay on exchange timeouts */
  		if (PTR_ERR(fp) == -FC_EX_TIMEOUT)
  			delay = 0;
@@ -198,7 +181,7 @@ index 93f5961..6a98bb8 100644
  		return;
  	}
  
-@@ -720,6 +763,8 @@ bad:
+@@ -742,6 +782,8 @@ bad:
   *
   * Locking Note: The rport lock is expected to be held before calling
   * this routine.
@@ -207,7 +190,7 @@ index 93f5961..6a98bb8 100644
   */
  static void fc_rport_enter_flogi(struct fc_rport_priv *rdata)
  {
-@@ -738,18 +783,21 @@ static void fc_rport_enter_flogi(struct fc_rport_priv *rdata)
+@@ -760,18 +802,21 @@ static void fc_rport_enter_flogi(struct
  	if (!fp)
  		return fc_rport_error_retry(rdata, fp);
  
@@ -232,7 +215,7 @@ index 93f5961..6a98bb8 100644
   */
  static void fc_rport_recv_flogi_req(struct fc_lport *lport,
  				    struct fc_frame *rx_fp)
-@@ -804,8 +852,7 @@ static void fc_rport_recv_flogi_req(struct fc_lport *lport,
+@@ -826,8 +871,7 @@ static void fc_rport_recv_flogi_req(stru
  		 * RPORT wouldn;t have created and 'rport_lookup' would have
  		 * failed anyway in that case.
  		 */
@@ -242,7 +225,7 @@ index 93f5961..6a98bb8 100644
  	case RPORT_ST_DELETE:
  		mutex_unlock(&rdata->rp_mutex);
  		rjt_data.reason = ELS_RJT_FIP;
-@@ -949,6 +996,8 @@ fc_rport_compatible_roles(struct fc_lport *lport, struct fc_rport_priv *rdata)
+@@ -971,6 +1015,8 @@ fc_rport_compatible_roles(struct fc_lpor
   *
   * Locking Note: The rport lock is expected to be held before calling
   * this routine.
@@ -251,7 +234,7 @@ index 93f5961..6a98bb8 100644
   */
  static void fc_rport_enter_plogi(struct fc_rport_priv *rdata)
  {
-@@ -975,12 +1024,13 @@ static void fc_rport_enter_plogi(struct fc_rport_priv *rdata)
+@@ -997,12 +1043,13 @@ static void fc_rport_enter_plogi(struct
  	}
  	rdata->e_d_tov = lport->e_d_tov;
  
@@ -268,7 +251,7 @@ index 93f5961..6a98bb8 100644
  }
  
  /**
-@@ -1088,6 +1138,8 @@ err:
+@@ -1110,6 +1157,8 @@ err:
   *
   * Locking Note: The rport lock is expected to be held before calling
   * this routine.
@@ -277,7 +260,7 @@ index 93f5961..6a98bb8 100644
   */
  static void fc_rport_enter_prli(struct fc_rport_priv *rdata)
  {
-@@ -1131,11 +1183,12 @@ static void fc_rport_enter_prli(struct fc_rport_priv *rdata)
+@@ -1153,11 +1202,12 @@ static void fc_rport_enter_prli(struct f
  		       fc_host_port_id(lport->host), FC_TYPE_ELS,
  		       FC_FC_FIRST_SEQ | FC_FC_END_SEQ | FC_FC_SEQ_INIT, 0);
  
@@ -293,7 +276,7 @@ index 93f5961..6a98bb8 100644
  }
  
  /**
-@@ -1210,6 +1263,8 @@ err:
+@@ -1232,6 +1282,8 @@ err:
   *
   * Locking Note: The rport lock is expected to be held before calling
   * this routine.
@@ -302,7 +285,7 @@ index 93f5961..6a98bb8 100644
   */
  static void fc_rport_enter_rtv(struct fc_rport_priv *rdata)
  {
-@@ -1227,12 +1282,13 @@ static void fc_rport_enter_rtv(struct fc_rport_priv *rdata)
+@@ -1249,12 +1301,13 @@ static void fc_rport_enter_rtv(struct fc
  		return;
  	}
  
@@ -319,7 +302,7 @@ index 93f5961..6a98bb8 100644
  }
  
  /**
-@@ -1242,15 +1298,16 @@ static void fc_rport_enter_rtv(struct fc_rport_priv *rdata)
+@@ -1264,15 +1317,16 @@ static void fc_rport_enter_rtv(struct fc
   * @lport_arg: The local port
   */
  static void fc_rport_logo_resp(struct fc_seq *sp, struct fc_frame *fp,
@@ -341,7 +324,7 @@ index 93f5961..6a98bb8 100644
  }
  
  /**
-@@ -1259,6 +1316,8 @@ static void fc_rport_logo_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -1281,6 +1335,8 @@ static void fc_rport_logo_resp(struct fc
   *
   * Locking Note: The rport lock is expected to be held before calling
   * this routine.
@@ -350,7 +333,7 @@ index 93f5961..6a98bb8 100644
   */
  static void fc_rport_enter_logo(struct fc_rport_priv *rdata)
  {
-@@ -1271,8 +1330,10 @@ static void fc_rport_enter_logo(struct fc_rport_priv *rdata)
+@@ -1293,8 +1349,10 @@ static void fc_rport_enter_logo(struct f
  	fp = fc_frame_alloc(lport, sizeof(struct fc_els_logo));
  	if (!fp)
  		return;
@@ -363,7 +346,7 @@ index 93f5961..6a98bb8 100644
  }
  
  /**
-@@ -1339,6 +1400,8 @@ err:
+@@ -1361,6 +1419,8 @@ err:
   *
   * Locking Note: The rport lock is expected to be held before calling
   * this routine.
@@ -372,7 +355,7 @@ index 93f5961..6a98bb8 100644
   */
  static void fc_rport_enter_adisc(struct fc_rport_priv *rdata)
  {
-@@ -1355,12 +1418,13 @@ static void fc_rport_enter_adisc(struct fc_rport_priv *rdata)
+@@ -1377,12 +1437,13 @@ static void fc_rport_enter_adisc(struct
  		fc_rport_error_retry(rdata, fp);
  		return;
  	}
@@ -389,7 +372,7 @@ index 93f5961..6a98bb8 100644
  }
  
  /**
-@@ -1474,6 +1538,8 @@ out:
+@@ -1496,6 +1557,8 @@ out:
   * The ELS opcode has already been validated by the caller.
   *
   * Locking Note: Called with the lport lock held.
@@ -398,7 +381,7 @@ index 93f5961..6a98bb8 100644
   */
  static void fc_rport_recv_els_req(struct fc_lport *lport, struct fc_frame *fp)
  {
-@@ -1541,6 +1607,8 @@ reject:
+@@ -1563,6 +1626,8 @@ reject:
   * @fp:	   The request frame
   *
   * Locking Note: Called with the lport lock held.
@@ -407,7 +390,7 @@ index 93f5961..6a98bb8 100644
   */
  static void fc_rport_recv_req(struct fc_lport *lport, struct fc_frame *fp)
  {
-@@ -1585,6 +1653,8 @@ static void fc_rport_recv_req(struct fc_lport *lport, struct fc_frame *fp)
+@@ -1607,6 +1672,8 @@ static void fc_rport_recv_req(struct fc_
   * @rx_fp: The PLOGI request frame
   *
   * Locking Note: The rport lock is held before calling this function.
@@ -416,7 +399,7 @@ index 93f5961..6a98bb8 100644
   */
  static void fc_rport_recv_plogi_req(struct fc_lport *lport,
  				    struct fc_frame *rx_fp)
-@@ -1899,6 +1969,8 @@ drop:
+@@ -1921,6 +1988,8 @@ drop:
   *
   * Locking Note: The rport lock is expected to be held before calling
   * this function.
@@ -425,6 +408,3 @@ index 93f5961..6a98bb8 100644
   */
  static void fc_rport_recv_logo_req(struct fc_lport *lport, struct fc_frame *fp)
  {
--- 
-1.8.5.6
-

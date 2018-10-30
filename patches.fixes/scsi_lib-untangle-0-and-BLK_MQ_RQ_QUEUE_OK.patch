@@ -39,12 +39,12 @@ index 41f1c81..2145412 100644
  	ret = BLK_MQ_RQ_QUEUE_BUSY;
 @@ -1905,7 +1905,7 @@ static int scsi_queue_rq(struct blk_mq_hw_ctx *hctx,
  
- 	if (!(req->cmd_flags & REQ_DONTPREP)) {
+ 	if (!(req->rq_flags & RQF_DONTPREP)) {
  		ret = prep_to_mq(scsi_mq_prep_fn(req));
 -		if (ret)
 +		if (ret != BLK_MQ_RQ_QUEUE_OK)
  			goto out_dec_host_busy;
- 		req->cmd_flags |= REQ_DONTPREP;
+ 		req->rq_flags |= RQF_DONTPREP;
  	} else {
 -- 
 1.8.5.6

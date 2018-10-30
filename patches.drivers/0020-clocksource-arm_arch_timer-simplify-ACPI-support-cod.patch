@@ -99,7 +99,7 @@ index af286dd74ee6..810fcc612c0d 100644
 +	arch_timer_c3stop = acpi_gtdt_c3stop(arch_timer_uses_ppi);
  
  	/* Check for globally applicable workarounds */
- 	arch_timer_check_ool_workaround(ate_match_global_cap_id, NULL);
+ 	arch_timer_check_ool_workaround(ate_match_acpi_oem_info, table);
 -- 
 2.11.0
 

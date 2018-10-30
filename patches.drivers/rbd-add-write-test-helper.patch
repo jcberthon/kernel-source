@@ -50,7 +50,7 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  
  	kmem_cache_free(rbd_img_request_cache, img_request);
 @@ -2992,8 +2996,7 @@ static bool img_obj_request_simple(struc
- 	rbd_dev = img_request->rbd_dev;
+ 	struct rbd_device *rbd_dev = img_request->rbd_dev;
  
  	/* Reads */
 -	if (!img_request_write_test(img_request) &&

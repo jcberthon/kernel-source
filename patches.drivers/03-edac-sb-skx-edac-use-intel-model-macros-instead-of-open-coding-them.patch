@@ -63,7 +63,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
 @@ -263,7 +264,7 @@ fail:
  }
  
- static const struct x86_cpu_id skx_cpuids[] = {
+ const struct x86_cpu_id skx_cpuids[] = {
 -	{ X86_VENDOR_INTEL, 6, 0x55, 0, 0 },	/* Skylake */
 +	{ X86_VENDOR_INTEL, 6, INTEL_FAM6_SKYLAKE_X, 0, 0 },
  	{ }

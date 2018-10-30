@@ -25,15 +25,6 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  
  #include "trace.h"
  #include "pmu.h"
-@@ -619,6 +620,8 @@ struct vcpu_vmx {
- 	 */
- 	u64 msr_ia32_feature_control;
- 	u64 msr_ia32_feature_control_valid_bits;
-+
-+	u64 spec_ctrl;
- };
- 
- enum segment_cache_field {
 @@ -2793,6 +2796,7 @@ static inline bool vmx_feature_control_m
   */
  static int vmx_get_msr(struct kvm_vcpu *vcpu, struct msr_data *msr_info)

@@ -88,8 +88,8 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
 -			primarily_use_numa_for_topology();
 +			x86_has_numa_in_package = true;
  	}
- }
  
+ 	threads = cpumask_weight(topology_sibling_cpumask(cpu));
 @@ -1180,6 +1181,16 @@ void __init native_smp_prepare_cpus(unsi
  		zalloc_cpumask_var(&per_cpu(cpu_core_map, i), GFP_KERNEL);
  		zalloc_cpumask_var(&per_cpu(cpu_llc_shared_map, i), GFP_KERNEL);

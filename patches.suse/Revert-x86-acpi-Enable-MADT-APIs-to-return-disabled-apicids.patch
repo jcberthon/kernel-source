@@ -96,8 +96,8 @@ index 288ae44f568f..1b9780162eb4 100644
  }
  
  static phys_cpuid_t map_madt_entry(struct acpi_table_madt *madt,
--		int type, u32 acpi_id, bool ignore_disabled)
-+			int type, u32 acpi_id)
+-				   int type, u32 acpi_id, bool ignore_disabled)
++				   int type, u32 acpi_id)
  {
  	unsigned long madt_end, entry;
  	phys_cpuid_t phys_id = PHYS_CPUID_INVALID;	/* CPU hardware ID */
@@ -176,7 +176,7 @@ index 288ae44f568f..1b9780162eb4 100644
 +	phys_id = map_mat_entry(handle, type, acpi_id);
  	if (invalid_phys_cpuid(phys_id))
 -		phys_id = map_madt_entry(get_madt_table(), type, acpi_id,
--				ignore_disabled);
+-					 ignore_disabled);
 +		phys_id = map_madt_entry(get_madt_table(), type, acpi_id);
  
  	return phys_id;

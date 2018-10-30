@@ -160,7 +160,7 @@ diff --git a/drivers/net/hyperv/netvsc_drv.c b/drivers/net/hyperv/netvsc_drv.c
 +	return ret;
  }
  
- static struct rtnl_link_stats64 *netvsc_get_stats64(struct net_device *net,
+ static void netvsc_get_stats64(struct net_device *net,
 @@ -1525,8 +1529,10 @@ static int netvsc_probe(struct hv_device *dev,
  	memset(&device_info, 0, sizeof(device_info));
  	device_info.ring_size = ring_size;

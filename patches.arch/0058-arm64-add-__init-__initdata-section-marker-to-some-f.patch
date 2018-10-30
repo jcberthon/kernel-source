@@ -86,8 +86,8 @@ index a549740..dab3f22 100644
  	int i;
  
 @@ -955,7 +956,7 @@ void verify_local_cpu_capabilities(void)
- 	}
- }
+ 
+ #endif	/* CONFIG_HOTPLUG_CPU */
  
 -static void setup_feature_capabilities(void)
 +static void __init setup_feature_capabilities(void)
@@ -155,7 +155,7 @@ index 1fcd051..f225afc 100644
 +static void __init arm64_memory_present(void)
  {
  	struct memblock_region *reg;
- 	int nid = 0;
+ 
 -- 
 2.11.0
 

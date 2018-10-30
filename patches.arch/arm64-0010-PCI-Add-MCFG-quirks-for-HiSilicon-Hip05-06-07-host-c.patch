@@ -59,7 +59,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +obj-$(CONFIG_ARM64) += pcie-hisi.o
  obj-$(CONFIG_PCI_HOST_THUNDER_ECAM) += pci-thunder-ecam.o
  obj-$(CONFIG_PCI_HOST_THUNDER_PEM) += pci-thunder-pem.o
- obj-$(CONFIG_PCIE_ROCKCHIP) += pcie-rockchip.o
+ obj-$(CONFIG_PCIE_ARMADA_8K) += pcie-armada8k.o
 --- a/drivers/pci/host/pcie-hisi.c
 +++ b/drivers/pci/host/pcie-hisi.c
 @@ -18,7 +18,106 @@

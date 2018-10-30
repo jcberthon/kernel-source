@@ -54,6 +54,6 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  		unsigned long pfn = phys_start_pfn + i*PAGES_PER_SECTION;
 +
 +		cond_resched();
- 		ret = __remove_section(zone, __pfn_to_section(pfn));
+ 		ret = __remove_section(zone, __pfn_to_section(pfn), map_offset);
+ 		map_offset = 0;
  		if (ret)
- 			break;

@@ -170,8 +170,8 @@ index e13509970e24..d04f94320cbd 100644
 --- a/drivers/nvme/host/rdma.c
 +++ b/drivers/nvme/host/rdma.c
 @@ -1456,14 +1456,13 @@ static int nvme_rdma_queue_rq(struct blk_mq_hw_ctx *hctx,
+ 	struct nvme_rdma_qe *sqe = &req->sqe;
  	struct nvme_command *c = sqe->data;
- 	bool flush = false;
  	struct ib_device *dev;
 +	bool queue_ready = test_bit(NVME_RDMA_Q_LIVE, &queue->flags);
  	int ret;

@@ -142,13 +142,14 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 +#endif
  } mm_context_t;
  
- void leave_mm(int cpu);
+ #define INIT_MM_CONTEXT(mm)						\
 --- a/arch/x86/include/asm/mmu_context.h
 +++ b/arch/x86/include/asm/mmu_context.h
-@@ -106,6 +106,14 @@ static inline void enter_lazy_tlb(struct
- static inline int init_new_context(struct task_struct *tsk,
+@@ -106,6 +106,15 @@ static inline void enter_lazy_tlb(struct
  				   struct mm_struct *mm)
  {
+ 	mm->context.ctx_id = atomic64_inc_return(&last_mm_ctx_id);
++
 +	#ifdef CONFIG_X86_INTEL_MEMORY_PROTECTION_KEYS
 +	if (cpu_feature_enabled(X86_FEATURE_OSPKE)) {
 +		/* pkey 0 is the default and always allocated */
@@ -264,7 +265,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
  #include <asm/fpu/api.h>
 @@ -856,9 +857,10 @@ out:
- 	fpu__current_fpstate_write_end();
+ 	return get_xsave_addr(&fpu->state.xsave, xsave_state);
  }
  
 +#ifdef CONFIG_ARCH_HAS_PKEYS
@@ -273,8 +274,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  #define PKRU_VALID_MASK (NR_VALID_PKRU_BITS - 1)
 -
  /*
-  * This will go out and modify the XSAVE buffer so that PKRU is
-  * set to a particular state for access to 'pkey'.
+  * This will go out and modify PKRU register to set the access
+  * rights for @pkey to @init_val.
 @@ -926,3 +928,4 @@ int arch_set_user_pkey_access(struct tas
  
  	return 0;

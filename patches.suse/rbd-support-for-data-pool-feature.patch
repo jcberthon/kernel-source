@@ -11,21 +11,17 @@ now stores the data pool id.
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 Reviewed-by: Jason Dillaman <dillaman@redhat.com>
-[ddiss: rbd_image_header changes to librbd.h]
 Acked-by: David Disseldorp <ddiss@suse.de>
 Acked-by: Luis Henriques <lhenriques@suse.com>
 Acked-by: Lee Duncan <lduncan@suse.com>
 
 ---
- drivers/block/rbd.c         | 35 ++++++++++++++++++++++++++++++++---
- include/linux/ceph/librbd.h |  1 +
- 2 files changed, 33 insertions(+), 3 deletions(-)
+ drivers/block/rbd.c |   36 +++++++++++++++++++++++++++++++++---
+ 1 file changed, 33 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 564ddb2d3485..1c92df9e2f81 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -109,8 +109,11 @@ static int atomic_dec_return_safe(atomic_t *v)
+@@ -118,8 +118,11 @@ static int atomic_dec_return_safe(atomic
  
  #define RBD_FEATURE_LAYERING	(1<<0)
  #define RBD_FEATURE_STRIPINGV2	(1<<1)
@@ -39,7 +35,15 @@ index 564ddb2d3485..1c92df9e2f81 100644
  
  /* Features supported by this (client software) implementation. */
  
-@@ -812,7 +815,8 @@ static void rbd_init_layout(struct rbd_device *rbd_dev)
+@@ -140,6 +143,7 @@ struct rbd_image_header {
+ 	__u8 obj_order;
+ 	u64 stripe_unit;
+ 	u64 stripe_count;
++	s64 data_pool_id;
+ 	u64 features;		/* Might be changeable someday? */
+ 
+ 	/* The remaining fields need to be updated occasionally */
+@@ -922,7 +926,8 @@ static void rbd_init_layout(struct rbd_d
  	rbd_dev->layout.stripe_unit = rbd_dev->header.stripe_unit;
  	rbd_dev->layout.stripe_count = rbd_dev->header.stripe_count;
  	rbd_dev->layout.object_size = rbd_obj_bytes(&rbd_dev->header);
@@ -49,7 +53,7 @@ index 564ddb2d3485..1c92df9e2f81 100644
  	RCU_INIT_POINTER(rbd_dev->layout.pool_ns, NULL);
  }
  
-@@ -4488,6 +4492,7 @@ static struct rbd_device *__rbd_dev_create(struct rbd_client *rbdc,
+@@ -3927,6 +3932,7 @@ static struct rbd_device *__rbd_dev_crea
  	INIT_LIST_HEAD(&rbd_dev->node);
  	init_rwsem(&rbd_dev->header_rwsem);
  
@@ -57,7 +61,7 @@ index 564ddb2d3485..1c92df9e2f81 100644
  	ceph_oid_init(&rbd_dev->header_oid);
  	rbd_dev->header_oloc.pool = spec->pool_id;
  
-@@ -4840,6 +4845,24 @@ static int rbd_dev_v2_striping_info(struct rbd_device *rbd_dev)
+@@ -4279,6 +4285,24 @@ static int rbd_dev_v2_striping_info(stru
  	return 0;
  }
  
@@ -82,7 +86,7 @@ index 564ddb2d3485..1c92df9e2f81 100644
  static char *rbd_dev_image_name(struct rbd_device *rbd_dev)
  {
  	CEPH_DEFINE_OID_ONSTACK(oid);
-@@ -5536,6 +5559,12 @@ static int rbd_dev_v2_header_onetime(struct rbd_device *rbd_dev)
+@@ -4975,6 +4999,12 @@ static int rbd_dev_v2_header_onetime(str
  			goto out_err;
  	}
  
@@ -95,18 +99,3 @@ index 564ddb2d3485..1c92df9e2f81 100644
  	rbd_init_layout(rbd_dev);
  	return 0;
  
-diff --git a/include/linux/ceph/librbd.h b/include/linux/ceph/librbd.h
-index 88ac78d1443f..27411c6f1d04 100644
---- a/include/linux/ceph/librbd.h
-+++ b/include/linux/ceph/librbd.h
-@@ -30,6 +30,7 @@ struct rbd_image_header {
- 	__u8 obj_order;
- 	u64 stripe_unit;
- 	u64 stripe_count;
-+	s64 data_pool_id;
- 	u64 features;		/* Might be changeable someday? */
- 
- 	/* The remaining fields need to be updated occasionally */
--- 
-2.12.3
-

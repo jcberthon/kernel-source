@@ -1,21 +1,20 @@
-From bca2a11f83aad27db4460e581185b083ed31241a Mon Sep 17 00:00:00 2001
 From: Hannes Reinecke <hare@suse.de>
-Date: Mon, 18 Jul 2016 11:13:13 +0200
-Subject: [PATCH 02/22] libfc: additional debugging messages
+Subject: scsi: libfc: additional debugging messages
 References: bnc#990245
 Git-commit: 57d3ec7e468bb6659d9a461294d8747906fb7231
 Patch-mainline: v4.10-rc1
 
 Signed-off-by: Hannes Reinecke <hare@suse.com>
-Acked-by: Hannes Reinecke <hare@suse.de>
+Acked-by: Johannes Thumshirn <jth@kernel.org>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 ---
- drivers/scsi/libfc/fc_exch.c  | 18 +++++++++++++++---
- drivers/scsi/libfc/fc_fcp.c   | 39 +++++++++++++++++++++++++++++++++------
- drivers/scsi/libfc/fc_rport.c | 11 ++++++++---
- 3 files changed, 56 insertions(+), 12 deletions(-)
+ drivers/scsi/libfc/fc_exch.c  | 59 +++++++++++++++++++++++++++++++++++--------
+ drivers/scsi/libfc/fc_fcp.c   | 41 ++++++++++++++++++++++++------
+ drivers/scsi/libfc/fc_rport.c | 25 ++++++++++++++----
+ 3 files changed, 101 insertions(+), 24 deletions(-)
 
 diff --git a/drivers/scsi/libfc/fc_exch.c b/drivers/scsi/libfc/fc_exch.c
-index e72673b..dc078d3 100644
+index dd95e2aece66..91800cb776ec 100644
 --- a/drivers/scsi/libfc/fc_exch.c
 +++ b/drivers/scsi/libfc/fc_exch.c
 @@ -362,8 +362,10 @@ static inline void fc_exch_timer_set_locked(struct fc_exch *ep,
@@ -54,24 +53,121 @@ index e72673b..dc078d3 100644
  
  	spin_lock_bh(&ep->ex_lock);
  	if (ep->state & (FC_EX_RST_CLEANUP | FC_EX_DONE))
-@@ -1383,6 +1389,7 @@ static void fc_exch_recv_abts(struct fc_exch *ep, struct fc_frame *rx_fp)
+@@ -1263,8 +1269,10 @@ static void fc_seq_send_ack(struct fc_seq *sp, const struct fc_frame *rx_fp)
+ 	 */
+ 	if (fc_sof_needs_ack(fr_sof(rx_fp))) {
+ 		fp = fc_frame_alloc(lport, 0);
+-		if (!fp)
++		if (!fp) {
++			FC_EXCH_DBG(ep, "Drop ACK request, out of memory\n");
+ 			return;
++		}
+ 
+ 		fh = fc_frame_header_get(fp);
+ 		fh->fh_r_ctl = FC_RCTL_ACK_1;
+@@ -1317,13 +1325,18 @@ static void fc_exch_send_ba_rjt(struct fc_frame *rx_fp,
+ 	struct fc_frame_header *rx_fh;
+ 	struct fc_frame_header *fh;
+ 	struct fc_ba_rjt *rp;
++	struct fc_seq *sp;
+ 	struct fc_lport *lport;
+ 	unsigned int f_ctl;
+ 
+ 	lport = fr_dev(rx_fp);
++	sp = fr_seq(rx_fp);
+ 	fp = fc_frame_alloc(lport, sizeof(*rp));
+-	if (!fp)
++	if (!fp) {
++		FC_EXCH_DBG(fc_seq_exch(sp),
++			     "Drop BA_RJT request, out of memory\n");
+ 		return;
++	}
+ 	fh = fc_frame_header_get(fp);
+ 	rx_fh = fc_frame_header_get(rx_fp);
+ 
+@@ -1388,14 +1401,17 @@ static void fc_exch_recv_abts(struct fc_exch *ep, struct fc_frame *rx_fp)
  	if (!ep)
  		goto reject;
  
 +	FC_EXCH_DBG(ep, "exch: ABTS received\n");
  	fp = fc_frame_alloc(ep->lp, sizeof(*ap));
- 	if (!fp)
+-	if (!fp)
++	if (!fp) {
++		FC_EXCH_DBG(ep, "Drop ABTS request, out of memory\n");
  		goto free;
-@@ -1978,6 +1985,8 @@ static void fc_exch_els_rec(struct fc_frame *rfp)
- 	explan = ELS_EXPL_OXID_RXID;
- 	if (!ep)
++	}
+ 
+ 	spin_lock_bh(&ep->ex_lock);
+ 	if (ep->esb_stat & ESB_ST_COMPLETE) {
+ 		spin_unlock_bh(&ep->ex_lock);
+-
++		FC_EXCH_DBG(ep, "exch: ABTS rejected, exchange complete\n");
+ 		fc_frame_free(fp);
  		goto reject;
+ 	}
+@@ -1789,11 +1805,16 @@ static void fc_seq_ls_acc(struct fc_frame *rx_fp)
+ 	struct fc_lport *lport;
+ 	struct fc_els_ls_acc *acc;
+ 	struct fc_frame *fp;
++	struct fc_seq *sp;
+ 
+ 	lport = fr_dev(rx_fp);
++	sp = fr_seq(rx_fp);
+ 	fp = fc_frame_alloc(lport, sizeof(*acc));
+-	if (!fp)
++	if (!fp) {
++		FC_EXCH_DBG(fc_seq_exch(sp),
++			    "exch: drop LS_ACC, out of memory\n");
+ 		return;
++	}
+ 	acc = fc_frame_payload_get(fp, sizeof(*acc));
+ 	memset(acc, 0, sizeof(*acc));
+ 	acc->la_cmd = ELS_LS_ACC;
+@@ -1816,11 +1837,16 @@ static void fc_seq_ls_rjt(struct fc_frame *rx_fp, enum fc_els_rjt_reason reason,
+ 	struct fc_lport *lport;
+ 	struct fc_els_ls_rjt *rjt;
+ 	struct fc_frame *fp;
++	struct fc_seq *sp;
+ 
+ 	lport = fr_dev(rx_fp);
++	sp = fr_seq(rx_fp);
+ 	fp = fc_frame_alloc(lport, sizeof(*rjt));
+-	if (!fp)
++	if (!fp) {
++		FC_EXCH_DBG(fc_seq_exch(sp),
++			    "exch: drop LS_ACC, out of memory\n");
+ 		return;
++	}
+ 	rjt = fc_frame_payload_get(fp, sizeof(*rjt));
+ 	memset(rjt, 0, sizeof(*rjt));
+ 	rjt->er_cmd = ELS_LS_RJT;
+@@ -1980,15 +2006,23 @@ static void fc_exch_els_rec(struct fc_frame *rfp)
+ 	ep = fc_exch_lookup(lport,
+ 			    sid == fc_host_port_id(lport->host) ? oxid : rxid);
+ 	explan = ELS_EXPL_OXID_RXID;
+-	if (!ep)
++	if (!ep) {
++		FC_LPORT_DBG(lport,
++			     "REC request from %x: rxid %x oxid %x not found\n",
++			     sid, rxid, oxid);
+ 		goto reject;
++	}
 +	FC_EXCH_DBG(ep, "REC request from %x: rxid %x oxid %x\n",
 +		    sid, rxid, oxid);
  	if (ep->oid != sid || oxid != ep->oxid)
  		goto rel;
  	if (rxid != FC_XID_UNKNOWN && rxid != ep->rxid)
-@@ -2177,6 +2186,7 @@ static void fc_exch_rrq(struct fc_exch *ep)
+ 		goto rel;
+ 	fp = fc_frame_alloc(lport, sizeof(*acc));
+-	if (!fp)
++	if (!fp) {
++		FC_EXCH_DBG(ep, "Drop REC request, out of memory\n");
+ 		goto out;
++	}
+ 
+ 	acc = fc_frame_payload_get(fp, sizeof(*acc));
+ 	memset(acc, 0, sizeof(*acc));
+@@ -2181,6 +2215,7 @@ static void fc_exch_rrq(struct fc_exch *ep)
  		return;
  
  retry:
@@ -79,7 +175,7 @@ index e72673b..dc078d3 100644
  	spin_lock_bh(&ep->ex_lock);
  	if (ep->state & (FC_EX_RST_CLEANUP | FC_EX_DONE)) {
  		spin_unlock_bh(&ep->ex_lock);
-@@ -2219,6 +2229,8 @@ static void fc_exch_els_rrq(struct fc_frame *fp)
+@@ -2223,6 +2258,8 @@ static void fc_exch_els_rrq(struct fc_frame *fp)
  	if (!ep)
  		goto reject;
  	spin_lock_bh(&ep->ex_lock);
@@ -89,7 +185,7 @@ index e72673b..dc078d3 100644
  		goto unlock_reject;
  	if (ep->rxid != ntohs(rp->rrq_rx_id) &&
 diff --git a/drivers/scsi/libfc/fc_fcp.c b/drivers/scsi/libfc/fc_fcp.c
-index 5121272..bd4bdbf 100644
+index 5121272f28fd..5c6c73a80379 100644
 --- a/drivers/scsi/libfc/fc_fcp.c
 +++ b/drivers/scsi/libfc/fc_fcp.c
 @@ -764,8 +764,11 @@ static void fc_fcp_recv(struct fc_seq *seq, struct fc_frame *fp, void *arg)
@@ -141,7 +237,7 @@ index 5121272..bd4bdbf 100644
  	}
  
  	seq = fsp->seq_ptr;
-@@ -1222,8 +1235,11 @@ static int fc_fcp_pkt_abort(struct fc_fcp_pkt *fsp)
+@@ -1222,8 +1234,11 @@ static int fc_fcp_pkt_abort(struct fc_fcp_pkt *fsp)
  	int rc = FAILED;
  	unsigned long ticks_left;
  
@@ -154,7 +250,7 @@ index 5121272..bd4bdbf 100644
  
  	init_completion(&fsp->tm_done);
  	fsp->wait_for_comp = 1;
-@@ -1394,6 +1410,8 @@ static void fc_fcp_timeout(unsigned long data)
+@@ -1394,6 +1409,8 @@ static void fc_fcp_timeout(unsigned long data)
  	if (fsp->cdb_cmd.fc_tm_flags)
  		goto unlock;
  
@@ -178,13 +274,13 @@ index 5121272..bd4bdbf 100644
  			break;
  		case ELS_RJT_LOGIC:
  		case ELS_RJT_UNAB:
-+			FC_FCP_DBG(fsp, "device %x REC reject %d/%d\n"
++			FC_FCP_DBG(fsp, "device %x REC reject %d/%d\n",
 +				   fsp->rport->port_id, rjt->er_reason,
 +				   rjt->er_explan);
  			/*
  			 * If no data transfer, the command frame got dropped
  			 * so we just retry.  If data was transferred, we
-@@ -1608,6 +1630,8 @@ static void fc_fcp_rec_error(struct fc_fcp_pkt *fsp, struct fc_frame *fp)
+@@ -1608,6 +1628,8 @@ static void fc_fcp_rec_error(struct fc_fcp_pkt *fsp, struct fc_frame *fp)
  
  	switch (error) {
  	case -FC_EX_CLOSED:
@@ -193,7 +289,7 @@ index 5121272..bd4bdbf 100644
  		fc_fcp_retry_cmd(fsp);
  		break;
  
-@@ -1622,8 +1646,8 @@ static void fc_fcp_rec_error(struct fc_fcp_pkt *fsp, struct fc_frame *fp)
+@@ -1622,8 +1644,8 @@ static void fc_fcp_rec_error(struct fc_fcp_pkt *fsp, struct fc_frame *fp)
  		 * Assume REC or LS_ACC was lost.
  		 * The exchange manager will have aborted REC, so retry.
  		 */
@@ -204,7 +300,7 @@ index 5121272..bd4bdbf 100644
  			   FC_MAX_RECOV_RETRY);
  		if (fsp->recov_retry++ < FC_MAX_RECOV_RETRY)
  			fc_fcp_rec(fsp);
-@@ -1642,6 +1666,7 @@ out:
+@@ -1642,6 +1664,7 @@ static void fc_fcp_rec_error(struct fc_fcp_pkt *fsp, struct fc_frame *fp)
   */
  static void fc_fcp_recovery(struct fc_fcp_pkt *fsp, u8 code)
  {
@@ -212,7 +308,7 @@ index 5121272..bd4bdbf 100644
  	fsp->status_code = code;
  	fsp->cdb_status = 0;
  	fsp->io_status = 0;
-@@ -1768,12 +1793,14 @@ static void fc_fcp_srr_error(struct fc_fcp_pkt *fsp, struct fc_frame *fp)
+@@ -1768,12 +1791,14 @@ static void fc_fcp_srr_error(struct fc_fcp_pkt *fsp, struct fc_frame *fp)
  		goto out;
  	switch (PTR_ERR(fp)) {
  	case -FC_EX_TIMEOUT:
@@ -228,10 +324,22 @@ index 5121272..bd4bdbf 100644
  	default:
  		fc_fcp_retry_cmd(fsp);
 diff --git a/drivers/scsi/libfc/fc_rport.c b/drivers/scsi/libfc/fc_rport.c
-index 6a98bb8..afc1f9b 100644
+index 4b9bb6dd4004..bcd1cd3c5285 100644
 --- a/drivers/scsi/libfc/fc_rport.c
 +++ b/drivers/scsi/libfc/fc_rport.c
-@@ -387,8 +387,10 @@ static void fc_rport_work(struct work_struct *work)
+@@ -287,8 +287,10 @@ static void fc_rport_work(struct work_struct *work)
+ 		kref_get(&rdata->kref);
+ 		mutex_unlock(&rdata->rp_mutex);
+ 
+-		if (!rport)
++		if (!rport) {
++			FC_RPORT_DBG(rdata, "No rport!\n");
+ 			rport = fc_remote_port_add(lport->host, 0, &ids);
++		}
+ 		if (!rport) {
+ 			FC_RPORT_DBG(rdata, "Failed to add the rport\n");
+ 			lport->tt.rport_logoff(rdata);
+@@ -389,8 +391,10 @@ static void fc_rport_work(struct work_struct *work)
  			 * Re-open for events.  Reissue READY event if ready.
  			 */
  			rdata->event = RPORT_EV_NONE;
@@ -243,7 +351,15 @@ index 6a98bb8..afc1f9b 100644
  			mutex_unlock(&rdata->rp_mutex);
  		}
  		break;
-@@ -1052,6 +1054,7 @@ static void fc_rport_prli_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -568,6 +572,7 @@ static void fc_rport_timeout(struct work_struct *work)
+ 	struct fc_lport *lport = rdata->local_port;
+ 
+ 	mutex_lock(&rdata->rp_mutex);
++	FC_RPORT_DBG(rdata, "Port timeout, state %s\n", fc_rport_state(rdata));
+ 
+ 	switch (rdata->rp_state) {
+ 	case RPORT_ST_FLOGI:
+@@ -1095,6 +1100,7 @@ static void fc_rport_prli_resp(struct fc_seq *sp, struct fc_frame *fp,
  		struct fc_els_spp spp;
  	} *pp;
  	struct fc_els_spp temp_spp;
@@ -251,7 +367,7 @@ index 6a98bb8..afc1f9b 100644
  	struct fc4_prov *prov;
  	u32 roles = FC_RPORT_ROLE_UNKNOWN;
  	u32 fcp_parm = 0;
-@@ -1121,8 +1124,10 @@ static void fc_rport_prli_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -1167,8 +1173,10 @@ static void fc_rport_prli_resp(struct fc_seq *sp, struct fc_frame *fp,
  		fc_rport_enter_rtv(rdata);
  
  	} else {
@@ -264,6 +380,28 @@ index 6a98bb8..afc1f9b 100644
  	}
  
  out:
--- 
-1.8.5.6
+@@ -1602,8 +1610,12 @@ static void fc_rport_recv_els_req(struct fc_lport *lport, struct fc_frame *fp)
+ 	struct fc_seq_els_data els_data;
+ 
+ 	rdata = lport->tt.rport_lookup(lport, fc_frame_sid(fp));
+-	if (!rdata)
++	if (!rdata) {
++		FC_RPORT_ID_DBG(lport, fc_frame_sid(fp),
++				"Received ELS 0x%02x from non-logged-in port\n",
++				fc_frame_payload_op(fp));
+ 		goto reject;
++	}
+ 
+ 	mutex_lock(&rdata->rp_mutex);
+ 
+@@ -1614,6 +1626,9 @@ static void fc_rport_recv_els_req(struct fc_lport *lport, struct fc_frame *fp)
+ 	case RPORT_ST_ADISC:
+ 		break;
+ 	default:
++		FC_RPORT_DBG(rdata,
++			     "Reject ELS 0x%02x while in state %s\n",
++			     fc_frame_payload_op(fp), fc_rport_state(rdata));
+ 		mutex_unlock(&rdata->rp_mutex);
+ 		kref_put(&rdata->kref, lport->tt.rport_destroy);
+ 		goto reject;
 

@@ -25,7 +25,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 
 --- a/drivers/pci/host/Kconfig
 +++ b/drivers/pci/host/Kconfig
-@@ -217,6 +217,17 @@ config PCIE_ROCKCHIP
+@@ -217,4 +217,15 @@ config PCIE_ROCKCHIP
  	help
  	  Say Y here if you want ECAM support for CN88XX-Pass-1.x Cavium Thunder SoCs.
  
@@ -40,17 +40,14 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	  Designware hardware and therefore the driver re-uses the
 +	  Designware core functions to implement the driver.
 +
- config PCIE_ROCKCHIP
- 	bool "Rockchip PCIe controller"
- 	depends on ARCH_ROCKCHIP || COMPILE_TEST
+ endmenu
 --- a/drivers/pci/host/Makefile
 +++ b/drivers/pci/host/Makefile
-@@ -25,4 +25,5 @@ obj-$(CONFIG_PCIE_ALTERA_MSI) += pcie-al
- obj-$(CONFIG_ARM64) += pcie-hisi.o
- obj-$(CONFIG_ARM64) += pci-thunder-ecam.o
- obj-$(CONFIG_ARM64) += pci-thunder-pem.o
+@@ -25,3 +25,4 @@ obj-$(CONFIG_PCIE_ALTERA_MSI) += pcie-al
+ obj-$(CONFIG_PCI_HISI) += pcie-hisi.o
+ obj-$(CONFIG_PCI_HOST_THUNDER_ECAM) += pci-thunder-ecam.o
+ obj-$(CONFIG_PCI_HOST_THUNDER_PEM) += pci-thunder-pem.o
 +obj-$(CONFIG_PCIE_ARMADA_8K) += pcie-armada8k.o
- obj-$(CONFIG_PCIE_ROCKCHIP) += pcie-rockchip.o
 --- /dev/null
 +++ b/drivers/pci/host/pcie-armada8k.c
 @@ -0,0 +1,262 @@

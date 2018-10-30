@@ -327,19 +327,19 @@ Signed-off-by: Qu Wenruo <wqu@suse.com>
  	struct btrfs_root *root = BTRFS_I(inode)->root;
  	struct btrfs_dio_data dio_data = { 0 };
 +	struct extent_changeset *data_reserved = NULL;
+ 	loff_t offset = iocb->ki_pos;
  	size_t count = 0;
  	int flags = 0;
- 	bool wakeup = true;
 @@ -8717,7 +8722,8 @@ static ssize_t btrfs_direct_IO(struct ki
- 			mutex_unlock(&inode->i_mutex);
- 			relock = true;
+ 			ret = -EAGAIN;
+ 			goto out;
  		}
 -		ret = btrfs_delalloc_reserve_space(inode, offset, count);
 +		ret = btrfs_delalloc_reserve_space(inode, &data_reserved,
 +						   offset, count);
  		if (ret)
  			goto out;
- 		dio_data.outstanding_extents = div64_u64(count +
+ 		dio_data.outstanding_extents = count_max_extents(count);
 @@ -8773,6 +8779,7 @@ out:
  	if (relock)
  		mutex_lock(&inode->i_mutex);
@@ -521,8 +521,8 @@ Signed-off-by: Qu Wenruo <wqu@suse.com>
  			EXTENT_QGROUP_RESERVED, &changeset);
  
 @@ -3027,5 +3042,5 @@ void btrfs_qgroup_check_reserved_leak(st
- 		}
- 		qgroup_free(BTRFS_I(inode)->root, changeset.bytes_changed);
+ 				changeset.bytes_changed);
+ 
  	}
 -	ulist_release(&changeset.range_changed);
 +	extent_changeset_release(&changeset);

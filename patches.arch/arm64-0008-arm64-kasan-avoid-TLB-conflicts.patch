@@ -80,7 +80,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	clear_pgds(KASAN_SHADOW_START, KASAN_SHADOW_END);
  
 @@ -156,8 +148,7 @@ void __init kasan_init(void)
- 	}
+ 			pfn_pte(virt_to_pfn(kasan_zero_page), PAGE_KERNEL_RO));
  
  	memset(kasan_zero_page, 0, PAGE_SIZE);
 -	cpu_set_ttbr1(__pa(swapper_pg_dir));

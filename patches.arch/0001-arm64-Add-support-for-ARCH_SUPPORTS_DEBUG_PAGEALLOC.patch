@@ -89,7 +89,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  					   pgprot_val(mk_sect_prot(prot))));
 --- a/arch/arm64/mm/pageattr.c
 +++ b/arch/arm64/mm/pageattr.c
-@@ -36,14 +36,31 @@ static int change_page_range(pte_t *ptep
+@@ -36,15 +36,32 @@ static int change_page_range(pte_t *ptep
  	return 0;
  }
  
@@ -120,6 +120,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	unsigned long end = start + size;
 -	int ret;
 -	struct page_change_data data;
+ 	struct vm_struct *area;
  
  	if (!PAGE_ALIGNED(addr)) {
  		start &= PAGE_MASK;

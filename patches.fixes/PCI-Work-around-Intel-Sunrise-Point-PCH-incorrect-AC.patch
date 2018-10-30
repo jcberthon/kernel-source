@@ -89,7 +89,7 @@ index 8b0c8b5..22ed1a8 100644
 +	{ PCI_VENDOR_ID_INTEL, PCI_ANY_ID, pci_quirk_intel_spt_pch_acs },
  	{ 0x19a2, 0x710, pci_quirk_mf_endpoint_acs }, /* Emulex BE3-R */
  	{ 0x10df, 0x720, pci_quirk_mf_endpoint_acs }, /* Emulex Skyhawk-R */
- 	{ 0 }
+ 	/* Cavium ThunderX */
 @@ -4112,12 +4162,40 @@ static int pci_quirk_enable_intel_pch_acs(struct pci_dev *dev)
  	return 0;
  }

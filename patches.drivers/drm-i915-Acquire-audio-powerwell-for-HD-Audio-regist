@@ -66,12 +66,12 @@ Acked-by: Takashi Iwai <tiwai@suse.de>
 +	i915_audio_component_get_power(dev);
  	mutex_lock(&dev_priv->av_mutex);
  	/* 1. get the pipe */
- 	for_each_intel_encoder(drm_dev, intel_encoder) {
+ 	intel_encoder = dev_priv->dig_port_map[port];
 @@ -703,6 +708,7 @@ static int i915_audio_component_sync_aud
- 	I915_WRITE(HSW_AUD_CFG(pipe), tmp);
  
+  unlock:
  	mutex_unlock(&dev_priv->av_mutex);
 +	i915_audio_component_put_power(dev);
- 	return 0;
+ 	return err;
  }
  

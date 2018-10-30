@@ -24,8 +24,8 @@ index d46942828a34..2ac55e6520f2 100644
  	blk_mq_start_stopped_hw_queues(ctrl->ctrl.admin_q, true);
 +	blk_mq_kick_requeue_list(ctrl->ctrl.admin_q);
  
- 	nvme_fc_ctlr_inactive_on_rport(ctrl);
- }
+ 	/* resume the io queues so that things will fast fail */
+ 	nvme_start_queues(&ctrl->ctrl);
 -- 
 2.12.3
 

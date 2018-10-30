@@ -1,0 +1,27 @@
+From: Jeff Mahoney <jeffm@suse.com>
+Subject: libfc: restore debug message text in fc_exch_els_rec
+Patch-mainline: Never, SUSE-specific
+References: bsc#1114763
+
+Using upstream commit 57d3ec7e468 for
+patches.fixes/libfc-additional-debugging-messages.patch changed the formatting
+of the xids in a debug message in fc_exch_els_rec.  This patch restores it
+to what it was prior to that switch.
+
+Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+---
+ drivers/scsi/libfc/fc_exch.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/drivers/scsi/libfc/fc_exch.c
++++ b/drivers/scsi/libfc/fc_exch.c
+@@ -2044,7 +2044,7 @@ static void fc_exch_els_rec(struct fc_fr
+ 	ep = fc_exch_lookup(lport, xid);
+ 	if (!ep) {
+ 		FC_LPORT_DBG(lport,
+-			     "REC request from %x: rxid %x oxid %x not found\n",
++			     "REC request from %x: xid %4.4x-%4.4x not found\n",
+ 			     sid, rxid, oxid);
+ 		goto reject;
+ 	}
+

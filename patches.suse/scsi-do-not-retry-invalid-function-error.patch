@@ -21,5 +21,5 @@ index 86d3975..33cadee 100644
  		    sshdr.asc == 0x21 || /* Logical block address out of range */
 +		    sshdr.asc == 0x22 || /* Invalid function */
  		    sshdr.asc == 0x24 || /* Invalid field in cdb */
- 		    sshdr.asc == 0x26) { /* Parameter value invalid */
- 			set_host_byte(scmd, DID_TARGET_FAILURE);
+ 		    sshdr.asc == 0x26 || /* Parameter value invalid */
+ 		    sshdr.asc == 0x27) { /* Write protected */

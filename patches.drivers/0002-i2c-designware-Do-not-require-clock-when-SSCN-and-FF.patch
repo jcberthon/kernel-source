@@ -117,9 +117,9 @@ index 724aff2a6658..202d165767ff 100644
 +	return 0;
 +}
 +
- static void dw_i2c_set_fifo_size(struct dw_i2c_dev *dev, int id)
+ static int dw_i2c_plat_probe(struct platform_device *pdev)
  {
- 	u32 param, tx_fifo_depth, rx_fifo_depth;
+ 	struct dw_i2c_platform_data *pdata = dev_get_platdata(&pdev->dev);
 @@ -249,16 +261,13 @@ static int dw_i2c_plat_probe(struct platform_device *pdev)
  			DW_IC_CON_RESTART_EN | DW_IC_CON_SPEED_FAST;
  
@@ -142,7 +142,7 @@ index 724aff2a6658..202d165767ff 100644
 +				1000000);
  	}
  
- 	dw_i2c_set_fifo_size(dev, pdev->id);
+ 	if (!dev->tx_fifo_depth) {
 @@ -336,7 +345,7 @@ static int dw_i2c_plat_suspend(struct device *dev)
  	struct dw_i2c_dev *i_dev = platform_get_drvdata(pdev);
  
@@ -158,9 +158,9 @@ index 724aff2a6658..202d165767ff 100644
  
 -	clk_prepare_enable(i_dev->clk);
 +	i2c_dw_plat_prepare_clk(i_dev, true);
- 	i2c_dw_init(i_dev);
- 
- 	return 0;
+
+ 	if (!i_dev->pm_runtime_disabled)
+ 		i2c_dw_init(i_dev);
 -- 
 2.11.0
 

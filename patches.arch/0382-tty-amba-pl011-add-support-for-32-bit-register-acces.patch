@@ -72,13 +72,13 @@ index 13e7afa..1394df5 100644
  	uap->fifosize = vendor->get_fifosize(dev);
  	uap->port.irq = dev->irq[0];
 @@ -2579,6 +2589,7 @@ static int sbsa_uart_probe(struct platform_device *pdev)
- 	uap->port.irq	= ret;
+ 		return -ENOMEM;
  
  	uap->reg_offset = vendor_sbsa.reg_offset;
 +	uap->access_32b = vendor_sbsa.access_32b;
  	uap->vendor	= &vendor_sbsa;
  	uap->fifosize	= 32;
- 	uap->port.ops	= &sbsa_uart_pops;
+ 	uap->port.irq	= platform_get_irq(pdev, 0);
 -- 
 2.11.0
 

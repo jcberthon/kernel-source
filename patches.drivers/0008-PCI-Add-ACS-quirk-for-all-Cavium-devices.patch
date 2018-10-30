@@ -42,7 +42,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
   * Many Intel PCH root ports do provide ACS-like features to disable peer
   * transactions and validate bus numbers in requests, but do not provide an
 @@ -4157,6 +4170,8 @@ static const struct pci_dev_acs_enabled
- 	{ PCI_VENDOR_ID_INTEL, PCI_ANY_ID, pci_quirk_intel_spt_pch_acs },
+ 	{ PCI_VENDOR_ID_INTEL, PCI_ANY_ID, pci_quirk_intel_pch_acs },
  	{ 0x19a2, 0x710, pci_quirk_mf_endpoint_acs }, /* Emulex BE3-R */
  	{ 0x10df, 0x720, pci_quirk_mf_endpoint_acs }, /* Emulex Skyhawk-R */
 +	/* Cavium ThunderX */

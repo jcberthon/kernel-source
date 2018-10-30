@@ -35,8 +35,8 @@ drivers/firmware/efi/arm-init.c    |  8 ++++++++
  drivers/firmware/efi/libstub/fdt.c |   24 +-----------------------
  2 files changed, 9 insertions(+), 23 deletions(-)
 
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
 @@ -170,6 +170,14 @@ static __init void reserve_regions(void)
  	if (efi_enabled(EFI_DBG))
  		pr_info("Processing EFI memory map:\n");
@@ -49,7 +49,7 @@ drivers/firmware/efi/arm-init.c    |  8 ++++++++
 +	memblock_dump_all();
 +	memblock_remove(0, ULLONG_MAX);
 +
- 	for_each_efi_memory_desc(&memmap, md) {
+ 	for_each_efi_memory_desc(md) {
  		paddr = md->phys_addr;
  		npages = md->num_pages;
 --- a/drivers/firmware/efi/libstub/fdt.c

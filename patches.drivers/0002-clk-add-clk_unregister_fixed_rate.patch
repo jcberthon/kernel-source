@@ -39,11 +39,12 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
   * of_fixed_clk_setup() - Setup function for simple fixed rate clock
 --- a/include/linux/clk-provider.h
 +++ b/include/linux/clk-provider.h
-@@ -292,6 +292,7 @@ struct clk *clk_register_fixed_rate_with
+@@ -292,7 +292,7 @@ struct clk *clk_register_fixed_rate_with
  struct clk *clk_register_fixed_rate_with_accuracy(struct device *dev,
  		const char *name, const char *parent_name, unsigned long flags,
  		unsigned long fixed_rate, unsigned long fixed_accuracy);
+-
 +void clk_unregister_fixed_rate(struct clk *clk);
- struct clk_hw *clk_hw_register_fixed_rate_with_accuracy(struct device *dev,
- 		const char *name, const char *parent_name, unsigned long flags,
- 		unsigned long fixed_rate, unsigned long fixed_accuracy);
+ void of_fixed_clk_setup(struct device_node *np);
+ 
+ /**

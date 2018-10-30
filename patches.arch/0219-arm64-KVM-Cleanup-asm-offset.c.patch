@@ -21,7 +21,7 @@ diff --git a/arch/arm64/kernel/asm-offsets.c b/arch/arm64/kernel/asm-offsets.c
 index 584099b..1abcd88 100644
 --- a/arch/arm64/kernel/asm-offsets.c
 +++ b/arch/arm64/kernel/asm-offsets.c
-@@ -112,47 +112,8 @@ int main(void)
+@@ -112,50 +112,11 @@ int main(void)
    DEFINE(CPU_GP_REGS,		offsetof(struct kvm_cpu_context, gp_regs));
    DEFINE(CPU_USER_PT_REGS,	offsetof(struct kvm_regs, regs));
    DEFINE(CPU_FP_REGS,		offsetof(struct kvm_regs, fp_regs));
@@ -30,6 +30,9 @@ index 584099b..1abcd88 100644
 -  DEFINE(CPU_SPSR,		offsetof(struct kvm_regs, spsr));
 -  DEFINE(CPU_SYSREGS,		offsetof(struct kvm_cpu_context, sys_regs));
    DEFINE(VCPU_FPEXC32_EL2,	offsetof(struct kvm_vcpu, arch.ctxt.sys_regs[FPEXC32_EL2]));
+   DEFINE(VCPU_ESR_EL2,		offsetof(struct kvm_vcpu, arch.fault.esr_el2));
+   DEFINE(VCPU_FAR_EL2,		offsetof(struct kvm_vcpu, arch.fault.far_el2));
+   DEFINE(VCPU_HPFAR_EL2,	offsetof(struct kvm_vcpu, arch.fault.hpfar_el2));
 -  DEFINE(VCPU_DEBUG_FLAGS,	offsetof(struct kvm_vcpu, arch.debug_flags));
 -  DEFINE(VCPU_DEBUG_PTR,	offsetof(struct kvm_vcpu, arch.debug_ptr));
 -  DEFINE(DEBUG_BCR, 		offsetof(struct kvm_guest_debug_arch, dbg_bcr));

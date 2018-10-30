@@ -30,7 +30,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 +	u32 ldr_mode;
  	struct page *avic_logical_id_table_page;
  	struct page *avic_physical_id_table_page;
- };
+ 
 --- a/arch/x86/include/uapi/asm/svm.h
 +++ b/arch/x86/include/uapi/asm/svm.h
 @@ -73,6 +73,8 @@

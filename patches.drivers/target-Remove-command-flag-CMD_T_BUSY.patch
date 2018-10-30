@@ -47,7 +47,7 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
  	if (cmd->state_active) {
  		list_del(&cmd->state_list);
 @@ -717,7 +714,6 @@ static void __target_complete_cmd(struct
- 	cmd->sense_reason = sense_reason;
+ 
  
  	spin_lock_irqsave(&cmd->t_state_lock, flags);
 -	cmd->transport_state &= ~CMD_T_BUSY;

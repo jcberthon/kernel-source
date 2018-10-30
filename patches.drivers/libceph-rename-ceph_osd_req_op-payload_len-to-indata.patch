@@ -32,17 +32,8 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  		struct {
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -610,7 +610,7 @@ void osd_req_op_writesame_init(struct ce
- 	op->writesame.offset = offset;
- 	op->writesame.length = length;
- 	op->writesame.data_length = data_length;
--	op->payload_len = data_length;
-+	op->indata_len = data_length;
- }
- EXPORT_SYMBOL(osd_req_op_writesame_init);
- 
 @@ -635,7 +635,7 @@ void osd_req_op_extent_init(struct ceph_
- 	    opcode == CEPH_OSD_OP_CMPEXT)
+ 	if (opcode == CEPH_OSD_OP_WRITE || opcode == CEPH_OSD_OP_WRITEFULL)
  		payload_len += length;
  
 -	op->payload_len = payload_len;
@@ -71,12 +62,12 @@ Acked-by: David Disseldorp <ddiss@suse.de>
 @@ -732,7 +732,7 @@ int osd_req_op_xattr_init(struct ceph_os
  	op->xattr.cmp_mode = cmp_mode;
  
- 	ceph_osd_data_pagelist_init(&op->xattr.request_data, req_pagelist);
+ 	ceph_osd_data_pagelist_init(&op->xattr.osd_data, pagelist);
 -	op->payload_len = payload_len;
 +	op->indata_len = payload_len;
- 
  	return 0;
- 
+ }
+ EXPORT_SYMBOL(osd_req_op_xattr_init);
 @@ -870,7 +870,7 @@ static u64 osd_req_encode_op(struct ceph
  			BUG_ON(osd_data->type == CEPH_OSD_DATA_TYPE_NONE);
  			dst->cls.indata_len = cpu_to_le32(data_length);

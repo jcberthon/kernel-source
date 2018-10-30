@@ -31,13 +31,15 @@ Acked-by: NeilBrown <neilb@suse.com>
 
 --- a/fs/ceph/addr.c
 +++ b/fs/ceph/addr.c
-@@ -176,8 +176,7 @@ static void ceph_invalidatepage(struct p
+@@ -176,9 +176,8 @@ static void ceph_invalidatepage(struct p
+ 
  static int ceph_releasepage(struct page *page, gfp_t g)
  {
- 	struct inode *inode = page->mapping ? page->mapping->host : NULL;
--	dout("%p releasepage %p idx %lu\n", inode, page, page->index);
+-	dout("%p releasepage %p idx %lu\n", page->mapping->host,
+-	     page, page->index);
 -	WARN_ON(PageDirty(page));
-+	dout("%p releasepage %p idx %lu (%sdirty)\n", inode, page, page->index, PageDirty(page) ? "" : "not ");
++	dout("%p releasepage %p idx %lu (%sdirty)\n", page->mapping->host,
++	     page, page->index, PageDirty(page) ? "" : "not ");
  
  	/* Can we release the page from the cache? */
  	if (!ceph_release_fscache_page(page, g))

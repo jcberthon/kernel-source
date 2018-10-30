@@ -36,4 +36,4 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +
  #ifndef __ASSEMBLY__
  
- /*
+ #include <asm/sysreg.h>

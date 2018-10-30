@@ -40,7 +40,7 @@ index d1c567d16699..f6c0fb0707ea 100644
 +}
 +
  bool kvm_irq_delivery_to_apic_fast(struct kvm *kvm, struct kvm_lapic *src,
- 		struct kvm_lapic_irq *irq, int *r, struct dest_map *dest_map)
+ 		struct kvm_lapic_irq *irq, int *r, unsigned long *dest_map)
  {
 @@ -746,15 +755,8 @@ bool kvm_irq_delivery_to_apic_fast(struct kvm *kvm, struct kvm_lapic *src,
  			idx = kvm_vector_to_index(irq->vector,

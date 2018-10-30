@@ -29,7 +29,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  
 -const struct x86_cpu_id skx_cpuids[] = {
 +static const struct x86_cpu_id skx_cpuids[] = {
- 	{ X86_VENDOR_INTEL, 6, 0x55, 0, 0 },	/* Skylake */
+ 	{ X86_VENDOR_INTEL, 6, INTEL_FAM6_SKYLAKE_X, 0, 0 },
  	{ }
  };
 @@ -1036,7 +1036,7 @@ static void skx_remove(void)

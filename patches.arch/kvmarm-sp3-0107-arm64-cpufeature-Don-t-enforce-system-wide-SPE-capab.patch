@@ -31,7 +31,7 @@ index 3cc3390..fcf0aa4 100644
 --- a/arch/arm64/include/asm/sysreg.h
 +++ b/arch/arm64/include/asm/sysreg.h
 @@ -160,6 +160,7 @@
- #define ID_AA64MMFR2_UAO_SHIFT		4
+ #define ID_AA64MMFR2_CNP_SHIFT		0
  
  /* id_aa64dfr0 */
 +#define ID_AA64DFR0_PMSVER_SHIFT	32

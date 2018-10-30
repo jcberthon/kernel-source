@@ -37,7 +37,7 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 
 --- a/arch/x86/include/asm/pgtable.h
 +++ b/arch/x86/include/asm/pgtable.h
-@@ -551,6 +551,13 @@ static inline int pte_present(pte_t a)
+@@ -496,6 +496,13 @@ static inline int pte_present(pte_t a)
  	return pte_flags(a) & (_PAGE_PRESENT | _PAGE_PROTNONE);
  }
  
@@ -59,9 +59,9 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
  #include <linux/swap.h>
 +#include <linux/memremap.h>
  
- #include <asm/mmu_context.h>
  #include <asm/pgtable.h>
-@@ -64,6 +65,16 @@ retry:
+ 
+@@ -86,6 +87,16 @@ static inline int pte_allows_gup(unsigne
  #endif
  }
  
@@ -76,22 +76,23 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 +}
 +
  /*
-  * 'pteval' can come from a pte, pmd or pud.  We only check
-  * _PAGE_PRESENT, _PAGE_USER, and _PAGE_RW in here which are the
-@@ -94,6 +105,8 @@ static inline int pte_allows_gup(unsigne
+  * The performance critical leaf functions are made noinline otherwise gcc
+  * inlines everything into a single function which results in too much
+@@ -94,7 +105,9 @@ static inline int pte_allows_gup(unsigne
  static noinline int gup_pte_range(pmd_t pmd, unsigned long addr,
  		unsigned long end, int write, struct page **pages, int *nr)
  {
 +	struct dev_pagemap *pgmap = NULL;
+ 	unsigned long mask;
 +	int nr_start = *nr;
  	pte_t *ptep;
  
- 	ptep = pte_offset_map(&pmd, addr);
-@@ -107,14 +120,22 @@ static noinline int gup_pte_range(pmd_t
+ 	mask = _PAGE_PRESENT|_PAGE_USER;
+@@ -107,13 +120,21 @@ static noinline int gup_pte_range(pmd_t
  			return 0;
  		}
  
--		if (!pte_allows_gup(pte_val(pte), write) ||
+-		if ((pte_flags(pte) & (mask | _PAGE_SPECIAL)) != mask) {
 +		page = pte_page(pte);
 +		if (pte_devmap(pte)) {
 +			pgmap = get_dev_pagemap(pte_pfn(pte), pgmap);
@@ -100,8 +101,7 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 +				pte_unmap(ptep);
 +				return 0;
 +			}
-+		} else if (!pte_allows_gup(pte_val(pte), write) ||
- 		    pte_special(pte)) {
++		} else if ((pte_flags(pte) & (mask | _PAGE_SPECIAL)) != mask) {
  			pte_unmap(ptep);
  			return 0;
  		}
@@ -146,8 +146,8 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
  		unsigned long end, int write, struct page **pages, int *nr)
  {
 @@ -141,9 +188,13 @@ static noinline int gup_huge_pmd(pmd_t p
- 
- 	if (!pte_allows_gup(pmd_val(pmd), write))
+ 		mask |= _PAGE_RW;
+ 	if ((pmd_flags(pmd) & mask) != mask)
  		return 0;
 +
 +	VM_BUG_ON(!pfn_valid(pmd_pfn(pmd)));

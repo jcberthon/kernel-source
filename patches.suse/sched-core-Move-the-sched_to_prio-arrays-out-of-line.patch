@@ -26,13 +26,13 @@ Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
 ---
  kernel/sched/auto_group.c |    2 +-
- kernel/sched/core.c       |   45 +++++++++++++++++++++++++++++++++++++++++++--
+ kernel/sched/core.c       |   46 ++++++++++++++++++++++++++++++++++++++++++++--
  kernel/sched/sched.h      |   42 ++----------------------------------------
- 3 files changed, 46 insertions(+), 43 deletions(-)
+ 3 files changed, 47 insertions(+), 43 deletions(-)
 
 --- a/kernel/sched/auto_group.c
 +++ b/kernel/sched/auto_group.c
-@@ -213,7 +213,7 @@ int proc_sched_autogroup_set_nice(struct
+@@ -212,7 +212,7 @@ int proc_sched_autogroup_set_nice(struct
  	ag = autogroup_task_get(p);
  
  	down_write(&ag->lock);
@@ -43,7 +43,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  	up_write(&ag->lock);
 --- a/kernel/sched/core.c
 +++ b/kernel/sched/core.c
-@@ -903,8 +903,8 @@ static void set_load_weight(struct task_
+@@ -831,8 +831,8 @@ static void set_load_weight(struct task_
  		return;
  	}
  
@@ -54,10 +54,12 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  }
  
  static inline void enqueue_task(struct rq *rq, struct task_struct *p, int flags)
-@@ -8817,6 +8817,47 @@ void dump_cpu_task(int cpu)
+@@ -8675,3 +8675,45 @@ static int __init parse_nortsched(char *
+ 	pr_info("Task dump for CPU %d:\n", cpu);
+ 	sched_show_task(cpu_curr(cpu));
  }
- 
- /*
++
++/*
 + * Nice levels are multiplicative, with a gentle 10% change for every
 + * nice level changed. I.e. when a CPU-bound task goes from nice 0 to
 + * nice 1, it will get ~10% less CPU time than another CPU-bound task
@@ -98,13 +100,9 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
 + /*  15 */ 119304647, 148102320, 186737708, 238609294, 286331153,
 +};
 +
-+/*
-  * Bootline option to disable sched_rt_runtime.
-  */
- static int __init parse_nortsched(char *arg)
 --- a/kernel/sched/sched.h
 +++ b/kernel/sched/sched.h
-@@ -1149,46 +1149,8 @@ static inline void finish_lock_switch(st
+@@ -1127,46 +1127,8 @@ static inline void finish_lock_switch(st
  #define WEIGHT_IDLEPRIO                3
  #define WMULT_IDLEPRIO         1431655765
  

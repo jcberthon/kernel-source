@@ -60,9 +60,10 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  };
  
 @@ -291,6 +294,45 @@ static const struct of_device_id sdhci_a
- MODULE_DEVICE_TABLE(of, sdhci_arasan_of_match);
+ 	.recalc_rate = sdhci_arasan_sdcardclk_recalc_rate,
+ };
  
- /**
++/**
 + * sdhci_arasan_update_clockmultiplier - Set corecfg_clockmultiplier
 + *
 + * The corecfg_clockmultiplier is supposed to contain clock multiplier
@@ -101,12 +102,11 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	sdhci_arasan_syscon_write(host, &soc_ctl_map->clockmultiplier, value);
 +}
 +
-+/**
+ /**
   * sdhci_arasan_update_baseclkfreq - Set corecfg_baseclkfreq
   *
-  * The corecfg_baseclkfreq is supposed to contain the MHz of clk_xin.  This
 @@ -396,6 +438,10 @@ static int sdhci_arasan_probe(struct pla
- 	pltfm_host->priv = sdhci_arasan;
+ 	sdhci_get_of_property(pdev);
  	pltfm_host->clk = clk_xin;
  
 +	if (of_device_is_compatible(pdev->dev.of_node,
@@ -115,4 +115,4 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +
  	sdhci_arasan_update_baseclkfreq(host);
  
- 	ret = mmc_of_parse(host->mmc);
+ 	ret = sdhci_arasan_register_sdclk(sdhci_arasan, clk_xin, &pdev->dev);

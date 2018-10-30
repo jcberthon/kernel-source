@@ -150,9 +150,9 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
  	}
 -	lport->tt.exch_done(cmd->seq);
 +	fc_exch_done(cmd->seq);
- 	return 0;
- }
- 
+ 	/*
+ 	 * Drop the extra ACK_KREF reference taken by target_submit_cmd()
+ 	 * ahead of ft_check_stop_free() -> transport_generic_free_cmd()
 @@ -319,7 +319,7 @@ static void ft_send_resp_status(struct f
  	sp = fr_seq(fp);
  	if (sp) {

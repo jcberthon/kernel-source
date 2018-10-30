@@ -149,7 +149,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 +		if (unlikely(bad_pmem))
  			rc = -EIO;
  		else {
- 			rc = memcpy_from_pmem(mem + off, pmem_addr, len);
+ 			memcpy_from_pmem(mem + off, pmem_addr, len);
 @@ -82,6 +105,10 @@ static int pmem_do_bvec(struct pmem_devi
  	} else {
  		flush_dcache_page(page);

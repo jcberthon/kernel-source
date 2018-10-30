@@ -62,7 +62,7 @@ index a497cf0..7ac8a5f 100644
 +	return id_aa64mmfr0_mixed_endian_el0(read_sanitised_ftr_reg(SYS_ID_AA64MMFR0_EL1));
  }
  
- #endif /* __ASSEMBLY__ */
+ static inline bool system_uses_ttbr0_pan(void)
 diff --git a/arch/arm64/include/asm/hw_breakpoint.h b/arch/arm64/include/asm/hw_breakpoint.h
 index 783ba7d..e29044b 100644
 --- a/arch/arm64/include/asm/hw_breakpoint.h

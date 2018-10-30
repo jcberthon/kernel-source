@@ -68,11 +68,11 @@ index 2f0d81c..c02a1b1 100644
 +}
 +
  /**
-  * vgic_v3_probe - probe for a GICv3 compatible interrupt controller
-  * @gic_kvm_info:	pointer to the GIC description
+  * vgic_v3_probe - probe for a GICv3 compatible interrupt controller in DT
+  * @node:	pointer to the DT node
 @@ -271,6 +276,8 @@ int vgic_v3_probe(const struct gic_kvm_info *gic_kvm_info,
- 	kvm_info("GICV base=0x%llx, IRQ=%d\n",
- 		 vgic->vcpu_base, vgic->maint_irq);
+ 	kvm_info("%s@%llx IRQ%d\n", vgic_node->name,
+ 		 vcpu_res.start, vgic->maint_irq);
  
 +	on_each_cpu(vgic_cpu_init_lrs, vgic, 1);
 +

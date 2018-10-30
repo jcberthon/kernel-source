@@ -65,14 +65,14 @@ index 6b8a7f6..4fd0699 100644
  	uap->lcrh_rx = vendor->lcrh_rx;
  	uap->lcrh_tx = vendor->lcrh_tx;
 @@ -2569,7 +2573,7 @@ static int sbsa_uart_probe(struct platform_device *pdev)
- 	}
- 	uap->port.irq	= ret;
+ 	if (!uap)
+ 		return -ENOMEM;
  
 -	uap->reg_offset = pl011_std_offsets;
 +	uap->reg_offset = vendor_sbsa.reg_offset;
  	uap->vendor	= &vendor_sbsa;
  	uap->fifosize	= 32;
- 	uap->port.ops	= &sbsa_uart_pops;
+ 	uap->port.irq	= platform_get_irq(pdev, 0);
 -- 
 2.11.0
 

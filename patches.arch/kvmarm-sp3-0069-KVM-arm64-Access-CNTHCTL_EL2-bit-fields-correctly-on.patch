@@ -69,16 +69,16 @@ index c8fc82d..15a5788 100644
 --- a/arch/arm64/include/asm/virt.h
 +++ b/arch/arm64/include/asm/virt.h
 @@ -46,6 +46,7 @@
- 
  #include <asm/ptrace.h>
+ #include <asm/sections.h>
  #include <asm/sysreg.h>
 +#include <asm/cpufeature.h>
  
  /*
   * __boot_cpu_mode records what mode CPUs were booted in.
 @@ -87,6 +88,20 @@ extern char __hyp_idmap_text_end[];
- extern char __hyp_text_start[];
- extern char __hyp_text_end[];
+ 	return read_sysreg(CurrentEL) == CurrentEL_EL2;
+ }
  
 +static inline bool has_vhe(void)
 +{

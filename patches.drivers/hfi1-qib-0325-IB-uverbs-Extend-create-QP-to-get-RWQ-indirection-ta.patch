@@ -46,7 +46,7 @@ Acked-by: Thomas Bogendoerfer <tbogendoerfer@suse.de>
  {
  	struct ib_uobject *uobj;
 @@ -1764,6 +1775,8 @@ static int create_qp(struct ib_uverbs_fi
- 	struct ib_qp_init_attr		attr;
+ 	struct ib_qp_init_attr		attr = {};
  	struct ib_uverbs_ex_create_qp_resp resp;
  	int				ret;
 +	struct ib_rwq_ind_table *ind_tbl = NULL;

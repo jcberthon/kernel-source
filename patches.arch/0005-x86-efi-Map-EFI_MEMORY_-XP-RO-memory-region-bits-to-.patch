@@ -88,8 +88,8 @@ Acked-by: Lee, Chun-Yi <jlee@suse.com>
 +	efi_runtime_update_mappings();
 +	efi_dump_pagetable();
  
- 	/* clean DUMMY object */
- 	efi_delete_dummy_variable();
+ 	/*
+ 	 * We mapped the descriptor array into the EFI pagetable above
 --- a/arch/x86/platform/efi/efi_32.c
 +++ b/arch/x86/platform/efi/efi_32.c
 @@ -90,7 +90,7 @@ void __init efi_call_phys_epilog(pgd_t *

@@ -45,7 +45,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 +++ b/drivers/nvme/host/pci.c
 @@ -317,7 +317,7 @@ static int nvme_init_iod(struct request
  		rq->retries = 0;
- 		rq->cmd_flags |= REQ_DONTPREP;
+ 		rq->rq_flags |= RQF_DONTPREP;
  	}
 -	return 0;
 +	return BLK_MQ_RQ_QUEUE_OK;

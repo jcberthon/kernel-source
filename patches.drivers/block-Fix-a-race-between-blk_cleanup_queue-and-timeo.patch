@@ -36,7 +36,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  	if (q->mq_ops) {
  		struct blk_mq_hw_ctx *hctx;
 @@ -720,6 +721,7 @@ struct request_queue *blk_alloc_queue_no
- 	setup_timer(&q->backing_dev_info.laptop_mode_wb_timer,
+ 	setup_timer(&q->backing_dev_info->laptop_mode_wb_timer,
  		    laptop_mode_timer_fn, (unsigned long) q);
  	setup_timer(&q->timeout, blk_rq_timed_out_timer, (unsigned long) q);
 +	INIT_WORK(&q->timeout_work, NULL);
@@ -55,7 +55,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  
  	list_for_each_entry_safe(rq, tmp, &q->timeout_list, timeout_list)
 @@ -148,7 +146,6 @@ void blk_timeout_work(struct work_struct
- 		mod_timer(&q->timeout, next);
+ 		mod_timer(&q->timeout, round_jiffies_up(next));
  
  	spin_unlock_irqrestore(q->queue_lock, flags);
 -	blk_queue_exit(q);

@@ -220,8 +220,8 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
  		goto pd_err;
  
 @@ -435,7 +429,7 @@ static int iser_create_ib_conn_res(struc
- {
- 	struct iser_conn *iser_conn = to_iser_conn(ib_conn);
+ 	struct iser_conn *iser_conn = container_of(ib_conn, struct iser_conn,
+ 						   ib_conn);
  	struct iser_device	*device;
 -	struct ib_device_attr *dev_attr;
 +	struct ib_device	*ib_dev;
@@ -353,7 +353,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 -	dev_attr = &device->dev_attr;
 -	ret = isert_query_device(device->ib_device, dev_attr);
 -	if (ret)
--		return ret;
+-		goto out;
 +	isert_dbg("devattr->max_sge: %d\n", ib_dev->attrs.max_sge);
 +	isert_dbg("devattr->max_sge_rd: %d\n", ib_dev->attrs.max_sge_rd);
  
@@ -372,7 +372,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 -	ret = isert_alloc_comps(device, dev_attr);
 +	ret = isert_alloc_comps(device);
  	if (ret)
- 		return ret;
+ 		goto out;
  
 -	device->pd = ib_alloc_pd(device->ib_device);
 +	device->pd = ib_alloc_pd(ib_dev);

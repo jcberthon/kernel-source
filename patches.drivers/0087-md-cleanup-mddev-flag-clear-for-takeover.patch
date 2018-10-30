@@ -32,20 +32,18 @@ Signed-off-by: Coly Li <colyli@suse.de>
  enum mddev_flags {
  	MD_ARRAY_FIRST_USE,	/* First use of array, needs initialization */
  	MD_CLOSING,		/* If set, we are closing the array, do not open
-@@ -705,6 +706,13 @@ static inline int mddev_is_clustered(str
+@@ -705,4 +706,11 @@ static inline int mddev_is_clustered(str
+ {
  	return mddev->cluster_info && mddev->bitmap_info.nodes > 1;
  }
- 
++
 +/* clear unsupported mddev_flags */
 +static inline void mddev_clear_unsupported_flags(struct mddev *mddev,
 +	unsigned long unsupported_flags)
 +{
 +	mddev->flags &= ~unsupported_flags;
 +}
-+
- static inline void mddev_check_writesame(struct mddev *mddev, struct bio *bio)
- {
- 	if (bio_op(bio) == REQ_OP_WRITE_SAME &&
+ #endif /* _MD_MD_H */
 --- a/drivers/md/raid0.c
 +++ b/drivers/md/raid0.c
 @@ -26,6 +26,11 @@

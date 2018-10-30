@@ -57,9 +57,9 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
  					int used, int quota_claim);
 +extern int ext4_issue_zeroout(struct inode *inode, ext4_lblk_t lblk,
 +			      ext4_fsblk_t pblk, ext4_lblk_t len);
- extern int ext4_get_next_extent(struct inode *inode, ext4_lblk_t lblk,
- 				unsigned int map_len,
- 				struct extent_status *result);
+ 
+ /* indirect.c */
+ extern int ext4_ind_map_blocks(handle_t *handle, struct inode *inode,
 --- a/fs/ext4/extents.c
 +++ b/fs/ext4/extents.c
 @@ -3137,19 +3137,11 @@ static int ext4_ext_zeroout(struct inode

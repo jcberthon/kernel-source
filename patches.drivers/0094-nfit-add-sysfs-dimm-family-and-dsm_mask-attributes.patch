@@ -49,8 +49,8 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  {
 @@ -1037,6 +1061,8 @@ static struct attribute *acpi_nfit_dimm_
  	&dev_attr_serial.attr,
+ 	&dev_attr_rev_id.attr,
  	&dev_attr_flags.attr,
- 	&dev_attr_id.attr,
 +	&dev_attr_family.attr,
 +	&dev_attr_dsm_mask.attr,
  	NULL,

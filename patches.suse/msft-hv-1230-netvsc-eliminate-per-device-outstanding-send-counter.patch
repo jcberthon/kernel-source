@@ -127,8 +127,8 @@ index 359e7ef7040b..bd055146f098 100644
 +	    netvsc_channel_idle(net_device, q_idx))
 +		return;
  
- 	while ((desc = get_next_pkt_raw(channel)) != NULL) {
- 		netvsc_process_raw_pkt(device, channel, net_device,
+ 	/* commit_rd_index() -> hv_signal_on_read() needs this. */
+ 	init_cached_read_index(channel);
 diff --git a/drivers/net/hyperv/rndis_filter.c b/drivers/net/hyperv/rndis_filter.c
 index 70b099a731a9..19356f56b7b1 100644
 --- a/drivers/net/hyperv/rndis_filter.c

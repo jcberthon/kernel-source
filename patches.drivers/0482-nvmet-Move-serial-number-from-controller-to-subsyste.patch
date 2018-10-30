@@ -28,17 +28,15 @@ diff --git a/drivers/nvme/target/admin-cmd.c b/drivers/nvme/target/admin-cmd.c
 index 2c207bfef715..e3a80f022f0c 100644
 --- a/drivers/nvme/target/admin-cmd.c
 +++ b/drivers/nvme/target/admin-cmd.c
-@@ -183,8 +183,8 @@ static void nvmet_execute_identify_ctrl(struct nvmet_req *req)
- 	id->vid = 0;
+@@ -183,7 +183,7 @@ static void nvmet_execute_identify_ctrl(struct nvmet_req *req)
  	id->ssvid = 0;
  
--	bin2hex(id->sn, &ctrl->serial, min(sizeof(ctrl->serial),
--					   sizeof(id->sn) / 2));
-+	bin2hex(id->sn, &ctrl->subsys->serial,
-+			min(sizeof(ctrl->subsys->serial), sizeof(id->sn) / 2));
+ 	memset(id->sn, ' ', sizeof(id->sn));
+-	snprintf(id->sn, sizeof(id->sn), "%llx", ctrl->serial);
++	snprintf(id->sn, sizeof(id->sn), "%llx", ctrl->subsys->serial);
  
- 	memcpy_and_pad(id->mn, sizeof(id->mn), MODEL, sizeof(MODEL) - 1, ' ');
- 	memcpy_and_pad(id->fr, sizeof(id->fr),
+ 	memset(id->mn, ' ', sizeof(id->mn));
+ 	strncpy((char *)id->mn, "Linux", sizeof(id->mn));
 diff --git a/drivers/nvme/target/core.c b/drivers/nvme/target/core.c
 index 2a2e83089696..b79f81ecc3ac 100644
 --- a/drivers/nvme/target/core.c

@@ -17,14 +17,6 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
 
 --- a/arch/x86/kvm/svm.c
 +++ b/arch/x86/kvm/svm.c
-@@ -45,6 +45,7 @@
- #include <asm/kvm_para.h>
- #include <asm/spec-ctrl.h>
- #include <asm/irq_remapping.h>
-+#include <asm/spec_ctrl.h>
- 
- #include <asm/virtext.h>
- #include "trace.h"
 @@ -175,6 +176,8 @@ struct vcpu_svm {
  
  	u64 next_rip;

@@ -24,17 +24,15 @@ diff --git a/drivers/scsi/megaraid/megaraid_sas_base.c b/drivers/scsi/megaraid/m
 index 24928c3..7797d78 100644
 --- a/drivers/scsi/megaraid/megaraid_sas_base.c
 +++ b/drivers/scsi/megaraid/megaraid_sas_base.c
-@@ -5033,8 +5033,8 @@ static int megasas_init_fw(struct megasas_instance *instance)
+@@ -5033,7 +5033,7 @@ static int megasas_init_fw(struct megasas_instance *instance)
  
  	/* Find first memory bar */
  	bar_list = pci_select_bars(instance->pdev, IORESOURCE_MEM);
 -	instance->bar = find_first_bit(&bar_list, sizeof(unsigned long));
--	if (pci_request_selected_regions(instance->pdev, 1<<instance->bar,
 +	instance->bar = find_first_bit(&bar_list, BITS_PER_LONG);
-+	if (pci_request_selected_regions(instance->pdev, instance->bar,
+ 	if (pci_request_selected_regions(instance->pdev, 1<<instance->bar,
  					 "megasas: LSI")) {
  		dev_printk(KERN_DEBUG, &instance->pdev->dev, "IO memory region busy!\n");
- 		return -EBUSY;
 -- 
 1.8.5.6
 

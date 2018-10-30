@@ -18,15 +18,17 @@ Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 Acked-by: Nikolay Borisov <nborisov@suse.com>
 ---
- fs/xfs/libxfs/xfs_bmap.c       |   23 ++---------------------
- fs/xfs/libxfs/xfs_bmap.h       |    9 ---------
- fs/xfs/libxfs/xfs_inode_fork.c |   10 +++++++---
- fs/xfs/xfs_trace.h             |    3 ++-
+ fs/xfs/libxfs/xfs_bmap.c       | 23 ++---------------------
+ fs/xfs/libxfs/xfs_bmap.h       |  9 ---------
+ fs/xfs/libxfs/xfs_inode_fork.c | 10 +++++++---
+ fs/xfs/xfs_trace.h             |  3 ++-
  4 files changed, 11 insertions(+), 34 deletions(-)
 
+diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
+index d03de10adb59..4eb1673984ff 100644
 --- a/fs/xfs/libxfs/xfs_bmap.c
 +++ b/fs/xfs/libxfs/xfs_bmap.c
-@@ -479,26 +479,6 @@ error_norelse:
+@@ -479,26 +479,6 @@ xfs_bmap_check_leaf_extents(
  }
  
  /*
@@ -53,7 +55,7 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
   * Validate that the bmbt_irecs being returned from bmapi are valid
   * given the caller's original parameters.  Specifically check the
   * ranges of the returned irecs to ensure that they only extend beyond
-@@ -1260,6 +1240,7 @@ xfs_bmap_read_extents(
+@@ -1247,6 +1227,7 @@ xfs_bmap_read_extents(
  	__be64			*pp;	/* pointer to block address */
  	/* REFERENCED */
  	xfs_extnum_t		room;	/* number of entries there's room for */
@@ -61,15 +63,15 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  
  	bno = NULLFSBLOCK;
  	mp = ip->i_mount;
-@@ -1349,6 +1330,7 @@ xfs_bmap_read_extents(
- 						 ip->i_mount);
+@@ -1336,6 +1317,7 @@ xfs_bmap_read_extents(
+ 						 XFS_ERRLEVEL_LOW, mp);
  				goto error0;
  			}
 +			trace_xfs_read_extent(ip, i, state, _THIS_IP_);
  		}
  		xfs_trans_brelse(tp, bp);
  		bno = nextbno;
-@@ -1365,7 +1347,6 @@ xfs_bmap_read_extents(
+@@ -1352,7 +1334,6 @@ xfs_bmap_read_extents(
  	}
  	ASSERT(i == xfs_iext_count(ifp));
  	ASSERT(i == XFS_IFORK_NEXTENTS(ip, whichfork));
@@ -77,6 +79,8 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  	return 0;
  error0:
  	xfs_trans_brelse(tp, bp);
+diff --git a/fs/xfs/libxfs/xfs_bmap.h b/fs/xfs/libxfs/xfs_bmap.h
+index 5fbc8163fde7..546526a34adc 100644
 --- a/fs/xfs/libxfs/xfs_bmap.h
 +++ b/fs/xfs/libxfs/xfs_bmap.h
 @@ -180,15 +180,6 @@ enum shift_direction {
@@ -95,28 +99,28 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  void	xfs_trim_extent(struct xfs_bmbt_irec *irec, xfs_fileoff_t bno,
  		xfs_filblks_t len);
  int	xfs_bmap_add_attrfork(struct xfs_inode *ip, int size, int rsvd);
+diff --git a/fs/xfs/libxfs/xfs_inode_fork.c b/fs/xfs/libxfs/xfs_inode_fork.c
+index 22b1fbefd436..5027fe2a3660 100644
 --- a/fs/xfs/libxfs/xfs_inode_fork.c
 +++ b/fs/xfs/libxfs/xfs_inode_fork.c
-@@ -311,7 +311,8 @@ xfs_iformat_extents(
- 	xfs_dinode_t	*dip,
- 	int		whichfork)
+@@ -311,6 +311,7 @@ xfs_iformat_extents(
  {
--	xfs_bmbt_rec_t	*dp;
-+	int		state = xfs_bmap_fork_to_state(whichfork);
-+	xfs_bmbt_rec_t  *dp;
- 	xfs_ifork_t	*ifp;
- 	int		nex;
- 	int		size;
+ 	struct xfs_mount	*mp = ip->i_mount;
+ 	struct xfs_ifork	*ifp = XFS_IFORK_PTR(ip, whichfork);
++	int			state = xfs_bmap_fork_to_state(whichfork);
+ 	int			nex = XFS_DFORK_NEXTENTS(dip, whichfork);
+ 	int			size = nex * sizeof(xfs_bmbt_rec_t);
+ 	xfs_bmbt_rec_t		*dp;
 @@ -350,8 +351,8 @@ xfs_iformat_extents(
- 			xfs_bmbt_rec_host_t *ep = xfs_iext_get_ext(ifp, i);
- 			ep->l0 = get_unaligned_be64(&dp->l0);
- 			ep->l1 = get_unaligned_be64(&dp->l1);
+ 						 XFS_ERRLEVEL_LOW, mp);
+ 				return -EFSCORRUPTED;
+ 			}
 +			trace_xfs_read_extent(ip, i, state, _THIS_IP_);
  		}
 -		XFS_BMAP_TRACE_EXLIST(ip, nex, whichfork);
- 		if (whichfork != XFS_DATA_FORK ||
- 			XFS_EXTFMT_INODE(ip) == XFS_EXTFMT_NOSTATE)
- 				if (unlikely(xfs_check_nostate_extents(
+ 	}
+ 	ifp->if_flags |= XFS_IFEXTENTS;
+ 	return 0;
 @@ -756,6 +757,7 @@ xfs_iextents_copy(
  	xfs_bmbt_rec_t		*dp,
  	int			whichfork)
@@ -146,6 +150,8 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  		dp++;
  		copied++;
  	}
+diff --git a/fs/xfs/xfs_trace.h b/fs/xfs/xfs_trace.h
+index d821cf438219..5b39d703fe1b 100644
 --- a/fs/xfs/xfs_trace.h
 +++ b/fs/xfs/xfs_trace.h
 @@ -303,7 +303,8 @@ DEFINE_EVENT(xfs_bmap_class, name, \
@@ -158,3 +164,6 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  
  DECLARE_EVENT_CLASS(xfs_buf_class,
  	TP_PROTO(struct xfs_buf *bp, unsigned long caller_ip),
+-- 
+2.7.4
+

@@ -194,18 +194,18 @@ index f43ec17..8619cd4 100644
  	.queue_rq	= nvme_queue_rq,
 -	.complete	= nvme_complete_rq,
 +	.complete	= nvme_pci_complete_rq,
- 	.map_queue	= blk_mq_map_queue,
  	.init_hctx	= nvme_admin_init_hctx,
  	.exit_hctx      = nvme_admin_exit_hctx,
+ 	.init_request	= nvme_admin_init_request,
 @@ -1137,7 +1115,7 @@ static struct blk_mq_ops nvme_mq_admin_ops = {
  
  static struct blk_mq_ops nvme_mq_ops = {
  	.queue_rq	= nvme_queue_rq,
 -	.complete	= nvme_complete_rq,
 +	.complete	= nvme_pci_complete_rq,
- 	.map_queue	= blk_mq_map_queue,
  	.init_hctx	= nvme_init_hctx,
  	.init_request	= nvme_init_request,
+ 	.map_queues	= nvme_pci_map_queues,
 diff --git a/drivers/nvme/host/rdma.c b/drivers/nvme/host/rdma.c
 index ab60d7b..6ab36c4 100644
 --- a/drivers/nvme/host/rdma.c

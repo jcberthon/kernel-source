@@ -43,18 +43,18 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
 -			ret = btrfs_map_bio(root, WRITE, bio, 0, 1);
 +			ret = btrfs_map_bio(root, bio, 0, 1);
- 			if (ret) {
- 				bio->bi_error = ret;
- 				bio_endio(bio);
+ 			BUG_ON(ret); /* -ENOMEM */
+ 
+ 			bio_put(bio);
 @@ -436,7 +436,7 @@ int btrfs_submit_compressed_write(struct
  		BUG_ON(ret); /* -ENOMEM */
  	}
  
 -	ret = btrfs_map_bio(root, WRITE, bio, 0, 1);
 +	ret = btrfs_map_bio(root, bio, 0, 1);
- 	if (ret) {
- 		bio->bi_error = ret;
- 		bio_endio(bio);
+ 	BUG_ON(ret); /* -ENOMEM */
+ 
+ 	bio_put(bio);
 @@ -665,7 +665,7 @@ int btrfs_submit_compressed_read(struct
  		page->index = em_start >> PAGE_CACHE_SHIFT;
  
@@ -220,8 +220,8 @@ Acked-by: Hannes Reinecke <hare@suse.de>
 --- a/fs/btrfs/extent_io.c
 +++ b/fs/btrfs/extent_io.c
 @@ -2424,8 +2424,7 @@ static int bio_readpage_error(struct bio
- 		"Repair Read Error: submitting new read[%#x] to this_mirror=%d, in_validation=%d",
- 		read_mode, failrec->this_mirror, failrec->in_validation);
+ 	pr_debug("Repair Read Error: submitting new read[%#x] to this_mirror=%d, in_validation=%d\n",
+ 		 read_mode, failrec->this_mirror, failrec->in_validation);
  
 -	ret = tree->ops->submit_bio_hook(inode, read_mode, bio,
 -					 failrec->this_mirror,
@@ -249,9 +249,9 @@ Acked-by: Hannes Reinecke <hare@suse.de>
 -						bio, bio_flags);
 +		ret = tree->ops->merge_bio_hook(page, offset, size, bio,
 +						bio_flags);
+ 	BUG_ON(ret < 0);
  	return ret;
  
- }
 --- a/fs/btrfs/extent_io.h
 +++ b/fs/btrfs/extent_io.h
 @@ -64,16 +64,16 @@ struct btrfs_root;
@@ -278,8 +278,8 @@ Acked-by: Hannes Reinecke <hare@suse.de>
 --- a/fs/btrfs/inode.c
 +++ b/fs/btrfs/inode.c
 @@ -1850,7 +1850,7 @@ static void btrfs_clear_bit_hook(struct
-  * return 0 if page can be merged to bio
-  * return error otherwise
+  * extent_io.c merge_bio_hook, this must check the chunk tree to make sure
+  * we don't create bios that span stripes or chunks
   */
 -int btrfs_merge_bio_hook(int rw, struct page *page, unsigned long offset,
 +int btrfs_merge_bio_hook(struct page *page, unsigned long offset,
@@ -452,7 +452,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  {
  	struct btrfs_device *dev = bbio->stripes[dev_nr].dev;
  
-@@ -6134,16 +6134,15 @@ static void submit_stripe_bio(struct btr
+@@ -6134,15 +6134,14 @@ static void submit_stripe_bio(struct btr
  	btrfs_io_bio(bio)->stripe_index = dev_nr;
  	bio->bi_end_io = btrfs_end_bio;
  	bio->bi_iter.bi_sector = physical >> 9;
@@ -463,14 +463,13 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
  		rcu_read_lock();
  		name = rcu_dereference(dev->name);
- 		btrfs_debug(fs_info,
--			"btrfs_map_bio: rw %d, sector=%llu, dev=%lu (%s id %llu), size=%u",
--			rw,
-+			"btrfs_map_bio: rw %d 0x%x, sector=%llu, dev=%lu (%s id %llu), size=%u",
-+			bio_op(bio), bio->bi_rw,
- 			(u64)bio->bi_iter.bi_sector,
- 			(u_long)dev->bdev->bd_dev, name->str, dev->devid,
- 			bio->bi_iter.bi_size);
+-		pr_debug("btrfs_map_bio: rw %d, sector=%llu, dev=%lu "
+-			 "(%s id %llu), size=%u\n", rw,
++		pr_debug("btrfs_map_bio: rw %d 0x%x, sector=%llu, dev=%lu "
++			 "(%s id %llu), size=%u\n", bio_op(bio), bio->bi_rw,
+ 			 (u64)bio->bi_iter.bi_sector, (u_long)dev->bdev->bd_dev,
+ 			 name->str, dev->devid, bio->bi_iter.bi_size);
+ 		rcu_read_unlock();
 @@ -6172,7 +6171,7 @@ static void bbio_error(struct btrfs_bio
  	}
  }

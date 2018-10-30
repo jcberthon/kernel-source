@@ -46,8 +46,8 @@ Acked-by: David Chang <dchang@suse.com>
  /* CMDs currently supported */
  #define ETHTOOL_GSET		0x00000001 /* Get settings. */
 @@ -1230,6 +1245,8 @@ enum ethtool_sfeatures_retval_bits {
- #define ETHTOOL_GTUNABLE	0x00000048 /* Get tunable configuration */
  #define ETHTOOL_STUNABLE	0x00000049 /* Set tunable configuration */
+ #define ETHTOOL_GPHYSTATS	0x0000004a /* get PHY-specific statistics */
  
 +#define ETHTOOL_PERQUEUE	0x0000004b /* Set per queue options */
 +
@@ -102,8 +102,8 @@ Acked-by: David Chang <dchang@suse.com>
  	case ETHTOOL_GDRVINFO:
  	case ETHTOOL_GMSGLVL:
 @@ -2056,6 +2076,9 @@ int dev_ethtool(struct net *net, struct
- 	case ETHTOOL_STUNABLE:
- 		rc = ethtool_set_tunable(dev, useraddr);
+ 	case ETHTOOL_GPHYSTATS:
+ 		rc = ethtool_get_phy_stats(dev, useraddr);
  		break;
 +	case ETHTOOL_PERQUEUE:
 +		rc = ethtool_set_per_queue(dev, useraddr);

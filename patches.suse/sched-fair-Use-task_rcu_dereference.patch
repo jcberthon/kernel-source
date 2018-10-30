@@ -82,7 +82,7 @@ Signed-off-by: Mel Gorman <mgorman@suse.de>
  			goto assign;
  		}
 @@ -1549,16 +1530,9 @@ balance:
- 	}
+ 		env->dst_cpu = select_idle_sibling(env->p, env->dst_cpu);
  
  assign:
 -	assigned = true;

@@ -3,6 +3,7 @@ From: Catalin Marinas <catalin.marinas@arm.com>
 Date: Thu, 3 Nov 2016 18:34:34 +0000
 Subject: [PATCH] arm64: Fix circular include of asm/lse.h through
  linux/jump_label.h
+X-notes: This is a pretty ridiculous way to restore the ordering
 
 Git-commit: 272d01bd790fdf3f1b16372fe28136e27756756f
 Patch-mainline: v4.9-rc5
@@ -38,12 +39,12 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  
 -#include <asm/cpufeature.h>
 +#include <asm/cpucaps.h>
+ #include <asm/insn.h>
  
  #ifndef __ASSEMBLY__
- 
 --- /dev/null
 +++ b/arch/arm64/include/asm/cpucaps.h
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,39 @@
 +/*
 + * arch/arm64/include/asm/cpucaps.h
 + *
@@ -79,23 +80,21 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +#define ARM64_WORKAROUND_CAVIUM_27456		12
 +#define ARM64_HAS_32BIT_EL0			13
 +#define ARM64_HYP_OFFSET_LOW			14
-+/* #define ARM64_MISMATCHED_CACHE_LINE_SIZE	15 */
-+#define ARM64_HAS_NO_BCAST_TLBI                 16 /* Out of tree */
 +
-+#define ARM64_NCAPS				17
++#define ARM64_NCAPS				15
 +
 +#endif /* __ASM_CPUCAPS_H */
 --- a/arch/arm64/include/asm/cpufeature.h
 +++ b/arch/arm64/include/asm/cpufeature.h
 @@ -9,6 +9,7 @@
- #ifndef __ASM_CPUFEATURE_H
- #define __ASM_CPUFEATURE_H
+ 
+ #include <linux/jump_label.h>
  
 +#include <asm/cpucaps.h>
  #include <asm/hwcap.h>
  #include <asm/sysreg.h>
  
-@@ -22,25 +23,6 @@
+@@ -22,24 +23,6 @@
  #define MAX_CPU_FEATURES	(8 * sizeof(elf_hwcap))
  #define cpu_feature(x)		ilog2(HWCAP_ ## x)
  
@@ -107,16 +106,15 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 -#define ARM64_HAS_LSE_ATOMICS			5
 -#define ARM64_WORKAROUND_CAVIUM_23154		6
 -#define ARM64_WORKAROUND_834220			7
--#define ARM64_WORKAROUND_CAVIUM_27456		8
--#define ARM64_HAS_NO_HW_PREFETCH		9
--#define ARM64_HAS_NO_BCAST_TLBI			10
--#define ARM64_HAS_UAO				11
--#define ARM64_ALT_PAN_NOT_UAO			12
+-#define ARM64_HAS_NO_HW_PREFETCH		8
+-#define ARM64_HAS_UAO				9
+-#define ARM64_ALT_PAN_NOT_UAO			10
+-#define ARM64_HAS_VIRT_HOST_EXTN		11
+-#define ARM64_WORKAROUND_CAVIUM_27456		12
 -#define ARM64_HAS_32BIT_EL0			13
--#define ARM64_HAS_VIRT_HOST_EXTN		14
--#define ARM64_HYP_OFFSET_LOW			15
+-#define ARM64_HYP_OFFSET_LOW			14
 -
--#define ARM64_NCAPS				16
+-#define ARM64_NCAPS				15
 -
  #ifndef __ASSEMBLY__
  

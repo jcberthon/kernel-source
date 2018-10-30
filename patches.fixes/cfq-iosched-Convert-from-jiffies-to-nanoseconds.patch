@@ -176,13 +176,13 @@ Signed-off-by: Jan Kara <jack@suse.cz>
  #ifdef CONFIG_DEBUG_BLK_CGROUP
 @@ -783,7 +783,7 @@ static inline void cfqg_put(struct cfq_g
  static inline void cfqg_stats_update_io_add(struct cfq_group *cfqg,
- 			struct cfq_group *curr_cfqg, int rw) { }
+ 			struct cfq_group *curr_cfqg, int op, int op_flags) { }
  static inline void cfqg_stats_update_timeslice_used(struct cfq_group *cfqg,
 -			unsigned long time, unsigned long unaccounted_time) { }
 +			uint64_t time, uint64_t unaccounted_time) { }
- static inline void cfqg_stats_update_io_remove(struct cfq_group *cfqg, int rw) { }
- static inline void cfqg_stats_update_io_merged(struct cfq_group *cfqg, int rw) { }
- static inline void cfqg_stats_update_completion(struct cfq_group *cfqg,
+ static inline void cfqg_stats_update_io_remove(struct cfq_group *cfqg, int op,
+ 			int op_flags) { }
+ static inline void cfqg_stats_update_io_merged(struct cfq_group *cfqg, int op,
 @@ -807,7 +807,7 @@ static inline void cfqg_stats_update_com
  static inline bool cfq_io_thinktime_big(struct cfq_data *cfqd,
  	struct cfq_ttime *ttime, bool group_idle)
@@ -728,7 +728,7 @@ Signed-off-by: Jan Kara <jack@suse.cz>
 +	rq->fifo_time = ktime_get_ns() + cfqd->cfq_fifo_expire[rq_is_sync(rq)];
  	list_add_tail(&rq->queuelist, &cfqq->fifo);
  	cfq_add_rq_rb(rq);
- 	cfqg_stats_update_io_add(RQ_CFQG(rq), cfqd->serving_group,
+ 	cfqg_stats_update_io_add(RQ_CFQG(rq), cfqd->serving_group, req_op(rq),
 @@ -4160,6 +4170,7 @@ static void cfq_update_hw_tag(struct cfq
  static bool cfq_should_wait_busy(struct cfq_data *cfqd, struct cfq_queue *cfqq)
  {

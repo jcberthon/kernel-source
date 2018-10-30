@@ -167,8 +167,8 @@ Signed-off-by: Oliver Neukum <oneukum@suse.com>
 +struct device_node *usb_of_get_child_node(struct device_node *parent,
 +			int portnum);
  #else
- static inline bool of_usb_host_tpl_support(struct device_node *np)
- {
+ static inline enum usb_dr_mode
+ of_usb_get_dr_mode_by_phy(struct device_node *phy_np)
 @@ -25,6 +27,11 @@ static inline int of_usb_update_otg_caps
  {
  	return 0;

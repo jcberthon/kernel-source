@@ -24,21 +24,7 @@ index 5981018..a5e8b23 100644
 +	blk_mq_kick_requeue_list(ctrl->ctrl.admin_q);
  	nvme_start_queues(&ctrl->ctrl);
  
- 	nvme_rdma_reconnect_or_remove(ctrl);
-@@ -1450,9 +1451,11 @@ static inline int nvme_rdma_queue_is_ready(struct nvme_rdma_queue *queue,
- 			 * fail it fast to allow upper layers a chance to
- 			 * failover.
- 			 */
--			if (queue->ctrl->ctrl.state == NVME_CTRL_RECONNECTING)
-+			if (queue->ctrl->ctrl.state == NVME_CTRL_RECONNECTING ||
-+			    queue->ctrl->ctrl.state == NVME_CTRL_DELETING) {
-+				nvme_req(rq)->status = NVME_SC_ABORT_REQ;
- 				return -EIO;
--			else
-+			} else
- 				return -EAGAIN;
- 		}
- 	}
+ 	if (!nvme_change_ctrl_state(&ctrl->ctrl, NVME_CTRL_RECONNECTING)) {
 -- 
 1.8.5.6
 

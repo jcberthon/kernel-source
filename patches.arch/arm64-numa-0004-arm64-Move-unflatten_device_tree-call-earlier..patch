@@ -40,8 +40,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/arch/arm64/kernel/setup.c
 +++ b/arch/arm64/kernel/setup.c
 @@ -324,18 +324,22 @@ void __init setup_arch(char **cmdline_p)
+ 
  	paging_init();
- 	relocate_initrd();
  
 +	if (acpi_disabled)
 +		unflatten_device_tree();
@@ -75,11 +75,11 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/arch/arm64/mm/mmu.c
 +++ b/arch/arm64/mm/mmu.c
 @@ -452,8 +452,6 @@ void __init paging_init(void)
- 	/* allocate the zero page. */
- 	zero_page = early_alloc(PAGE_SIZE);
- 
--	bootmem_init();
+ 	 */
+ 	memblock_free(__pa(swapper_pg_dir) + PAGE_SIZE,
+ 		      SWAPPER_DIR_SIZE - PAGE_SIZE);
 -
- 	empty_zero_page = virt_to_page(zero_page);
+-	bootmem_init();
+ }
  
- 	/* Ensure the zero page is visible to the page table walker */
+ /*

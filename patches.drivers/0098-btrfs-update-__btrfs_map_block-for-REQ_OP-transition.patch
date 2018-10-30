@@ -41,8 +41,8 @@ Acked-by: Hannes Reinecke <hare@suse.de>
 -	ret = btrfs_map_block(root->fs_info, rw, logical,
 +	ret = btrfs_map_block(root->fs_info, bio_op(bio), logical,
  			      &map_length, NULL, 0);
- 	if (ret < 0)
- 		return ret;
+ 	/* Will always return 0 with map_multi == NULL */
+ 	BUG_ON(ret < 0);
 --- a/fs/btrfs/volumes.c
 +++ b/fs/btrfs/volumes.c
 @@ -5320,7 +5320,7 @@ void btrfs_put_bbio(struct btrfs_bio *bb

@@ -67,7 +67,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +++ b/drivers/irqchip/irq-gic.c
 @@ -105,6 +105,8 @@ static struct static_key supports_deacti
  
- static struct gic_chip_data gic_data[MAX_GIC_NR] __read_mostly;
+ static struct gic_chip_data gic_data[CONFIG_ARM_GIC_MAX_NR] __read_mostly;
  
 +static struct gic_kvm_info gic_v2_kvm_info;
 +
@@ -75,7 +75,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  static void __iomem *gic_get_percpu_base(union gic_base *base)
  {
 @@ -1204,6 +1206,29 @@ static bool gic_check_eoimode(struct dev
- 	return true;
+ 	return -ENOMEM;
  }
  
 +static void __init gic_of_setup_kvm_info(struct device_node *node)
@@ -101,13 +101,13 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	gic_set_kvm_info(&gic_v2_kvm_info);
 +}
 +
- static int __init
+ int __init
  gic_of_init(struct device_node *node, struct device_node *parent)
  {
 @@ -1233,8 +1258,10 @@ gic_of_init(struct device_node *node, st
+ 		return ret;
+ 	}
  
- 	__gic_init_bases(gic_cnt, -1, dist_base, cpu_base, percpu_offset,
- 			 &node->fwnode);
 -	if (!gic_cnt)
 +	if (!gic_cnt) {
  		gic_init_physaddr(node);
@@ -183,9 +183,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  static int __init gic_v2_acpi_init(struct acpi_subtable_header *header,
  				   const unsigned long end)
 @@ -1370,6 +1442,8 @@ static int __init gic_v2_acpi_init(struc
- 	__gic_init_bases(0, -1, dist_base, cpu_base, 0, domain_handle);
+ 	if (IS_ENABLED(CONFIG_ARM_GIC_V2M))
+ 		gicv2m_init(NULL, gic_data[0].domain);
  
- 	acpi_set_irq_model(ACPI_IRQ_MODEL_GIC, domain_handle);
 +	gic_acpi_setup_kvm_info();
 +
  	return 0;

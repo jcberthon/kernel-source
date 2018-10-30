@@ -109,13 +109,14 @@ Acked-by: Gary Lin <glin@suse.com>
 
 --- a/kernel/bpf/verifier.c
 +++ b/kernel/bpf/verifier.c
-@@ -189,13 +189,29 @@ struct verifier_stack_elem {
+@@ -189,14 +189,30 @@ struct verifier_stack_elem {
  struct bpf_insn_aux_data {
  	union {
  		enum bpf_reg_type ptr_type;	/* pointer type for load/store insns */
 -		struct bpf_map *map_ptr;	/* pointer for call insn into lookup_elem */
 +		unsigned long map_state;        /* pointer/poison value for maps */
  	};
+ 	int sanitize_stack_off; /* stack slot to be cleared */
  	bool seen; /* this insn was processed by the verifier */
  };
  

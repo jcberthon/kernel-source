@@ -34,18 +34,14 @@ Acked-by: Takashi Iwai <tiwai@suse.de>
  			u8 hi_pri_lvl;
  			u32 bpp;
  			u32 mb;
-@@ -1756,6 +1759,14 @@ static int mga_vga_mode_valid(struct drm
- 					      mode->base.id, bw, 30100 * 1024);
+@@ -1756,6 +1759,10 @@ static int mga_vga_mode_valid(struct drm
+ 			if (mga_vga_calculate_mode_bandwidth(mode, bpp)
+ 				> (30100 * 1024))
  				return MODE_BANDWIDTH;
- 			}
 +		} else {
-+			if ((bw =
-+			     mga_vga_calculate_mode_bandwidth(mode, bpp)) 
-+			    > (55000 * 1024)) {
-+				DRM_DEBUG_KMS("Mode %d exceeds bandwidth: %d > %d",
-+					      mode->base.id, bw, 55000 * 1024);
++			if (mga_vga_calculate_mode_bandwidth(mode, bpp)
++				> (55000 * 1024))
 +				return MODE_BANDWIDTH;
-+			}
  		}
  	} else if (mdev->type == G200_WB) {
  		if (mode->hdisplay > 1280)

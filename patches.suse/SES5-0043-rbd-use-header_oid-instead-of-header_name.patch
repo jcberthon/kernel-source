@@ -20,6 +20,15 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
 
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
+@@ -126,7 +126,7 @@ struct rbd_device {
+ 	struct rbd_spec		*spec;
+ 	struct rbd_options	*opts;
+ 
+-	char			*header_name;
++	struct ceph_object_id	header_oid;
+ 
+ 	struct ceph_file_layout	layout;
+ 
 @@ -3434,7 +3434,7 @@ static int rbd_obj_notify_ack_sync(struc
  	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
  	int ret;
@@ -56,33 +65,6 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
  				       0, size, ondisk);
  		if (ret < 0)
  			goto out;
-@@ -4292,7 +4292,7 @@ int rbd_dev_setxattr(struct rbd_device *
- 	struct rbd_obj_request *obj_request;
- 	int ret;
- 
--	obj_request = rbd_obj_request_create(rbd_dev->header_name, 0, 0,
-+	obj_request = rbd_obj_request_create(rbd_dev->header_oid.name, 0, 0,
- 					     OBJ_REQUEST_NODATA);
- 	if (!obj_request)
- 		return -ENOMEM;
-@@ -4339,7 +4339,7 @@ int rbd_dev_cmpsetxattr(struct rbd_devic
- 	struct rbd_obj_request *obj_request;
- 	int ret;
- 
--	obj_request = rbd_obj_request_create(rbd_dev->header_name, 0, 0,
-+	obj_request = rbd_obj_request_create(rbd_dev->header_oid.name, 0, 0,
- 					     OBJ_REQUEST_NODATA);
- 	if (!obj_request)
- 		return -ENOMEM;
-@@ -4407,7 +4407,7 @@ int rbd_dev_getxattr(struct rbd_device *
- 	if (IS_ERR(pages))
- 		return PTR_ERR(pages);
- 
--	obj_request = rbd_obj_request_create(rbd_dev->header_name, 0,
-+	obj_request = rbd_obj_request_create(rbd_dev->header_oid.name, 0,
- 					     max_val_len, OBJ_REQUEST_PAGES);
- 	if (!obj_request) {
- 		ceph_release_page_vector(pages, page_count);
 @@ -4661,6 +4661,8 @@ static void rbd_dev_release(struct devic
  	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
  	bool need_put = !!rbd_dev->opts;
@@ -234,14 +216,3 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
  err_out_format:
  	rbd_dev->image_format = 0;
  	kfree(rbd_dev->spec->image_id);
---- a/include/linux/ceph/librbd.h
-+++ b/include/linux/ceph/librbd.h
-@@ -126,7 +126,7 @@ struct rbd_device {
- 	struct rbd_spec		*spec;
- 	struct rbd_options	*opts;
- 
--	char			*header_name;
-+	struct ceph_object_id	header_oid;
- 
- 	struct ceph_file_layout	layout;
- 

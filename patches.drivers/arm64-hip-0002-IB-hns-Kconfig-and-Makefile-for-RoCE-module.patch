@@ -34,9 +34,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/drivers/infiniband/hw/Makefile
 +++ b/drivers/infiniband/hw/Makefile
 @@ -7,3 +7,4 @@ obj-$(CONFIG_MLX5_INFINIBAND)		+= mlx5/
- obj-$(CONFIG_INFINIBAND_NES)		+= nes/
  obj-$(CONFIG_INFINIBAND_OCRDMA)		+= ocrdma/
  obj-$(CONFIG_INFINIBAND_USNIC)		+= usnic/
+ obj-$(CONFIG_INFINIBAND_HFI1)		+= hfi1/
 +obj-$(CONFIG_INFINIBAND_HNS)		+= hns/
 --- /dev/null
 +++ b/drivers/infiniband/hw/hns/Kconfig

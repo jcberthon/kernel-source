@@ -52,9 +52,9 @@ index aec2c9d..508efa6 100644
 --- a/arch/arm64/mm/mmu.c
 +++ b/arch/arm64/mm/mmu.c
 @@ -453,12 +453,6 @@ void __init paging_init(void)
- 
- 	map_mem();
  	fixup_executable();
+ 
+ 	bootmem_init();
 -
 -	/*
 -	 * TTBR0 is only used for the identity mapping at this stage. Make it

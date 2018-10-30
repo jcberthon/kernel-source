@@ -44,5 +44,5 @@ Acked-by: NeilBrown <neilb@suse.com>
 +		if (test_bit(Faulty, &conf->mirrors[i].rdev->flags))
 +			continue;
  
- 		wbio->bi_rw = WRITE;
- 		wbio->bi_end_io = end_sync_write;
+ 		bio_set_op_attrs(wbio, REQ_OP_WRITE, 0);
+ 		if (test_bit(FailFast, &conf->mirrors[i].rdev->flags))

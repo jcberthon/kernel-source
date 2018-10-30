@@ -65,7 +65,7 @@ Signed-off-by: Lee Duncan <lduncan@suse.com>
 +
  static int __init target_core_init_configfs(void)
  {
- 	struct config_group *target_cg, *hba_cg = NULL, *alua_cg = NULL;
+ 	struct configfs_subsystem *subsys = &target_core_fabrics;
 @@ -3333,6 +3356,8 @@ static int __init target_core_init_confi
  	if (ret < 0)
  		goto out;

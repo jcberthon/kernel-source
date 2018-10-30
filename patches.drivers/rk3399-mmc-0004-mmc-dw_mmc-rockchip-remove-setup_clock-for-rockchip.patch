@@ -19,8 +19,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/drivers/mmc/host/dw_mmc-rockchip.c
 +++ b/drivers/mmc/host/dw_mmc-rockchip.c
 @@ -31,13 +31,6 @@ static void dw_mci_rockchip_prepare_comm
- 	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
- }
+ 	int			default_sample_phase;
+ };
  
 -static int dw_mci_rk3288_setup_clock(struct dw_mci *host)
 -{

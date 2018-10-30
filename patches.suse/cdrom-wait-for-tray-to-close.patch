@@ -29,7 +29,7 @@ index 35eb6688cd8c..e7de36660bc4 100644
  #include <linux/times.h>
 -
 +#include <linux/delay.h>
- #include <asm/uaccess.h>
+ #include <linux/uaccess.h>
 +#include <linux/sched.h>
  
  /* used to tell the module to turn on full debugging messages */

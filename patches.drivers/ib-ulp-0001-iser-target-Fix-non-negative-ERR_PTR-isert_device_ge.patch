@@ -19,23 +19,30 @@ Cc: Sagi Grimberg <sagig@mellanox.com>
 Signed-off-by: Nicholas Bellinger <nab@linux-iscsi.org>
 Acked-by: Thomas Bogendoerfer <tbogendoerfer@suse.de>
 ---
- drivers/infiniband/ulp/isert/ib_isert.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ drivers/infiniband/ulp/isert/ib_isert.c |    7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/infiniband/ulp/isert/ib_isert.c b/drivers/infiniband/ulp/isert/ib_isert.c
-index 60cb19245f86..1a1c11f94e89 100644
 --- a/drivers/infiniband/ulp/isert/ib_isert.c
 +++ b/drivers/infiniband/ulp/isert/ib_isert.c
-@@ -309,7 +309,7 @@ isert_create_device_ib_res(struct isert_device *device)
- 
- 	ret = isert_alloc_comps(device);
+@@ -351,7 +351,7 @@ isert_create_device_ib_res(struct isert_
+ 	dev_attr = &device->dev_attr;
+ 	ret = isert_query_device(device->ib_device, dev_attr);
  	if (ret)
 -		return ret;
 +		goto out;
  
- 	device->pd = ib_alloc_pd(ib_dev, 0);
+ 	/* asign function handlers */
+ 	if (dev_attr->device_cap_flags & IB_DEVICE_MEM_MGT_EXTENSIONS &&
+@@ -367,7 +367,7 @@ isert_create_device_ib_res(struct isert_
+ 
+ 	ret = isert_alloc_comps(device, dev_attr);
+ 	if (ret)
+-		return ret;
++		goto out;
+ 
+ 	device->pd = ib_alloc_pd(device->ib_device);
  	if (IS_ERR(device->pd)) {
-@@ -327,6 +327,9 @@ isert_create_device_ib_res(struct isert_device *device)
+@@ -385,6 +385,9 @@ isert_create_device_ib_res(struct isert_
  
  out_cq:
  	isert_free_comps(device);
@@ -45,6 +52,3 @@ index 60cb19245f86..1a1c11f94e89 100644
  	return ret;
  }
  
--- 
-1.8.5.6
-

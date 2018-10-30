@@ -57,8 +57,8 @@ index e4c2437..8320ea4 100644
 +			/* Do not cache partition table for arrays */
 +			scsicmd->device->removable = 1;
  
- 		scsicmd->result = DID_OK << 16 | COMMAND_COMPLETE << 8 | SAM_STAT_GOOD;
- 		scsicmd->scsi_done(scsicmd);
+ 		scsicmd->result = AAC_STAT_GOOD;
+ 		break;
 @@ -2568,8 +2574,9 @@ int aac_scsi_cmd(struct scsi_cmnd * scsicmd)
  		cp[6] = (fsa_dev_ptr[cid].block_size >> 8) & 0xff;
  		cp[7] = (fsa_dev_ptr[cid].block_size) & 0xff;
@@ -68,31 +68,33 @@ index e4c2437..8320ea4 100644
 +		if (!aac_export_fixed)
 +			/* Do not cache partition table for arrays */
 +			scsicmd->device->removable = 1;
- 		scsicmd->result = DID_OK << 16 | COMMAND_COMPLETE << 8 |
- 		  SAM_STAT_GOOD;
- 		scsicmd->scsi_done(scsicmd);
+ 		scsicmd->result = AAC_STAT_GOOD;
+ 		break;
+ 	}
 diff --git a/drivers/scsi/aacraid/aacraid.h b/drivers/scsi/aacraid/aacraid.h
 index 074878b..409f2cf 100644
 --- a/drivers/scsi/aacraid/aacraid.h
 +++ b/drivers/scsi/aacraid/aacraid.h
-@@ -2173,3 +2173,4 @@ extern int aac_commit;
+@@ -2173,5 +2173,6 @@ extern int aac_commit;
  extern int update_interval;
  extern int check_interval;
  extern int aac_check_reset;
 +extern int aac_export_fixed;
+ extern int aac_fib_dump;
+ #endif
 diff --git a/drivers/scsi/aacraid/linit.c b/drivers/scsi/aacraid/linit.c
 index 3b6e5c6..017093b 100644
 --- a/drivers/scsi/aacraid/linit.c
 +++ b/drivers/scsi/aacraid/linit.c
 @@ -402,7 +402,7 @@ static int aac_biosparm(struct scsi_device *sdev, struct block_device *bdev,
- static int aac_slave_configure(struct scsi_device *sdev)
- {
- 	struct aac_dev *aac = (struct aac_dev *)sdev->host->hostdata;
+ 	}
+ 
+ 
 -	if (aac->jbod && (sdev->type == TYPE_DISK))
 +	if (!aac_export_fixed && aac->jbod && (sdev->type == TYPE_DISK))
  		sdev->removable = 1;
- 	if ((sdev->type == TYPE_DISK) &&
- 			(sdev_channel(sdev) != CONTAINER_CHANNEL) &&
+ 
+ 	if (sdev->type == TYPE_DISK
 -- 
 1.8.5.6
 

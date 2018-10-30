@@ -48,15 +48,15 @@ index 78a7787..4da1b27 100644
 --- a/arch/arm64/kernel/efi.c
 +++ b/arch/arm64/kernel/efi.c
 @@ -34,6 +34,9 @@
- #include <asm/mmu.h>
- #include <asm/pgtable.h>
+ 	return pgprot_val(PAGE_KERNEL_EXEC);
+ }
  
 +/* we will fill this structure from the stub, so don't put it in .bss */
 +struct screen_info screen_info __section(.data);
 +
- struct efi_memory_map memmap;
- 
- static u64 efi_system_table;
+ int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
+ {
+ 	pteval_t prot_val = create_mapping_protection(md);
 diff --git a/arch/arm64/kernel/image.h b/arch/arm64/kernel/image.h
 index bc2abb8..c887798 100644
 --- a/arch/arm64/kernel/image.h

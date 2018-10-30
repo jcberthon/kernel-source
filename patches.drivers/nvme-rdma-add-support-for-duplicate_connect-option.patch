@@ -24,7 +24,7 @@ index a5e8b23..a65087c 100644
 --- a/drivers/nvme/host/rdma.c
 +++ b/drivers/nvme/host/rdma.c
 @@ -1894,6 +1894,83 @@ static int nvme_rdma_parse_ipaddr(struct sockaddr_in *in_addr, char *p)
- 	return 0;
+ 	return ret;
  }
  
 +static inline bool
@@ -108,7 +108,7 @@ index a5e8b23..a65087c 100644
  		struct nvmf_ctrl_options *opts)
  {
 @@ -1935,6 +2012,11 @@ static struct nvme_ctrl *nvme_rdma_create_ctrl(struct device *dev,
- 		ctrl->addr_in.sin_port = cpu_to_be16(NVME_RDMA_IP_PORT);
+ 		}
  	}
  
 +	if (!opts->duplicate_connect && nvme_rdma_existing_controller(opts)) {

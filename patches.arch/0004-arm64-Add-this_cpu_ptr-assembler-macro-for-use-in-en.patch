@@ -38,5 +38,5 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +	.endm
 +
  /*
-  * vma_vm_mm - get mm pointer from vma pointer (vma->vm_mm)
-  */
+  * Annotate a function as position independent, i.e., safe to be called before
+  * the kernel virtual mapping is activated.

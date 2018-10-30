@@ -923,7 +923,7 @@ index 3e56a10..2f14adf 100644
 --- a/drivers/scsi/qla2xxx/qla_def.h
 +++ b/drivers/scsi/qla2xxx/qla_def.h
 @@ -404,7 +404,7 @@ typedef struct srb {
- 	struct qla_qpair *qpair;
+ 	int iocbs;
  	union {
  		struct srb_iocb iocb_cmd;
 -		struct fc_bsg_job *bsg_job;

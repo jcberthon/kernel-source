@@ -21,8 +21,8 @@ index 5fec768..eaf35c6 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
 @@ -283,7 +283,7 @@ typedef struct {
- 	void *register_protocol_notify;
- 	void *locate_handle;
+ 	efi_status_t (*locate_handle)(int, efi_guid_t *, void *,
+ 				      unsigned long *, efi_handle_t *);
  	void *locate_device_path;
 -	void *install_configuration_table;
 +	efi_status_t (*install_configuration_table)(efi_guid_t *, void *);

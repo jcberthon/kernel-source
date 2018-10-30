@@ -102,10 +102,10 @@ index 1377cb5..ce4bf21 100644
  
 @@ -350,6 +355,7 @@ int nvme_setup_cmd(struct nvme_ns *ns, struct request *req,
  
- 	if (!(req->cmd_flags & REQ_DONTPREP)) {
+ 	if (!(req->rq_flags & RQF_DONTPREP)) {
  		nvme_req(req)->retries = 0;
 +		nvme_req(req)->flags = 0;
- 		req->cmd_flags |= REQ_DONTPREP;
+ 		req->rq_flags |= RQF_DONTPREP;
  	}
  
 @@ -394,7 +400,10 @@ int __nvme_submit_sync_cmd(struct request_queue *q, struct nvme_command *cmd,
@@ -182,17 +182,14 @@ diff --git a/drivers/nvme/host/lightnvm.c b/drivers/nvme/host/lightnvm.c
 index 0680d4d..1c4af70 100644
 --- a/drivers/nvme/host/lightnvm.c
 +++ b/drivers/nvme/host/lightnvm.c
-@@ -452,9 +452,9 @@ static void nvme_nvm_end_io(struct request *rq, int error)
- 	struct nvm_rq *rqd = rq->end_io_data;
- 	struct nvm_dev *dev = rqd->dev;
+@@ -452,7 +452,7 @@ static void nvme_nvm_end_io(struct request *rq, int error)
+ 	if (cqe)
+ 		rqd->ppa_status = le64_to_cpu(cqe->result);
  
--	if (dev->mt && dev->mt->end_io(rqd, error))
-+	if (dev->mt && dev->mt->end_io(rqd, nvme_req(rq)->status))
- 		pr_err("nvme: err status: %x result: %lx\n",
--				rq->errors, (unsigned long)rq->special);
-+				nvme_req(rq)->status, (unsigned long)rq->special);
+-	nvm_end_io(rqd, error);
++	nvm_end_io(rqd, nvme_req(rq)->status);
  
- 	kfree(rq->cmd);
+ 	kfree(nvme_req(rq)->cmd);
  	blk_mq_free_request(rq);
 diff --git a/drivers/nvme/host/nvme.h b/drivers/nvme/host/nvme.h
 index d7b06fb..d7a743e 100644
@@ -229,7 +226,7 @@ index d7b06fb..d7a743e 100644
  
  static inline struct nvme_request *nvme_req(struct request *req)
 @@ -239,18 +235,17 @@ static inline void nvme_cleanup_cmd(struct request *req)
- 		kfree(req->completion_data);
+ 	}
  }
  
 -static inline int nvme_error_status(u16 status)

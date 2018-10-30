@@ -132,7 +132,6 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  drivers/gpio/gpio-wm831x.c                    |    2 -
  drivers/gpio/gpio-wm8350.c                    |    2 -
  drivers/gpio/gpio-wm8994.c                    |    2 -
- drivers/gpio/gpio-xgene-sb.c                  |    8 ++--
  drivers/gpio/gpio-xgene.c                     |    2 -
  drivers/gpio/gpio-xilinx.c                    |    2 -
  drivers/gpio/gpio-xlp.c                       |    2 -
@@ -195,7 +194,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  sound/soc/codecs/wm8903.c                     |    2 -
  sound/soc/codecs/wm8962.c                     |    2 -
  sound/soc/codecs/wm8996.c                     |    2 -
- 129 files changed, 278 insertions(+), 265 deletions(-)
+ 128 files changed, 274 insertions(+), 261 deletions(-)
 
 --- a/arch/avr32/mach-at32ap/pio.c
 +++ b/arch/avr32/mach-at32ap/pio.c
@@ -318,7 +317,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	}
 --- a/drivers/gpio/gpio-altera.c
 +++ b/drivers/gpio/gpio-altera.c
-@@ -290,7 +290,7 @@ static int altera_gpio_probe(struct plat
+@@ -286,7 +286,7 @@ static int altera_gpio_probe(struct plat
  	altera_gc->mmchip.gc.get		= altera_gpio_get;
  	altera_gc->mmchip.gc.set		= altera_gpio_set;
  	altera_gc->mmchip.gc.owner		= THIS_MODULE;
@@ -563,15 +562,15 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  		err = gpiochip_add(&bank->chip);
 --- a/drivers/gpio/gpio-generic.c
 +++ b/drivers/gpio/gpio-generic.c
-@@ -518,7 +518,7 @@ int bgpio_init(struct gpio_chip *gc, str
+@@ -545,7 +545,7 @@ int bgpio_init(struct bgpio_chip *bgc, s
  		return -EINVAL;
  
- 	spin_lock_init(&gc->bgpio_lock);
--	gc->dev = dev;
-+	gc->parent = dev;
- 	gc->label = dev_name(dev);
- 	gc->base = -1;
- 	gc->ngpio = gc->bgpio_bits;
+ 	spin_lock_init(&bgc->lock);
+-	bgc->gc.dev = dev;
++	bgc->gc.parent = dev;
+ 	bgc->gc.label = dev_name(dev);
+ 	bgc->gc.base = -1;
+ 	bgc->gc.ngpio = bgc->bits;
 --- a/drivers/gpio/gpio-ich.c
 +++ b/drivers/gpio/gpio-ich.c
 @@ -282,7 +282,7 @@ static void ichx_gpiolib_setup(struct gp
@@ -585,7 +584,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	chip->request = ichx_priv.desc->request ?
 --- a/drivers/gpio/gpio-intel-mid.c
 +++ b/drivers/gpio/gpio-intel-mid.c
-@@ -392,7 +392,7 @@ static int intel_gpio_probe(struct pci_d
+@@ -373,7 +373,7 @@ static int intel_gpio_probe(struct pci_d
  
  	priv->reg_base = pcim_iomap_table(pdev)[0];
  	priv->chip.label = dev_name(&pdev->dev);
@@ -787,15 +786,15 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  		if (type == MCP_TYPE_017)
 --- a/drivers/gpio/gpio-moxart.c
 +++ b/drivers/gpio/gpio-moxart.c
-@@ -60,7 +60,7 @@ static int moxart_gpio_probe(struct plat
- 	gc->bgpio_data = gc->read_reg(gc->reg_set);
- 	gc->base = 0;
- 	gc->ngpio = 32;
--	gc->dev = dev;
-+	gc->parent = dev;
- 	gc->owner = THIS_MODULE;
+@@ -61,7 +61,7 @@ static int moxart_gpio_probe(struct plat
+ 	bgc->data = bgc->read_reg(bgc->reg_set);
+ 	bgc->gc.base = 0;
+ 	bgc->gc.ngpio = 32;
+-	bgc->gc.dev = dev;
++	bgc->gc.parent = dev;
+ 	bgc->gc.owner = THIS_MODULE;
  
- 	ret = gpiochip_add_data(gc, NULL);
+ 	ret = gpiochip_add(&bgc->gc);
 --- a/drivers/gpio/gpio-msic.c
 +++ b/drivers/gpio/gpio-msic.c
 @@ -293,7 +293,7 @@ static int platform_msic_gpio_probe(stru
@@ -1009,7 +1008,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
 --- a/drivers/gpio/gpio-rcar.c
 +++ b/drivers/gpio/gpio-rcar.c
-@@ -449,7 +449,7 @@ static int gpio_rcar_probe(struct platfo
+@@ -491,7 +491,7 @@ static int gpio_rcar_probe(struct platfo
  	gpio_chip->direction_output = gpio_rcar_direction_output;
  	gpio_chip->set = gpio_rcar_set;
  	gpio_chip->label = name;
@@ -1416,34 +1415,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	if (pdata && pdata->gpio_base)
  		wm8994_gpio->gpio_chip.base = pdata->gpio_base;
  	else
---- a/drivers/gpio/gpio-xgene-sb.c
-+++ b/drivers/gpio/gpio-xgene-sb.c
-@@ -130,10 +130,10 @@ static int xgene_gpio_sb_to_irq(struct g
- 			(gpio > HWIRQ_TO_GPIO(priv, priv->nirq)))
- 		return -ENXIO;
- 
--	if (gc->dev->of_node)
--		fwspec.fwnode = of_node_to_fwnode(gc->dev->of_node);
-+	if (gc->parent->of_node)
-+		fwspec.fwnode = of_node_to_fwnode(gc->parent->of_node);
- 	else
--		fwspec.fwnode = gc->dev->fwnode;
-+		fwspec.fwnode = gc->parent->fwnode;
- 	fwspec.param_count = 2;
- 	fwspec.param[0] = GPIO_TO_HWIRQ(priv, gpio);
- 	fwspec.param[1] = IRQ_TYPE_NONE;
-@@ -147,7 +147,7 @@ static void xgene_gpio_sb_domain_activat
- 	u32 gpio = HWIRQ_TO_GPIO(priv, irq_data->hwirq);
- 
- 	if (gpiochip_lock_as_irq(&priv->gc, gpio)) {
--		dev_err(priv->gc.dev,
-+		dev_err(priv->gc.parent,
- 		"Unable to configure XGene GPIO standby pin %d as IRQ\n",
- 				gpio);
- 		return;
 --- a/drivers/gpio/gpio-xgene.c
 +++ b/drivers/gpio/gpio-xgene.c
-@@ -193,7 +193,7 @@ static int xgene_gpio_probe(struct platf
+@@ -181,7 +181,7 @@ static int xgene_gpio_probe(struct platf
  	gpio->chip.ngpio = XGENE_MAX_GPIOS;
  
  	spin_lock_init(&gpio->lock);
@@ -1465,7 +1439,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	chip->mmchip.gc.get = xgpio_get;
 --- a/drivers/gpio/gpio-xlp.c
 +++ b/drivers/gpio/gpio-xlp.c
-@@ -384,7 +384,7 @@ static int xlp_gpio_probe(struct platfor
+@@ -373,7 +373,7 @@ static int xlp_gpio_probe(struct platfor
  	gc->owner = THIS_MODULE;
  	gc->label = dev_name(&pdev->dev);
  	gc->base = 0;
@@ -1759,7 +1733,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  				 "GPIO name '%s'\n",
  				 gc->names[i]);
  	}
-@@ -350,8 +350,8 @@ int gpiochip_add_data(struct gpio_chip *
+@@ -348,8 +348,8 @@ int gpiochip_add(struct gpio_chip *chip)
  	INIT_LIST_HEAD(&chip->pin_ranges);
  #endif
  
@@ -1770,7 +1744,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
  	status = gpiochip_set_desc_names(chip);
  	if (status)
-@@ -426,7 +426,8 @@ void gpiochip_remove(struct gpio_chip *c
+@@ -424,7 +424,8 @@ void gpiochip_remove(struct gpio_chip *c
  	spin_unlock_irqrestore(&gpio_lock, flags);
  
  	if (requested)
@@ -1780,7 +1754,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
  	kfree(chip->desc);
  	chip->desc = NULL;
-@@ -685,11 +686,11 @@ int _gpiochip_irqchip_add(struct gpio_ch
+@@ -683,11 +684,11 @@ int _gpiochip_irqchip_add(struct gpio_ch
  	if (!gpiochip || !irqchip)
  		return -EINVAL;
  
@@ -1794,7 +1768,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  #ifdef CONFIG_OF_GPIO
  	/*
  	 * If the gpiochip has an assigned OF node this takes precedence
-@@ -2511,7 +2512,7 @@ static int gpiolib_seq_show(struct seq_f
+@@ -2495,7 +2496,7 @@ static int gpiolib_seq_show(struct seq_f
  
  	seq_printf(s, "%sGPIOs %d-%d", (char *)s->private,
  			chip->base, chip->base + chip->ngpio - 1);
@@ -1999,7 +1973,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	vg->saved_context = devm_kcalloc(&pdev->dev, gc->ngpio,
 --- a/drivers/pinctrl/intel/pinctrl-cherryview.c
 +++ b/drivers/pinctrl/intel/pinctrl-cherryview.c
-@@ -1436,7 +1436,7 @@ static int chv_gpio_probe(struct chv_pin
+@@ -1445,7 +1445,7 @@ static int chv_gpio_probe(struct chv_pin
  
  	chip->ngpio = pctrl->community->ngpios;
  	chip->label = dev_name(pctrl->dev);
@@ -2066,7 +2040,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	int eint_num, virq, eint_offset;
  	unsigned int set_offset, bit, clr_bit, clr_offset, rst, i, unmask, dbnc;
  	static const unsigned int debounce_time[] = {500, 1000, 16000, 32000, 64000,
-@@ -1346,7 +1346,7 @@ int mtk_pctrl_init(struct platform_devic
+@@ -1347,7 +1347,7 @@ int mtk_pctrl_init(struct platform_devic
  	*pctl->chip = mtk_gpio_chip;
  	pctl->chip->ngpio = pctl->devdata->npins;
  	pctl->chip->label = dev_name(&pdev->dev);
@@ -2156,7 +2130,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  			output ? "output " : "input",
 --- a/drivers/pinctrl/pinctrl-amd.c
 +++ b/drivers/pinctrl/pinctrl-amd.c
-@@ -778,7 +778,7 @@ static int amd_gpio_probe(struct platfor
+@@ -758,7 +758,7 @@ static int amd_gpio_probe(struct platfor
  	gpio_dev->gc.base			= 0;
  	gpio_dev->gc.label			= pdev->name;
  	gpio_dev->gc.owner			= THIS_MODULE;
@@ -2223,7 +2197,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
  	return irq_find_mapping(atmel_pioctrl->irq_domain, offset);
  }
-@@ -969,7 +969,7 @@ static int atmel_pinctrl_probe(struct pl
+@@ -973,7 +973,7 @@ static int atmel_pinctrl_probe(struct pl
  	atmel_pioctrl->gpio_chip->of_node = dev->of_node;
  	atmel_pioctrl->gpio_chip->ngpio = atmel_pioctrl->npins;
  	atmel_pioctrl->gpio_chip->label = dev_name(dev);
@@ -2289,7 +2263,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
 --- a/drivers/pinctrl/pinctrl-st.c
 +++ b/drivers/pinctrl/pinctrl-st.c
-@@ -1522,7 +1522,7 @@ static int st_gpiolib_register_bank(stru
+@@ -1540,7 +1540,7 @@ static int st_gpiolib_register_bank(stru
  	bank->gpio_chip.base = bank_num * ST_GPIO_PINS_PER_BANK;
  	bank->gpio_chip.ngpio = ST_GPIO_PINS_PER_BANK;
  	bank->gpio_chip.of_node = np;
@@ -2346,7 +2320,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  		dev_err(&pdev->dev, "Failed to register gpio chip\n");
 --- a/drivers/pinctrl/qcom/pinctrl-msm.c
 +++ b/drivers/pinctrl/qcom/pinctrl-msm.c
-@@ -800,7 +800,7 @@ static int msm_gpio_init(struct msm_pinc
+@@ -796,7 +796,7 @@ static int msm_gpio_init(struct msm_pinc
  	chip->base = 0;
  	chip->ngpio = ngpio;
  	chip->label = dev_name(pctrl->dev);
@@ -2357,7 +2331,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
 --- a/drivers/pinctrl/qcom/pinctrl-spmi-gpio.c
 +++ b/drivers/pinctrl/qcom/pinctrl-spmi-gpio.c
-@@ -760,7 +760,7 @@ static int pmic_gpio_probe(struct platfo
+@@ -776,7 +776,7 @@ static int pmic_gpio_probe(struct platfo
  	}
  
  	state->chip = pmic_gpio_gpio_template;
@@ -2413,7 +2387,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	}
 --- a/drivers/pinctrl/samsung/pinctrl-exynos5440.c
 +++ b/drivers/pinctrl/samsung/pinctrl-exynos5440.c
-@@ -539,7 +539,7 @@ static const struct pinconf_ops exynos54
+@@ -541,7 +541,7 @@ static const struct pinconf_ops exynos54
  /* gpiolib gpio_set callback function */
  static void exynos5440_gpio_set(struct gpio_chip *gc, unsigned offset, int value)
  {
@@ -2422,7 +2396,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	void __iomem *base = priv->reg_base;
  	u32 data;
  
-@@ -553,7 +553,7 @@ static void exynos5440_gpio_set(struct g
+@@ -555,7 +555,7 @@ static void exynos5440_gpio_set(struct g
  /* gpiolib gpio_get callback function */
  static int exynos5440_gpio_get(struct gpio_chip *gc, unsigned offset)
  {
@@ -2431,7 +2405,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	void __iomem *base = priv->reg_base;
  	u32 data;
  
-@@ -566,7 +566,7 @@ static int exynos5440_gpio_get(struct gp
+@@ -568,7 +568,7 @@ static int exynos5440_gpio_get(struct gp
  /* gpiolib gpio_direction_input callback function */
  static int exynos5440_gpio_direction_input(struct gpio_chip *gc, unsigned offset)
  {
@@ -2440,7 +2414,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	void __iomem *base = priv->reg_base;
  	u32 data;
  
-@@ -586,7 +586,7 @@ static int exynos5440_gpio_direction_inp
+@@ -588,7 +588,7 @@ static int exynos5440_gpio_direction_inp
  static int exynos5440_gpio_direction_output(struct gpio_chip *gc, unsigned offset,
  							int value)
  {
@@ -2449,7 +2423,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	void __iomem *base = priv->reg_base;
  	u32 data;
  
-@@ -607,7 +607,7 @@ static int exynos5440_gpio_direction_out
+@@ -609,7 +609,7 @@ static int exynos5440_gpio_direction_out
  /* gpiolib gpio_to_irq callback function */
  static int exynos5440_gpio_to_irq(struct gpio_chip *gc, unsigned offset)
  {
@@ -2458,7 +2432,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	unsigned int virq;
  
  	if (offset < 16 || offset > 23)
-@@ -817,7 +817,7 @@ static int exynos5440_gpiolib_register(s
+@@ -818,7 +818,7 @@ static int exynos5440_gpiolib_register(s
  	priv->gc = gc;
  	gc->base = 0;
  	gc->ngpio = EXYNOS5440_MAX_PINS;
@@ -2647,7 +2621,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  		s->gpio.get		 = sc16is7xx_gpio_get;
 --- a/include/linux/gpio/driver.h
 +++ b/include/linux/gpio/driver.h
-@@ -21,7 +21,7 @@ struct seq_file;
+@@ -20,7 +20,7 @@ struct seq_file;
  /**
   * struct gpio_chip - abstract a GPIO controller
   * @label: for diagnostics
@@ -2655,8 +2629,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 + * @parent: optional parent device providing the GPIOs
   * @cdev: class device used by sysfs interface (may be NULL)
   * @owner: helps prevent removal of modules exporting active GPIOs
-  * @data: per-instance data assigned by the driver
-@@ -108,7 +108,7 @@ struct seq_file;
+  * @list: links gpio_chips together for traversal
+@@ -89,7 +89,7 @@ struct seq_file;
   */
  struct gpio_chip {
  	const char		*label;
@@ -2664,7 +2638,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	struct device		*parent;
  	struct device		*cdev;
  	struct module		*owner;
- 	void			*data;
+ 	struct list_head        list;
 --- a/sound/soc/codecs/rt5677.c
 +++ b/sound/soc/codecs/rt5677.c
 @@ -4696,7 +4696,7 @@ static void rt5677_init_gpio(struct i2c_

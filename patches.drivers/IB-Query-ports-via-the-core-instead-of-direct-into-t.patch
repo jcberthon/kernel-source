@@ -56,8 +56,8 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 -	memset(props, 0, sizeof(struct ib_port_attr));
 +	/* props being zeroed by the caller, avoid zeroing it here */
  	props->max_mtu = IB_MTU_4096;
- 	if (netdev->mtu >= 4096)
- 		props->active_mtu = IB_MTU_4096;
+ 	props->active_mtu = ib_mtu_int_to_enum(netdev->mtu);
+ 
 @@ -1352,13 +1352,14 @@ static int iwch_port_immutable(struct ib
  	struct ib_port_attr attr;
  	int err;
@@ -85,8 +85,8 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 -	memset(props, 0, sizeof(struct ib_port_attr));
 +	/* props being zeroed by the caller, avoid zeroing it here */
  	props->max_mtu = IB_MTU_4096;
- 	if (netdev->mtu >= 4096)
- 		props->active_mtu = IB_MTU_4096;
+ 	props->active_mtu = ib_mtu_int_to_enum(netdev->mtu);
+ 
 @@ -521,13 +520,14 @@ static int c4iw_port_immutable(struct ib
  	struct ib_port_attr attr;
  	int err;
@@ -153,8 +153,8 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 -
 +	/* props being zeroed by the caller, avoid zeroing it here */
  	props->max_mtu = IB_MTU_4096;
- 	if (netdev->mtu >= 4096)
- 		props->active_mtu = IB_MTU_4096;
+ 	props->active_mtu = ib_mtu_int_to_enum(netdev->mtu);
+ 
 @@ -2373,14 +2372,15 @@ static int i40iw_port_immutable(struct i
  	struct ib_port_attr attr;
  	int err;
@@ -347,7 +347,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 +	/* props being zeroed by the caller, avoid zeroing it here */
  
  	props->max_mtu = IB_MTU_4096;
- 
+ 	props->active_mtu = ib_mtu_int_to_enum(netdev->mtu);
 @@ -3737,13 +3737,14 @@ static int nes_port_immutable(struct ib_
  	struct ib_port_attr attr;
  	int err;

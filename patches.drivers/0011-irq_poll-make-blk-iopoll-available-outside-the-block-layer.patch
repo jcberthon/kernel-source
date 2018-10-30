@@ -54,7 +54,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 +			blk-lib.o blk-mq.o blk-mq-tag.o \
  			blk-mq-sysfs.o blk-mq-cpu.o blk-mq-cpumap.o ioctl.o \
  			genhd.o scsi_ioctl.o partition-generic.o ioprio.o \
- 			partitions/
+ 			badblocks.o partitions/
 --- a/block/blk-iopoll.c
 +++ /dev/null
 @@ -1,224 +0,0 @@
@@ -679,8 +679,8 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 --- a/lib/Makefile
 +++ b/lib/Makefile
 @@ -165,6 +165,7 @@ obj-$(CONFIG_GENERIC_NET_UTILS) += net_u
+
  obj-$(CONFIG_SG_SPLIT) += sg_split.o
- obj-$(CONFIG_SG_POOL) += sg_pool.o
  obj-$(CONFIG_STMP_DEVICE) += stmp_device.o
 +obj-$(CONFIG_IRQ_POLL) += irq_poll.o
  

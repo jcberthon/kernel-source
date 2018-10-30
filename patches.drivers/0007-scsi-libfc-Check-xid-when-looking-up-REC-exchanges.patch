@@ -52,7 +52,7 @@ index 01500e4..828e9ad 100644
 +	ep = fc_exch_lookup(lport, xid);
  	if (!ep) {
  		FC_LPORT_DBG(lport,
- 			     "REC request from %x: xid %4.4x-%4.4x not found\n",
+ 			     "REC request from %x: rxid %x oxid %x not found\n",
 -- 
 1.8.5.6
 

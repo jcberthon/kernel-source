@@ -57,7 +57,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/drivers/tty/serial/earlycon.c
 +++ b/drivers/tty/serial/earlycon.c
 @@ -209,7 +209,8 @@ static int __init param_setup_earlycon(c
- early_param("earlycon", param_setup_earlycon);
+ #ifdef CONFIG_OF_EARLY_FLATTREE
  
  int __init of_setup_earlycon(unsigned long addr,
 -			     const struct earlycon_id *match)

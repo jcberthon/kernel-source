@@ -21,30 +21,41 @@ diff --git a/drivers/md/dm-mpath.c b/drivers/md/dm-mpath.c
 index f8aec2c..121ad90 100644
 --- a/drivers/md/dm-mpath.c
 +++ b/drivers/md/dm-mpath.c
-@@ -435,12 +435,18 @@ failed:
-  * and multipath_resume() calls and we have no need to check
-  * for the DMF_NOFLUSH_SUSPENDING flag.
-  */
--static int must_push_back(struct multipath *m)
-+static bool must_push_back(struct multipath *m)
+@@ -435,16 +435,30 @@ failed:
+ 		dm_noflush_suspending(m->ti));
+ }
+ 
+-static bool must_push_back_rq(struct multipath *m)
++static bool must_push_back_rq(struct multipath *m)
  {
 -	return (test_bit(MPATHF_QUEUE_IF_NO_PATH, &m->flags) ||
--		((test_bit(MPATHF_QUEUE_IF_NO_PATH, &m->flags) !=
--		  test_bit(MPATHF_SAVED_QUEUE_IF_NO_PATH, &m->flags)) &&
--		 dm_noflush_suspending(m->ti)));
+-		__must_push_back(m));
 +	bool r;
 +	unsigned long flags;
 +
 +	spin_lock_irqsave(&m->lock, flags);
 +	r = (test_bit(MPATHF_QUEUE_IF_NO_PATH, &m->flags) ||
-+	     ((test_bit(MPATHF_QUEUE_IF_NO_PATH, &m->flags) !=
-+	       test_bit(MPATHF_SAVED_QUEUE_IF_NO_PATH, &m->flags)) &&
-+	      dm_noflush_suspending(m->ti)));
++	     __must_push_back(m));
 +	spin_unlock_irqrestore(&m->lock, flags);
++
++	return r;
+ }
+ 
+ static bool must_push_back_bio(struct multipath *m)
+ {
+-	return __must_push_back(m);
++	bool r;
++	unsigned long flags;
++
++	spin_lock_irqsave(&m->lock, flags);
++	r = __must_push_back(m);
++	spin_unlock_irqrestore(&m->lock, flags);
++
 +	return r;
  }
  
  /*
+  * Map cloned requests (request-based multipath)
 @@ -1460,12 +1466,14 @@ static void multipath_postsuspend(struct dm_target *ti)
  static void multipath_resume(struct dm_target *ti)
  {

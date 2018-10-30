@@ -43,8 +43,8 @@ index 43c3ded..bb2b762 100644
  
  static void print_conf(struct r10conf *conf)
 @@ -1605,13 +1603,13 @@ static void print_conf(struct r10conf *conf)
- 		/* Too many disks, too noisy */
- 		return;
+ 	int i;
+ 	struct md_rdev *rdev;
  
 -	printk(KERN_DEBUG "RAID10 conf printout:\n");
 +	pr_debug("RAID10 conf printout:\n");
@@ -182,7 +182,7 @@ index 43c3ded..bb2b762 100644
  		return;
  	}
  
- 	do_sync = (r10_bio->master_bio->bi_rw & REQ_SYNC);
+ 	do_sync = (r10_bio->master_bio->bi_opf & REQ_SYNC);
  	slot = r10_bio->read_slot;
 -	printk_ratelimited(
 -		KERN_ERR

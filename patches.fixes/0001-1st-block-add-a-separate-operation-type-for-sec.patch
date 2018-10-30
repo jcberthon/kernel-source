@@ -29,9 +29,9 @@ Acked-by: Hannes Reinecke <hare@suse.de>
 --- a/drivers/md/raid1.c
 +++ b/drivers/md/raid1.c
 @@ -1083,7 +1083,6 @@ static void raid1_make_request(struct md
- 	const int rw = bio_data_dir(bio);
  	const unsigned long do_sync = (bio->bi_rw & REQ_SYNC);
- 	const unsigned long do_flush_fua = (bio->bi_rw & (REQ_FLUSH | REQ_FUA));
+ 	const unsigned long do_flush_fua = (bio->bi_rw &
+ 						(REQ_PREFLUSH | REQ_FUA));
 -	const unsigned long do_sec = (bio->bi_rw & REQ_SECURE);
  	struct md_rdev *blocked_rdev;
  	struct blk_plug_cb *cb;
@@ -42,9 +42,9 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  		mbio->bi_end_io	= raid1_end_write_request;
 -		bio_set_op_attrs(mbio, op, do_flush_fua | do_sync | do_sec);
 +		bio_set_op_attrs(mbio, op, do_flush_fua | do_sync);
- 		if (test_bit(FailFast, &conf->mirrors[i].rdev->flags) &&
- 		    !test_bit(WriteMostly, &conf->mirrors[i].rdev->flags) &&
- 		    conf->raid_disks - mddev->degraded > 1)
+ 		mbio->bi_private = r1_bio;
+ 
+ 		atomic_inc(&r1_bio->remaining);
 --- a/drivers/md/raid10.c
 +++ b/drivers/md/raid10.c
 @@ -1097,7 +1097,6 @@ static void __make_request(struct mddev
@@ -61,9 +61,9 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  			mbio->bi_end_io	= raid10_end_write_request;
 -			bio_set_op_attrs(mbio, op, do_sync | do_fua | do_sec);
 +			bio_set_op_attrs(mbio, op, do_sync | do_fua);
- 			if (test_bit(FailFast, &conf->mirrors[d].rdev->flags) &&
- 			    enough(conf, d))
- 				mbio->bi_opf |= MD_FAILFAST;
+ 			mbio->bi_private = r10_bio;
+ 
+ 			atomic_inc(&r10_bio->remaining);
 @@ -1462,7 +1461,7 @@ retry_write:
  						   r10_bio, rdev));
  			mbio->bi_bdev = rdev->bdev;
@@ -72,4 +72,4 @@ Acked-by: Hannes Reinecke <hare@suse.de>
 +			bio_set_op_attrs(mbio, op, do_sync | do_fua);
  			mbio->bi_private = r10_bio;
  
- 			if (conf->mddev->gendisk)
+ 			atomic_inc(&r10_bio->remaining);

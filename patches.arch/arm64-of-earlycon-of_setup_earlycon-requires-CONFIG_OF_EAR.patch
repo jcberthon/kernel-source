@@ -23,9 +23,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
 +#ifdef CONFIG_OF_EARLY_FLATTREE
 +
- int __init of_setup_earlycon(const struct earlycon_id *match,
- 			     unsigned long node,
- 			     const char *options)
+ int __init of_setup_earlycon(unsigned long addr,
+ 			     int (*setup)(struct earlycon_device *, const char *))
+ {
 @@ -271,3 +273,5 @@ int __init of_setup_earlycon(const struc
  	register_console(early_console_dev.con);
  	return 0;

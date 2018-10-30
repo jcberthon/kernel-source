@@ -41,7 +41,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	struct ldt_struct *ldt;
  #endif
 @@ -30,11 +24,6 @@ typedef struct {
- 	atomic_t perf_rdpmc_allowed;	/* nonzero if rdpmc is allowed */
+ #endif
  } mm_context_t;
  
 -#define INIT_MM_CONTEXT(mm)						\
@@ -64,14 +64,15 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  #ifndef CONFIG_PARAVIRT
  static inline void paravirt_activate_mm(struct mm_struct *prev,
  					struct mm_struct *next)
-@@ -108,7 +105,6 @@ static inline void enter_lazy_tlb(struct
+@@ -108,8 +105,6 @@ static inline void enter_lazy_tlb(struct
  static inline int init_new_context(struct task_struct *tsk,
  				   struct mm_struct *mm)
  {
 -	mm->context.ctx_id = atomic64_inc_return(&last_mm_ctx_id);
- 	return init_new_context_ldt(tsk, mm);
- }
- static inline void destroy_context(struct mm_struct *mm)
+-
+ 	#ifdef CONFIG_X86_INTEL_MEMORY_PROTECTION_KEYS
+ 	if (cpu_feature_enabled(X86_FEATURE_OSPKE)) {
+ 		/* pkey 0 is the default and allocated implicitly */
 --- a/arch/x86/mm/tlb.c
 +++ b/arch/x86/mm/tlb.c
 @@ -29,8 +29,6 @@

@@ -64,9 +64,9 @@ index a5da3ff..2c67105 100644
  #define IOP_RESET_ALWAYS		0x00001001
  #define RE_INIT_ADAPTER			0x000000ee
 @@ -2687,4 +2692,5 @@ extern int update_interval;
+ extern int update_interval;
  extern int check_interval;
  extern int aac_check_reset;
- extern int aac_export_fixed;
 +extern int aac_fib_dump;
  #endif
 diff --git a/drivers/scsi/aacraid/src.c b/drivers/scsi/aacraid/src.c

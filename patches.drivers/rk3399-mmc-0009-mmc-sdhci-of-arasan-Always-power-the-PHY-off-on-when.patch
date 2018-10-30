@@ -88,18 +88,18 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  		phy_power_on(sdhci_arasan->phy);
  		spin_lock_irq(&host->lock);
 @@ -243,12 +245,6 @@ static int sdhci_arasan_probe(struct pla
- 			dev_err(&pdev->dev, "phy_init err.\n");
  			goto clk_disable_all;
  		}
--
+ 
 -		ret = phy_power_on(sdhci_arasan->phy);
 -		if (ret < 0) {
 -			dev_err(&pdev->dev, "phy_power_on err.\n");
 -			goto err_phy_power;
 -		}
+-
+ 		host->mmc_host_ops.hs400_enhanced_strobe =
+ 					sdhci_arasan_hs400_enhanced_strobe;
  	}
- 
- 	ret = sdhci_add_host(host);
 @@ -259,9 +255,6 @@ static int sdhci_arasan_probe(struct pla
  
  err_add_host:
@@ -108,5 +108,5 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 -err_phy_power:
 -	if (!IS_ERR(sdhci_arasan->phy))
  		phy_exit(sdhci_arasan->phy);
- err_pltfm_free:
- 	sdhci_pltfm_free(pdev);
+ clk_disable_all:
+ 	clk_disable_unprepare(clk_xin);

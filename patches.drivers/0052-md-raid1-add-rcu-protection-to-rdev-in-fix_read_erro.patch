@@ -43,7 +43,7 @@ index 2672303..af751c6 100644
  			    is_badblock(rdev, sect, s,
 -					&first_bad, &bad_sectors) == 0 &&
 -			    sync_page_io(rdev, sect, s<<9,
--					 conf->tmppage, READ, false))
+-					 conf->tmppage, REQ_OP_READ, 0, false))
 -				success = 1;
 -			else {
 -				d++;
@@ -54,7 +54,7 @@ index 2672303..af751c6 100644
 +				atomic_inc(&rdev->nr_pending);
 +				rcu_read_unlock();
 +				if (sync_page_io(rdev, sect, s<<9,
-+						 conf->tmppage, READ, false))
++						 conf->tmppage, REQ_OP_READ, 0, false))
 +					success = 1;
 +				rdev_dec_pending(rdev, mddev);
 +				if (success)

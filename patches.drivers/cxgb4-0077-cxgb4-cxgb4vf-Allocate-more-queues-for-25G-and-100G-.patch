@@ -62,7 +62,7 @@ index 9a06093..474f959 100644
 +	return high_speeds != 0;
  }
  
- /*
+ static inline void init_rspq(struct adapter *adap, struct sge_rspq *q,
 @@ -4643,8 +4650,12 @@ static void print_port_info(const struct net_device *dev)
  		bufp += sprintf(bufp, "1000/");
  	if (pi->link_cfg.supported & FW_PORT_CAP_SPEED_10G)

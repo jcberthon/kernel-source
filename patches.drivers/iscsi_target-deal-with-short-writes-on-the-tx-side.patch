@@ -97,7 +97,7 @@ index 91b39c2..ba5df9e 100644
 +	return total_tx;
  }
  
- static bool sockaddr_equal(struct sockaddr_storage *x, struct sockaddr_storage *y)
+ void iscsit_collect_login_stats(
 -- 
 1.8.5.6
 

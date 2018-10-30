@@ -43,10 +43,10 @@ Signed-off-by: Neil Brown <neilb@suse.de>
 --- a/include/linux/blkdev.h
 +++ b/include/linux/blkdev.h
 @@ -489,6 +489,7 @@ struct request_queue {
- #define QUEUE_FLAG_INIT_DONE   20	/* queue is initialized */
- #define QUEUE_FLAG_NO_SG_MERGE 21	/* don't attempt to merge SG segments*/
- #define QUEUE_FLAG_POLL	       22	/* IO polling enabled if set */
-+#define QUEUE_FLAG_NO_ROUND    26	/* Don't round timeout up to next second */
+ #define QUEUE_FLAG_FLUSH_NQ    25	/* flush not queueuable */
+ #define QUEUE_FLAG_DAX         26	/* device supports DAX */
+ #define QUEUE_FLAG_STATS       27	/* track rq completion times */
++#define QUEUE_FLAG_NO_ROUND    28	/* Don't round timeout up to next second */
  
  #define QUEUE_FLAG_DEFAULT	((1 << QUEUE_FLAG_IO_STAT) |		\
  				 (1 << QUEUE_FLAG_STACKABLE)	|	\

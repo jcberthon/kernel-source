@@ -126,7 +126,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
 -	spin_lock_init(&sdev->spinlock);
 +	mutex_init(&sdev->mutex);
  
- 	sdev->pd = ib_alloc_pd(device, 0);
+ 	sdev->pd = ib_alloc_pd(device);
  	if (IS_ERR(sdev->pd))
 @@ -2971,12 +2959,12 @@ static void srpt_close_session(struct se
  	pr_debug("ch %s-%d state %d\n", ch->sess_name, ch->qp->qp_num,

@@ -36,8 +36,8 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 --- a/arch/s390/include/asm/pgtable.h
 +++ b/arch/s390/include/asm/pgtable.h
 @@ -273,8 +273,12 @@ static inline int is_module_addr(void *a
- #define _REGION3_ENTRY_ORIGIN_LARGE ~0x7fffffffUL /* large page address	     */
- #define _REGION3_ENTRY_ORIGIN  ~0x7ffUL/* region third table origin	     */
+ #define _REGION3_ENTRY		(_REGION_ENTRY_TYPE_R3 | _REGION_ENTRY_LENGTH)
+ #define _REGION3_ENTRY_EMPTY	(_REGION_ENTRY_TYPE_R3 | _REGION_ENTRY_INVALID)
  
 -#define _REGION3_ENTRY_LARGE	0x400	/* RTTE-format control, large page  */
  #define _REGION3_ENTRY_RO	0x200	/* page protection bit		    */
@@ -47,8 +47,8 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 +#define _REGION3_ENTRY_READ	0x0002	/* SW region read bit */
 +#define _REGION3_ENTRY_WRITE	0x0001	/* SW region write bit */
  
- #define _REGION_ENTRY_BITS	0xfffffffffffff227UL
- #define _REGION_ENTRY_BITS_LARGE 0xffffffff8000fe27UL
+ /* Bits in the segment table entry */
+ #define _SEGMENT_ENTRY_BITS	0xfffffffffffffe33UL
 @@ -413,6 +417,33 @@ static inline void csp(unsigned int *ptr
  				 _SEGMENT_ENTRY_READ)
  #define SEGMENT_WRITE	__pgprot(_SEGMENT_ENTRY_READ | \

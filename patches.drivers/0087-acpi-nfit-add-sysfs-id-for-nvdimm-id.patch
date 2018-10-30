@@ -55,7 +55,6 @@ index 5dc243c..5a7199d 100644
  	&dev_attr_rev_id.attr,
  	&dev_attr_flags.attr,
 +	&dev_attr_id.attr,
+ 	&dev_attr_family.attr,
+ 	&dev_attr_dsm_mask.attr,
  	NULL,
- };
- 
-

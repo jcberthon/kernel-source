@@ -101,16 +101,16 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	in = ptr >= (unsigned long)&__exception_text_start &&
 --- a/arch/arm64/include/asm/virt.h
 +++ b/arch/arm64/include/asm/virt.h
-@@ -53,6 +53,7 @@
+@@ -47,6 +47,7 @@
  #ifndef __ASSEMBLY__
- 
+
  #include <asm/ptrace.h>
 +#include <asm/sections.h>
- #include <asm/sysreg.h>
- #include <asm/cpufeature.h>
  
-@@ -88,14 +89,6 @@ static inline bool is_kernel_in_hyp_mode
- 	return read_sysreg(CurrentEL) == CurrentEL_EL2;
+ /*
+  * __boot_cpu_mode records what mode CPUs were booted in.
+@@ -80,14 +81,6 @@ static inline bool is_kernel_in_hyp_mode
+ 	return el == CurrentEL_EL2;
  }
  
 -/* The section containing the hypervisor idmap text */
@@ -121,9 +121,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 -extern char __hyp_text_start[];
 -extern char __hyp_text_end[];
 -
- static inline bool has_vhe(void)
- {
- 	if (cpus_have_const_cap(ARM64_HAS_VIRT_HOST_EXTN))
+ #endif /* __ASSEMBLY__ */
+ 
+ #endif /* ! __ASM__VIRT_H */
 --- a/arch/arm64/kernel/alternative.c
 +++ b/arch/arm64/kernel/alternative.c
 @@ -25,14 +25,13 @@

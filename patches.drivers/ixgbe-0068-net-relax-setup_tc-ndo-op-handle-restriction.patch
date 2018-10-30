@@ -49,8 +49,8 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 --- a/drivers/net/ethernet/amd/xgbe/xgbe-drv.c
 +++ b/drivers/net/ethernet/amd/xgbe/xgbe-drv.c
 @@ -1633,7 +1633,7 @@ static int xgbe_setup_tc(struct net_devi
- 	unsigned int offset, queue;
- 	u8 i, tc;
+ 	struct xgbe_prv_data *pdata = netdev_priv(netdev);
+ 	u8 tc;
  
 -	if (handle != TC_H_ROOT || tc_to_netdev->type != TC_SETUP_MQPRIO)
 +	if (tc_to_netdev->type != TC_SETUP_MQPRIO)

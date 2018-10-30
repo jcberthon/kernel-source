@@ -42,4 +42,4 @@ Acked-by: Lee, Chun-Yi <jlee@suse.com>
 +	if (!IS_ENABLED(CONFIG_EFI_MIXED) || efi_is_native())
  		return 0;
  
- 	page = alloc_page(GFP_KERNEL|__GFP_DMA32);
+ 	/*

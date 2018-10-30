@@ -21,9 +21,9 @@ index 48bd730..e532529 100644
 --- a/arch/arm64/include/asm/arch_timer.h
 +++ b/arch/arm64/include/asm/arch_timer.h
 @@ -40,6 +40,7 @@ extern struct static_key_false arch_timer_read_ool_enabled;
+ 
  enum arch_timer_erratum_match_type {
  	ate_match_dt,
- 	ate_match_global_cap_id,
 +	ate_match_local_cap_id,
  };
  
@@ -33,7 +33,7 @@ index a0b1108..5069cb3 100644
 --- a/drivers/clocksource/arm_arch_timer.c
 +++ b/drivers/clocksource/arm_arch_timer.c
 @@ -221,6 +221,13 @@ bool arch_timer_check_global_cap_erratum(const struct arch_timer_erratum_workaro
- 	return cpus_have_cap((uintptr_t)wa->id);
+ 	return of_property_read_bool(np, wa->id);
  }
  
 +static
@@ -58,8 +58,8 @@ index a0b1108..5069cb3 100644
  	switch (type) {
  	case ate_match_dt:
 @@ -262,14 +267,27 @@ static void arch_timer_check_ool_workaround(enum arch_timer_erratum_match_type t
- 	case ate_match_global_cap_id:
- 		match_fn = arch_timer_check_global_cap_erratum;
+ 	case ate_match_dt:
+ 		match_fn = arch_timer_check_dt_erratum;
  		break;
 +	case ate_match_local_cap_id:
 +		match_fn = arch_timer_check_local_cap_erratum;

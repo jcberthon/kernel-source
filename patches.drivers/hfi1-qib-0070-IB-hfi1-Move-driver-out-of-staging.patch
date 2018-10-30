@@ -304,8 +304,8 @@ index dbed6ad..19a418a 100644
 --- a/drivers/infiniband/Kconfig
 +++ b/drivers/infiniband/Kconfig
 @@ -87,4 +87,6 @@ source "drivers/infiniband/ulp/isert/Kconfig"
+ 
  source "drivers/infiniband/sw/rdmavt/Kconfig"
- source "drivers/infiniband/sw/rxe/Kconfig"
  
 +source "drivers/infiniband/hw/hfi1/Kconfig"
 +
@@ -314,12 +314,11 @@ diff --git a/drivers/infiniband/hw/Makefile b/drivers/infiniband/hw/Makefile
 index 05aac90..21fe401 100644
 --- a/drivers/infiniband/hw/Makefile
 +++ b/drivers/infiniband/hw/Makefile
-@@ -8,4 +8,5 @@ obj-$(CONFIG_MLX5_INFINIBAND)		+= mlx5/
+@@ -8,3 +8,4 @@ obj-$(CONFIG_MLX5_INFINIBAND)		+= mlx5/
  obj-$(CONFIG_INFINIBAND_NES)		+= nes/
  obj-$(CONFIG_INFINIBAND_OCRDMA)		+= ocrdma/
  obj-$(CONFIG_INFINIBAND_USNIC)		+= usnic/
 +obj-$(CONFIG_INFINIBAND_HFI1)		+= hfi1/
- obj-$(CONFIG_INFINIBAND_HNS)		+= hns/
 diff --git a/drivers/infiniband/hw/hfi1/Kconfig b/drivers/infiniband/hw/hfi1/Kconfig
 new file mode 100644
 index 0000000..a925fb0
@@ -15962,7 +15961,7 @@ new file mode 100644
 index 0000000..66a3279
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/chip.h
-@@ -0,0 +1,1374 @@
+@@ -0,0 +1,1368 @@
 +#ifndef _CHIP_H
 +#define _CHIP_H
 +/*
@@ -16362,12 +16361,6 @@ index 0000000..66a3279
 +
 +/* Lane ID for general configuration registers */
 +#define GENERAL_CONFIG 4
-+
-+/* LINK_TUNING_PARAMETERS fields */
-+#define TUNING_METHOD_SHIFT 24
-+
-+/* LINK_OPTIMIZATION_SETTINGS fields */
-+#define ENABLE_EXT_DEV_CONFIG_SHIFT 24
 +
 +/* LOAD_DATA 8051 command shifts and fields */
 +#define LOAD_DATA_FIELD_ID_SHIFT 40
@@ -40467,7 +40460,7 @@ new file mode 100644
 index 0000000..03df932
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/platform.c
-@@ -0,0 +1,909 @@
+@@ -0,0 +1,907 @@
 +/*
 + * Copyright(c) 2015, 2016 Intel Corporation.
 + *
@@ -41010,8 +41003,7 @@ index 0000000..03df932
 +	/* Enable external device config if channel is limiting active */
 +	read_8051_config(ppd->dd, LINK_OPTIMIZATION_SETTINGS,
 +			 GENERAL_CONFIG, &config_data);
-+	config_data &= ~(0xff << ENABLE_EXT_DEV_CONFIG_SHIFT);
-+	config_data |= ((u32)limiting_active << ENABLE_EXT_DEV_CONFIG_SHIFT);
++	config_data |= limiting_active;
 +	ret = load_8051_config(ppd->dd, LINK_OPTIMIZATION_SETTINGS,
 +			       GENERAL_CONFIG, config_data);
 +	if (ret != HCMD_SUCCESS)
@@ -41024,8 +41016,7 @@ index 0000000..03df932
 +	/* Pass tuning method to 8051 */
 +	read_8051_config(ppd->dd, LINK_TUNING_PARAMETERS, GENERAL_CONFIG,
 +			 &config_data);
-+	config_data &= ~(0xff << TUNING_METHOD_SHIFT);
-+	config_data |= ((u32)tuning_method << TUNING_METHOD_SHIFT);
++	config_data |= tuning_method;
 +	ret = load_8051_config(ppd->dd, LINK_TUNING_PARAMETERS, GENERAL_CONFIG,
 +			       config_data);
 +	if (ret != HCMD_SUCCESS)
@@ -41693,7 +41684,7 @@ new file mode 100644
 index 0000000..1a942ff
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/qp.c
-@@ -0,0 +1,974 @@
+@@ -0,0 +1,973 @@
 +/*
 + * Copyright(c) 2015, 2016 Intel Corporation.
 + *
@@ -42208,7 +42199,6 @@ index 0000000..1a942ff
 +static void iowait_sdma_drained(struct iowait *wait)
 +{
 +	struct rvt_qp *qp = iowait_to_qp(wait);
-+	unsigned long flags;
 +
 +	/*
 +	 * This happens when the send engine notes
@@ -42216,12 +42206,12 @@ index 0000000..1a942ff
 +	 * do the flush work until that QP's
 +	 * sdma work has finished.
 +	 */
-+	spin_lock_irqsave(&qp->s_lock, flags);
++	spin_lock(&qp->s_lock);
 +	if (qp->s_flags & RVT_S_WAIT_DMA) {
 +		qp->s_flags &= ~RVT_S_WAIT_DMA;
 +		hfi1_schedule_send(qp);
 +	}
-+	spin_unlock_irqrestore(&qp->s_lock, flags);
++	spin_unlock(&qp->s_lock);
 +}
 +
 +/**
@@ -77341,7 +77331,7 @@ deleted file mode 100644
 index 66a3279..0000000
 --- a/drivers/staging/rdma/hfi1/chip.h
 +++ /dev/null
-@@ -1,1374 +0,0 @@
+@@ -1,1368 +0,0 @@
 -#ifndef _CHIP_H
 -#define _CHIP_H
 -/*
@@ -77741,12 +77731,6 @@ index 66a3279..0000000
 -
 -/* Lane ID for general configuration registers */
 -#define GENERAL_CONFIG 4
--
--/* LINK_TUNING_PARAMETERS fields */
--#define TUNING_METHOD_SHIFT 24
--
--/* LINK_OPTIMIZATION_SETTINGS fields */
--#define ENABLE_EXT_DEV_CONFIG_SHIFT 24
 -
 -/* LOAD_DATA 8051 command shifts and fields */
 -#define LOAD_DATA_FIELD_ID_SHIFT 40
@@ -101846,7 +101830,7 @@ deleted file mode 100644
 index 03df932..0000000
 --- a/drivers/staging/rdma/hfi1/platform.c
 +++ /dev/null
-@@ -1,909 +0,0 @@
+@@ -1,907 +0,0 @@
 -/*
 - * Copyright(c) 2015, 2016 Intel Corporation.
 - *
@@ -102389,8 +102373,7 @@ index 03df932..0000000
 -	/* Enable external device config if channel is limiting active */
 -	read_8051_config(ppd->dd, LINK_OPTIMIZATION_SETTINGS,
 -			 GENERAL_CONFIG, &config_data);
--	config_data &= ~(0xff << ENABLE_EXT_DEV_CONFIG_SHIFT);
--	config_data |= ((u32)limiting_active << ENABLE_EXT_DEV_CONFIG_SHIFT);
+-	config_data |= limiting_active;
 -	ret = load_8051_config(ppd->dd, LINK_OPTIMIZATION_SETTINGS,
 -			       GENERAL_CONFIG, config_data);
 -	if (ret != HCMD_SUCCESS)
@@ -102403,8 +102386,7 @@ index 03df932..0000000
 -	/* Pass tuning method to 8051 */
 -	read_8051_config(ppd->dd, LINK_TUNING_PARAMETERS, GENERAL_CONFIG,
 -			 &config_data);
--	config_data &= ~(0xff << TUNING_METHOD_SHIFT);
--	config_data |= ((u32)tuning_method << TUNING_METHOD_SHIFT);
+-	config_data |= tuning_method;
 -	ret = load_8051_config(ppd->dd, LINK_TUNING_PARAMETERS, GENERAL_CONFIG,
 -			       config_data);
 -	if (ret != HCMD_SUCCESS)
@@ -103072,7 +103054,7 @@ deleted file mode 100644
 index 1a942ff..0000000
 --- a/drivers/staging/rdma/hfi1/qp.c
 +++ /dev/null
-@@ -1,974 +0,0 @@
+@@ -1,973 +0,0 @@
 -/*
 - * Copyright(c) 2015, 2016 Intel Corporation.
 - *
@@ -103587,7 +103569,6 @@ index 1a942ff..0000000
 -static void iowait_sdma_drained(struct iowait *wait)
 -{
 -	struct rvt_qp *qp = iowait_to_qp(wait);
--	unsigned long flags;
 -
 -	/*
 -	 * This happens when the send engine notes
@@ -103595,12 +103576,12 @@ index 1a942ff..0000000
 -	 * do the flush work until that QP's
 -	 * sdma work has finished.
 -	 */
--	spin_lock_irqsave(&qp->s_lock, flags);
+-	spin_lock(&qp->s_lock);
 -	if (qp->s_flags & RVT_S_WAIT_DMA) {
 -		qp->s_flags &= ~RVT_S_WAIT_DMA;
 -		hfi1_schedule_send(qp);
 -	}
--	spin_unlock_irqrestore(&qp->s_lock, flags);
+-	spin_unlock(&qp->s_lock);
 -}
 -
 -/**

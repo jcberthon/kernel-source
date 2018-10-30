@@ -3,6 +3,7 @@ Date: Fri, 19 Aug 2016 08:41:13 +0200
 Subject: libfc: Correctly set E_D_TOV and R_A_TOV values in RTV response
 References: bsc#990245
 Patch-Mainline: submitted to linux-scsi, 2016/08/18
+X-notes: Replace with 7c5a51b8f82fc?
 
 The values are in big-endian (ie network) order.
 

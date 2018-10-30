@@ -67,8 +67,8 @@ index b68293bccf79..29b5e1dfec32 100644
 +	 * end_io() when necessary, otherwise a racing buffer read would cache
 +	 * zeros from unwritten extents.
  	 */
- 	if (ret > 0 && dio->op == REQ_OP_WRITE &&
- 	    dio->inode->i_mapping->nrpages) {
+ 	if (flags & DIO_COMPLETE_INVALIDATE &&
+ 	    ret > 0 && dio->op == REQ_OP_WRITE &&
 @@ -271,15 +283,6 @@ static ssize_t dio_complete(struct dio *dio, ssize_t ret, bool is_async)
  		WARN_ON_ONCE(err);
  	}

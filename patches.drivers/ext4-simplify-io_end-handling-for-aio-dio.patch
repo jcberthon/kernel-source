@@ -39,7 +39,7 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 --- a/fs/ext4/ext4.h
 +++ b/fs/ext4/ext4.h
 @@ -1481,16 +1481,6 @@ static inline int ext4_valid_inum(struct
- 		 ino <= le32_to_cpu(EXT4_SB(sb)->s_es->s_inodes_count));
+ 	}
  }
  
 -static inline ext4_io_end_t *ext4_inode_aio(struct inode *inode)
@@ -225,7 +225,7 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
  		   struct buffer_head *bh_result, int create)
  {
 @@ -3308,7 +3352,7 @@ out:
- static int ext4_end_io_dio(struct kiocb *iocb, loff_t offset,
+ static void ext4_end_io_dio(struct kiocb *iocb, loff_t offset,
  			    ssize_t size, void *private)
  {
 -        ext4_io_end_t *io_end = iocb->private;
@@ -242,9 +242,9 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 + 		  io_end, io_end->inode->i_ino, iocb, offset, size);
  
 -	iocb->private = NULL;
- 	/*
- 	 * Error during AIO DIO. We cannot convert unwritten extents as the
- 	 * data was not written. Just clear the unwritten flag and drop io_end.
+ 	io_end->offset = offset;
+ 	io_end->size = size;
+ 	ext4_put_io_end(io_end);
 @@ -3365,7 +3407,6 @@ static ssize_t ext4_ext_direct_IO(struct
  	get_block_t *get_block_func = NULL;
  	int dio_flags = 0;
@@ -315,7 +315,7 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
  		dio_flags = DIO_LOCKING;
  	}
  #ifdef CONFIG_EXT4_FS_ENCRYPTION
-@@ -3445,17 +3470,6 @@ static ssize_t ext4_ext_direct_IO(struct
+@@ -3445,27 +3470,6 @@ static ssize_t ext4_ext_direct_IO(struct
  					   get_block_func,
  					   ext4_end_io_dio, NULL, dio_flags);
  
@@ -329,6 +329,16 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 -	if (io_end) {
 -		ext4_inode_aio_set(inode, NULL);
 -		ext4_put_io_end(io_end);
+-		/*
+-		 * When no IO was submitted ext4_end_io_dio() was not
+-		 * called so we have to put iocb's reference.
+-		 */
+-		if (ret <= 0 && ret != -EIOCBQUEUED && iocb->private) {
+-			WARN_ON(iocb->private != io_end);
+-			WARN_ON(io_end->flag & EXT4_IO_END_UNWRITTEN);
+-			ext4_put_io_end(io_end);
+-			iocb->private = NULL;
+-		}
 -	}
  	if (ret > 0 && !overwrite && ext4_test_inode_state(inode,
  						EXT4_STATE_DIO_UNWRITTEN)) {

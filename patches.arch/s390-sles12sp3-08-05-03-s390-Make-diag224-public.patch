@@ -61,19 +61,19 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  	/* memory must be below 2GB */
 --- a/arch/s390/include/asm/diag.h
 +++ b/arch/s390/include/asm/diag.h
-@@ -232,5 +232,6 @@ struct diag204_x_phys_cpu {
- } __aligned(8);
+@@ -232,4 +232,5 @@ struct diag204_x_phys_cpu {
+ } __packed;
  
  int diag204(unsigned long subcode, unsigned long size, void *addr);
 +int diag224(void *ptr);
- int diag26c(void *req, void *resp, enum diag26c_sc subcode);
  #endif /* _ASM_S390_DIAG_H */
 --- a/arch/s390/kernel/diag.c
 +++ b/arch/s390/kernel/diag.c
-@@ -220,6 +220,20 @@ int diag210(struct diag210 *addr)
+@@ -220,3 +220,18 @@ int diag210(struct diag210 *addr)
+ 	return ccode;
  }
  EXPORT_SYMBOL(diag210);
- 
++
 +int diag224(void *ptr)
 +{
 +	int rc = -EOPNOTSUPP;
@@ -88,6 +88,3 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 +	return rc;
 +}
 +EXPORT_SYMBOL(diag224);
- /*
-  * Diagnose 26C: Access Certain System Information
-  */

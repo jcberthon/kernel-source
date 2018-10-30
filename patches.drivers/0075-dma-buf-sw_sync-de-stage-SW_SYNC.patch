@@ -461,7 +461,7 @@ new file mode 100644
 index 000000000000..623dc7ddb17c
 --- /dev/null
 +++ b/drivers/dma-buf/sync_debug.c
-@@ -0,0 +1,225 @@
+@@ -0,0 +1,230 @@
 +/*
 + * Sync File validation framework and debug information
 + *
@@ -653,8 +653,13 @@ index 000000000000..623dc7ddb17c
 +{
 +	dbgfs = debugfs_create_dir("sync", NULL);
 +
-+	debugfs_create_file("info", 0444, dbgfs, NULL, &sync_info_debugfs_fops);
-+
++	/*
++	 * The debugfs files won't ever get removed and thus, there is
++	 * no need to protect it against removal races. The use of
++	 * debugfs_create_file_unsafe() is actually safe here.
++	 */
++	debugfs_create_file("info", 0444, dbgfs, NULL,
++			   &sync_info_debugfs_fops);
 +	debugfs_create_file("sw_sync", 0644, dbgfs, NULL,
 +			    &sw_sync_debugfs_fops);
 +
@@ -1234,7 +1239,7 @@ deleted file mode 100644
 index 623dc7ddb17c..000000000000
 --- a/drivers/staging/android/sync_debug.c
 +++ /dev/null
-@@ -1,225 +0,0 @@
+@@ -1,230 +0,0 @@
 -/*
 - * Sync File validation framework and debug information
 - *
@@ -1426,8 +1431,13 @@ index 623dc7ddb17c..000000000000
 -{
 -	dbgfs = debugfs_create_dir("sync", NULL);
 -
--	debugfs_create_file("info", 0444, dbgfs, NULL, &sync_info_debugfs_fops);
--
+-	/*
+-	 * The debugfs files won't ever get removed and thus, there is
+-	 * no need to protect it against removal races. The use of
+-	 * debugfs_create_file_unsafe() is actually safe here.
+-	 */
+-	debugfs_create_file("info", 0444, dbgfs, NULL,
+-			   &sync_info_debugfs_fops);
 -	debugfs_create_file("sw_sync", 0644, dbgfs, NULL,
 -			    &sw_sync_debugfs_fops);
 -
