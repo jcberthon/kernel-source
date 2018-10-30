@@ -1,13 +1,15 @@
 # Descriptions of the binary kernel packages. The format is
 #
 # === <package name> ===
-# Summary (single line)
+# Summary: Package summary (single line)
+# Requires: additional dependencies for KMPs (single line)
+# ...
 #
 # Long description (multiple
 # lines)
 #
 # Descriptions of the -base and -extra subpackages are derived from the
-# main descriptions.
+# main descriptions. The "Summary:" keyword can be omitted
 
 === kernel-debug ===
 A Debug Version of the Kernel
@@ -19,6 +21,24 @@ Only use this kernel when investigating problems.
 The Standard Kernel
 
 The standard kernel for both uniprocessor and multiprocessor systems.
+
+=== kernel-kvmsmall ===
+The Small Developer Kernel for KVM
+
+This kernel is intended for kernel developers to use in simple virtual
+machines.  It contains only the device drivers necessary to use a
+KVM virtual machine *without* device passthrough enabled.  Common
+local and network file systems are enabled.  All device mapper targets
+are enabled.  Only the network and graphics drivers for devices that qemu
+emulates are enabled.  Many subsystems enabled in the default kernel
+are entirely disabled.  This kernel is meant to be small and to build
+very quickly.  The configuration may change arbitrarily between builds.
+
+=== Kernel-azure ===
+Kernel for MS Azure cloud
+
+Kernel for use in the MS Azure cloud and other Hyper-V based virtualization
+solutions.
 
 === kernel-pae ===
 Kernel with PAE Support
@@ -99,7 +119,8 @@ This kernel should only be used by the s390-tools package. This kernel
 should not be installed as a regular booting kernel.
 
 === cluster-md-kmp ===
-Clustering support for MD devices
+Summary: Clustering support for MD devices
+Requires: dlm-kmp
 
 Clustering support for MD devices. This enables locking and
 synchronization across multiple systems on the cluster, so all
@@ -112,12 +133,14 @@ DLM stands for Distributed Lock Manager, a means to synchronize access to
 shared resources over the cluster.
 
 === gfs2-kmp ===
-GFS2 kernel modules
+Summary: GFS2 kernel modules
+Requires: dlm-kmp
 
 GFS2 is Global Filesystem, a shared device filesystem.
 
 === ocfs2-kmp ===
-OCFS2 kernel modules
+Summary: OCFS2 kernel modules
+Requires: dlm-kmp
 
 OCFS2 is the Oracle Cluster Filesystem, a filesystem for shared devices
 accessible simultaneously from multiple nodes of a cluster.
@@ -142,3 +165,9 @@ reproduced, verified and corrected.
 
 Selftest drivers are intended to be supported only in testing and QA
 environments, they are not intended to be run on production systems.
+
+=== reiserfs-kmp ===
+Reiserfs kernel module
+
+The reiserfs file system is no longer supported in SLE15.  This package
+provides the reiserfs module for the installation system.
