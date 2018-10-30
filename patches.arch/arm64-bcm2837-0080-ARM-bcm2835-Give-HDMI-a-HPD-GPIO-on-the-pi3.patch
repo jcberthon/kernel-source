@@ -2,9 +2,8 @@ From 4df8f031643d949d72ef091396728ea5eab5cf07 Mon Sep 17 00:00:00 2001
 From: Gerd Hoffmann <kraxel@redhat.com>
 Date: Wed, 1 Jun 2016 12:22:13 +0200
 Subject: [PATCH] ARM: bcm2835: Give HDMI a HPD GPIO on the pi3
-Git-commit: 4df8f031643d949d72ef091396728ea5eab5cf07
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kraxel.org/linux
+Patch-mainline: No, handled differently
+X-notes: Handled upstream in commit b1b8f45b3130dbd8704e5ea0d82b49b1d929498e
 References: FATE#319481
 
 This is the wrong GPIO, but it means vc4 probes and turns on hdmi.

@@ -1,9 +1,8 @@
 From: Luis Henriques <lhenriques@suse.com>
 Date: Mon, 21 May 2018 10:27:29 +0100
 Subject: ceph: fix st_nlink stat for directories
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://github.com/ceph/ceph-client
-Git-commit: 2ddcb9a1b4c7a07f322090677334bbfeee0206d9
+Patch-mainline: v4.18-rc1
+Git-commit: 8c6286f1c69743ebdb2ee15f9165f9c4d44eef49
 References: bsc#1093904
 
 Currently, calling stat on a cephfs directory returns 1 for st_nlink.

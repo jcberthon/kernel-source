@@ -4,8 +4,7 @@ Date: Tue, 30 Jan 2018 15:58:49 -0800
 Subject: [PATCH 04/18] scsi: lpfc: Add WQ Full Logic for NVME Target
 References: bsc#1080656
 Git-commit: 6e8e1c14c61e54253098521127cd5ac0b959dd32
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Patch-mainline: v4.17-rc1
 
 I/O conditions on the nvme target may have the driver submitting to a
 full hardware wq. The hardware wq is a shared resource among all nvme

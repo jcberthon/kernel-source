@@ -1,10 +1,14 @@
-From 0594a81c28efd78dd6fa24d9561e6d099f3a16f6 Mon Sep 17 00:00:00 2001
-From: Bruce Rogers <brogers@suse.com>
-Date: Tue, 12 Apr 2016 11:18:53 -0600
-Subject: x86: kvm: increase guest vcpu support count to 240
+From: Radim Krčmář <rkrcmar@redhat.com>
+Subject: KVM: x86: bump KVM_SOFT_MAX_VCPUS to 240
 References: fate#320428
-Patch-mainline: Never, SLE specific support decision
+Git-commit: 757883de41eca292765578ef87c4f49453529bb2
+Patch-mainline: v4.8-rc1
 
+240 has been well tested by Red Hat.
+
+Reviewed-by: Paolo Bonzini <pbonzini@redhat.com>
+Signed-off-by: Radim Krčmář <rkrcmar@redhat.com>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
 Signed-off-by: Bruce Rogers <brogers@suse.com>
 ---
  arch/x86/include/asm/kvm_host.h | 2 +-

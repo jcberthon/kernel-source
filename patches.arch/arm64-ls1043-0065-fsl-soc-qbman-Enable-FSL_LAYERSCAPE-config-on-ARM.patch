@@ -2,7 +2,8 @@ From b38b8168414e1514529a312c6342d88a9d3cc320 Mon Sep 17 00:00:00 2001
 From: Madalin Bucur <madalin.bucur@nxp.com>
 Date: Wed, 15 Jun 2016 19:02:30 +0300
 Subject: [PATCH 065/221] fsl/soc/qbman: Enable FSL_LAYERSCAPE config on ARM
-Patch-mainline: Submitted, https://lkml.org/lkml/2017/5/1/483
+Git-commit: e868adf21c0a25634d5dfa5b1e6dbf839306d8fa
+Patch-mainline: v4.15-rc1
 References: FATE#320030
 
 Signed-off-by: Madalin Bucur <madalin.bucur@nxp.com>

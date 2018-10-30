@@ -2,8 +2,8 @@ From 5f470a5cf230bd0ecddeb0a77cb830661b0bdeee Mon Sep 17 00:00:00 2001
 From: "Lee, Chun-Yi" <jlee@suse.com>
 Date: Sun, 26 Jun 2016 14:01:14 +0800
 Subject: [PATCH v4] acpi, nfit: treat virtual ramdisk SPA as pmem region
-
-Patch-mainline: Not yet, reviewing on linux-acpi 
+Git-commit: c2f32acdf848ddc784b73189033592a3134ac651
+Patch-mainline: v4.8-rc1
 References: fate#320134
 Target: SLE-12 SP2
 

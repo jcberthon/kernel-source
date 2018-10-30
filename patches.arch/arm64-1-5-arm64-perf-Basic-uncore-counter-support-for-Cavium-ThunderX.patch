@@ -1,15 +1,5 @@
-Content-Type: text/plain; charset="utf-8"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Subject: [v2, 1/5] arm64/perf: Basic uncore counter support for Cavium ThunderX
 From: Jan Glauber <jglauber@cavium.com>
-X-Patchwork-Id: 8547441
-Message-Id: <2588abcb011df6e60cd8212a8583454999180748.1457539622.git.jglauber@cavium.com>
-To: Mark Rutland <mark.rutland@arm.com>,
-	Will Deacon <will.deacon@arm.com>
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	Jan Glauber <jglauber@cavium.com>
-Date: Wed,  9 Mar 2016 17:21:03 +0100
 Patch-mainline: Submitted, https://patchwork.kernel.org/patch/8547441
 References: fate#319982
 

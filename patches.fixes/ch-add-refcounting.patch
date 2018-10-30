@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 4 Apr 2014 13:26:51 +0200
 Subject: [PATCH] ch: add refcounting
 References: bnc#867517
-Patch-Mainline: submitted to linux-scsi
+Git-commit: 085e56766f74e8fdafb0e988c150e28464747cdc
+Patch-mainline: v4.14-rc1
 
 The 'scsi_changer' structure needs refcounting, as the device
 might be removed while the fd is still open.

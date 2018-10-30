@@ -2,8 +2,9 @@ From d89b7f2169814faa22b583814ee4e53fcee2217d Mon Sep 17 00:00:00 2001
 From: Valentin Rothberg <valentinrothberg@gmail.com>
 Date: Tue, 27 Sep 2016 10:27:41 +0200
 Subject: [PATCH 060/221] soc/fsl/qbman: Fix ARM32 typo
-Patch-mainline: Submitted, https://lkml.org/lkml/2017/5/1/489
+Patch-mainline: v4.15-rc1
 References: FATE#320030
+Git-commit: 219e8e0580cc441504b75e291401cf108e1a78f3
 
 The Kconfig symbol for 32bit ARM is 'ARM', not 'ARM32'.
 
@@ -11,7 +12,6 @@ Signed-off-by: Valentin Rothberg <valentinrothberg@gmail.com>
 Signed-off-by: Claudiu Manoil <claudiu.manoil@nxp.com>
 Signed-off-by: Roy Pledge <roy.pledge@nxp.com>
 Signed-off-by: Alexander Graf <agraf@suse.de>
-
 ---
  drivers/soc/fsl/qbman/dpaa_sys.h | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

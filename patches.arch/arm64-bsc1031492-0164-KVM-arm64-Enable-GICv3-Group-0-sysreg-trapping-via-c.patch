@@ -3,8 +3,9 @@ From: Marc Zyngier <marc.zyngier@arm.com>
 Date: Fri, 9 Jun 2017 12:49:46 +0100
 Subject: [PATCH 164/174] KVM: arm64: Enable GICv3 Group-0 sysreg trapping via
  command-line
-Patch-mainline: Submitted, https://www.spinics.net/lists/arm-kernel/msg587082.html
 References: bsc#1031492
+Git-commit: e23f62f76acea232d4def5d4eb21709a2b575f14
+Patch-mainline: v4.13-rc1
 
 Now that we're able to safely handle Group-0 sysreg access, let's
 give the user the opportunity to enable it by passing a specific

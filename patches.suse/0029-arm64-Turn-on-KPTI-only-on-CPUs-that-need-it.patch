@@ -3,8 +3,7 @@ Date: Fri, 19 Jan 2018 04:22:48 -0800
 Subject: arm64: Turn on KPTI only on CPUs that need it
 
 Git-commit: 0ba2e29c7fc1d58a90fab614d41bf487e28e3840
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Patch-mainline: v4.16-rc1
 References: bsc#1076187
 
 Whitelist Broadcom Vulcan/Cavium ThunderX2 processors in

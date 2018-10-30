@@ -1,21 +1,5 @@
-From patchwork Thu Aug  4 09:15:15 2016
-Content-Type: text/plain; charset="utf-8"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Subject: [2/4] arm64: Implement IPI based TLB invalidation
 From: Matthias Brugger <mbrugger@suse.com>
-X-Patchwork-Id: 9263101
-Message-Id: <1470302117-32296-3-git-send-email-mbrugger@suse.com>
-To: pbonzini@redhat.com, rkrcmar@redhat.com, christoffer.dall@linaro.org,
- marc.zyngier@arm.com, linux@armlinux.org.uk, catalin.marinas@arm.com, 
- will.deacon@arm.com
-Cc: mark.rutland@arm.com, mbrugger@suse.com, kvm@vger.kernel.org,
- david.daney@cavium.com, ard.biesheuvel@linaro.org, zlim.lnx@gmail.com,
- suzuki.poulose@arm.com, agraf@suse.de, linux-kernel@vger.kernel.org, 
- rrichter@cavium.com, lorenzo.pieralisi@arm.com, james.morse@arm.com, 
- dave.long@linaro.org, kvmarm@lists.cs.columbia.edu,
- linux-arm-kernel@lists.infradead.org
-Date: Thu,  4 Aug 2016 11:15:15 +0200
+Subject: [2/4] arm64: Implement IPI based TLB invalidation
 Patch-mainline: Submitted, https://patchwork.kernel.org/patch/9263101
 References: bsc#986099
 

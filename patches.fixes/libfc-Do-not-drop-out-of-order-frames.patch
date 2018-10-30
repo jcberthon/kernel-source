@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 29 Jul 2016 15:56:54 +0200
 Subject: [PATCH 20/22] libfc: Do not drop out-of-order frames
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Patch-mainline: v4.10-rc1
+Git-commit: 53db8fa8a3b37d076f89bac67095e1381a2fb19a
 
 When receiving packets from the network we cannot guarantee any
 frame ordering, so we should be receiving all valid frames and

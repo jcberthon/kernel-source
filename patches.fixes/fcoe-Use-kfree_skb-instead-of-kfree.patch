@@ -1,7 +1,8 @@
 From: Wei Yongjun <weiyj.lk@gmail.com>
 Date: Mon, 25 Jul 2016 07:00:33 +0000
 Subject: fcoe: Use kfree_skb() instead of kfree()
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Patch-mainline: v4.8-rc3
+Git-commit: ea0a95d7f162bfa1c9df74471f0064f71cdf80ea
 
 Use kfree_skb() instead of kfree() to free sk_buff.
 

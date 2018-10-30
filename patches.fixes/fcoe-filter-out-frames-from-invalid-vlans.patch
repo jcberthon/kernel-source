@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 28 Jul 2016 08:36:01 +0200
 Subject: [PATCH 07/22] fcoe: filter out frames from invalid vlans
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Patch-mainline: v4.10-rc1
+Git-commit: 5d5a51d205ba841b88d758deb6ff537fb754adbc
 
 Acked-by: Hannes Reinecke <hare@suse.de>
 ---

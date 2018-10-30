@@ -3,8 +3,9 @@ From: Eric Anholt <eric@anholt.net>
 Date: Wed, 1 Jun 2016 12:05:35 -0700
 Subject: [PATCH 115/115] clk: bcm2835: Mark the CM SDRAM clock's parent as
  critical
-Patch-mainline: Submitted 06/01/2016 linux-rpi-kernel@lists.infradead.org
+Patch-mainline: v4.9-rc1
 References: bsc#983145
+Git-commit: 9e400c5cc5c105e35216ac59a346f20cdd7613be
 
 While the SDRAM is being driven by its dedicated PLL most of the time,
 there is a little loop running in the firmware that periodically turns
@@ -17,6 +18,7 @@ clock, then disable that clock.
 Signed-off-by: Eric Anholt <eric@anholt.net>
 Message-id: 1464807936-532-4-git-send-email-eric@anholt.net
 (cherry picked from commit 0df76f6c015a7ce092a075c632ee238eaabfc436)
+
 Signed-off-by: Alexander Graf <agraf@suse.de>
 ---
  drivers/clk/bcm/clk-bcm2835.c | 25 +++++++++++++++++++++++++

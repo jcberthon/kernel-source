@@ -2,7 +2,8 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 5 Mar 2018 20:55:49 -0800
 Subject: [PATCH] nvme_fc: on remoteport reuse, set new nport_id and role.
 References: bsc#1076760
-Patch-Mainline: submitted linux-nvme, 03/06/2018
+Patch-mainline: v4.17-rc1
+Git-commit: 0cdd5fca876b1e9c56ca01186ba650b680248b35
 
 When reattaching to a removed remoteport that has not yet been
 fully deleted as it's waiting for reconnect timeouts, be sure to

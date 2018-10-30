@@ -2,7 +2,9 @@ From 0544ec0bad7b052f5310f1a20a4ea6a6525f6891 Mon Sep 17 00:00:00 2001
 From: Alexander Graf <agraf@suse.de>
 Date: Thu, 18 May 2017 13:47:38 +0200
 Subject: [PATCH 101/221] fsl fman: Convert to long
-Patch-mainline: No, partial apply of upstream commit 287980e49f
+Git-commit: 287980e49ffc0f6d911601e7e352a812ed27768e (partial)
+Patch-filtered: drivers/net/ethernet/freescale/fman/
+Patch-mainline: v4.7-rc1
 References: FATE#320030
 
 Upstream commit 287980e49f (remove lots of IS_ERR_VALUE abuses) converts

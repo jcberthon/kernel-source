@@ -1,12 +1,9 @@
-From 43993e45064d1a16b3b0aced087c70e724a2023d Mon Sep 17 00:00:00 2001
 From: Shawn Lin <shawn.lin@rock-chips.com>
 Date: Fri, 17 Feb 2017 10:56:42 +0800
 Subject: [PATCH 68/95] mmc: dw_mmc: move dw_mci_get_cd forward to avoid
  declaration
-
-Git-commit: 6fdfcb3cf53b810a0aab7d8446f57d104860e033
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Git-commit: 671fa142fc034b0fb5c067afe8f0bbc64979f074
+Patch-mainline: v4.12-rc1
 References: bsc#1033484
 
 No functional change intended.

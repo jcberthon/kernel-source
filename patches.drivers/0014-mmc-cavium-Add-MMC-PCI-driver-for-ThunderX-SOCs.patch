@@ -1,11 +1,7 @@
-From d329784b3062630a27340961ea5d15fb27aa51b1 Mon Sep 17 00:00:00 2001
 From: Jan Glauber <jglauber@cavium.com>
-Date: Thu, 30 Mar 2017 17:31:25 +0200
 Subject: [PATCH 14/17] mmc: cavium: Add MMC PCI driver for ThunderX SOCs
-
-Git-commit: 2a8644e4561600fdd0e3336dd1a00db7c1dcafeb
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Git-commit: 166bac38c3c569508e695aca99fdc2def2ae2198
+Patch-mainline: v4.12-rc1
 References: fate#321995
 
 Add a platform driver for ThunderX ARM SOCs.

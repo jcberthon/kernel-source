@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 27 Oct 2016 15:33:45 +0200
 Subject: hpsa: fallback to use legacy REPORT PHYS command
 References: bsc#1006175
-Patch-Mainline: submitted linux-scsi 2016/11/18
+Git-commit: 2a80d5458a027f6d514987c09f0b51f45c3a5be4
+Patch-mainline: v4.10-rc1
 
 Older SmartArray controller do not support the extended REPORT PHYS
 command, so fallback to use the legacy version here.

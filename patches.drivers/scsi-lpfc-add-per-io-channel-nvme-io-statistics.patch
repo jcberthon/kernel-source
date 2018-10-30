@@ -1,9 +1,8 @@
 From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 9 Apr 2018 14:24:23 -0700
 Subject: scsi: lpfc: Add per io channel NVME IO statistics
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
-Git-commit: 7723fccce761b3301ade3a25e6897331cab4ff51
+Git-commit: 66a210ffb877dc93644d02b688d5d8586aab4e60
+Patch-mainline: v4.18-rc1
 References: bsc#1088865
 
 When debugging various issues, per IO channel IO statistics were useful

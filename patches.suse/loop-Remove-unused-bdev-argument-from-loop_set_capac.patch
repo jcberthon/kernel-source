@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 17 Jul 2015 09:27:05 +0200
 Subject: loop: Remove unused 'bdev' argument from loop_set_capacity
 References: bsc#931634, FATE#319010
-Patch-Mainline: Submitted to lkml 2015/11/10
+Patch-mainline: v4.13-rc1
+Git-commit: 51001b7da364a24ed2464f3c22179efdc6b3a960
 
 Signed-off-by: Hannes Reinecke <hare@suse.de>
 Reviewed-by: Christoph Hellwig <hch@lst.de>

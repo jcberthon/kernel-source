@@ -1,7 +1,8 @@
 From: Sebastian Ott <sebott@linux.vnet.ibm.com>
 Subject: s390/pci: add report_error attribute
-Patch-mainline: not yet, in process
+Patch-mainline: v4.7-rc1
 References: FATE#320437, LTC#135989
+Git-commit: 368704a65be8620df795ccbeb44e025dafbc3e1f
 
 Summary:     s390/pci: add report_error attribute
 Description: Provide an report_error attribute to send an
@@ -16,7 +17,6 @@ Upstream-Description:
              notification associated with a PCI function.
 
              Signed-off-by: Sebastian Ott <sebott@linux.vnet.ibm.com>
-
 
 Signed-off-by: Sebastian Ott <sebott@linux.vnet.ibm.com>
 Acked-by: John Jolly <jjolly@suse.de>

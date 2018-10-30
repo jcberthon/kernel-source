@@ -1,9 +1,8 @@
 From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 9 Apr 2018 14:24:27 -0700
 Subject: scsi: lpfc: Fix NULL pointer access in lpfc_nvme_info_show
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
-Git-commit: 44096d2bfa694774042654fc9b0c15b9dffcc305
+Patch-mainline: v4.18-rc1
+Git-commit: 01466024d2de1c05652d69411461e8e7908f0d1e
 References: bsc#1088865
 
 After making remoteport unregister requests, the ndlp nrport pointer was

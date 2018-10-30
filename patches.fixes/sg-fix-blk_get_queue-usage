@@ -1,7 +1,8 @@
 From: Bodo Stroesser <bstroesser@ts.fujitsu.com>
 Subject: [patch] sg: fix blk_get_queue usage
-Patch-mainline: Submitted to linux-scsi, 15 Nov 2013
+Git-commit: 180efde0a3f43dbe533e4be203c2918793482d4e
 References: bnc#834808
+Patch-mainline: v4.13-rc6
 
 If blk_queue_get() in st_probe fails, disk->queue must not
 be set to SDp->request_queue, as that would result in

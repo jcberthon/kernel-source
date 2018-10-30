@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Tue, 16 Aug 2016 16:47:55 +0200
 Subject: libfc: safeguard against invalid exchange index
 References: bsc#990245
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Patch-mainline: v4.10-rc1
+Git-commit: b73aa56ee91cd88a4977033cfd2a18d6b25dddde
 
 The cached exchange index might be invalid, in which case
 we should drop down to allocate a new one.

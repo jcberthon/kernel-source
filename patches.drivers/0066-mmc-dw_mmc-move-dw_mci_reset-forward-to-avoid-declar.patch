@@ -1,12 +1,9 @@
-From e428998d7f562e3b96cb1d9185c4c88767faeea9 Mon Sep 17 00:00:00 2001
 From: Shawn Lin <shawn.lin@rock-chips.com>
 Date: Fri, 17 Feb 2017 10:56:40 +0800
 Subject: [PATCH 66/95] mmc: dw_mmc: move dw_mci_reset forward to avoid
  declaration
-
-Git-commit: 309440acf9215a8d551b2722840772b7eba25bab
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Git-commit: 4e7392b2ac6ed95b4ccacdec2f2e9e8e00c929c4
+Patch-mainline: v4.12-rc1
 References: bsc#1033484
 
 No functional change intended.

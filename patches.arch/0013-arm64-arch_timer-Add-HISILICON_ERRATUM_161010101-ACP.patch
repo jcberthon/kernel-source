@@ -1,9 +1,8 @@
 From: Marc Zyngier <marc.zyngier@arm.com>
 Date: Tue, 21 Feb 2017 15:04:27 +0000
 Subject: arm64: arch_timer: Add HISILICON_ERRATUM_161010101 ACPI matching data
-Git-commit: 317327df79aeca1621758debe2c4c07f97f43f68
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/maz/arm-platforms.git
+Git-commit: d003d029cea8a28139b4f9b88a36b8fac864f45b
+Patch-mainline: v4.12-rc1
 References: fate#322150
 
 In order to deal with ACPI enabled platforms suffering from the

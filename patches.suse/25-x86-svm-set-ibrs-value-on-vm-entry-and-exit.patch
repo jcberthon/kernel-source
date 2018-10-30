@@ -1,7 +1,8 @@
 From: Tom Lendacky <thomas.lendacky@amd.com>
 Date: Mon, 18 Dec 2017 12:23:33 +0100
 Subject: x86/svm: Set IBRS value on VM entry and exit
-Patch-mainline: submitted on 2018/1/9
+Git-commit: b2ac58f90540e39324e7a29a7ad471407ae0bf48 (partial)
+Patch-mainline: v4.16-rc1
 References: bsc#1068032
 
 Set/restore the guests IBRS value on VM entry. On VM exit back to the

@@ -1,9 +1,8 @@
 From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 9 Apr 2018 14:24:21 -0700
 Subject: scsi: lpfc: Fix multiple PRLI completion error path
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
-Git-commit: 5f83ed207df94df3633d6cd3f53860015531c276
+Patch-mainline: v4.18-rc1
+Git-commit: 118c0415eeec96669219536ed8fdaabecc5619fb
 References: bsc#1088865
 
 Nodelist entry for SCSI array ends up in UNMAPPED state. This is due to

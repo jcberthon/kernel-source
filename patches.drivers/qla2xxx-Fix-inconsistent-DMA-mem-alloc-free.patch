@@ -3,7 +3,7 @@ Date: Mon, 2 Jul 2018 13:01:58 -0700
 Subject: [PATCH] qla2xxx: Fix inconsistent DMA mem alloc/free
 References: bsc#1085657
 Patch-Mainline: v4.18-rc6
-Git-commit: b5f3bc39a0e815a30005da246dd4ad47fd2f88ffk
+Git-commit: b5f3bc39a0e815a30005da246dd4ad47fd2f88ff
 
 GPNFT command allocates 2 buffer for switch query. On
 completion, the same buffers were freed using different size,
@@ -29,6 +29,7 @@ Reported-by: Ewan D. Milne <emilne@redhat.com>
 Signed-off-by: Quinn Tran <quinn.tran@cavium.com>
 Signed-off-by: Himanshu Madhani <himanshu.madhani@cavium.com>
 Signed-off-by: Himanshu Madhani <hmadhani@redhat.com>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 Acked-by: Hannes Reinecke <hare@suse.com>
 ---
  drivers/scsi/qla2xxx/qla_def.h |  2 ++

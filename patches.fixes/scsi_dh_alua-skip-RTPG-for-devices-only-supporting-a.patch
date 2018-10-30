@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.com>
 Date: Fri, 8 Dec 2017 11:14:08 +0100
 Subject: scsi_dh_alua: skip RTPG for devices only supporting active/optimized
 References: bsc#1064311
-Patch-Mainline: submitted linux-scsi 2017/12/22
+Git-commit: 80c716fad82550b6c4ee4b7c6d48bff3fd7dab56
+Patch-mainline: v4.16-rc1
 
 For hardware only supporting active/optimized there's no point in
 ever re-issuing RTPG as the only new state we can possibly read is

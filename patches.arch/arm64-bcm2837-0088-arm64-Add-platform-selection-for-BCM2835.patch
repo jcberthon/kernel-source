@@ -2,9 +2,9 @@ From 20247942115b574d228462aeab6f6998d689bdba Mon Sep 17 00:00:00 2001
 From: Eric Anholt <eric@anholt.net>
 Date: Sat, 19 Mar 2016 23:13:07 -0700
 Subject: [PATCH 088/101] arm64: Add platform selection for BCM2835
-Git-commit: 221d1259eed2c25b0dc7ba82a6ddede2cd37c7ac
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://github.com/anholt/linux.git
+Git-commit: 628d30d1ccb897fee54a6f7312561cf2f6f72f09
+Patch-mainline: v4.8-rc1
+X-notes: Upstream commit has more selects
 References: FATE#319481
 
 Like ARCH_BCM_IPROC, we replicate the config option under arm64, but

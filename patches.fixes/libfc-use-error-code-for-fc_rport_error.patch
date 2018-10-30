@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 28 Jul 2016 10:21:54 +0200
 Subject: [PATCH 14/22] libfc: use error code for fc_rport_error()
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Git-commit: 9f9504a7cdee39e167f0421346ff17568a5f29a0
+Patch-mainline: v4.10-rc1
 
 We only ever use the 'fp' argument for fc_rport_error() to
 encapsulate the error code, so we can as well do away with that

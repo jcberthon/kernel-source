@@ -1,12 +1,8 @@
-From c6ee9f564f2b447ddd28f64cf28c7a7b44867a4a Mon Sep 17 00:00:00 2001
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Date: Fri, 17 Feb 2017 10:59:44 +0800
 Subject: [PATCH 70/95] mmc: dw_mmc: move mci_send_cmd forward to avoid
  declaration
-
-Git-commit: b1eb7a3d0ff5f5f034e564974c94a82a10a03ce3
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Git-commit: 4dba18defb4c7bbea8af85913cd2dc506178389a
+Patch-mainline: v4.12-rc1
 References: bsc#1033484
 
 No functional change intended.

@@ -1,9 +1,8 @@
 From: Marc Zyngier <marc.zyngier@arm.com>
 Date: Wed, 1 Feb 2017 12:07:15 +0000
 Subject: arm64: arch_timer: Enable CNTVCT_EL0 trap if workaround is enabled
-Git-commit: 2c7cb850a5bdd146d9c7da0c013a9ea016872151
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/maz/arm-platforms.git
+Git-commit: a86bd139f2ae02f960caeb0c1dd5f871d3e087cd
+Patch-mainline: v4.12-rc1
 References: fate#322150
 
 Userspace being allowed to use read CNTVCT_EL0 anytime (and not

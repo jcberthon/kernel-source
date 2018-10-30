@@ -1,11 +1,9 @@
-From 933da022531395dc0dd67cad37c18c2ea696d9ec Mon Sep 17 00:00:00 2001
 From: Bjorn Helgaas <bhelgaas@google.com>
 Date: Fri, 21 Apr 2017 11:42:54 -0500
 Subject: [PATCH 12/13] PCI/ACPI: Tidy up MCFG quirk whitespace
 
-Git-commit: c4e97c70e5b9b71f65ea0a5d0a42b8ff2c93c4f7
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Git-commit: ced414a14f709fc0af60bd381ba8a566dc566869
+Patch-mainline: v4.12-rc1
 References: bsc#1035479
 
 With no blank lines, it's not obvious where the macro definitions end and

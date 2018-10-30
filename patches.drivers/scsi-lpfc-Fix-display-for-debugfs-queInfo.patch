@@ -2,9 +2,8 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 20 Nov 2017 16:00:35 -0800
 Subject: scsi: lpfc: Fix display for debugfs queInfo
 References: bsc#1067735
-Patch-mainline: Queued in subsystem maintainer repository
-Git-commit: 09975eaecb260fb45b034615047ef92db8918d4a
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Patch-mainline: v4.16-rc1
+Git-commit: 07d494f7533e6d9c22931f6e4a2e048560063081
 
 Display for lpfc/fnX/iDiag/queInfo isn't formatted perfectly.  Corrected
 the format strings for the queue info debug messages.

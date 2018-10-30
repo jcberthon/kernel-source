@@ -2,8 +2,8 @@ From be1b258fdb540e6c9a30dc457ea513c44dc69c18 Mon Sep 17 00:00:00 2001
 From: Oliver Neukum <oneukum@suse.com>
 Date: Thu, 10 Mar 2016 16:09:09 +0100
 Subject: [PATCH 2/3] USB: PD: define specific requests
-Git-commit: be1b258fdb540e6c9a30dc457ea513c44dc69c18
-Patch-Mainline: v4.7
+Git-commit: e1669f4a425c92c186e33a101e8fa84195fa2744
+Patch-mainline: v4.7-rc1
 References: FATE#319962
 
 This takes the definitions of requests from chapter 9.3.1

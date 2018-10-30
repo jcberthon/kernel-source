@@ -2,8 +2,7 @@ From: Sagi Grimberg <sagi@grimberg.me>
 Date: Sun, 26 Nov 2017 15:31:04 +0200
 Subject: iser-target: Fix possible use-after-free in connection establishment
  error
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/rdma/rdma.git
+Patch-mainline: v4.15-rc9
 Git-commit: cd52cb26e7ead5093635e98e07e221e4df482d34
 References: FATE#321732
 

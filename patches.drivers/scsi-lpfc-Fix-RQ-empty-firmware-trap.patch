@@ -4,8 +4,7 @@ Date: Tue, 30 Jan 2018 15:58:52 -0800
 Subject: [PATCH 07/18] scsi: lpfc: Fix RQ empty firmware trap
 References: bsc#1080656
 Git-commit: 411de511c6943554cdc4173c3f522029db2f75c7
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Patch-mainline: v4.17-rc1
 
 When nvme target deferred receive logic waits for exchange resources,
 the corresponding receive buffer is not replenished with the hardware.
@@ -22,7 +21,6 @@ Signed-off-by: Dick Kennedy <dick.kennedy@broadcom.com>
 Signed-off-by: James Smart <james.smart@broadcom.com>
 Reviewed-by: Hannes Reinecke <hare@suse.com>
 Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
-
 ---
  drivers/scsi/lpfc/lpfc_attr.c  |  6 ++++++
  drivers/scsi/lpfc/lpfc_mem.c   | 10 +++++++---
