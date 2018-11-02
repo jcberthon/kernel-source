@@ -6,7 +6,7 @@ Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Git-commit: d59d51f088014f25c2562de59b9abff4f42a7468
 Patch-mainline: v4.15-rc3
-References: bsc#1106240
+References: bsc#1106240i, CVE-2017-1000407, bsc#1071021
 
 This fixes CVE-2017-1000407.
 
