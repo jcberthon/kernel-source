@@ -175,12 +175,13 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  	case ETHTOOL_GTSO:
  	case ETHTOOL_GPERMADDR:
  	case ETHTOOL_GUFO:
-@@ -2170,6 +2246,8 @@ int dev_ethtool(struct net *net, struct
+@@ -2170,6 +2246,9 @@ int dev_ethtool(struct net *net, struct
  	case ETHTOOL_STUNABLE:
  		rc = ethtool_set_tunable(dev, useraddr);
  		break;
 +	case ETHTOOL_GPHYSTATS:
 +		rc = ethtool_get_phy_stats(dev, useraddr);
++		break;
  	case ETHTOOL_PERQUEUE:
  		rc = ethtool_set_per_queue(dev, useraddr);
  		break;

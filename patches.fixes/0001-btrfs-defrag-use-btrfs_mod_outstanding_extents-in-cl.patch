@@ -1,0 +1,34 @@
+From 28c4a3e21ad030d7571ee9b1b246a5cbfd886627 Mon Sep 17 00:00:00 2001
+From: Su Yue <suy.fnst@cn.fujitsu.com>
+Date: Wed, 5 Sep 2018 11:07:33 +0800
+Patch-mainline: 4.20
+Git-commit: 28c4a3e21ad030d7571ee9b1b246a5cbfd886627
+References: Follow up fixes for bsc#1031392
+Subject: [PATCH] btrfs: defrag: use btrfs_mod_outstanding_extents in
+ cluster_pages_for_defrag
+
+Since commit 8b62f87bad9c ("Btrfs: rework outstanding_extents"),
+manual operations of outstanding_extent in btrfs_inode are replaced by
+btrfs_mod_outstanding_extents().
+The one in cluster_pages_for_defrag seems to be lost, so replace it
+of btrfs_mod_outstanding_extents().
+
+Fixes: 8b62f87bad9c ("Btrfs: rework outstanding_extents")
+Signed-off-by: Su Yue <suy.fnst@cn.fujitsu.com>
+Reviewed-by: David Sterba <dsterba@suse.com>
+Signed-off-by: David Sterba <dsterba@suse.com>
+---
+ fs/btrfs/ioctl.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/fs/btrfs/ioctl.c
++++ b/fs/btrfs/ioctl.c
+@@ -1231,7 +1231,7 @@ again:
+ 
+ 	if (i_done != page_cnt) {
+ 		spin_lock(&BTRFS_I(inode)->lock);
+-		BTRFS_I(inode)->outstanding_extents++;
++		btrfs_mod_outstanding_extents(BTRFS_I(inode), 1);
+ 		spin_unlock(&BTRFS_I(inode)->lock);
+ 		btrfs_delalloc_release_space(inode, data_reserved,
+ 				start_index << PAGE_CACHE_SHIFT,
