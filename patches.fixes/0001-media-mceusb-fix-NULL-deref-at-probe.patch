@@ -29,7 +29,7 @@ Signed-off-by: Oliver Neukum <oneukum@suse.com>
  	}
 -	if (ep_in == NULL) {
 -		mce_dbg(&intf->dev, "inbound and/or endpoint not found\n");
-+	if (i!ep_in || !ep_out) {
++	if (!ep_in || !ep_out) {
 +		mce_dbg(&intf->dev, "required endpoints not found\n");
  		return -ENODEV;
  	}

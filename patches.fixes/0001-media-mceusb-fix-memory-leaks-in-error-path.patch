@@ -18,26 +18,28 @@ Signed-off-by: Sean Young <sean@mess.org>
 Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
 Signed-off-by: Oliver Neukum <oneukum@suse.com>
 ---
- drivers/media/rc/mceusb.c |    4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/media/rc/mceusb.c |    6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
 --- a/drivers/media/rc/mceusb.c
 +++ b/drivers/media/rc/mceusb.c
-@@ -676,6 +676,8 @@ static void mce_request_packet(struct mc
+@@ -634,7 +634,7 @@ static void mce_request_packet(struct mc
+ 	int res, pipe;
+ 	struct urb *async_urb;
+ 	struct device *dev = ir->dev;
+-	unsigned char *async_buf;
++	unsigned char *async_buf = NULL;
+ 
+ 	if (urb_type == MCEUSB_TX) {
+ 		async_urb = usb_alloc_urb(0, GFP_KERNEL);
+@@ -676,6 +676,10 @@ static void mce_request_packet(struct mc
  	res = usb_submit_urb(async_urb, GFP_ATOMIC);
  	if (res) {
  		mce_dbg(dev, "receive request FAILED! (res=%d)\n", res);
-+		kfree(async_buf);
-+		usb_free_urb(async_urb);
++		if (urb_type == MCEUSB_TX) {
++			kfree(async_buf);
++			usb_free_urb(async_urb);
++		}
  		return;
  	}
  	mce_dbg(dev, "receive request complete (res=%d)\n", res);
-@@ -1166,7 +1168,7 @@ static int __devinit mceusb_dev_probe(st
- 				"found\n");
- 		}
- 	}
--	if (i!ep_in || !ep_out) {
-+	if (!ep_in || !ep_out) {
- 		mce_dbg(&intf->dev, "required endpoints not found\n");
- 		return -ENODEV;
- 	}
