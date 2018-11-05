@@ -2,22 +2,25 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 21 Sep 2018 14:09:06 +0200
 Subject: [PATCH] ib_srp: Remove WARN_ON in srp_terminate_io()
 References: bsc#1094562
-Patch-Mainline: submitted linux-scsi 2018/09/21
+Git-commit: 56e027a604c80b1106786f8426e7cc5dbacb53b2
+Patch-Mainline: v4.20-rc1
 
 The WARN_ON() is pointless as the rport is placed in SDEV_TRANSPORT_OFFLINE
 at that time, so no new commands can be submitted via srp_queuecomment().
 
 Signed-off-by: Hannes Reinecke <hare@suse.com>
 ---
- drivers/infiniband/ulp/srp/ib_srp.c | 7 -------
- 1 file changed, 7 deletions(-)
+ drivers/infiniband/ulp/srp/ib_srp.c |    9 ---------
+ 1 file changed, 9 deletions(-)
 
-diff --git a/drivers/infiniband/ulp/srp/ib_srp.c b/drivers/infiniband/ulp/srp/ib_srp.c
-index 1615bc61b5a7..7675ad941163 100644
 --- a/drivers/infiniband/ulp/srp/ib_srp.c
 +++ b/drivers/infiniband/ulp/srp/ib_srp.c
-@@ -1179,13 +1179,6 @@ static void srp_terminate_io(struct srp_rport *rport)
- 	struct scsi_device *sdev;
+@@ -1167,17 +1167,8 @@ static void srp_terminate_io(struct srp_
+ {
+ 	struct srp_target_port *target = rport->lld_data;
+ 	struct srp_rdma_ch *ch;
+-	struct Scsi_Host *shost = target->scsi_host;
+-	struct scsi_device *sdev;
  	int i, j;
  
 -	/*
@@ -30,6 +33,3 @@ index 1615bc61b5a7..7675ad941163 100644
  	for (i = 0; i < target->ch_count; i++) {
  		ch = &target->ch[i];
  
--- 
-2.16.4
-
