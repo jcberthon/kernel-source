@@ -68,7 +68,7 @@ index ab622d4..6149d5f 100644
  		}
  	}
 @@ -2532,7 +2532,7 @@ static void fcoe_ctlr_vn_add(struct fcoe_ctlr *fip, struct fc_rport_priv *new)
- 		LIBFCOE_FIP_DBG(fip, "vn_add rport logoff %6.6x\n", port_id);
+ 	    (ids->node_name != -1 && ids->node_name != new->ids.node_name)) {
  		mutex_unlock(&rdata->rp_mutex);
  		LIBFCOE_FIP_DBG(fip, "vn_add rport logoff %6.6x\n", port_id);
 -		lport->tt.rport_logoff(rdata);
