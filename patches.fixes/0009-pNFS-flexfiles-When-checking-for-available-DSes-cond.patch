@@ -1,0 +1,69 @@
+From: Tom Haynes <loghyr@primarydata.com>
+Date: Tue, 17 May 2016 12:28:37 -0400
+Subject: [PATCH] pNFS/flexfiles: When checking for available DSes,
+ conditionally check for MDS io
+Git-commit: 3b13b4b311a508a5899070936a873e30fcc96a2f
+Patch-mainline: v4.7
+References: git-fixes
+
+Whenever we check to see if we have the needed number of DSes for the
+action, we may also have to check to see whether IO is allowed to go to
+the MDS or not.
+
+[jlayton: fix merge conflict due to lack of localio patches here]
+
+Signed-off-by: Tom Haynes <loghyr@primarydata.com>
+Signed-off-by: Jeff Layton <jeff.layton@primarydata.com>
+Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
+Acked-by: NeilBrown <neilb@suse.com>
+
+---
+ fs/nfs/flexfilelayout/flexfilelayout.c    |    5 ++---
+ fs/nfs/flexfilelayout/flexfilelayout.h    |    1 +
+ fs/nfs/flexfilelayout/flexfilelayoutdev.c |    6 ++++++
+ 3 files changed, 9 insertions(+), 3 deletions(-)
+
+--- a/fs/nfs/flexfilelayout/flexfilelayout.c
++++ b/fs/nfs/flexfilelayout/flexfilelayout.c
+@@ -1050,8 +1050,7 @@ static int ff_layout_async_handle_error_
+ 		rpc_wake_up(&tbl->slot_tbl_waitq);
+ 		/* fall through */
+ 	default:
+-		if (ff_layout_no_fallback_to_mds(lseg) ||
+-		    ff_layout_has_available_ds(lseg))
++		if (ff_layout_avoid_mds_available_ds(lseg))
+ 			return -NFS4ERR_RESET_TO_PNFS;
+ reset:
+ 		dprintk("%s Retry through MDS. Error %d\n", __func__,
+@@ -1652,7 +1651,7 @@ ff_layout_read_pagelist(struct nfs_pgio_
+ 	return PNFS_ATTEMPTED;
+ 
+ out_failed:
+-	if (ff_layout_has_available_ds(lseg))
++	if (ff_layout_avoid_mds_available_ds(lseg))
+ 		return PNFS_TRY_AGAIN;
+ 	return PNFS_NOT_ATTEMPTED;
+ }
+--- a/fs/nfs/flexfilelayout/flexfilelayout.h
++++ b/fs/nfs/flexfilelayout/flexfilelayout.h
+@@ -191,4 +191,5 @@ nfs4_ff_find_or_create_ds_client(struct
+ struct rpc_cred *ff_layout_get_ds_cred(struct pnfs_layout_segment *lseg,
+ 				       u32 ds_idx, struct rpc_cred *mdscred);
+ bool ff_layout_has_available_ds(struct pnfs_layout_segment *lseg);
++bool ff_layout_avoid_mds_available_ds(struct pnfs_layout_segment *lseg);
+ #endif /* FS_NFS_NFS4FLEXFILELAYOUT_H */
+--- a/fs/nfs/flexfilelayout/flexfilelayoutdev.c
++++ b/fs/nfs/flexfilelayout/flexfilelayoutdev.c
+@@ -588,6 +588,12 @@ bool ff_layout_has_available_ds(struct p
+ 	return ff_rw_layout_has_available_ds(lseg);
+ }
+ 
++bool ff_layout_avoid_mds_available_ds(struct pnfs_layout_segment *lseg)
++{
++	return ff_layout_no_fallback_to_mds(lseg) ||
++	       ff_layout_has_available_ds(lseg);
++}
++
+ module_param(dataserver_retrans, uint, 0644);
+ MODULE_PARM_DESC(dataserver_retrans, "The  number of times the NFSv4.1 client "
+ 			"retries a request before it attempts further "
