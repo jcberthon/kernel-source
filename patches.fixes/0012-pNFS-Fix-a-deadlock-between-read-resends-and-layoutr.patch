@@ -1,0 +1,33 @@
+From: Trond Myklebust <trond.myklebust@primarydata.com>
+Date: Sun, 27 Nov 2016 15:12:39 -0500
+Subject: [PATCH] pNFS: Fix a deadlock between read resends and layoutreturn
+Git-commit: 54e4a0dfa25d9365c4e80a639e80d9213eb6edbe
+Patch-mainline: v4.10
+References: git-fixes
+
+We must not call nfs_pageio_init_read() on a new nfs_pageio_descriptor
+while holding a reference to a layout segment, as that can deadlock
+pnfs_update_layout().
+
+Fixes: d67ae825a59d6 ("pnfs/flexfiles: Add the FlexFile Layout Driver")
+Signed-off-by: Trond Myklebust <trond.myklebust@primarydata.com>
+Cc: stable@vger.kernel.org # v4.0+
+Acked-by: NeilBrown <neilb@suse.com>
+
+---
+ fs/nfs/pnfs.c |    4 ++++
+ 1 file changed, 4 insertions(+)
+
+--- a/fs/nfs/pnfs.c
++++ b/fs/nfs/pnfs.c
+@@ -2091,6 +2091,10 @@ void pnfs_read_resend_pnfs(struct nfs_pg
+ 	struct nfs_pageio_descriptor pgio;
+ 
+ 	if (!test_and_set_bit(NFS_IOHDR_REDO, &hdr->flags)) {
++		/* Prevent deadlocks with layoutreturn! */
++		pnfs_put_lseg(hdr->lseg);
++		hdr->lseg = NULL;
++
+ 		nfs_pageio_init_read(&pgio, hdr->inode, false,
+ 					hdr->completion_ops);
+ 		hdr->task.tk_status = nfs_pageio_resend(&pgio, hdr);
