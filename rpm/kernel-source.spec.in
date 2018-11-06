@@ -43,6 +43,7 @@ BuildRequires:  fdupes
 BuildRequires:  sed
 Requires(post): coreutils sed
 Provides:       %name = %version-%source_rel
+Provides:       %name-srchash = @COMMIT_FULL@
 Provides:       linux
 Provides:       multiversion(kernel)
 Source0:        @TARBALL_URL@linux-%srcversion.tar.xz
@@ -93,6 +94,8 @@ Source69:       try-disable-staging-driver
 Source70:       kernel-obs-build.spec.in
 Source71:       kernel-obs-qa.spec.in
 Source72:       compress-vmlinux.sh
+Source75:       release-projects
+Source76:       check-module-license
 Source90:       SLES-UEFI-SIGN-Certificate-2048.crt
 Source100:      config.tar.bz2
 Source101:      config.addon.tar.bz2

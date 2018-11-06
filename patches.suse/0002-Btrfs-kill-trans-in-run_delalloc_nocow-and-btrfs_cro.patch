@@ -1,0 +1,190 @@
+From e4c3b2dcd1449def1229efb138da7cb28c796c71 Mon Sep 17 00:00:00 2001
+From: Liu Bo <bo.li.liu@oracle.com>
+Date: Mon, 30 Jan 2017 12:25:28 -0800
+Patch-mainline: v4.11
+Git-commit: e4c3b2dcd1449def1229efb138da7cb28c796c71
+References: dependency for bsc#1031392
+Subject: [PATCH 2/2] Btrfs: kill trans in run_delalloc_nocow and
+ btrfs_cross_ref_exist
+
+run_delalloc_nocow has used trans in two places where they don't
+actually need @trans.
+
+For btrfs_lookup_file_extent, we search for file extents without COWing
+anything, and for btrfs_cross_ref_exist, the only place where we need
+@trans is deferencing it in order to get running_transaction which we
+could easily get from the global fs_info.
+
+Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+Reviewed-by: David Sterba <dsterba@suse.com>
+Signed-off-by: David Sterba <dsterba@suse.com>
+---
+ fs/btrfs/ctree.h       |    3 +--
+ fs/btrfs/extent-tree.c |   22 ++++++++++++----------
+ fs/btrfs/inode.c       |   39 +++------------------------------------
+ 3 files changed, 16 insertions(+), 48 deletions(-)
+
+--- a/fs/btrfs/ctree.h
++++ b/fs/btrfs/ctree.h
+@@ -2570,8 +2570,7 @@ int btrfs_pin_extent_for_log_replay(stru
+ 				    u64 bytenr, u64 num_bytes);
+ int btrfs_exclude_logged_extents(struct btrfs_root *root,
+ 				 struct extent_buffer *eb);
+-int btrfs_cross_ref_exist(struct btrfs_trans_handle *trans,
+-			  struct btrfs_root *root,
++int btrfs_cross_ref_exist(struct btrfs_root *root,
+ 			  u64 objectid, u64 offset, u64 bytenr);
+ struct btrfs_block_group_cache *btrfs_lookup_block_group(
+ 						 struct btrfs_fs_info *info,
+--- a/fs/btrfs/extent-tree.c
++++ b/fs/btrfs/extent-tree.c
+@@ -3074,8 +3074,7 @@ int btrfs_set_disk_extent_flags(struct b
+ 	return ret;
+ }
+ 
+-static noinline int check_delayed_ref(struct btrfs_trans_handle *trans,
+-				      struct btrfs_root *root,
++static noinline int check_delayed_ref(struct btrfs_root *root,
+ 				      struct btrfs_path *path,
+ 				      u64 objectid, u64 offset, u64 bytenr)
+ {
+@@ -3083,9 +3082,14 @@ static noinline int check_delayed_ref(st
+ 	struct btrfs_delayed_ref_node *ref;
+ 	struct btrfs_delayed_data_ref *data_ref;
+ 	struct btrfs_delayed_ref_root *delayed_refs;
++	struct btrfs_transaction *cur_trans;
+ 	int ret = 0;
+ 
+-	delayed_refs = &trans->transaction->delayed_refs;
++	cur_trans = root->fs_info->running_transaction;
++	if (!cur_trans)
++		return 0;
++
++	delayed_refs = &cur_trans->delayed_refs;
+ 	spin_lock(&delayed_refs->lock);
+ 	head = btrfs_find_delayed_ref_head(delayed_refs, bytenr);
+ 	if (!head) {
+@@ -3136,8 +3140,7 @@ static noinline int check_delayed_ref(st
+ 	return ret;
+ }
+ 
+-static noinline int check_committed_ref(struct btrfs_trans_handle *trans,
+-					struct btrfs_root *root,
++static noinline int check_committed_ref(struct btrfs_root *root,
+ 					struct btrfs_path *path,
+ 					u64 objectid, u64 offset, u64 bytenr)
+ {
+@@ -3207,9 +3210,8 @@ out:
+ 	return ret;
+ }
+ 
+-int btrfs_cross_ref_exist(struct btrfs_trans_handle *trans,
+-			  struct btrfs_root *root,
+-			  u64 objectid, u64 offset, u64 bytenr)
++int btrfs_cross_ref_exist(struct btrfs_root *root, u64 objectid, u64 offset,
++			  u64 bytenr)
+ {
+ 	struct btrfs_path *path;
+ 	int ret;
+@@ -3220,12 +3222,12 @@ int btrfs_cross_ref_exist(struct btrfs_t
+ 		return -ENOENT;
+ 
+ 	do {
+-		ret = check_committed_ref(trans, root, path, objectid,
++		ret = check_committed_ref(root, path, objectid,
+ 					  offset, bytenr);
+ 		if (ret && ret != -ENOENT)
+ 			goto out;
+ 
+-		ret2 = check_delayed_ref(trans, root, path, objectid,
++		ret2 = check_delayed_ref(root, path, objectid,
+ 					 offset, bytenr);
+ 	} while (ret2 == -EAGAIN);
+ 
+--- a/fs/btrfs/inode.c
++++ b/fs/btrfs/inode.c
+@@ -1247,7 +1247,6 @@ static noinline int run_delalloc_nocow(s
+ 			      unsigned long *nr_written)
+ {
+ 	struct btrfs_root *root = BTRFS_I(inode)->root;
+-	struct btrfs_trans_handle *trans;
+ 	struct extent_buffer *leaf;
+ 	struct btrfs_path *path;
+ 	struct btrfs_file_extent_item *fi;
+@@ -1283,30 +1282,10 @@ static noinline int run_delalloc_nocow(s
+ 
+ 	nolock = btrfs_is_free_space_inode(inode);
+ 
+-	if (nolock)
+-		trans = btrfs_join_transaction_nolock(root);
+-	else
+-		trans = btrfs_join_transaction(root);
+-
+-	if (IS_ERR(trans)) {
+-		extent_clear_unlock_delalloc(inode, start, end, end,
+-					     locked_page,
+-					     EXTENT_LOCKED | EXTENT_DELALLOC |
+-					     EXTENT_DO_ACCOUNTING |
+-					     EXTENT_DEFRAG, PAGE_UNLOCK |
+-					     PAGE_CLEAR_DIRTY |
+-					     PAGE_SET_WRITEBACK |
+-					     PAGE_END_WRITEBACK);
+-		btrfs_free_path(path);
+-		return PTR_ERR(trans);
+-	}
+-
+-	trans->block_rsv = &root->fs_info->delalloc_block_rsv;
+-
+ 	cow_start = (u64)-1;
+ 	cur_offset = start;
+ 	while (1) {
+-		ret = btrfs_lookup_file_extent(trans, root, path, ino,
++		ret = btrfs_lookup_file_extent(NULL, root, path, ino,
+ 					       cur_offset, 0);
+ 		if (ret < 0)
+ 			goto error;
+@@ -1382,7 +1361,7 @@ next_slot:
+ 				goto out_check;
+ 			if (btrfs_extent_readonly(root, disk_bytenr))
+ 				goto out_check;
+-			ret = btrfs_cross_ref_exist(trans, root, ino,
++			ret = btrfs_cross_ref_exist(root, ino,
+ 						  found_key.offset -
+ 						  extent_offset, disk_bytenr);
+ 			if (ret) {
+@@ -1559,10 +1538,6 @@ out_check:
+ 	}
+ 
+ error:
+-	err = btrfs_end_transaction(trans, root);
+-	if (!ret)
+-		ret = err;
+-
+ 	if (ret && cur_offset < end)
+ 		extent_clear_unlock_delalloc(inode, cur_offset, end, end,
+ 					     locked_page, EXTENT_LOCKED |
+@@ -7320,7 +7295,6 @@ noinline int can_nocow_extent(struct ino
+ 			      u64 *orig_start, u64 *orig_block_len,
+ 			      u64 *ram_bytes)
+ {
+-	struct btrfs_trans_handle *trans;
+ 	struct btrfs_path *path;
+ 	int ret;
+ 	struct extent_buffer *leaf;
+@@ -7422,15 +7396,8 @@ noinline int can_nocow_extent(struct ino
+ 	 * look for other files referencing this extent, if we
+ 	 * find any we must cow
+ 	 */
+-	trans = btrfs_join_transaction(root);
+-	if (IS_ERR(trans)) {
+-		ret = 0;
+-		goto out;
+-	}
+-
+-	ret = btrfs_cross_ref_exist(trans, root, btrfs_ino(inode),
++	ret = btrfs_cross_ref_exist(root, btrfs_ino(inode),
+ 				    key.offset - backref_offset, disk_bytenr);
+-	btrfs_end_transaction(trans, root);
+ 	if (ret) {
+ 		ret = 0;
+ 		goto out;
