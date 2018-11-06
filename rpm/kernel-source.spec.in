@@ -94,8 +94,8 @@ Source69:       try-disable-staging-driver
 Source70:       kernel-obs-build.spec.in
 Source71:       kernel-obs-qa.spec.in
 Source72:       compress-vmlinux.sh
-Source73:       release-projects
-Source74:       check-module-license
+Source75:       release-projects
+Source76:       check-module-license
 Source90:       SLES-UEFI-SIGN-Certificate-2048.crt
 Source100:      config.tar.bz2
 Source101:      config.addon.tar.bz2
