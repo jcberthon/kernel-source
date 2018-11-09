@@ -31,16 +31,17 @@ Cc: Dan Williams <dan.j.williams@gmail.com>
 Signed-off-by: Michal Hocko <mhocko@suse.com>
 
 ---
+
  arch/ia64/mm/init.c            |    2 +-
  arch/powerpc/mm/mem.c          |    2 +-
  arch/s390/mm/init.c            |    2 +-
  arch/sh/mm/init.c              |    2 +-
  arch/x86/mm/init_32.c          |    2 +-
  arch/x86/mm/init_64.c          |    2 +-
- drivers/base/memory.c          |   22 ++++++++--------------
+ drivers/base/memory.c          |   23 +++++++++--------------
  include/linux/memory_hotplug.h |    2 +-
  mm/memory_hotplug.c            |   10 +++++++---
- 9 files changed, 22 insertions(+), 24 deletions(-)
+ 9 files changed, 23 insertions(+), 24 deletions(-)
 
 --- a/arch/ia64/mm/init.c
 +++ b/arch/ia64/mm/init.c
@@ -150,11 +151,19 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
 +	 */
  	mem = find_memory_block(section);
 +	if (!mem)
-+		return 0;
++		goto out_unlock;
 +
  	unregister_mem_sect_under_nodes(mem, __section_nr(section));
  
  	mem->section_count--;
+@@ -724,6 +724,7 @@ static int remove_memory_block(unsigned
+ 	else
+ 		put_device(&mem->dev);
+ 
++out_unlock:
+ 	mutex_unlock(&mem_sysfs_mutex);
+ 	return 0;
+ }
 --- a/include/linux/memory_hotplug.h
 +++ b/include/linux/memory_hotplug.h
 @@ -109,7 +109,7 @@ extern int __remove_pages(struct zone *z
