@@ -1,0 +1,87 @@
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: efi/arm*/libstub: Wire up GOP protocol to 'struct screen_info'
+Git-commit: f0827e18a7a1da574ba8201a8b18f63778451aae
+Patch-mainline: v4.7-rc1
+References: bnc#974215
+
+This adds the code to the ARM and arm64 versions of the UEFI stub to
+populate struct screen_info based on the information received from the
+firmware via the GOP protocol.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: David Herrmann <dh.herrmann@gmail.com>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: Peter Jones <pjones@redhat.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Will Deacon <will.deacon@arm.com>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/1461614832-17633-23-git-send-email-matt@codeblueprint.co.uk
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Matt Fleming <mfleming@suse.de>
+---
+
+ drivers/firmware/efi/libstub/arm-stub.c |   24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index a3a447c..523c1ca 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -145,6 +145,25 @@ void efi_char16_printk(efi_system_table_t *sys_table_arg,
+ 	out->output_string(out, str);
+ }
+ 
++static struct screen_info *setup_graphics(efi_system_table_t *sys_table_arg)
++{
++	efi_guid_t gop_proto = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
++	efi_status_t status;
++	unsigned long size;
++	void **gop_handle = NULL;
++	struct screen_info *si = NULL;
++
++	size = 0;
++	status = efi_call_early(locate_handle, EFI_LOCATE_BY_PROTOCOL,
++				&gop_proto, NULL, &size, gop_handle);
++	if (status == EFI_BUFFER_TOO_SMALL) {
++		si = alloc_screen_info(sys_table_arg);
++		if (!si)
++			return NULL;
++		efi_setup_gop(sys_table_arg, si, &gop_proto, size);
++	}
++	return si;
++}
+ 
+ /*
+  * This function handles the architcture specific differences between arm and
+@@ -183,6 +202,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 	efi_guid_t loaded_image_proto = LOADED_IMAGE_PROTOCOL_GUID;
+ 	unsigned long reserve_addr = 0;
+ 	unsigned long reserve_size = 0;
++	struct screen_info *si;
+ 
+ 	/* Check if we were booted by the EFI firmware */
+ 	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
+@@ -207,6 +227,9 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 		pr_efi_err(sys_table, "Failed to find DRAM base\n");
+ 		goto fail;
+ 	}
++
++	si = setup_graphics(sys_table);
++
+ 	status = handle_kernel_image(sys_table, image_addr, &image_size,
+ 				     &reserve_addr,
+ 				     &reserve_size,
+@@ -286,6 +309,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 	efi_free(sys_table, fdt_size, fdt_addr);
+ 
+ fail_free_cmdline:
++	free_screen_info(sys_table, si);
+ 	efi_free(sys_table, cmdline_size, (unsigned long)cmdline_ptr);
+ 
+ fail_free_image:
+-- 
+2.7.3
+
