@@ -1,0 +1,49 @@
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: efifb: Enable the efi-framebuffer platform driver for ARM and arm64
+Patch-mainline: v4.7-rc1
+Git-commit: 9822504c1fa5c557ea8776765f03fd16eb4de4c9
+References: bnc#974215
+
+This allows the efifb driver to be built for ARM and arm64, and adds the
+registration of a "efi-framebuffer" platform device if the GOP code in the
+stub has populated screen_info appropriately.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Matt Fleming <mfleming@suse.de>
+---
+
+ arch/arm64/include/asm/efi.h |    4 ++++
+ drivers/video/fbdev/Kconfig  |    2 +-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index 4661700..a348f9d 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -49,6 +49,10 @@ extern void efi_init_fdt(void *fdt);
+ #define alloc_screen_info(x...)		&screen_info
+ #define free_screen_info(x...)
+ 
++static inline void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
++{
++}
++
+ #define EFI_ALLOC_ALIGN		SZ_64K
+ 
+ /*
+diff --git a/drivers/video/fbdev/Kconfig b/drivers/video/fbdev/Kconfig
+index e6d16d6..0ccd3b7 100644
+--- a/drivers/video/fbdev/Kconfig
++++ b/drivers/video/fbdev/Kconfig
+@@ -757,7 +757,7 @@ config FB_VESA
+ 
+ config FB_EFI
+ 	bool "EFI-based Framebuffer Support"
+-	depends on (FB = y) && X86 && EFI
++	depends on (FB = y) && !IA64 && EFI
+ 	select FB_CFB_FILLRECT
+ 	select FB_CFB_COPYAREA
+ 	select FB_CFB_IMAGEBLIT
+-- 
+2.7.3
+

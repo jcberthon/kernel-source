@@ -1,0 +1,66 @@
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: efi/arm*: Wire up 'struct screen_info' to efi-framebuffer platform
+ device
+Git-commit: e3271c96ca7d01957b03b5f1e2bdc00e08fd7160
+Patch-mainline: v4.7-rc1
+References: bnc#974215
+
+This adds code to the ARM and arm64 EFI init routines to expose a platform
+device of type 'efi-framebuffer' if 'struct screen_info' has been populated
+appropriately from the GOP protocol by the stub. Since the framebuffer may
+potentially be located in system RAM, make sure that the region is reserved
+and marked MEMBLOCK_NOMAP.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: David Herrmann <dh.herrmann@gmail.com>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: Peter Jones <pjones@redhat.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Will Deacon <will.deacon@arm.com>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/1461614832-17633-24-git-send-email-matt@codeblueprint.co.uk
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Matt Fleming <mfleming@suse.de>
+---
+ drivers/firmware/efi/arm-init.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index 4da1b27..56a76b6 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -26,6 +26,7 @@
+ #include <linux/sched.h>
+ #include <linux/slab.h>
+ #include <linux/spinlock.h>
++#include <linux/platform_device.h>
+ 
+ #include <asm/cacheflush.h>
+ #include <asm/efi.h>
+@@ -244,7 +245,23 @@ void __init efi_init_fdt(void *fdt)
+ 
+ 	reserve_regions();
+ 	early_memunmap(memmap.map, params.mmap_size);
++
++	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI)
++		memblock_reserve(screen_info.lfb_base, screen_info.lfb_size);
++}
++
++static int __init register_gop_device(void)
++{
++	void *pd;
++
++	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
++		return 0;
++
++	/* the efifb driver accesses screen_info directly, no need to pass it */
++	pd = platform_device_register_simple("efi-framebuffer", 0, NULL, 0);
++	return PTR_ERR_OR_ZERO(pd);
+ }
++subsys_initcall(register_gop_device);
+ 
+ static bool __init efi_virtmap_init(void)
+ {
