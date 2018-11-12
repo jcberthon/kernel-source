@@ -451,6 +451,7 @@ BRP_PESIGN_FILES="$BRP_PESIGN_FILES *.ko"
 # from i686 to i586
 BRP_PESIGN_FILES=""
 %endif
+export BRP_PESIGN_FILES
 
 # get rid of /usr/lib/rpm/brp-strip-debug
 # strip removes too much from the vmlinux ELF binary
