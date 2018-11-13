@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Thu, 23 Jun 2016 16:32:45 -0700
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 5e24e9af01abcb151173bb133f1a72b94239c670
 References: bsc#1012452
 Subject: [PATCH] Btrfs: error out if generic_bin_search get invalid

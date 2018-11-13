@@ -1,6 +1,6 @@
 From: Alex Lyakas <alex.bolshoy@gmail.com>
 Date: Thu, 10 Mar 2016 13:10:15 +0200
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc2
 Git-commit: 0f805531daa2ebfb5706422dc2ead1cff9e53e65
 References: bsc#1012452
 Subject: [PATCH] btrfs: do not write corrupted metadata blocks to disk

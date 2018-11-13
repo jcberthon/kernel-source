@@ -1,6 +1,6 @@
 From: Salah Triki <salah.triki@gmail.com>
 Date: Sun, 3 Jul 2016 05:40:10 +0100
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: a60617d0ae51c22f652b6fcf4ca56558c76e5aad
 References: bsc#1012452
 Subject: [PATCH] btrfs: Replace -ENOENT by -ERANGE in btrfs_get_acl()

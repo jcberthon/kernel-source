@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Thu, 15 Sep 2016 14:57:48 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc8
 Git-commit: 1e5ec2e709bd8c5588fdbdda909945e4e2be8d23
 References: bsc#1005666
 Subject: [PATCH] Btrfs: handle quota reserve failure properly

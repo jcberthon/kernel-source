@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Tue, 26 Apr 2016 16:03:57 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 66ac9fe7bacf9fa76c472efc7a7aaa590c7bce6a
 References: bsc#1012452
 Subject: [PATCH] btrfs: add check to sysfs handler of label

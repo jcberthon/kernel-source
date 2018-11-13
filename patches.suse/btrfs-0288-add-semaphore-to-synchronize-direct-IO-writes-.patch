@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Thu, 12 May 2016 13:53:36 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 5f9a8a51d8b95505d8de8b7191ae2ed8c504d4af
 References: bsc#1012452
 Subject: [PATCH] Btrfs: add semaphore to synchronize direct IO writes

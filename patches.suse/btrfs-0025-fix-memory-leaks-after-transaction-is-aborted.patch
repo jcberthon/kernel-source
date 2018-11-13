@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Fri, 27 Nov 2015 16:12:00 +0000
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 7785a663c4beebdafeb300caf2818e7e6474abd1
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix memory leaks after transaction is aborted

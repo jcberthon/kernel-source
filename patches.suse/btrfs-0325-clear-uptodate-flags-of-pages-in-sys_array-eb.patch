@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Fri, 3 Jun 2016 17:41:42 -0700
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc3
 Git-commit: d865177a5e749827f248f6363f5100d3a2f66b0f
 References: bsc#1012452
 Subject: [PATCH] Btrfs: clear uptodate flags of pages in sys_array eb

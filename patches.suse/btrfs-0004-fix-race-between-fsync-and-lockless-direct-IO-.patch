@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Thu, 21 Jan 2016 10:17:54 +0000
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc2
 Git-commit: de0ee0edb21fbab4c7afa3e94573ecfebfb0244e
 References: bsc#977685
 Subject: [PATCH] Btrfs: fix race between fsync and lockless direct IO

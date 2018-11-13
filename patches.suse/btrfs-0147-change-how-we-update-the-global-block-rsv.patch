@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Mon, 11 Jan 2016 17:28:38 -0500
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: fb4b10e5d56639389fbc46dc8a87e81578af0b64
 References: bsc#1012452
 Subject: [PATCH] Btrfs: change how we update the global block rsv

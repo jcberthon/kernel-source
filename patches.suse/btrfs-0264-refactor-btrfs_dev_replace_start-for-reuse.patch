@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Thu, 24 Mar 2016 18:48:14 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: b5255456c529155730c837f8cfcea47e8feb85ca
 References: bsc#1012452
 Subject: [PATCH] btrfs: refactor btrfs_dev_replace_start for reuse

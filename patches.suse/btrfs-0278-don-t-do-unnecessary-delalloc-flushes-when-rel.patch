@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Tue, 26 Apr 2016 15:39:32 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 9cfa3e34e20e6798a671236000d9e97c8aa5d318
 References: bsc#1012452
 Subject: [PATCH] Btrfs: don't do unnecessary delalloc flushes when

@@ -1,6 +1,6 @@
 From: =?UTF-8?q?Vincent=20Stehl=C3=A9?= <vincent.stehle@intel.com>
 Date: Tue, 10 May 2016 14:56:20 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 72928f2476d08c79f132b4f44a17c9a011dd98e3
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix fspath error deallocation

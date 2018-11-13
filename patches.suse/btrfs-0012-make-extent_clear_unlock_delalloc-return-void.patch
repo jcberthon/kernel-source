@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 3 Dec 2015 13:08:59 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: a9d93e1778f3a92852d3816cd203cbec179b8813
 References: bsc#1012452
 Subject: [PATCH] btrfs: make extent_clear_unlock_delalloc return void

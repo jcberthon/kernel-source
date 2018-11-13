@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 11 Feb 2016 10:49:42 +0100
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 58c4e173847af8e63537e11be6c1c3fd4b6153fe
 References: bsc#1012452
 Subject: [PATCH] btrfs: scrub: use GFP_KERNEL on the submission path

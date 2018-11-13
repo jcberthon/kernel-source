@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Fri, 27 Nov 2015 16:31:38 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: dccabfad20880bc6c8be21b538df4293506b99f8
 References: bsc#1012452
 Subject: [PATCH] btrfs: use smaller type for btrfs_path reada

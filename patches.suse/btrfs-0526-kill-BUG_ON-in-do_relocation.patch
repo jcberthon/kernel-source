@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Fri, 23 Sep 2016 14:05:04 -0700
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc4
 Git-commit: 4547f4d8ffd63ba4ac129f9136027bd14b729101
 References: bsc#1012452
 Subject: [PATCH] Btrfs: kill BUG_ON in do_relocation

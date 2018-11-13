@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Sat, 13 Feb 2016 10:01:33 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: f1fa7f264250f2cb60119aca3fd114c3f47070c2
 References: bsc#1012452
 Subject: [PATCH] btrfs: create helper function

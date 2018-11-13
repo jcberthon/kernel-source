@@ -1,6 +1,6 @@
 From: Sam Tygier <samtygier@yahoo.co.uk>
 Date: Wed, 6 Jan 2016 08:46:12 +0000
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: ee592d07716139ef7c3ea8049936cbc3aafbc533
 References: bsc#1012452
 Subject: [PATCH] Btrfs: Check metadata redundancy on balance

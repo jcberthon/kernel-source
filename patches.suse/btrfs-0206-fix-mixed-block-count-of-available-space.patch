@@ -1,6 +1,6 @@
 From: Luis de Bethencourt <luisbg@osg.samsung.com>
 Date: Wed, 30 Mar 2016 21:53:38 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: ae02d1bd070767e109f4a6f1bb1f466e9698a355
 References: bsc#1012452
 Subject: [PATCH] btrfs: fix mixed block count of available space

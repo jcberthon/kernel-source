@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Thu, 5 May 2016 02:08:56 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 376e5a57bf7f1466031a957d04bf8b8f6801ee6d
 References: bsc#1020975
 Subject: [PATCH] Btrfs: pin logs earlier when doing a rename exchange

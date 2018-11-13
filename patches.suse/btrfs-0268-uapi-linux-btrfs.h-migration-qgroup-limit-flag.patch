@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Fri, 1 Apr 2016 16:14:24 -0400
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 83288b60bf6668933689078973136e0c9d387b38
 References: bsc#1012452
 Subject: [PATCH] btrfs: uapi/linux/btrfs.h migration, qgroup limit

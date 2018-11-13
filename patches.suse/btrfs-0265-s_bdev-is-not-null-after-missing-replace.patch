@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Thu, 14 Apr 2016 18:24:10 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 8ed01abe7da6af62f2089da9a4c1fe839dc638f5
 References: bsc#1012452
 Subject: [PATCH] btrfs: s_bdev is not null after missing replace

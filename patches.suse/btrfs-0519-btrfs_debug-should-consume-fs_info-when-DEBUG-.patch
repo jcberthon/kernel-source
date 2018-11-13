@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Wed, 21 Sep 2016 12:17:37 -0400
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: c01f5f96f511419ee656a60e09605b7b6a63b66c
 References: bsc#1012452
 Subject: [PATCH] btrfs: btrfs_debug should consume fs_info when DEBUG is

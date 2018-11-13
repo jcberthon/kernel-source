@@ -2,7 +2,7 @@ From: Filipe Manana <fdmanana@suse.com>
 Date: Tue, 14 Feb 2017 16:56:01 +0000
 Subject: Btrfs: fix data loss after truncate when using the no-holes feature
 Git-commit: 76b42abbf7488121c4f9f1ea5941123306e25d99
-Patch-mainline: v4.11
+Patch-mainline: v4.11-rc1
 References: bsc#1036214
 
 If we have a file with an implicit hole (NO_HOLES feature enabled) that

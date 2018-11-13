@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Tue, 8 Dec 2015 14:39:32 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 100d57025cce6bf568a10660c0d884bcc64c580e
 References: bsc#1012452
 Subject: [PATCH] btrfs: don't use slab cache for struct

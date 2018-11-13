@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Wed, 22 Jun 2016 18:31:49 -0700
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 6f034ece3422d8d4fbe0afe7cd8c2ac6438e651e
 References: bsc#1012452
 Subject: [PATCH] Btrfs: cleanup BUG_ON in merge_bio

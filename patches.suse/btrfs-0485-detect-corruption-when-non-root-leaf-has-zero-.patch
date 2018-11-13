@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Tue, 23 Aug 2016 15:22:58 -0700
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc4
 Git-commit: 1ba98d086fe3a14d6a31f2f66dbab70c45d00f63
 References: bsc#1012452
 Subject: [PATCH] Btrfs: detect corruption when non-root leaf has zero

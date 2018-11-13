@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Tue, 17 May 2016 17:37:38 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: f1fee6534dcfbf468a159789aa202db2bce8c200
 References: bsc#1012452
 Subject: [PATCH] btrfs: scrub: Set bbio to NULL before calling

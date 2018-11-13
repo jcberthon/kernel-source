@@ -1,6 +1,6 @@
 From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
 Date: Fri, 2 Sep 2016 10:58:46 +0800
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc6
 Git-commit: ce129655c9d9aaa7b3bcc46529db1b36693575ed
 References: bsc#1012452
 Subject: [PATCH] btrfs: introduce tickets_id to determine whether

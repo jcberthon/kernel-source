@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Sat, 2 Jul 2016 05:43:46 +0100
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc2
 Git-commit: 15b253eace1f98dabbc6e03f6793fcf8603b1655
 References: bsc#1018316
 Subject: [PATCH] Btrfs: send, avoid incorrect leaf accesses when

@@ -1,6 +1,6 @@
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
 Date: Tue, 18 Oct 2016 09:31:28 +0800
-Patch-mainline: 4.10
+Patch-mainline: v4.10-rc1
 Git-commit: 33d1f05ccb698aa92db3e64a639ce523cf18a408
 References: bsc#983087, bsc#986255
 Subject: [PATCH] btrfs: Export and move leaf/subtree qgroup helpers to

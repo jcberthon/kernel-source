@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Thu, 9 Jun 2016 16:22:11 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: cb001095ca705dcd95f57fe98867e38a4889916d
 References: bsc#1012452
 Subject: [PATCH] btrfs: plumb fs_info into btrfs_work

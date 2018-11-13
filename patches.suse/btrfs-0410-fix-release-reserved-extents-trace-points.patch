@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Fri, 25 Mar 2016 13:25:58 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 31bada7c4e5e80b9cc031e89247175bed58ed9e9
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix release reserved extents trace points

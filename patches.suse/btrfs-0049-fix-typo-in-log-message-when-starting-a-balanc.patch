@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Fri, 15 Jan 2016 10:56:15 +0000
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: fedc00455ccc1f928066528da87b0c7b143de647
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix typo in log message when starting a

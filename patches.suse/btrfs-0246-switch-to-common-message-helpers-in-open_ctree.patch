@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Mon, 9 May 2016 11:32:39 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 05135f597adcb94dc34fa87b82e68eb55e00f0eb
 References: bsc#1012452
 Subject: [PATCH] btrfs: switch to common message helpers in

@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Sat, 13 Feb 2016 10:01:34 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: bd45ffbcb1f082e3c5a0bd56b1d7310d8b707ffb
 References: bsc#1012452
 Subject: [PATCH] btrfs: clean up and optimize

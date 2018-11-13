@@ -3,7 +3,7 @@ Date: Wed, 1 Jun 2016 19:18:23 +0800
 Subject: Btrfs: test_check_exists: Fix infinite loop when searching for free
  space entries
 Git-commit: 5473e0c426ffaeaa19734987b153c2a7f33b8706
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc3
 References: bsc#987192
 
 On a ppc64 machine using 64K as the block size, assume that the RB

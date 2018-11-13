@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.cz>
 Date: Fri, 23 Jan 2015 18:43:31 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: ee6111386a1b304f8bf589d36810d53e3b27ee20
 References: bsc#1012452
 Subject: [PATCH] btrfs: add read-only check to sysfs handler of

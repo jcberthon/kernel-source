@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Fri, 27 May 2016 13:03:04 -0400
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc4
 Git-commit: 3b6571c180da85e43550c608e954ab7b2a31d954
 References: bsc#1012452
 Subject: [PATCH] Btrfs: don't BUG_ON() in btrfs_orphan_add

@@ -1,6 +1,6 @@
 From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
 Date: Fri, 17 Jun 2016 17:20:40 +0000
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc5
 Git-commit: 04e1b65af2085d4102b2b5d2fd1e050f8ee63092
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix error return code in btrfs_init_test_fs()

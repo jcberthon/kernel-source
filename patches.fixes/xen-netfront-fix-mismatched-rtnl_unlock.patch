@@ -1,6 +1,6 @@
 From: Ross Lagerwall <ross.lagerwall@citrix.com>
-Date:   Thu Jun 21 14:00:20 2018 +0100
-Patch-mainline: 4.18
+Date: Thu Jun 21 14:00:20 2018 +0100
+Patch-mainline: v4.18-rc3
 Git-commit: cb257783c2927b73614b20f915a91ff78aa6f3e8
 References: bnc#1101658
 Subject: xen-netfront: Fix mismatched rtnl_unlock

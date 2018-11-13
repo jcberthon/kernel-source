@@ -1,4 +1,3 @@
-From 26aa23396ed34343ba55cae985160856246dafbb Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Ville=20Syrj=C3=A4l=C3=A4?= <ville.syrjala@linux.intel.com>
 Date: Mon, 26 Sep 2016 12:20:44 +0300
 Subject: Revert "Skip intel_crt_init for Dell XPS 8700"
@@ -6,7 +5,7 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Git-commit: 26aa23396ed34343ba55cae985160856246dafbb
-Patch-mainline: v4.8-rc2
+Patch-mainline: v4.10-rc1
 References: bsc#1106929
 
 This reverts commit 10b6ee4a87811a110cb01eaca01eb04da6801baf.

@@ -1,6 +1,6 @@
 From: Robbie Ko <robbieko@synology.com>
 Date: Tue, 23 Jun 2015 18:39:46 +0800
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc2
 Git-commit: 801bec365e0e19f2ba066cd3e25a67dee21b4aae
 References: bsc#1018316
 Subject: [PATCH] Btrfs: send, fix failure to move directories with the

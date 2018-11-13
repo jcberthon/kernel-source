@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Fri, 6 Jan 2017 14:12:51 +0100
-Patch-mainline: 4.10
+Patch-mainline: v4.10-rc4
 Git-commit: ac0c7cf8be00f269f82964cf7b144ca3edc5dbc4
 References: bsc#1012452
 Subject: [PATCH] btrfs: fix crash when tracepoint arguments are freed

@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Tue, 12 Jan 2016 14:58:39 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 895a11b868347ca8e287f152f7816862ad4b179d
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: simplify dev->reada_in_flight processing

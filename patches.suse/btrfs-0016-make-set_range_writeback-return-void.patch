@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 3 Dec 2015 13:08:59 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 35de6db28f260e88e9acc47305f7b3f272d76cbf
 References: bsc#1012452
 Subject: [PATCH] btrfs: make set_range_writeback return void

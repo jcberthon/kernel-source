@@ -1,6 +1,6 @@
 From: Ashish Samant <ashish.samant@oracle.com>
 Date: Fri, 29 Apr 2016 18:33:59 -0700
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 2473114981a36b4f0f57cf6e9548037d547a71b7
 References: bsc#1012452
 Subject: [PATCH] btrfs: Fix BUG_ON condition in

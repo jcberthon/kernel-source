@@ -2,7 +2,7 @@ From: Gal Pressman <galp@mellanox.com>
 Date: Mon, 19 Jun 2017 18:25:59 +0300
 Subject: net/mlx5: Fix driver load error flow when firmware is stuck
 Git-commit: 8ce59b16b4b6eacedaec1f7b652b4781cdbfe15f
-Patch-mainline: 4.13-rc1
+Patch-mainline: v4.13-rc1
 References: git-fixes
 
 When wait for firmware init fails, previous code would mistakenly

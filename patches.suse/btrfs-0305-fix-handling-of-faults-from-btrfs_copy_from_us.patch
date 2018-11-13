@@ -1,6 +1,6 @@
 From: Chris Mason <clm@fb.com>
 Date: Mon, 16 May 2016 09:21:01 -0700
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 56244ef151c3cd11f505020ab0b3f45454363bcc
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix handling of faults from

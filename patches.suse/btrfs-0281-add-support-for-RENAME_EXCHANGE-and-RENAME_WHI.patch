@@ -1,8 +1,8 @@
 From: Dan Fuhry <dfuhry@datto.com>
-Date:   Thu Mar 17 15:23:38 2016 +0100
+Date: Thu Mar 17 15:23:38 2016 +0100
 Subject: [PATCH] btrfs: add support for RENAME_EXCHANGE and RENAME_WHITEOUT
 References: bsc#1020975
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: cdd1fedf8261cd7a73c0596298902ff4f0f04492
 
 Two new flags, RENAME_EXCHANGE and RENAME_WHITEOUT, provide for new

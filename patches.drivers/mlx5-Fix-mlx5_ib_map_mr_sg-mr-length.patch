@@ -2,7 +2,7 @@ From: Sagi Grimberg <sagi@grimberg.me>
 Date: Sun, 23 Apr 2017 14:31:42 +0300
 Subject: mlx5: Fix mlx5_ib_map_mr_sg mr length
 Git-commit: 0a49f2c31c3efbeb0de3e4b5598764887f629be2
-Patch-Mainline: v4.12
+Patch-mainline: v4.12-rc1
 References: bsc#1040073
 
 In case we got an initial sg_offset, we need to

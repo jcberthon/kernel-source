@@ -1,10 +1,9 @@
-From 06290bfe74ea665ee0d5ae6a7bca06235419778a Mon Sep 17 00:00:00 2001
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
 Date: Mon, 27 Feb 2017 15:10:39 +0800
 Subject: [PATCH 8/8] btrfs: qgroup: Fix qgroup reserved space underflow by
  only freeing reserved ranges
 Git-commit: bc42bda22345efdb5d8b578d1b4df2c6eaa85c58
-Patch-mainline: 4.13
+Patch-mainline: v4.13-rc1
 References: bsc#1031395
 
 [BUG]

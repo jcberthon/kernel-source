@@ -1,6 +1,6 @@
 From: Mark Fasheh <mfasheh@suse.de>
 Date: Tue, 29 Mar 2016 17:19:55 -0700
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc3
 Git-commit: 0f5dcf8de974db5970d48d12a202997baa2846a1
 References: bnc#935087, bnc#945649, bsc#972993
 Subject: [PATCH] btrfs: Add qgroup tracing

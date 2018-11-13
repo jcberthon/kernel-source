@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Wed, 23 Nov 2016 16:21:18 +0000
-Patch-mainline: 4.10
+Patch-mainline: v4.10-rc1
 Git-commit: f177d73949bf758542ca15a1c1945bd2e802cc65
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix emptiness check for dirtied extent buffers

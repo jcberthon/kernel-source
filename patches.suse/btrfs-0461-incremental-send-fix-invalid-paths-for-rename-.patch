@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Mon, 27 Jun 2016 16:54:44 +0100
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc2
 Git-commit: 4122ea64f877f632390bca1886c8a6f666f28398
 References: bsc#1018316
 Subject: [PATCH] Btrfs: incremental send, fix invalid paths for rename

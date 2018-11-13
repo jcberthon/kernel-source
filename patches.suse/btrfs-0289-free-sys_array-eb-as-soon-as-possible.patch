@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Fri, 13 May 2016 17:06:59 -0700
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 1c8b5b6e8b570a8038fa42cf9e7c23782bd4882c
 References: bsc#1012452
 Subject: [PATCH] Btrfs: free sys_array eb as soon as possible

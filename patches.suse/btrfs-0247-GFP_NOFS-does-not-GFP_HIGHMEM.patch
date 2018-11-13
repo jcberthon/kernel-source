@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Mon, 9 May 2016 14:11:38 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: e1860a7724828a341037b010b3f4ff58bad53f95
 References: bsc#1012452
 Subject: [PATCH] btrfs: GFP_NOFS does not GFP_HIGHMEM

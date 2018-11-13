@@ -1,9 +1,8 @@
-From 06168a64b1ae346816fcd0a0c3ea5276c778408b Mon Sep 17 00:00:00 2001
 From: Bhushan Shah <bshah@kde.org>
 Date: Fri, 23 Jun 2017 09:24:33 +0530
 Subject: backlight: lm3630a: Bump REG_MAX value to 0x50 instead of 0x1F
 References: bsc#1106929
-Patch-mainline: v4.13-rc1
+Patch-mainline: v4.14-rc1
 Git-commit: 06168a64b1ae346816fcd0a0c3ea5276c778408b
 
 In the lm3630a_chip_init we try to write to 0x50 register, which is

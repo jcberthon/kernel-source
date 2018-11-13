@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Tue, 1 Dec 2015 18:04:30 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 61dd5ae65be6dfaeadb0e841ea6639351f0e04ce
 References: bsc#1012452
 Subject: [PATCH] btrfs: use GFP_KERNEL for allocations of workqueues

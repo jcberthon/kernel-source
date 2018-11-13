@@ -1,6 +1,6 @@
 From: Chris Mason <clm@fb.com>
 Date: Mon, 21 Mar 2016 06:59:09 -0700
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 389f239c53420802ad5085e51e88c37e2df5e003
 References: bsc#1012452
 Subject: [PATCH] btrfs: make sure we stay inside the bvec during

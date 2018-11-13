@@ -1,6 +1,6 @@
 From: Alex Lyakas <alex.bolshoy@gmail.com>
 Date: Thu, 10 Mar 2016 13:09:46 +0200
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc2
 Git-commit: 8bd98f0e6bf792e8fa7c3fed709321ad42ba8d2e
 References: bsc#1012452
 Subject: [PATCH] btrfs: csum_tree_block: return proper errno value

@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Wed, 14 Sep 2016 17:23:39 -0700
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: a42cbec9c662ced87f1d0f22a1c114de4cf6e352
 References: bsc#1012452
 Subject: [PATCH] Btrfs: add error handling for extent buffer in print

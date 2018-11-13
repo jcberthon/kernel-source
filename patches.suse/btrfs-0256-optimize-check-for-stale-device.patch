@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Sat, 13 Feb 2016 10:01:40 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 02feae3c5525771878461b90edd2ba38fd3f5359
 References: bsc#1012452
 Subject: [PATCH] btrfs: optimize check for stale device

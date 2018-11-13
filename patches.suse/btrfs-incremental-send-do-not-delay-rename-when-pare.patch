@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Wed, 11 Jan 2017 02:15:39 +0000
-Patch-mainline: 4.11-rc1
+Patch-mainline: v4.11-rc1
 Git-commit: fe9c798dbf4c78322549068255f611e4038a5b28
 References: bsc#1028325
 Subject: [PATCH] Btrfs: incremental send, do not delay rename when parent

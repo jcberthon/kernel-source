@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Mon, 15 Feb 2016 18:15:21 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 735654ea91a06a30bfe05fdfd09c8895abf6c1bf
 References: bsc#1012452
 Subject: [PATCH] btrfs: rename flags for vol args v2

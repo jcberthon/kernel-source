@@ -1,10 +1,9 @@
-From 5035657cb5ddd0d581c85d44e969dae2ff7d103c Mon Sep 17 00:00:00 2001
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
 Date: Mon, 27 Feb 2017 15:10:37 +0800
 Subject: [PATCH 6/8] btrfs: qgroup: Fix qgroup reserved space underflow caused
  by buffered write and quotas being enabled
 Git-commit: bc42bda22345efdb5d8b578d1b4df2c6eaa85c58
-Patch-mainline: 4.13
+Patch-mainline: v4.13-rc1
 References: bsc#1031395
 
 [BUG]

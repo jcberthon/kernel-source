@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Fri, 27 May 2016 17:42:05 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc2
 Git-commit: 2999241daa8d77947f108dfbde35c268cd7bd709
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix race between device replace and discard

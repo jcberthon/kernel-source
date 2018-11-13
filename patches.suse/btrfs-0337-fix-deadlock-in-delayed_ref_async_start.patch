@@ -1,6 +1,6 @@
 From: Chris Mason <clm@fb.com>
 Date: Wed, 27 Apr 2016 09:59:38 -0400
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc5
 Git-commit: 0f873eca82a0bee45f38862e0ea2ac7b1c2a31bd
 References: bsc#1012452
 Subject: [PATCH] btrfs: fix deadlock in delayed_ref_async_start

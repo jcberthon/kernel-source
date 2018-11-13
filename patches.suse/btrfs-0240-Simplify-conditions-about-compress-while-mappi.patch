@@ -1,6 +1,6 @@
 From: Satoru Takeuchi <takeuchi_satoru@jp.fujitsu.com>
 Date: Tue, 15 Mar 2016 09:09:59 +0900
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 13f48dc9094b56c5bffd8d57349a0a01a1926b2d
 References: bsc#1012452
 Subject: [PATCH] btrfs: Simplify conditions about compress while
