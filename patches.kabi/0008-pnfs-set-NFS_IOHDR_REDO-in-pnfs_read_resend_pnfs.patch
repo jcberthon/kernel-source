@@ -1,0 +1,45 @@
+From: NeilBrown <neilb@suse.com>
+Subject: kabi: revert sig change on pnfs_read_resend_pnfs
+Patch-mainline: never, kabi
+References: git-fixes
+
+Though this can not return an error now, we don't *need* it
+to be "void" - returning 0 maintains kabi, and is safe.
+
+Signed-off-by: NeilBrown <neilb@suse.com>
+
+---
+ fs/nfs/pnfs.c |    3 ++-
+ fs/nfs/pnfs.h |    2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+--- a/fs/nfs/pnfs.c
++++ b/fs/nfs/pnfs.c
+@@ -2086,7 +2086,7 @@ pnfs_try_to_read_data(struct nfs_pgio_he
+ }
+ 
+ /* Resend all requests through pnfs. */
+-void pnfs_read_resend_pnfs(struct nfs_pgio_header *hdr)
++int pnfs_read_resend_pnfs(struct nfs_pgio_header *hdr)
+ {
+ 	struct nfs_pageio_descriptor pgio;
+ 
+@@ -2095,6 +2095,7 @@ void pnfs_read_resend_pnfs(struct nfs_pg
+ 					hdr->completion_ops);
+ 		hdr->task.tk_status = nfs_pageio_resend(&pgio, hdr);
+ 	}
++	return 0;
+ }
+ EXPORT_SYMBOL_GPL(pnfs_read_resend_pnfs);
+ 
+--- a/fs/nfs/pnfs.h
++++ b/fs/nfs/pnfs.h
+@@ -280,7 +280,7 @@ int _pnfs_return_layout(struct inode *);
+ int pnfs_commit_and_return_layout(struct inode *);
+ void pnfs_ld_write_done(struct nfs_pgio_header *);
+ void pnfs_ld_read_done(struct nfs_pgio_header *);
+-void pnfs_read_resend_pnfs(struct nfs_pgio_header *);
++int pnfs_read_resend_pnfs(struct nfs_pgio_header *);
+ struct pnfs_layout_segment *pnfs_update_layout(struct inode *ino,
+ 					       struct nfs_open_context *ctx,
+ 					       loff_t pos,
