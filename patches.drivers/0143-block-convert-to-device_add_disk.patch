@@ -115,7 +115,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  cleanup_queue:
 --- a/drivers/block/floppy.c
 +++ b/drivers/block/floppy.c
-@@ -4349,8 +4349,7 @@ static int __init do_floppy_init(void)
+@@ -4352,8 +4352,7 @@ static int __init do_floppy_init(void)
  		/* to be cleaned up... */
  		disks[drive]->private_data = (void *)(long)drive;
  		disks[drive]->flags |= GENHD_FL_REMOVABLE;
@@ -127,7 +127,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	return 0;
 --- a/drivers/block/mtip32xx/mtip32xx.c
 +++ b/drivers/block/mtip32xx/mtip32xx.c
-@@ -3956,7 +3956,6 @@ static int mtip_block_initialize(struct
+@@ -3954,7 +3954,6 @@ static int mtip_block_initialize(struct
  	if (rv)
  		goto disk_index_error;
  
@@ -135,7 +135,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	dd->disk->major		= dd->major;
  	dd->disk->first_minor	= index * MTIP_MAX_MINORS;
  	dd->disk->minors 	= MTIP_MAX_MINORS;
-@@ -4008,7 +4007,7 @@ skip_create_disk:
+@@ -4006,7 +4005,7 @@ skip_create_disk:
  
  	/*
  	 * if rebuild pending, start the service thread, and delay the block
@@ -144,7 +144,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	 */
  	if (wait_for_rebuild == MTIP_FTL_REBUILD_MAGIC)
  		goto start_service_thread;
-@@ -4042,7 +4041,7 @@ skip_create_disk:
+@@ -4040,7 +4039,7 @@ skip_create_disk:
  	set_capacity(dd->disk, capacity);
  
  	/* Enable the block device and add it to /dev */
@@ -212,7 +212,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	card->gendisk->fops = &rsxx_fops;
 --- a/drivers/block/skd_main.c
 +++ b/drivers/block/skd_main.c
-@@ -4690,10 +4690,10 @@ static int skd_bdev_getgeo(struct block_
+@@ -4697,10 +4697,10 @@ static int skd_bdev_getgeo(struct block_
  	return -EIO;
  }
  
@@ -225,7 +225,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	return 0;
  }
  
-@@ -4812,8 +4812,6 @@ static int skd_pci_probe(struct pci_dev
+@@ -4819,8 +4819,6 @@ static int skd_pci_probe(struct pci_dev
  
  	pci_set_drvdata(pdev, skdev);
  
@@ -234,7 +234,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	for (i = 0; i < SKD_MAX_BARS; i++) {
  		skdev->mem_phys[i] = pci_resource_start(pdev, i);
  		skdev->mem_size[i] = (u32)pci_resource_len(pdev, i);
-@@ -4851,7 +4849,7 @@ static int skd_pci_probe(struct pci_dev
+@@ -4858,7 +4856,7 @@ static int skd_pci_probe(struct pci_dev
  					      (SKD_START_WAIT_SECONDS * HZ));
  	if (skdev->gendisk_on > 0) {
  		/* device came on-line after reset */
@@ -264,7 +264,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  }
 --- a/drivers/block/virtio_blk.c
 +++ b/drivers/block/virtio_blk.c
-@@ -651,7 +651,6 @@ static int virtblk_probe(struct virtio_d
+@@ -652,7 +652,6 @@ static int virtblk_probe(struct virtio_d
  	vblk->disk->first_minor = index_to_minor(index);
  	vblk->disk->private_data = vblk;
  	vblk->disk->fops = &virtblk_fops;
@@ -272,7 +272,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	vblk->disk->flags |= GENHD_FL_EXT_DEVT;
  	vblk->index = index;
  
-@@ -728,7 +727,7 @@ static int virtblk_probe(struct virtio_d
+@@ -729,7 +728,7 @@ static int virtblk_probe(struct virtio_d
  
  	virtio_device_ready(vdev);
  
@@ -291,7 +291,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	set_capacity(gd, capacity);
  
  	if (xlvbd_init_blk_queue(gd, sector_size, physical_sector_size,
-@@ -2089,7 +2088,7 @@ static void blkfront_connect(struct blkf
+@@ -2092,7 +2091,7 @@ static void blkfront_connect(struct blkf
  	kick_pending_request_queues(info);
  	spin_unlock_irq(&info->io_lock);
  
@@ -302,7 +302,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	return;
 --- a/drivers/ide/ide-cd.c
 +++ b/drivers/ide/ide-cd.c
-@@ -1770,7 +1770,6 @@ static int ide_cd_probe(ide_drive_t *dri
+@@ -1772,7 +1772,6 @@ static int ide_cd_probe(ide_drive_t *dri
  	drive->driver_data = info;
  
  	g->minors = 1;
@@ -310,7 +310,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	g->flags = GENHD_FL_CD | GENHD_FL_REMOVABLE;
  	if (ide_cdrom_setup(drive)) {
  		put_device(&info->dev);
-@@ -1780,7 +1779,7 @@ static int ide_cd_probe(ide_drive_t *dri
+@@ -1782,7 +1781,7 @@ static int ide_cd_probe(ide_drive_t *dri
  	ide_cd_read_toc(drive, &sense);
  	g->fops = &idecd_ops;
  	g->flags |= GENHD_FL_REMOVABLE | GENHD_FL_BLOCK_EVENTS_ON_EXCL_WRITE;
@@ -409,7 +409,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  		return -ENOMEM;
 --- a/drivers/nvdimm/btt.c
 +++ b/drivers/nvdimm/btt.c
-@@ -1243,7 +1243,6 @@ static int btt_blk_init(struct btt *btt)
+@@ -1246,7 +1246,6 @@ static int btt_blk_init(struct btt *btt)
  	}
  
  	nvdimm_namespace_disk_name(ndns, btt->btt_disk->disk_name);
@@ -417,7 +417,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	btt->btt_disk->first_minor = 0;
  	btt->btt_disk->fops = &btt_fops;
  	btt->btt_disk->private_data = btt;
-@@ -1258,7 +1257,7 @@ static int btt_blk_init(struct btt *btt)
+@@ -1261,7 +1260,7 @@ static int btt_blk_init(struct btt *btt)
  	btt->btt_queue->queuedata = btt;
  
  	set_capacity(btt->btt_disk, 0);
@@ -428,7 +428,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
 --- a/drivers/nvdimm/pmem.c
 +++ b/drivers/nvdimm/pmem.c
-@@ -333,13 +333,12 @@ static int pmem_attach_disk(struct devic
+@@ -331,14 +331,13 @@ static int pmem_attach_disk(struct devic
  	disk->queue		= q;
  	disk->flags		= GENHD_FL_EXT_DEVT;
  	nvdimm_namespace_disk_name(ndns, disk->disk_name);
@@ -438,6 +438,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	if (devm_init_badblocks(dev, &pmem->bb))
  		return -ENOMEM;
  	nvdimm_badblocks_populate(nd_region, &pmem->bb, res);
+ 	disk->bb = &pmem->bb;
 -	add_disk(disk);
 +	device_add_disk(dev, disk);
  	revalidate_disk(disk);
@@ -445,7 +446,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	if (devm_add_action_or_reset(dev, pmem_release_disk, disk))
 --- a/drivers/nvme/host/core.c
 +++ b/drivers/nvme/host/core.c
-@@ -1660,7 +1660,6 @@ static void nvme_alloc_ns(struct nvme_ct
+@@ -1839,7 +1839,6 @@ static void nvme_alloc_ns(struct nvme_ct
  	disk->fops = &nvme_fops;
  	disk->private_data = ns;
  	disk->queue = ns->queue;
@@ -453,7 +454,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	disk->flags = GENHD_FL_EXT_DEVT;
  	sprintf(disk->disk_name, "nvme%dn%d", ctrl->instance, ns->instance);
  
-@@ -1675,7 +1674,7 @@ static void nvme_alloc_ns(struct nvme_ct
+@@ -1854,7 +1853,7 @@ static void nvme_alloc_ns(struct nvme_ct
  	if (ns->type == NVME_NS_LIGHTNVM)
  		return;
  
@@ -521,7 +522,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  out_queue:
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
-@@ -3009,7 +3009,6 @@ static void sd_probe_async(void *data, a
+@@ -3047,7 +3047,6 @@ static void sd_probe_async(void *data, a
  
  	sd_revalidate_disk(gd);
  
@@ -529,7 +530,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	gd->flags = GENHD_FL_EXT_DEVT;
  	if (sdp->removable) {
  		gd->flags |= GENHD_FL_REMOVABLE;
-@@ -3017,7 +3016,7 @@ static void sd_probe_async(void *data, a
+@@ -3055,7 +3054,7 @@ static void sd_probe_async(void *data, a
  	}
  
  	blk_pm_runtime_init(sdp->request_queue, dev);
@@ -540,7 +541,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
 --- a/drivers/scsi/sr.c
 +++ b/drivers/scsi/sr.c
-@@ -713,7 +713,6 @@ static int sr_probe(struct device *dev)
+@@ -749,7 +749,6 @@ static int sr_probe(struct device *dev)
  	get_capabilities(cd);
  	sr_vendor_init(cd);
  
@@ -548,7 +549,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	set_capacity(disk, cd->capacity);
  	disk->private_data = &cd->driver;
  	disk->queue = sdev->request_queue;
-@@ -730,7 +729,7 @@ static int sr_probe(struct device *dev)
+@@ -766,7 +765,7 @@ static int sr_probe(struct device *dev)
  
  	dev_set_drvdata(dev, cd);
  	disk->flags |= GENHD_FL_REMOVABLE;
