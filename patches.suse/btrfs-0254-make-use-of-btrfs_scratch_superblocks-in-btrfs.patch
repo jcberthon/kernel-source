@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Sat, 13 Feb 2016 10:01:38 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 42b674271566c26692c32f4ec1f4b4cf14d5046f
 References: bsc#1012452
 Subject: [PATCH] btrfs: make use of btrfs_scratch_superblocks() in

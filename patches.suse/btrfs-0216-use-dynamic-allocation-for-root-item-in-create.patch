@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 24 Mar 2016 17:49:22 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 49a3c4d9b64d2e5d6fd268d53153945d04cb5559
 References: bsc#1012452
 Subject: [PATCH] btrfs: use dynamic allocation for root item in

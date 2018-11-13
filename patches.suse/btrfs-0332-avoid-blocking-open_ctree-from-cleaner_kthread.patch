@@ -1,6 +1,6 @@
 From: Zygo Blaxell <ce3g8jdj@umail.furryterror.org>
 Date: Sun, 12 Jun 2016 23:39:58 -0400
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc4
 Git-commit: 90c711ab380d633bf85249bd5d819edb601feda7
 References: bsc#1012452
 Subject: [PATCH] btrfs: avoid blocking open_ctree from cleaner_kthread

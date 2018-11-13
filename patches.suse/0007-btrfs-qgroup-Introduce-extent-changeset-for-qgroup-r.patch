@@ -1,11 +1,10 @@
-From 36c5a968a15485489fceca64a39a5845c93bf50e Mon Sep 17 00:00:00 2001
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
 Date: Mon, 27 Feb 2017 15:10:38 +0800
 Subject: [PATCH 7/8] btrfs: qgroup: Introduce extent changeset for qgroup
  reserve functions
 References: dependent patch, bsc#1031395
 Git-commit: 364ecf3651e0862152c8b340d7cb3021dc0122c7
-Patch-mainline: 4.13
+Patch-mainline: v4.13-rc1
 
 Introduce a new parameter, struct extent_changeset for
 btrfs_qgroup_reserved_data() and its callers.

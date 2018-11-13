@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Mon, 11 Apr 2016 18:52:02 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: e55d1153dbf48485a74eb4bf4eefeaedcf1486a9
 References: bsc#1012452
 Subject: [PATCH] btrfs: send: use temporary variable to store

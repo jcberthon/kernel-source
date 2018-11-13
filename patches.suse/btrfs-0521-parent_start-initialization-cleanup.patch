@@ -1,6 +1,6 @@
 From: Goldwyn Rodrigues <rgoldwyn@suse.com>
 Date: Thu, 22 Sep 2016 14:11:34 -0500
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: 0f5053eb90f58c619885eac2757ccdc5eccd9046
 References: bsc#1012452
 Subject: [PATCH] btrfs: parent_start initialization cleanup

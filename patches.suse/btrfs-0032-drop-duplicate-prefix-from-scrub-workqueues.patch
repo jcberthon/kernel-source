@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Tue, 1 Dec 2015 18:09:12 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 0de270fa83d5a45664e3f2428d432145037ac432
 References: bsc#1012452
 Subject: [PATCH] btrfs: drop duplicate prefix from scrub workqueues

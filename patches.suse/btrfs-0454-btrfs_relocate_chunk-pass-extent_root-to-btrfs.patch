@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Fri, 24 Jun 2016 16:37:38 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 05f9a780129c81dfd70ae827a9abb15c7e6321a8
 References: bsc#1012452
 Subject: [PATCH] btrfs: btrfs_relocate_chunk pass extent_root to

@@ -1,6 +1,6 @@
 From: Anand Jain <Anand.Jain@oracle.com>
 Date: Fri, 22 Jul 2016 06:04:53 +0800
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc4
 Git-commit: 142388194191a3edc9ba01cfcfd8b691e0971fb2
 References: bsc#1012452
 Subject: [PATCH] btrfs: do not background blkdev_put()

@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Fri, 1 Apr 2016 16:14:25 -0400
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 884f6eca59475bc3cad5c22360523a1261bd5597
 References: bsc#1012452
 Subject: [PATCH] btrfs: uapi/linux/btrfs.h migration, document subvol

@@ -1,9 +1,8 @@
-From 9dbeea7f08f3784b152d9fb3b86beb34aad77c72 Mon Sep 17 00:00:00 2001
 From: Eric Dumazet <edumazet@google.com>
 Date: Fri, 26 Aug 2016 08:51:39 -0700
 Subject: [PATCH] rhashtable: fix a memory leak in alloc_bucket_locks()
 Git-commit: 9dbeea7f08f3784b152d9fb3b86beb34aad77c72
-Patch-mainline: v4.8-rc3
+Patch-mainline: v4.8-rc5
 References: bsc#997456
 
 If vmalloc() was successful, do not attempt a kmalloc_array()

@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Wed, 15 Jun 2016 10:33:06 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 1db1ff92b6ce2247999787480c2eeb63a1811e79
 References: bsc#1012452
 Subject: [PATCH] btrfs: convert nodesize macros to static inlines

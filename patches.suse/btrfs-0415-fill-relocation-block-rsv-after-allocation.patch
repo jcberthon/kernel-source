@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Fri, 27 May 2016 13:08:26 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: ac2fabac4211431b607b326c2233e73b81e86af2
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fill relocation block rsv after allocation

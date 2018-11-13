@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Mon, 7 Mar 2016 16:56:21 -0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: a91326679f2a0a4c239cd643674fdcda28ee86be
 References: bsc#1012452
 Subject: [PATCH] Btrfs: make mapping->writeback_index point to the

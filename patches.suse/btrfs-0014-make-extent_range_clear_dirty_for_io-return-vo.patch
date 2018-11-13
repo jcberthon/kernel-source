@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 3 Dec 2015 13:08:59 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: bd1fa4f0b0ddbed05ef98c28048d00db727c4b0e
 References: bsc#1012452
 Subject: [PATCH] btrfs: make extent_range_clear_dirty_for_io return

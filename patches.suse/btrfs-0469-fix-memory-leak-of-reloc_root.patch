@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Tue, 19 Jul 2016 15:36:05 -0700
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc4
 Git-commit: 1c1ea4f781db9f754842b9c31d1eff400d17cddc
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix memory leak of reloc_root

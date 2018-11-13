@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Fri, 18 Dec 2015 01:57:29 +0000
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 0376374a98abd533fb49c6db12967bddc2f4b4b3
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix locking bugs when defragging leaves

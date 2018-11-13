@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Fri, 3 Jun 2016 12:05:14 -0700
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc3
 Git-commit: 99e3ecfcb9f4ca35192d20a5bea158b81f600062
 References: bsc#1012452
 Subject: [PATCH] Btrfs: add more validation checks for superblock

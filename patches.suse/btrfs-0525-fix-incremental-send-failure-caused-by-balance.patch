@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Mon, 19 Sep 2016 10:57:40 +0100
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc3
 Git-commit: d5e84fd8d0634d056248b67463b42f6c85896a19
 References: bsc#985850
 Subject: [PATCH] Btrfs: fix incremental send failure caused by balance

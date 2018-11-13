@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Mon, 30 Nov 2015 16:51:29 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 35b3ad50baa4a5fc2ae616c0513d2987bfb52a85
 References: bsc#1012452
 Subject: [PATCH] btrfs: better packing of btrfs_delayed_extent_op

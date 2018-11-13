@@ -1,6 +1,6 @@
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
 Date: Wed, 23 Mar 2016 11:38:17 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc3
 Git-commit: 0305bc279317a6ba261a663cc32721d78e6544cf
 References: bsc#1012452
 Subject: [PATCH] btrfs: Output more info for enospc_debug mount option

@@ -1,6 +1,6 @@
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
 Date: Wed, 20 Jul 2016 15:04:18 +0800
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc4
 Git-commit: d8422ba334f9df16e071bc77707e55fd7f8446ae
 References: bsc#1017641
 Subject: [PATCH] btrfs: backref: Fix soft lockup in __merge_refs

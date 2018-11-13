@@ -1,6 +1,6 @@
 From: Scott Talbert <scott.talbert@hgst.com>
 Date: Mon, 9 May 2016 09:14:28 -0400
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 4673272f43ae790ab9ec04e38a7542f82bb8f020
 References: bsc#1012452
 Subject: [PATCH] btrfs: fix memory leak during RAID 5/6 device

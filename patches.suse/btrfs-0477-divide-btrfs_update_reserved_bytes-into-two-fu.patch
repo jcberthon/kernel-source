@@ -1,6 +1,6 @@
 From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
 Date: Mon, 25 Jul 2016 15:51:39 +0800
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc4
 Git-commit: 4824f1f412f75e9f84b9cecbde828e8f4699f82d
 References: bsc#1012452
 Subject: [PATCH] btrfs: divide btrfs_update_reserved_bytes() into two

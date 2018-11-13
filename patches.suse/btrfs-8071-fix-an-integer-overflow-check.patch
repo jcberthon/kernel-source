@@ -1,6 +1,6 @@
 From: Dan Carpenter <dan.carpenter@oracle.com>
 Date: Fri, 17 Mar 2017 23:51:20 +0300
-Patch-mainline: 4.11
+Patch-mainline: v4.11-rc5
 Git-commit: 457ae7268b29c33dee1c0feb143a15f6029d177b
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix an integer overflow check

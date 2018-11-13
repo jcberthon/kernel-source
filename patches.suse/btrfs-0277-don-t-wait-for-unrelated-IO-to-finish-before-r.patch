@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Tue, 26 Apr 2016 15:36:38 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 578def7c50f236432ba140d35bb7ca4ef0a1b20b
 References: bsc#1012452
 Subject: [PATCH] Btrfs: don't wait for unrelated IO to finish before

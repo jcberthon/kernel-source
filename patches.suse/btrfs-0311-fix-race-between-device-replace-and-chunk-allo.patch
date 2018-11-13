@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Wed, 18 May 2016 20:29:44 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc2
 Git-commit: 22ab04e814f4fe2ce72a13d291491f98ef6ac757
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix race between device replace and chunk

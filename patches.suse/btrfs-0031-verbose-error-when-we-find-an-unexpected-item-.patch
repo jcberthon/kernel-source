@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Mon, 30 Nov 2015 17:27:09 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 93a3d46780b0f207f76608078eb965cf7b83902c
 References: bsc#1012452
 Subject: [PATCH] btrfs: verbose error when we find an unexpected item

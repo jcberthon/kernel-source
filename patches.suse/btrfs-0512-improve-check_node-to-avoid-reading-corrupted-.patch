@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Wed, 14 Sep 2016 17:23:24 -0700
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: 6b722c1747d533ac6d4df110dc8233db46918b65
 References: bsc#1012452
 Subject: [PATCH] Btrfs: improve check_node to avoid reading corrupted

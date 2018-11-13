@@ -1,6 +1,6 @@
 From: Arnd Bergmann <arnd@arndb.de>
 Date: Mon, 22 Feb 2016 22:53:20 +0100
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: f827ba9a641b481f01d1bdc0771a7afc3776cc0b
 References: bsc#1012452
 Subject: [PATCH] btrfs: avoid uninitialized variable warning

@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Tue, 26 Jan 2016 18:42:40 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 4fe7a0e13864238fe5b4cc2640e963581f96429e
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: avoid undone reada extents in

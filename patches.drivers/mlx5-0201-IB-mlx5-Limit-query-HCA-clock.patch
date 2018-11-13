@@ -1,7 +1,7 @@
 From: Noa Osherovich <noaos@mellanox.com>
 Date: Sat, 4 Jun 2016 15:15:31 +0300
 Subject: [PATCH] IB/mlx5: Limit query HCA clock
-Patch-mainline: v4.7-rc5
+Patch-mainline: v4.7-rc3
 Git-commit: bc5c6eed0510f19b033ce7a7d3976e695e96785b
 References: bsc#966170 FATE#320225 bsc#966172 FATE#320226
 

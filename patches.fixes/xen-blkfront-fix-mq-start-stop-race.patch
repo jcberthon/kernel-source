@@ -1,6 +1,6 @@
 From: Junxiao Bi <junxiao.bi@oracle.com>
 Date: Thu, 20 Jul 2017 09:26:21 +0800
-Patch-mainline: v4.9-rc1
+Patch-mainline: v4.13-rc3
 Subject: xen-blkfront: fix mq start/stop race
 Git-commit: 4b422cb99836de3d261faec20a0329385bdec43d
 References: bsc#1085042

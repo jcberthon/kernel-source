@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Mon, 18 Apr 2016 16:51:23 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 779bf3fefa835cb52a07457c8acac6f2f66f2493
 References: bsc#1012452
 Subject: [PATCH] btrfs: fix lock dep warning, move scratch dev out of

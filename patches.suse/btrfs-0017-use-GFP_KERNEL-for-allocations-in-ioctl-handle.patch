@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Wed, 4 Nov 2015 15:38:29 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 8d2db7855e7b65c9eecc8789fc54d818ee281ac6
 References: bsc#1012452
 Subject: [PATCH] btrfs: use GFP_KERNEL for allocations in ioctl

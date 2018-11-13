@@ -1,9 +1,8 @@
-From fb1a21114fe18e2ee96ea159c6b42441cc3aedf1 Mon Sep 17 00:00:00 2001
 From: Arun Siluvery <arun.siluvery@linux.intel.com>
 Date: Thu, 19 Nov 2015 16:47:44 +0000
 Subject: Revert "drm/i915: Initialize HWS page address after GPU reset"
 Git-commit: fb1a21114fe18e2ee96ea159c6b42441cc3aedf1
-Patch-mainline: v4.3-rc3
+Patch-mainline: v4.5-rc1
 References: bsc#1106929
 
 This reverts commit 2e5356da370e36ba7aab39d2800c7a2412630ae7.

@@ -1,9 +1,8 @@
-From d530b5f1ca0bb66958a2b714bebe40a1248b9c15 Mon Sep 17 00:00:00 2001
 From: Nicholas Mc Guire <hofrat@osadl.org>
 Date: Sat, 14 Jul 2018 14:32:12 +0200
 Subject: [PATCH] drm: re-enable error handling
 References: bsc#1103884
-Patch-mainline: v4.18-rc3
+Patch-mainline: v4.18-rc8
 Git-commit: d530b5f1ca0bb66958a2b714bebe40a1248b9c15
 
 drm_legacy_ctxbitmap_next() returns idr_alloc() which can return

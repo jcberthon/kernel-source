@@ -1,7 +1,7 @@
 From: Max Gurtovoy <maxg@mellanox.com>
 Date: Mon, 6 Jun 2016 19:34:39 +0300
 Subject: [PATCH] IB/core: Fix bit curruption in ib_device_cap_flags structure
-Patch-mainline: v4.7-rc5
+Patch-mainline: v4.7-rc3
 Git-commit: 47355b3cd7d3c9c5226bff7c449b9d269fb17fa6
 References: bsc#966170 FATE#320225 bsc#966172 FATE#320226
 

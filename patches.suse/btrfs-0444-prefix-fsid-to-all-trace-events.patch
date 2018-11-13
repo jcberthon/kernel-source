@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Thu, 9 Jun 2016 17:27:55 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: bc074524e123ded281cde25ebc5661910f9679e3
 References: bsc#1012452
 Subject: [PATCH] btrfs: prefix fsid to all trace events

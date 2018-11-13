@@ -1,6 +1,6 @@
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 Date: Thu, 21 Jan 2016 15:55:55 +0530
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 2dabb3248453be9b81906dd028ec6979708de7be
 References: bsc#1012452
 Subject: [PATCH] Btrfs: Direct I/O read: Work on sectorsized blocks

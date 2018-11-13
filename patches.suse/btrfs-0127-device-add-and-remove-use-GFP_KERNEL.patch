@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 11 Feb 2016 14:25:38 +0100
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 78f2c9e6dbb144f0000c9cbb79bdf19410e4007b
 References: bsc#1012452
 Subject: [PATCH] btrfs: device add and remove: use GFP_KERNEL

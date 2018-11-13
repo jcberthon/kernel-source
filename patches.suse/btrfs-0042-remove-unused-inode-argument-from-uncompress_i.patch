@@ -1,6 +1,6 @@
 From: Byongho Lee <bhlee.kernel@gmail.com>
 Date: Tue, 19 May 2015 23:46:45 +0900
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: e40da0e58a208940bf3d1745f9bd8cf1e27904d4
 References: bsc#1012452
 Subject: [PATCH] btrfs: remove unused inode argument from

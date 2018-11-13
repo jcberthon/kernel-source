@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Fri, 25 Mar 2016 13:25:49 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 48c3d480e4f746edb0bd3b84b4bd987ef8728560
 References: bsc#1012452
 Subject: [PATCH] Btrfs: always reserve metadata for delalloc extents

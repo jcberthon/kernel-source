@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Thu, 31 Dec 2015 18:48:54 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 319450211842ba92d0604af6e4ddf15f445efbcf
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: bypass adding extent when all zone failed

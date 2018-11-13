@@ -1,6 +1,6 @@
 From: Nikolay Borisov <kernel@kyup.com>
 Date: Wed, 13 Jul 2016 16:19:14 +0300
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: aee133afcdf77641be66c5c9f32975feca8e6bd0
 References: bsc#1012452
 Subject: [PATCH] btrfs: Ratelimit "no csum found" info message

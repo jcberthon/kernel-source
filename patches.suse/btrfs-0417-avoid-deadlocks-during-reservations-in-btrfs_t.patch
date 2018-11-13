@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Wed, 20 Jul 2016 16:48:45 -0700
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: bac357dcec2956f01df9da5365be257741b534dc
 References: bsc#1012452
 Subject: [PATCH] Btrfs: avoid deadlocks during reservations in

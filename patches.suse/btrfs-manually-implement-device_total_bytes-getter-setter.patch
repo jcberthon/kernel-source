@@ -1,10 +1,9 @@
-From 6a5887fd83009746e3a7d85f4a2fa2396504d81d Mon Sep 17 00:00:00 2001
 From: Nikolay Borisov <nborisov@suse.com>
 Date: Fri, 16 Jun 2017 14:39:19 +0300
 Subject: [PATCH 1/2] btrfs: Manually implement device_total_bytes
  getter/setter
 Git-commit: eca152edf57e04f61d5a79e404d8e6c147278fdf
-Patch-mainline: v4.13 or v4.12-rc8 (next release)
+Patch-mainline: v4.13-rc1
 References: bsc#1043912
 
 The device->total_bytes member needs to always be rounded down to sectorsize

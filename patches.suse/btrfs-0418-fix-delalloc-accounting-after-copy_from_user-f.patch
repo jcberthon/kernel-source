@@ -1,6 +1,6 @@
 From: Chris Mason <clm@fb.com>
 Date: Tue, 19 Jul 2016 05:52:36 -0700
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 8b8b08cbfb9021af4b54b4175fc4c51d655aac8c
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix delalloc accounting after copy_from_user

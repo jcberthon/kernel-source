@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Fri, 18 Dec 2015 21:56:08 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 8e9aa51f5405b2a01a44818120116b65a2ba4d3a
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: Add missed segment checking in

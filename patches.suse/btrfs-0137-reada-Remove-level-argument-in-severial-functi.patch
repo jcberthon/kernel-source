@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Thu, 31 Dec 2015 20:30:00 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 1e7970c0f31d6916e0ab523e5f05c9741f71955f
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: Remove level argument in severial

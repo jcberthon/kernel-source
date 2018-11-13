@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Wed, 17 Aug 2016 21:58:33 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc4
 Git-commit: 35bbb97fc898aeb874cb7c8b746f091caa359994
 References: bsc#994881
 Subject: [PATCH] btrfs: don't create or leak aliased root while

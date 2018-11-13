@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Thu, 7 Jan 2016 18:38:48 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 2fefd5583f8b86171c898f90cadac7c09ccf9d73
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: limit max works count

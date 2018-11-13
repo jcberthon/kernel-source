@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 16 Jun 2016 17:34:28 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc4
 Git-commit: 89c5a5441d703ba068699524ae59f7806e9b173d
 References: bsc#1012452
 Subject: [PATCH] btrfs: remove build fixup for qgroup_account_snapshot

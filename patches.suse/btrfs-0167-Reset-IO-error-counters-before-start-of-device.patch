@@ -1,6 +1,6 @@
 From: Yauhen Kharuzhy <yauhen.kharuzhy@zavadatar.com>
 Date: Tue, 29 Mar 2016 14:17:48 -0700
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc3
 Git-commit: 7ccefb98ce3e5c4493cd213cd03714b7149cf0cb
 References: bsc#1012452
 Subject: [PATCH] btrfs: Reset IO error counters before start of device

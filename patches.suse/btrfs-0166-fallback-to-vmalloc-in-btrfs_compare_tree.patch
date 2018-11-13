@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Wed, 30 Mar 2016 16:01:12 +0200
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc3
 Git-commit: 8f282f71eaee7ac979cdbe525f76daa0722798a8
 References: bsc#1012452
 Subject: [PATCH] btrfs: fallback to vmalloc in btrfs_compare_tree

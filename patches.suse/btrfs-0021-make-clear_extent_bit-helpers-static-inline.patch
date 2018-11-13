@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 3 Dec 2015 14:08:11 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: e83b1d91f872a4cf7bf0d3528044fc9e43260e2b
 References: bsc#1012452
 Subject: [PATCH] btrfs: make clear_extent_bit helpers static inline

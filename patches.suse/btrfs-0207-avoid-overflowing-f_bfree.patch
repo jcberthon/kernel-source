@@ -1,6 +1,6 @@
 From: Luis de Bethencourt <luisbg@osg.samsung.com>
 Date: Wed, 30 Mar 2016 23:18:14 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 41b34accb265e3a20211a7a8ef3625678f1c6ec7
 References: bsc#1012452
 Subject: [PATCH] btrfs: avoid overflowing f_bfree

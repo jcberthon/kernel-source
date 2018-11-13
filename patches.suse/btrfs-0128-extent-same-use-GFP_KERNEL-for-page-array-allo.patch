@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 11 Feb 2016 14:25:38 +0100
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: fd95ef56b1acf96a24ff3d3f7bf19c2350ad0786
 References: bsc#1012452
 Subject: [PATCH] btrfs: extent same: use GFP_KERNEL for page array

@@ -2,7 +2,7 @@ From: Liu Bo <bo.li.liu@oracle.com>
 Date: Fri, 7 Apr 2017 13:11:10 -0700
 Subject: Btrfs: fix segmentation fault when doing dio read
 Git-commit: 97bf5a5589aa3a59c60aa775fc12ec0483fc5002
-Patch-mainline: v4.11
+Patch-mainline: v4.11-rc7
 References: bsc#1040425
 
 Commit 2dabb3248453 ("Btrfs: Direct I/O read: Work on sectorsized blocks")

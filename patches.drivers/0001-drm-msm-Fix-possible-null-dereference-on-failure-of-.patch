@@ -1,9 +1,8 @@
-From 03c94d60261c28689465a16086eb290ab3012aa3 Mon Sep 17 00:00:00 2001
 From: Ben Hutchings <ben.hutchings@codethink.co.uk>
 Date: Tue, 3 Apr 2018 23:38:45 +0100
 Subject: drm/msm: Fix possible null dereference on failure of get_pages()
 References: bsc#1102394
-Patch-mainline: v4.17-rc2
+Patch-mainline: v4.18-rc1
 Git-commit: 03c94d60261c28689465a16086eb290ab3012aa3
 
 Commit 62e3a3e342af changed get_pages() to initialise

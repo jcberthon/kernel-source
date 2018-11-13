@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Wed, 23 Sep 2015 15:00:37 -0400
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc3
 Git-commit: 65d4f4c151a5fa7b2dacaaf70def3f95001766d7
 References: bsc#1012452
 Subject: [PATCH] Btrfs: end transaction if we abort when creating uuid

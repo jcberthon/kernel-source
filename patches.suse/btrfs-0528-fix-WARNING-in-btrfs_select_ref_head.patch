@@ -1,6 +1,6 @@
 From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
 Date: Mon, 20 Jun 2016 09:18:52 +0800
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc4
 Git-commit: 9d1032cc49a8a1065e79ee323de66bcb4fdbd535
 References: bsc#1012452
 Subject: [PATCH] btrfs: fix WARNING in btrfs_select_ref_head()

@@ -1,6 +1,6 @@
 From: Robbie Ko <robbieko@synology.com>
 Date: Tue, 23 Jun 2015 18:39:50 +0800
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc2
 Git-commit: 764433a12e78e1a2161793c02eceafdfed2d652b
 References: bsc#1018316
 Subject: [PATCH] Btrfs: send, fix invalid leaf accesses due to

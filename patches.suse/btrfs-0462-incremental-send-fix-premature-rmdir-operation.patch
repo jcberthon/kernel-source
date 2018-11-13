@@ -1,6 +1,6 @@
 From: Robbie Ko <robbieko@synology.com>
 Date: Tue, 23 Jun 2015 18:39:49 +0800
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc2
 Git-commit: 99ea42ddb13bad6188d4f183f8866cacd14fa141
 References: bsc#1018316
 Subject: [PATCH] Btrfs: incremental send, fix premature rmdir

@@ -1,9 +1,8 @@
-From 98cb20f8fac462c4f64cbdce7a7abab2b8ee9832 Mon Sep 17 00:00:00 2001
 From: Brian Foster <bfoster@redhat.com>
 Date: Sun, 17 Sep 2017 14:06:12 -0700
 Subject: [PATCH] xfs: always verify the log tail during recovery
 Git-commit: 5297ac1f6d7cbf45464a49b9558831f271dfc559
-Patch-mainline: v4.13.3
+Patch-mainline: v4.14-rc1
 References: bsc#1036215
 Stable-commit: 98cb20f8fac462c4f64cbdce7a7abab2b8ee9832
 

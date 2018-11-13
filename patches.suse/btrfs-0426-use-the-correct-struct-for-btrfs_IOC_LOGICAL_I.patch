@@ -1,6 +1,6 @@
 From: Hans van Kranenburg <hans.van.kranenburg@mendix.com>
 Date: Sun, 3 Jul 2016 23:23:06 +0200
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 7af7c616fa2f1ce6c0d806b89898d2df098b4bd8
 References: bsc#1012452
 Subject: [PATCH] Btrfs: use the correct struct for

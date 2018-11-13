@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 3 Dec 2015 12:49:48 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 39a27ec1004e886f1d949bdb8f2616896d02c5c2
 References: bsc#1012452
 Subject: [PATCH] btrfs: use GFP_KERNEL for xattr and acl allocations

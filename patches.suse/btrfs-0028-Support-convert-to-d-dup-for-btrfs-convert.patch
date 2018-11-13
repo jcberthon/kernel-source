@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Thu, 19 Nov 2015 17:26:22 +0800
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: c5ca87819d7f10625b0940b356adb8ac0f1080d7
 References: bsc#1012452
 Subject: [PATCH] btrfs: Support convert to -d dup for btrfs-convert

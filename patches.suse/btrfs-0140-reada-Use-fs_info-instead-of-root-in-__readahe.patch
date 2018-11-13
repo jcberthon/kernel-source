@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Thu, 31 Dec 2015 22:46:45 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 02873e432518f84ad8f15d8911e79659ea38085f
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: Use fs_info instead of root in

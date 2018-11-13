@@ -1,6 +1,6 @@
 From: Dan Carpenter <dan.carpenter@oracle.com>
 Date: Wed, 13 Jan 2016 15:21:17 +0300
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 0dc924c5f2a3c4d999e12feaccee5f970cea1315
 References: bsc#1012452
 Subject: [PATCH] Btrfs: clean up an error code in

@@ -1,6 +1,6 @@
 From: Sudip Mukherjee <sudipm.mukherjee@gmail.com>
 Date: Tue, 16 Feb 2016 13:32:47 +0530
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 89771cc98c5a4e8666e479dde171ffb52c6fa774
 References: bsc#1012452
 Subject: [PATCH] btrfs: fix build warning

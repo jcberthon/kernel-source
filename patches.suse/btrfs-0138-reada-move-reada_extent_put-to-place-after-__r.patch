@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Thu, 31 Dec 2015 21:07:17 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: b257cf50060cada63a3fe11a932909b9badf4595
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: move reada_extent_put to place after

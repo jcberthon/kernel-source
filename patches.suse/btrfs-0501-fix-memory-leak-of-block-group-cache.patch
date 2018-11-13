@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Wed, 20 Jul 2016 17:44:12 -0700
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: c79a175175d5a908a7c4d923d44f36808f56536e
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix memory leak of block group cache

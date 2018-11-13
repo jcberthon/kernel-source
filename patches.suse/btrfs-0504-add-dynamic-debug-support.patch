@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Wed, 31 Aug 2016 23:55:33 -0400
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: 897a41b1167955bd543bb252fd3f06f5844f2177
 References: bsc#1012452
 Subject: [PATCH] btrfs: add dynamic debug support

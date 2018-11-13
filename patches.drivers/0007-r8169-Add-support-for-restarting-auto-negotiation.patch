@@ -1,9 +1,8 @@
-From aaa2af4da03a5f54173b5957389f7ea6e1535860 Mon Sep 17 00:00:00 2001
 From: Florian Fainelli <f.fainelli@gmail.com>
 Date: Sat, 3 Dec 2016 12:01:19 -0800
 Subject: [PATCH 7/7] r8169: Add support for restarting auto-negotiation
 Git-commit: f0903ea371f56c4977d1c07c2f8d4a55846c2801
-Patch-mainline: v4.10
+Patch-mainline: v4.10-rc1
 References: bsc#1050742
 
 Implement ethtooll::nway_restart by utilizing mii_nway_restart.

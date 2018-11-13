@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 11 Feb 2016 13:24:13 +0100
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 47dc196ae719c197b961c09d72d1b5ab90c66dc5
 References: bsc#1012452
 Subject: [PATCH] btrfs: use proper type for failrec in extent_state

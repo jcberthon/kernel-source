@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Mon, 15 Feb 2016 16:28:14 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 418775a22b4c67bd15915e043c3a8f29816799bd
 References: bsc#1012452
 Subject: [PATCH] btrfs: use existing device constraints table

@@ -1,6 +1,6 @@
 From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
 Date: Mon, 1 Aug 2016 13:28:08 +0800
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc4
 Git-commit: 9e7cc91a6d18a4973c6d2cc104871439c9e94f3d
 References: bsc#1012452
 Subject: [PATCH] btrfs: fix fsfreeze hang caused by delayed iputs deal

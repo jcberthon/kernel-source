@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Tue, 5 Jul 2016 12:10:14 -0700
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: fb770ae414d018255afa7a70b14ba1f8620762dd
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix read_node_slot to return errors
