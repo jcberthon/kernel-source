@@ -1,0 +1,80 @@
+From: Trond Myklebust <trond.myklebust@primarydata.com>
+Date: Sat, 29 Apr 2017 00:02:37 -0400
+Subject: [PATCH] pNFS/flexfiles: Fix up the ff_layout_write_pagelist failure
+ path
+Git-commit: 37f8aa16da8e9239092429e7a6dadf352897a92d
+Patch-mainline: v4.12
+References: git-fixes
+
+If the attempt to write through pNFS fails, we need to use the same
+failure semantics as for the read path: If the FF_FLAGS_NO_IO_THRU_MDS
+flag is set or we have sufficient valid DSes, then we must retry through
+pNFS
+
+Fixes: d67ae825a59d ("pnfs/flexfiles: Add the FlexFile Layout Driver")
+Signed-off-by: Trond Myklebust <trond.myklebust@primarydata.com>
+Acked-by: NeilBrown <neilb@suse.com>
+
+---
+ fs/nfs/flexfilelayout/flexfilelayout.c |   11 ++++++++---
+ fs/nfs/pnfs.c                          |   14 +++++++++++++-
+ 2 files changed, 21 insertions(+), 4 deletions(-)
+
+--- a/fs/nfs/flexfilelayout/flexfilelayout.c
++++ b/fs/nfs/flexfilelayout/flexfilelayout.c
+@@ -1672,16 +1672,16 @@ ff_layout_write_pagelist(struct nfs_pgio
+ 
+ 	ds = nfs4_ff_layout_prepare_ds(lseg, idx, true);
+ 	if (!ds)
+-		return PNFS_NOT_ATTEMPTED;
++		goto out_failed;
+ 
+ 	ds_clnt = nfs4_ff_find_or_create_ds_client(lseg, idx, ds->ds_clp,
+ 						   hdr->inode);
+ 	if (IS_ERR(ds_clnt))
+-		return PNFS_NOT_ATTEMPTED;
++		goto out_failed;
+ 
+ 	ds_cred = ff_layout_get_ds_cred(lseg, idx, hdr->cred);
+ 	if (IS_ERR(ds_cred))
+-		return PNFS_NOT_ATTEMPTED;
++		goto out_failed;
+ 
+ 	vers = nfs4_ff_layout_ds_version(lseg, idx);
+ 
+@@ -1710,6 +1710,11 @@ ff_layout_write_pagelist(struct nfs_pgio
+ 				      &ff_layout_write_call_ops_v4,
+ 			  sync, RPC_TASK_SOFTCONN);
+ 	return PNFS_ATTEMPTED;
++
++out_failed:
++	if (ff_layout_avoid_mds_available_ds(lseg))
++		return PNFS_TRY_AGAIN;
++	return PNFS_NOT_ATTEMPTED;
+ }
+ 
+ static u32 calc_ds_index_from_commit(struct pnfs_layout_segment *lseg, u32 i)
+--- a/fs/nfs/pnfs.c
++++ b/fs/nfs/pnfs.c
+@@ -1976,8 +1976,20 @@ pnfs_do_write(struct nfs_pageio_descript
+ 	enum pnfs_try_status trypnfs;
+ 
+ 	trypnfs = pnfs_try_to_write_data(hdr, call_ops, lseg, how);
+-	if (trypnfs == PNFS_NOT_ATTEMPTED)
++	switch (trypnfs) {
++	case PNFS_NOT_ATTEMPTED:
+ 		pnfs_write_through_mds(desc, hdr);
++	case PNFS_ATTEMPTED:
++		break;
++	case PNFS_TRY_AGAIN:
++		/* cleanup hdr and prepare to redo pnfs */
++		if (!test_and_set_bit(NFS_IOHDR_REDO, &hdr->flags)) {
++			struct nfs_pgio_mirror *mirror = nfs_pgio_current_mirror(desc);
++			list_splice_init(&hdr->pages, &mirror->pg_list);
++			mirror->pg_recoalesce = 1;
++		}
++		hdr->mds_ops->rpc_release(hdr);
++	}
+ }
+ 
+ static void pnfs_writehdr_free(struct nfs_pgio_header *hdr)
