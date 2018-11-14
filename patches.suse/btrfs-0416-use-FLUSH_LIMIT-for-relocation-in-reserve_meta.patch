@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Fri, 27 May 2016 13:24:13 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 8ca17f0f59529df9e2132ca594ff00c52a9bc556
 References: bsc#1012452
 Subject: [PATCH] Btrfs: use FLUSH_LIMIT for relocation in

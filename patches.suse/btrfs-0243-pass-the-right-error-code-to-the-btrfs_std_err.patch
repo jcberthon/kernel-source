@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Thu, 10 Mar 2016 12:22:15 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: ad8403df054c9b5dc3175a26c6179571b9cafa4e
 References: bsc#1012452
 Subject: [PATCH] btrfs: pass the right error code to the

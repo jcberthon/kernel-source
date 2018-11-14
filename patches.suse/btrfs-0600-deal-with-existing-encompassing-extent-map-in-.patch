@@ -1,6 +1,6 @@
 From: Omar Sandoval <osandov@fb.com>
 Date: Wed, 9 Nov 2016 15:26:50 -0800
-Patch-mainline: 4.10
+Patch-mainline: v4.10-rc1
 Git-commit: 8e2bd3b7fac91b79a6115fd1511ca20b2a09696d
 References: bsc#1001171
 Subject: [PATCH] Btrfs: deal with existing encompassing extent map in

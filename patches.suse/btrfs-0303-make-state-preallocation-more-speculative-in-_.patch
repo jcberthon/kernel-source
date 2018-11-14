@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Wed, 27 Apr 2016 01:03:45 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 059f791c6bbaba72dc3c1bd6e2657aacc8552849
 References: bsc#1012452
 Subject: [PATCH] btrfs: make state preallocation more speculative in

@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Fri, 27 May 2016 22:21:27 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc2
 Git-commit: b5de8d0df80fa87f1f97fbcc4bbc8cad0a018802
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix race between device replace and read

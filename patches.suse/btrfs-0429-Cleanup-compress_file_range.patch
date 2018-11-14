@@ -1,6 +1,6 @@
 From: Ashish Samant <ashish.samant@oracle.com>
 Date: Fri, 25 Mar 2016 19:01:33 -0700
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: c8bb0c8bd22a4b9d1c457a9c2b1c192d8271831a
 References: bsc#1012452
 Subject: [PATCH] btrfs: Cleanup compress_file_range()

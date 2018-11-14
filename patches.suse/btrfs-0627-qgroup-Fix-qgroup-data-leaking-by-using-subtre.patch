@@ -1,6 +1,6 @@
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
 Date: Tue, 18 Oct 2016 09:31:29 +0800
-Patch-mainline: 4.10
+Patch-mainline: v4.10-rc1
 Git-commit: 824d8dff8846533c9f1f9b1eabb0c03959e989ca
 References: bsc#983087, bsc#986255
 Subject: [PATCH] btrfs: qgroup: Fix qgroup data leaking by using

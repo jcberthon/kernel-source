@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Fri, 23 Sep 2016 13:44:44 -0700
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: 851cd173f06045816528176001cf82948282029c
 References: bsc#1012452
 Subject: [PATCH] Btrfs: memset to avoid stale content in btree leaf

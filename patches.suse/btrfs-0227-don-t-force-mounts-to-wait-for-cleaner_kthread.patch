@@ -1,6 +1,6 @@
 From: Zygo Blaxell <ce3g8jdj@umail.furryterror.org>
 Date: Thu, 5 May 2016 00:23:49 -0400
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 2f3165ecf103599f82bf0ea254039db335fb5005
 References: bsc#1012452
 Subject: [PATCH] btrfs: don't force mounts to wait for cleaner_kthread

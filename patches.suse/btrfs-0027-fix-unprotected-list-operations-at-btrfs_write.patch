@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Fri, 18 Dec 2015 03:02:48 +0000
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: e44081ef611832b47a86abf4e36dc0ed2e950884
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix unprotected list operations at

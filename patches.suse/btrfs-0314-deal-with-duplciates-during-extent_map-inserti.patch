@@ -3,7 +3,7 @@ Date: Sat, 19 Sep 2015 11:28:25 -0700
 Subject: Btrfs: deal with duplciates during extent_map insertion in
  btrfs_get_extent
 Git-commit: 8dff9c85341032767d7b519217a79ea04cd676b0
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc2
 References: bsc#1001171
 
 When dealing with inline extents, btrfs_get_extent will incorrectly try

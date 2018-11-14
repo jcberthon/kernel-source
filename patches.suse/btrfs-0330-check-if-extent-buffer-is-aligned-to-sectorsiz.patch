@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Mon, 6 Jun 2016 12:01:23 -0700
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc4
 Git-commit: c871b0f2fd27e7f9097d507f47de5270f88003b9
 References: bsc#1012452
 Subject: [PATCH] Btrfs: check if extent buffer is aligned to

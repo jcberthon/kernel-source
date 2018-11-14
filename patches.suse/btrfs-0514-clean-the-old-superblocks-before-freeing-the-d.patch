@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Tue, 20 Sep 2016 08:50:21 -0400
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: cea67ab92d3d4da9f2b4141d87cb8664757daca0
 References: bsc#1012452
 Subject: [PATCH] btrfs: clean the old superblocks before freeing the

@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Wed, 3 Jun 2015 10:55:48 -0400
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 95617d69326ce386c95e33db7aeb832b45ee9f8f
 References: bsc#1012452
 Subject: [PATCH] btrfs: cleanup, stop casting for extent_map->lookup

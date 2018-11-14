@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 11 Feb 2016 14:25:38 +0100
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 32fc932e30c4b6a03847426f52e23459c9fb906f
 References: bsc#1012452
 Subject: [PATCH] btrfs: fallocate: use GFP_KERNEL

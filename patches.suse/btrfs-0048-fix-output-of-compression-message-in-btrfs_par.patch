@@ -1,6 +1,6 @@
 From: Tsutomu Itoh <t-itoh@jp.fujitsu.com>
 Date: Wed, 6 Jan 2016 17:03:40 +0900
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: b7c47bbb2d1856330f71ba04c8eb03b39aca87cd
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix output of compression message in

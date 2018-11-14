@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Fri, 10 Jun 2016 18:19:25 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 66642832f06a4351e23cea6cf254967c227f8224
 References: bsc#1012452
 Subject: [PATCH] btrfs: btrfs_abort_transaction, drop root parameter

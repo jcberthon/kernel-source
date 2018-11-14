@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Fri, 25 Mar 2016 13:25:54 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: c51e7bb1845079fda515a7acf0514e289aa6a07c
 References: bsc#1012452
 Subject: [PATCH] Btrfs: trace pinned extents

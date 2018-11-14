@@ -1,6 +1,6 @@
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
 Date: Tue, 19 Jul 2016 16:50:36 +0800
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: ba8b04c1d4adbc66f3653e3de5bd6c74a9a003bf
 References: bsc#1012452
 Subject: [PATCH] btrfs: extend btrfs_set_extent_delalloc and its friends

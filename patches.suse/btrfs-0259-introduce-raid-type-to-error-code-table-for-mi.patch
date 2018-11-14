@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Mon, 15 Feb 2016 16:28:03 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 621292bae6ae3b25cd3124b63603d01df4cccfb6
 References: bsc#1012452
 Subject: [PATCH] btrfs: introduce raid-type to error-code table, for

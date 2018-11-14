@@ -1,6 +1,6 @@
 From: Chris Mason <clm@fb.com>
 Date: Fri, 9 Dec 2016 05:56:33 -0800
-Patch-mainline: 4.10
+Patch-mainline: v4.10-rc1
 Git-commit: e5d6b12fe14e89ea1c494585c47b1dfb31d71183
 References: bsc#1035866
 Subject: [PATCH] Btrfs: don't WARN() in btrfs_transaction_abort() for

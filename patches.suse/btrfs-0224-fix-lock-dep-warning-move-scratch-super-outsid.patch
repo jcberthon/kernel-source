@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Tue, 12 Apr 2016 21:36:16 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 48b3b9d401ec86899a52003b37331190a35a81a6
 References: bsc#1012452
 Subject: [PATCH] btrfs: fix lock dep warning move scratch super

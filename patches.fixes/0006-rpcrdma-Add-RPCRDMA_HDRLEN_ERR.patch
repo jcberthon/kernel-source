@@ -1,0 +1,33 @@
+From: Chuck Lever <chuck.lever@oracle.com>
+Date: Fri, 4 Mar 2016 11:28:09 -0500
+Subject: [PATCH] rpcrdma: Add RPCRDMA_HDRLEN_ERR
+Git-commit: d8647f2d3c381a6f543358710eb07dafa7070854
+Patch-mainline: v4.6
+References: git-fixes
+
+Error headers are shorter than either RDMA_MSG or RDMA_NOMSG.
+
+Since HDRLEN_MIN is already used in several other places that would
+be annoying to change, add RPCRDMA_HDRLEN_ERR for the one or two
+spots where the shorter length is needed.
+
+Signed-off-by: Chuck Lever <chuck.lever@oracle.com>
+Reviewed-by: Devesh Sharma <devesh.sharma@broadcom.com>
+Reviewed-by: Sagi Grimberg <sagig@mellanox.com>
+Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
+Acked-by: NeilBrown <neilb@suse.com>
+
+---
+ include/linux/sunrpc/rpc_rdma.h |    1 +
+ 1 file changed, 1 insertion(+)
+
+--- a/include/linux/sunrpc/rpc_rdma.h
++++ b/include/linux/sunrpc/rpc_rdma.h
+@@ -102,6 +102,7 @@ struct rpcrdma_msg {
+  * Smallest RPC/RDMA header: rm_xid through rm_type, then rm_nochunks
+  */
+ #define RPCRDMA_HDRLEN_MIN	(sizeof(__be32) * 7)
++#define RPCRDMA_HDRLEN_ERR	(sizeof(__be32) * 5)
+ 
+ enum rpcrdma_errcode {
+ 	ERR_VERS = 1,

@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Wed, 27 Apr 2016 02:15:15 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 6ac10a6ac2b11ada24580cc76dcd0c182061c576
 References: bsc#1012452
 Subject: [PATCH] btrfs: rename and document compression workspace

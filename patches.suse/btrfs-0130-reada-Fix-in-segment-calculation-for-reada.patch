@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Fri, 18 Dec 2015 21:33:05 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 503785306d182ab624a2232856ef8ab503ee85f9
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: Fix in-segment calculation for reada

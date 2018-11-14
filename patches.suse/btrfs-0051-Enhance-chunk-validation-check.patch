@@ -1,6 +1,6 @@
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
 Date: Tue, 15 Dec 2015 09:14:37 +0800
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: f04b772bfc17f502703794f4d100d12155c1a1a9
 References: bsc#1012452
 Subject: [PATCH] btrfs: Enhance chunk validation check

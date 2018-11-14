@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Fri, 27 Nov 2015 16:31:45 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 4fb72bf2e913ca3798afd9e226e2416918936e49
 References: bsc#1012452
 Subject: [PATCH] btrfs: use smaller type for btrfs_path locks

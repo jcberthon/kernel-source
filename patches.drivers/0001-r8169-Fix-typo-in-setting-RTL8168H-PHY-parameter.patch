@@ -1,9 +1,8 @@
-From b210df2025804bc37a9fa25404deaed7293c8d20 Mon Sep 17 00:00:00 2001
 From: Chun-Hao Lin <hau@realtek.com>
 Date: Thu, 24 Dec 2015 21:15:26 +0800
 Subject: [PATCH 1/7] r8169:Fix typo in setting RTL8168H PHY parameter
 Git-commit: e2e2788e4e96af1383a411335c5686a4b8c82496
-Patch-mainline: v4.5
+Patch-mainline: v4.5-rc1
 References: bsc#1050742
 
 In function "rtl8168h_2_hw_phy_config", there is a typo in setting

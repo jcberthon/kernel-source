@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Thu, 31 Dec 2015 16:57:21 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 97d5f0e63d78a48cef35349261f90d0d4266dc24
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: Avoid many times of empty loop

@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Tue, 17 May 2016 13:30:55 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 957780eb2788d8c218d539e19a85653f51a96dc1
 References: bsc#1012452
 Subject: [PATCH] Btrfs: introduce ticketed enospc infrastructure

@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Thu, 17 Mar 2016 10:38:57 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 0713d90c75745dc6148f6346d490e9ef63a4e8b4
 References: bsc#1012452
 Subject: [PATCH] btrfs: remove save_error_info()

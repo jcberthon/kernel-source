@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Tue, 12 Jul 2016 11:24:21 -0700
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 5a488b9d2c25d98cdd11d09de311bfc83ba09fbd
 References: bsc#998655
 Subject: [PATCH] Btrfs: fix unexpected balance crash due to BUG_ON

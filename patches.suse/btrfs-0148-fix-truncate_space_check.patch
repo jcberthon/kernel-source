@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Wed, 13 Jan 2016 11:48:06 -0500
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: dc95f7bfc57fa4b75a77d0da84d5db249d74aa3f
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix truncate_space_check

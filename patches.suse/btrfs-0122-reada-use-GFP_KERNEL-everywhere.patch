@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Mon, 18 Jan 2016 18:42:13 +0100
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: ed0244faf59e33ff915b83acd15c903b81fd357b
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: use GFP_KERNEL everywhere

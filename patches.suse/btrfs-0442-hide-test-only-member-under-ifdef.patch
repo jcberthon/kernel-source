@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Fri, 15 Jul 2016 15:23:37 +0200
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 05653ef38659edc46a886c9bda105e64edba6896
 References: bsc#1012452
 Subject: [PATCH] btrfs: hide test-only member under ifdef

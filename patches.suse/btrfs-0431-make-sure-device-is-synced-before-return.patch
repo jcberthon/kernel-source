@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Thu, 23 Jun 2016 20:54:07 +0800
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: e2bf6e89b4c71ea08223f13a700cfd0b576f7e7a
 References: bsc#1012452
 Subject: [PATCH] btrfs: make sure device is synced before return

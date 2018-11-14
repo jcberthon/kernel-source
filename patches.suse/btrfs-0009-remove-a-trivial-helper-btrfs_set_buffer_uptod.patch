@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 3 Dec 2015 13:06:46 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 4db8c528cdccb44f8ca237ca3c695d6c164fa70f
 References: bsc#1012452
 Subject: [PATCH] btrfs: remove a trivial helper

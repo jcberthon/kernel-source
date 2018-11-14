@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Mon, 14 Dec 2015 18:29:32 -0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: cf25ce518e8ef9d59b292e51193bed2b023a32da
 References: bsc#1012452
 Subject: [PATCH] Btrfs: do not create empty block group if we have

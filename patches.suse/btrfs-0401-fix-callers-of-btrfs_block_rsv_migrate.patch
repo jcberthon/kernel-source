@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Fri, 25 Mar 2016 13:25:48 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 25d609f86d6808eb1f0e8a6cafc3edb4a2b5ae35
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix callers of btrfs_block_rsv_migrate

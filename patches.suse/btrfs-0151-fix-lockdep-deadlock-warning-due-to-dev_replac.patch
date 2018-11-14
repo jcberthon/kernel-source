@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Fri, 17 Jul 2015 16:49:19 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 73beece9ca07c003e0e4f4825b12be167334d4ad
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix lockdep deadlock warning due to dev_replace

@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 11 Feb 2016 11:01:55 +0100
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 74e4d82757f7479bab6b854783f84a5b9f2df78f
 References: bsc#1012452
 Subject: [PATCH] btrfs: let callers of btrfs_alloc_root pass gfp flags

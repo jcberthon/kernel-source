@@ -1,6 +1,6 @@
 From: Ashish Samant <ashish.samant@oracle.com>
 Date: Fri, 11 Mar 2016 14:54:05 -0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 2e3fcb1ccdbe7918006d509a531fcf8c9b10e9f8
 References: bsc#1012452
 Subject: [PATCH] btrfs: Print Warning only if ENOSPC_DEBUG is enabled

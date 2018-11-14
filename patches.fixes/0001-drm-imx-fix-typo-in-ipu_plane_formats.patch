@@ -1,9 +1,8 @@
-From f2ad99fc46d5454e097692c8c8202fd5bc46c809 Mon Sep 17 00:00:00 2001
 From: Laurentiu Palcu <laurentiu.palcu@nxp.com>
 Date: Wed, 28 Jun 2017 12:31:34 +0300
 Subject: drm/imx: fix typo in ipu_plane_formats[]
 References: bsc#1106929
-Patch-mainline: v4.12
+Patch-mainline: v4.13-rc2
 Git-commit: f2ad99fc46d5454e097692c8c8202fd5bc46c809
 
 The BGRA8888 appears twice in the ipu_plane_formats[] list. The

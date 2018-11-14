@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Mon, 15 Feb 2016 16:00:26 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 3cc31a0d5bc77e35229671307eba5ea5c4c4cb9d
 References: bsc#1012452
 Subject: [PATCH] btrfs: pass number of devices to

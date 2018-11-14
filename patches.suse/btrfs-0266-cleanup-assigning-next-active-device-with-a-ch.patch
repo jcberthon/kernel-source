@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Tue, 3 May 2016 17:44:43 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 88acff64c621aaeee2a4fe0ed124c77358069bce
 References: bsc#1012452
 Subject: [PATCH] btrfs: cleanup assigning next active device with a

@@ -1,6 +1,6 @@
 From: Alex Lyakas <alex@zadarastorage.com>
 Date: Sun, 6 Dec 2015 12:32:31 +0200
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc4
 Git-commit: eecba891d38051ebf7f4af6394d188a5fd151a6a
 References: bsc#1012452
 Subject: [PATCH] btrfs: flush_space: treat return value of

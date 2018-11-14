@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Tue, 26 Jan 2016 09:35:38 -0500
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: baee8790641eac0c0fcb2524a925aec39d9be6e0
 References: bsc#1012452
 Subject: [PATCH] Btrfs: check reserved when deciding to background flush

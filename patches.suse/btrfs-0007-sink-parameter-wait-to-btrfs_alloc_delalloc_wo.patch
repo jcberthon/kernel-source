@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Fri, 27 Nov 2015 19:24:16 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 651d494a678e48712f784e8f26450c34b5c61015
 References: bsc#1012452
 Subject: [PATCH] btrfs: sink parameter wait to

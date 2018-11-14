@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Mon, 6 Jun 2016 11:51:25 +0100
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc2
 Git-commit: 67710892ec983aa79ad1e2a2642fe8e3a4a194ea
 References: bsc#981038
 Subject: [PATCH] Btrfs: be more precise on errors when getting an

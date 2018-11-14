@@ -1,9 +1,8 @@
-From 86397fb1f51e35203f5d508742cb0165f92bf442 Mon Sep 17 00:00:00 2001
 From: Chun-Hao Lin <hau@realtek.com>
 Date: Tue, 29 Dec 2015 22:13:39 +0800
 Subject: [PATCH 4/7] r8169:Correct the way of setting RTL8168DP ephy
 Git-commit: 1016a4a1f4018c9a1db411b38f46bd00b96f4e83
-Patch-mainline: v4.5
+Patch-mainline: v4.5-rc1
 References: bsc#1050742
 
 The original way is wrong, it always writes ephy reg 0x03.

@@ -1,9 +1,8 @@
-From d5318d302e7cf6583ec85a2a8bfbb3a3910ae372 Mon Sep 17 00:00:00 2001
 From: Johan Hovold <johan@kernel.org>
 Date: Mon, 20 Nov 2017 11:45:47 +0100
 Subject: backlight: as3711_bl: Fix Device Tree node leaks
 References: bsc#1106929
-Patch-mainline: v4.17-rc1
+Patch-mainline: v4.18-rc1
 Git-commit: d5318d302e7cf6583ec85a2a8bfbb3a3910ae372
 
 Two framebuffer device-node names were looked up during probe, but were

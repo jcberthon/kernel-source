@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Fri, 2 Sep 2016 12:35:34 -0700
-Patch-mainline: 4.10
+Patch-mainline: v4.10-rc1
 Git-commit: ef85b25e982b5bba1530b936e283ef129f02ab9d
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix BUG_ON in btrfs_mark_buffer_dirty

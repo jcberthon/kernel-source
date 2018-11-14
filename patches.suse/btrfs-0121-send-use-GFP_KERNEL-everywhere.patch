@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Mon, 18 Jan 2016 18:42:13 +0100
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: e780b0d1c1523ec8cd489c6910fb8c5ee452bb6c
 References: bsc#1012452
 Subject: [PATCH] btrfs: send: use GFP_KERNEL everywhere

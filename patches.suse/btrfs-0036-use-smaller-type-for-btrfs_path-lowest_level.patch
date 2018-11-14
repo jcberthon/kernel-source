@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Fri, 27 Nov 2015 16:31:42 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 7853f15b2aeeb01c587168fc3f7f0ff76a3c9bfd
 References: bsc#1012452
 Subject: [PATCH] btrfs: use smaller type for btrfs_path lowest_level

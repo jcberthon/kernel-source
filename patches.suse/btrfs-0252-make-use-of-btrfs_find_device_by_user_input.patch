@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Sat, 13 Feb 2016 10:01:36 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 24fc572fe456c02ff4136c07861a3edd4b8de683
 References: bsc#1012452
 Subject: [PATCH] btrfs: make use of btrfs_find_device_by_user_input()

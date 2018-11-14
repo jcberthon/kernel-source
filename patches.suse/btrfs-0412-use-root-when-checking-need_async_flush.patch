@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Mon, 25 Apr 2016 09:58:18 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 87241c2e68451c4d50b60af84f9a3ab119001b4c
 References: bsc#1012452
 Subject: [PATCH] Btrfs: use root when checking need_async_flush

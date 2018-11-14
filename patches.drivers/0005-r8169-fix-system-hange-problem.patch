@@ -1,9 +1,8 @@
-From 31512f71ff9db526f022bd0fbc3cab70da588c0c Mon Sep 17 00:00:00 2001
 From: Chun-Hao Lin <hau@realtek.com>
 Date: Fri, 5 Feb 2016 02:28:00 +0800
 Subject: [PATCH 5/7] r8169:fix system hange problem.
 Git-commit: a2cb7ec001559d649b09572a7a5e4f69222eb467
-Patch-mainline: v4.5
+Patch-mainline: v4.5-rc6
 References: bsc#1050742
 
 There are typos in setting RTL8168H hardware parameters. If system install

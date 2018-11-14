@@ -1,6 +1,6 @@
 From: Al Viro <viro@zeniv.linux.org.uk>
 Date: Mon, 10 Oct 2016 13:39:05 -0400
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: cd27e455042da85b088bdd3a6e00da1d5b4df9f1
 References: bsc#1012452
 Subject: [PATCH] [btrfs] fix check_direct_IO() for non-iovec iterators

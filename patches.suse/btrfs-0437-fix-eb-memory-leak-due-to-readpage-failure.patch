@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Mon, 11 Jul 2016 10:39:07 -0700
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: baf863b9c29617cc9eaf24e039f58846e700db48
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix eb memory leak due to readpage failure

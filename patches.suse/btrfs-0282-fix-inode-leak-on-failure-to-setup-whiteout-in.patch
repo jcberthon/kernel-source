@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Thu, 5 May 2016 01:41:57 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: c990161888f387db136856337c237aa8d5003292
 References: bsc#1020975
 Subject: [PATCH] Btrfs: fix inode leak on failure to setup whiteout inode

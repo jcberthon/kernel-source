@@ -1,6 +1,6 @@
 From: Robbie Ko <robbieko@synology.com>
 Date: Thu, 5 Jan 2017 16:24:58 +0800
-Patch-mainline: 4.11-rc1
+Patch-mainline: v4.11-rc1
 Git-commit: 0191410158840d6176de3267daa4604ad6a773fb
 References: bsc#1028325
 Subject: [PATCH] Btrfs: incremental send, do not issue invalid rmdir

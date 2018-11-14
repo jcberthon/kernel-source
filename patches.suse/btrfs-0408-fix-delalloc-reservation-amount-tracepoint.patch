@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Fri, 25 Mar 2016 13:25:55 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: f485c9ee32531794e39631437fcedc82d5b8e650
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix delalloc reservation amount tracepoint

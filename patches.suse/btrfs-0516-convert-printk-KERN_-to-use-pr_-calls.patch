@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Tue, 20 Sep 2016 10:05:01 -0400
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: 62e855771dacf7c4d6daf9741642a965e7066d31
 References: bsc#1012452
 Subject: [PATCH] btrfs: convert printk(KERN_* to use pr_* calls

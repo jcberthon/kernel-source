@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Mon, 11 Apr 2016 17:37:40 -0400
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc5
 Git-commit: 31b9655f439a26856edca0f3f8daa368a61f16d5
 References: bsc#1012452
 Subject: [PATCH] Btrfs: track transid for delayed ref flushing

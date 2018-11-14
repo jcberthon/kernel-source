@@ -1,9 +1,8 @@
-From ffe8f53f9cc73fb25c8f78d4aed7ddf285503a60 Mon Sep 17 00:00:00 2001
 From: Liviu Dudau <Liviu.Dudau@arm.com>
 Date: Thu, 15 Jun 2017 15:13:46 +0100
 Subject: drm/msm/hdmi: Use bitwise operators when building register values
 References: bsc#1106929
-Patch-mainline: v4.12-rc5
+Patch-mainline: v4.13-rc1
 Git-commit: ffe8f53f9cc73fb25c8f78d4aed7ddf285503a60
 
 Commit c0c0d9eeeb8d ("drm/msm: hdmi audio support") uses logical

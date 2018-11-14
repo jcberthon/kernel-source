@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Fri, 25 Mar 2016 13:25:51 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: d555b6c380c644af63dbdaa7cc14bba041a4e4dd
 References: bsc#1012452
 Subject: [PATCH] Btrfs: warn_on for unaccounted spaces
