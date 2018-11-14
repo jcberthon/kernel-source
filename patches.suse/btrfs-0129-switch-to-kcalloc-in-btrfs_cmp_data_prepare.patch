@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 11 Feb 2016 15:01:38 +0100
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 66722f7c059089ad7f11eaa3e27af2321ab1b0e6
 References: bsc#1012452
 Subject: [PATCH] btrfs: switch to kcalloc in btrfs_cmp_data_prepare

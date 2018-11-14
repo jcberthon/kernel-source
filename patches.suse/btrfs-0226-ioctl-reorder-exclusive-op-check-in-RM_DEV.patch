@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.cz>
 Date: Wed, 4 May 2016 14:10:47 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 58d7bbf81f54667e36940d5f4b5609606efa597b
 References: bsc#1012452
 Subject: [PATCH] btrfs: ioctl: reorder exclusive op check in RM_DEV

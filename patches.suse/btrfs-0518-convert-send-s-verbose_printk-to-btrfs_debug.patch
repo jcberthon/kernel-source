@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Tue, 20 Sep 2016 10:05:03 -0400
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: 04ab956ee69cdbe8627f6e34b88af5c308eede84
 References: bsc#1012452
 Subject: [PATCH] btrfs: convert send's verbose_printk to btrfs_debug

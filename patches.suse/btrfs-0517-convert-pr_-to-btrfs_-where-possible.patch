@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Tue, 20 Sep 2016 10:05:02 -0400
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: ab8d0fc48dba09e0a2b8b0dbfe144d4de9eb874f
 References: bsc#1012452
 Subject: [PATCH] btrfs: convert pr_* to btrfs_* where possible

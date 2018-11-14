@@ -1,6 +1,6 @@
 From: Vinson Lee <vlee@freedesktop.org>
 Date: Sat, 28 May 2016 07:04:38 +0000
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc3
 Git-commit: 1691cf160048c0753036d0b3fad7f239234dab56
 References: bsc#1012452
 Subject: [PATCH] btrfs: Use __u64 in exported linux/btrfs.h.

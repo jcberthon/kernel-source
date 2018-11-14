@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 3 Dec 2015 14:41:30 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: cd716d8fea125e5531003e66aaf7ca7323277f83
 References: bsc#1012452
 Subject: [PATCH] btrfs: make lock_extent static inline

@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Fri, 25 Mar 2016 13:25:59 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: d38b349c39a9feb1aca82c3280b9b1234497d582
 References: bsc#1012452
 Subject: [PATCH] Btrfs: don't bother kicking async if there's nothing

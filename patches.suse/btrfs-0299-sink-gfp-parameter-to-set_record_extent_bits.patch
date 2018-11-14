@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Tue, 26 Apr 2016 23:54:39 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 2c53b912ae317e560bce1fc446e76915a5b30587
 References: bsc#1012452
 Subject: [PATCH] btrfs: sink gfp parameter to set_record_extent_bits

@@ -1,6 +1,6 @@
 From: Adam Borowski <kilobyte@angband.pl>
 Date: Sun, 8 May 2016 15:08:00 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 8eb0dfdbda3f56bf7d248ed87fcc383df114ecbb
 References: bsc#1012452
 Subject: [PATCH] btrfs: fix int32 overflow in shrink_delalloc().

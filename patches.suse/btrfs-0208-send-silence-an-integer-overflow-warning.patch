@@ -1,6 +1,6 @@
 From: Dan Carpenter <dan.carpenter@oracle.com>
 Date: Wed, 13 Apr 2016 09:40:59 +0300
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: f5ecec3ce21f706e9e7a330b2e8e5a2941927b46
 References: bsc#1012452
 Subject: [PATCH] btrfs: send: silence an integer overflow warning

@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Tue, 14 Jun 2016 14:18:27 +0100
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc2
 Git-commit: 0596a9048bf2aca2a74b312493f39e4d5ac3b653
 References: bsc#1012452
 Subject: [PATCH] Btrfs: add missing check for writeback errors on

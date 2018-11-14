@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Wed, 16 Mar 2016 16:43:07 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 2351d743f6b69d289f04246127c9d92516621974
 References: bsc#1012452
 Subject: [PATCH] btrfs: remove unused function btrfs_assert()

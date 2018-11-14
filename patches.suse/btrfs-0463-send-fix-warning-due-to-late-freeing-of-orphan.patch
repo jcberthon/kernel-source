@@ -1,6 +1,6 @@
 From: Robbie Ko <robbieko@synology.com>
 Date: Mon, 22 Jun 2015 17:08:45 +0800
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc2
 Git-commit: 443f9d266c4848a3a9ea386f66c4bed2f5997940
 References: bsc#1018316
 Subject: [PATCH] Btrfs: send, fix warning due to late freeing of

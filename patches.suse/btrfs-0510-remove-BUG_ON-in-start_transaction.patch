@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Tue, 13 Sep 2016 19:15:48 -0700
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: a43f7f82064220082eba7075c5a844d773fdef1b
 References: bsc#1012452
 Subject: [PATCH] Btrfs: remove BUG_ON in start_transaction

@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Wed, 27 Apr 2016 01:02:15 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 03bf5387708069194fbe5072fb57f9542e7a8b82
 References: bsc#1012452
 Subject: [PATCH] btrfs: untangle gotos a bit in convert_extent_bit

@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Tue, 12 Apr 2016 12:54:40 -0400
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: e042d1ec4417981dfe9331e47b76f17929bc2ffe
 References: bsc#1012452
 Subject: [PATCH] Btrfs: remove BUG_ON()'s in btrfs_map_block

@@ -1,10 +1,9 @@
-From 31aab599bc83e194235ac6dfdfe9f2678773a380 Mon Sep 17 00:00:00 2001
 From: Chun-Hao Lin <hau@realtek.com>
 Date: Thu, 24 Dec 2015 21:15:27 +0800
 Subject: [PATCH 2/7] r8169:Update the way of reading RTL8168H PHY register
  "rg_saw_cnt"
 Git-commit: 584933334b7a81f09637f28cbee759a1e24428db
-Patch-mainline: v4.5
+Patch-mainline: v4.5-rc1
 References: bsc#1050742
 
 The vlaue of RTL8168H PHY register "rg_saw_cnt" only valid from bit0 to bit13.

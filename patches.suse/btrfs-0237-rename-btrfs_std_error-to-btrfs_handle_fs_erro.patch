@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Wed, 16 Mar 2016 16:43:06 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 34d9700702f4042ce10d68a092ab7f79575e7a3b
 References: bsc#1012452
 Subject: [PATCH] btrfs: rename btrfs_std_error to

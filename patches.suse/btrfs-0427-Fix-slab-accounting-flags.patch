@@ -1,6 +1,6 @@
 From: Nikolay Borisov <n.borisov.lkml@gmail.com>
 Date: Thu, 23 Jun 2016 21:17:08 +0300
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: fba4b697710eb2a4bee456b9d39e9239c66f8bee
 References: bsc#1012452
 Subject: [PATCH] btrfs: Fix slab accounting flags

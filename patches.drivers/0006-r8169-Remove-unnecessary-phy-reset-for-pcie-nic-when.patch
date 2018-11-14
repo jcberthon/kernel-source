@@ -1,10 +1,9 @@
-From 35b19032a8b5c7aed5895f711f85eb41b565d335 Mon Sep 17 00:00:00 2001
 From: Chun-Hao Lin <hau@realtek.com>
 Date: Fri, 11 Mar 2016 14:21:14 +0800
 Subject: [PATCH 6/7] r8169:Remove unnecessary phy reset for pcie nic when
  setting link spped.
 Git-commit: c45569755e828a8458d125bb93feb1d90ac9be6f
-Patch-mainline: v4.6
+Patch-mainline: v4.6-rc1
 References: bsc#1050742
 
 For pcie nic, after setting link speed and there is no link driver does not need

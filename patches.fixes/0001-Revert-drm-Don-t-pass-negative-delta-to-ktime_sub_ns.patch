@@ -1,4 +1,3 @@
-From a91d7b9142b91c9567bc0304cb7d718ac411e85e Mon Sep 17 00:00:00 2001
 From: Daniel Vetter <daniel.vetter@ffwll.ch>
 Date: Tue, 29 Mar 2016 13:12:22 +0200
 Subject: Revert "drm: Don't pass negative delta to ktime_sub_ns()"
@@ -6,7 +5,7 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Git-commit: a91d7b9142b91c9567bc0304cb7d718ac411e85e
-Patch-mainline: v4.5-rc3
+Patch-mainline: v4.7-rc1
 References: bsc#1106929
 
 This reverts commit e91abf80a0998f326107874c88d549f94839f13c.

@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Thu, 24 Mar 2016 18:48:12 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: fc23c246d72d21385be115305d1cb85fcc34acad
 References: bsc#1012452
 Subject: [PATCH] btrfs: use fs_info directly

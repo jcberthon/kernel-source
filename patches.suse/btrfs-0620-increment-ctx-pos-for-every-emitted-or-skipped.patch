@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Sat, 5 Nov 2016 13:26:35 -0400
-Patch-mainline: 4.10
+Patch-mainline: v4.10-rc1
 Git-commit: d2fbb2b589ece9060635b43c2b2333d0b0a0fbf2
 References: bsc#981709
 Subject: [PATCH] btrfs: increment ctx->pos for every emitted or

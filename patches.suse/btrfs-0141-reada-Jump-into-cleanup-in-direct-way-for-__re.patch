@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Thu, 31 Dec 2015 22:20:59 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 57f16e08269c6a91fb77508b2fe58130c6442d94
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: Jump into cleanup in direct way for

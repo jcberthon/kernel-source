@@ -1,6 +1,6 @@
 From: "Austin S. Hemmelgarn" <ahferroin7@gmail.com>
 Date: Wed, 23 Mar 2016 14:22:59 -0400
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 88be159c905a2b4f6d59afa352bef410afb6af02
 References: bsc#1012452
 Subject: [PATCH] btrfs: allow balancing to dup with multi-device

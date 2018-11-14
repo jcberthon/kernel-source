@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Fri, 27 Nov 2015 16:31:35 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: e4058b54d1e442b6b3eca949f0d63d49ba2b020d
 References: bsc#1012452
 Subject: [PATCH] btrfs: cleanup, use enum values for btrfs_path reada

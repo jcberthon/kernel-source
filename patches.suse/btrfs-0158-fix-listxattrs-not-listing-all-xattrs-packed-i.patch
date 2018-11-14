@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Sun, 21 Feb 2016 15:03:02 +0000
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: daac7ba61a0d338c66b70c47d205ba7465718155
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix listxattrs not listing all xattrs packed in

@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Wed, 15 Jun 2016 10:25:38 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 14a1e067b45614d6236e3c82b36f62caef44ac62
 References: bsc#1012452
 Subject: [PATCH] btrfs: introduce BTRFS_MAX_ITEM_SIZE

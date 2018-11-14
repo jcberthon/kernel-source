@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Fri, 17 Jun 2016 18:15:25 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc4
 Git-commit: f7af3934c2bccba261972261ac8ebcbf92a346b2
 References: bsc#1012452
 Subject: [PATCH] btrfs: use new error message helper in

@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Mon, 21 Mar 2016 14:59:53 -0700
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc3
 Git-commit: 264813acb1c756aebc337b16b832604a0c9aadaf
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix invalid reference in replace_path

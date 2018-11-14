@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Fri, 17 Jun 2016 19:16:21 -0700
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc5
 Git-commit: 415b35a55b57a701afe7391d32a6bb0193b7d3da
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix error handling in

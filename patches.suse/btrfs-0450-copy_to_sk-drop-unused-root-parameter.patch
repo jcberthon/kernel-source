@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Tue, 21 Jun 2016 20:18:21 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: df3975652f23dcfb72aa043a32ecaf587e75b158
 References: bsc#1012452
 Subject: [PATCH] btrfs: copy_to_sk drop unused root parameter

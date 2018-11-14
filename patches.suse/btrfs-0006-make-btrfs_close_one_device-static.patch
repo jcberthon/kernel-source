@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Fri, 27 Nov 2015 18:49:39 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 87ad58c5f07444ab2fa083c62b154f38ef0a3035
 References: bsc#1012452
 Subject: [PATCH] btrfs: make btrfs_close_one_device static

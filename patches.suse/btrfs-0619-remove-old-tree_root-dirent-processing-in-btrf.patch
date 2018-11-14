@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Mon, 21 Nov 2016 15:59:04 +0100
-Patch-mainline: 4.10
+Patch-mainline: v4.10-rc1
 Git-commit: c2951f32d36c28d96acf95f0d83116facbec48a2
 References: bsc#981709
 Subject: [PATCH] btrfs: remove old tree_root dirent processing in

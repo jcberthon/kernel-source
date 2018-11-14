@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Wed, 14 Sep 2016 19:19:05 -0700
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: 02794222c4132ac003e7281fb71f4ec1645ffc87
 References: bsc#1012452
 Subject: [PATCH] Btrfs: kill BUG_ON in run_delayed_tree_ref

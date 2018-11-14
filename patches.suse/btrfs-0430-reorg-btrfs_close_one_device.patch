@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Tue, 14 Jun 2016 18:55:25 +0800
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: f448341af9cf50b9f405f5192f184d398e1812e0
 References: bsc#1012452
 Subject: [PATCH] btrfs: reorg btrfs_close_one_device()

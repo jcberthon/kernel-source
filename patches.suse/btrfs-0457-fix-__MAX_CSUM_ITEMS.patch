@@ -1,6 +1,6 @@
 From: Chris Mason <clm@fb.com>
 Date: Wed, 3 Aug 2016 14:05:46 -0700
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 42049bf60db4c01e0432fc861463dcd3208c0d93
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix __MAX_CSUM_ITEMS

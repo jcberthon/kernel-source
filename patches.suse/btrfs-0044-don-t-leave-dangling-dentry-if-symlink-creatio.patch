@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Thu, 31 Dec 2015 18:08:24 +0000
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: d50866d00fb39fcf72307001763ee9cc92625a43
 References: bsc#1012452
 Subject: [PATCH] Btrfs: don't leave dangling dentry if symlink

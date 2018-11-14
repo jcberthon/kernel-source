@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 3 Dec 2015 13:08:59 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 09c25a8cda5baf6537234be0954173a18568423d
 References: bsc#1012452
 Subject: [PATCH] btrfs: make set_extent_buffer_uptodate return void

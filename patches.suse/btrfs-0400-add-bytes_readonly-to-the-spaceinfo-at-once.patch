@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Fri, 25 Mar 2016 13:25:47 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: e40edf2da4fc6ab10c707b0522372b08b38171e6
 References: bsc#1012452
 Subject: [PATCH] Btrfs: add bytes_readonly to the spaceinfo at once

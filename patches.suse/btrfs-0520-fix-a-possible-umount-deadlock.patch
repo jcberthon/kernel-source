@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Thu, 22 Sep 2016 12:56:13 +0800
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: 0ccd05285e7f5a8e297e1d6dfc41e7c65757d6fa
 References: bsc#1012452
 Subject: [PATCH] btrfs: fix a possible umount deadlock

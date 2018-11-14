@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Sat, 13 Feb 2016 10:01:29 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 6cf86a006be9f2a77434d5a06ea289719815ad7c
 References: bsc#1012452
 Subject: [PATCH] btrfs: create a helper function to read the disk

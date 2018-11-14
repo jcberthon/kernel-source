@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 3 Dec 2015 13:08:59 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: b5227c075b5c11d5cf653bac5c01b9f7f03f2a8f
 References: bsc#1012452
 Subject: [PATCH] btrfs: make end_extent_writepage return void

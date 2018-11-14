@@ -1,9 +1,8 @@
-From 031180b00ef95a971e2e4c8ccbb01c49162d0216 Mon Sep 17 00:00:00 2001
 From: David Sterba <dsterba@suse.com>
 Date: Wed, 15 Feb 2017 16:47:36 +0100
 Subject: [PATCH 3/8] btrfs: ulist: rename ulist_fini to ulist_release
 Git-commit: 6655bc3de1078f8343263b8d822d0aa2236d86b4
-Patch-mainline: 4.11
+Patch-mainline: v4.11-rc1
 References: dependent patch, bsc#1031395
 
 Change the name so it matches the naming we already use eg. for

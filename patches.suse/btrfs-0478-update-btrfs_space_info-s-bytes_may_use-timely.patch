@@ -1,6 +1,6 @@
 From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
 Date: Mon, 25 Jul 2016 15:51:40 +0800
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc4
 Git-commit: 18513091af9483ba84328d42092bd4d42a3c958f
 References: bsc#1012452
 Subject: [PATCH] btrfs: update btrfs_space_info's bytes_may_use timely

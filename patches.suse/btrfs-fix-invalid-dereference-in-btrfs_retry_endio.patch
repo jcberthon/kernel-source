@@ -2,7 +2,7 @@ From: Liu Bo <bo.li.liu@oracle.com>
 Date: Wed, 5 Apr 2017 14:04:19 -0700
 Subject: Btrfs: fix invalid dereference in btrfs_retry_endio
 Git-commit: 2e949b0a5592664f8b3eb3e2e48213f514892561
-Patch-mainline: v4.11
+Patch-mainline: v4.11-rc7
 References: bsc#1040395
 
 When doing directIO repair, we have this oops:

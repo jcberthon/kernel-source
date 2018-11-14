@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Mon, 9 May 2016 13:15:41 +0100
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: f78c436c3931e7df713688028f2b4faf72bf9f2a
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix race between block group relocation and

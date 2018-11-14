@@ -1,6 +1,6 @@
 From: Davide Italiano <dccitaliano@gmail.com>
 Date: Mon, 6 Apr 2015 22:09:15 -0700
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc3
 Git-commit: 2a162ce93232eb78124601996744f8eafec845ab
 References: bsc#1012452
 Subject: [PATCH] Btrfs: Improve FL_KEEP_SIZE handling in fallocate

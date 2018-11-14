@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Wed, 27 Apr 2016 02:55:15 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: f77dd0d6b2f0f2cf290cacbd48f5eee18586e52b
 References: bsc#1012452
 Subject: [PATCH] btrfs: preallocate compression workspaces

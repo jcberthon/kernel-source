@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Mon, 11 Jul 2016 18:52:57 -0700
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: f49070957ffed84feb7944550f7edd53672b5201
 References: bsc#1012452
 Subject: [PATCH] Btrfs: change BUG_ON()'s to ASSERT()'s in

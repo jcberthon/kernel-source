@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Mon, 11 Apr 2016 18:40:08 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 2f91306a37809907474a06c1defdb1ff50be06f0
 References: bsc#1012452
 Subject: [PATCH] btrfs: send: use vmalloc only as fallback for

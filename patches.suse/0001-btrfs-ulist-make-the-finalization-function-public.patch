@@ -1,9 +1,8 @@
-From f93fcdb2f07b07b86eb285e36c9cb03340eb3da9 Mon Sep 17 00:00:00 2001
 From: David Sterba <dsterba@suse.com>
 Date: Mon, 13 Feb 2017 13:40:16 +0100
 Subject: [PATCH 1/8] btrfs: ulist: make the finalization function public
 Git-commit: 9d037933861805799db4edfd075412a39e2549f4
-Patch-mainline: 4.11
+Patch-mainline: v4.11-rc1
 References: dependent patch, bsc#1031395
 
 Make ulist_fini externally visible so the ulist API is complete.

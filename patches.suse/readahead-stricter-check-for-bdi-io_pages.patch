@@ -1,10 +1,8 @@
-From 473aa5357d8df13a350abab747049e0a275c473a Mon Sep 17 00:00:00 2001
 From: Markus Stockhausen <stockhausen@collogia.de>
 Date: Fri, 27 Jul 2018 09:09:53 -0600
 Subject: [PATCH] readahead: stricter check for bdi io_pages
-
 References: VM Functionality, git fixes
-Patch-mainline: v4.19
+Patch-mainline: v4.19-rc1
 Git-commit: dc30b96ab6d569060741572cf30517d3179429a8
 
 ondemand_readahead() checks bdi->io_pages to cap the maximum pages

@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 3 Dec 2015 13:08:59 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: f6311572762a9ccaa533e60bf7929d63be914bde
 References: bsc#1012452
 Subject: [PATCH] btrfs: make extent_range_redirty_for_io return void

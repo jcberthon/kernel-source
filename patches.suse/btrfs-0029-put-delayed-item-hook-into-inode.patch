@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.cz>
 Date: Thu, 19 Nov 2015 14:15:51 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 8089fe62c6603860f6796ca80519b92391292f21
 References: bsc#1012452
 Subject: [PATCH] btrfs: put delayed item hook into inode

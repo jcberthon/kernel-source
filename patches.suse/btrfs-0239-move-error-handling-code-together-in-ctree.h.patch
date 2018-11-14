@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Wed, 16 Mar 2016 16:43:08 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: c5f4ccb2f77355ac44433feb362fecd7f1a7d03e
 References: bsc#1012452
 Subject: [PATCH] btrfs: move error handling code together in ctree.h

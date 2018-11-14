@@ -1,6 +1,6 @@
 From: Anand Jain <anand.jain@oracle.com>
 Date: Sat, 13 Feb 2016 10:01:39 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 6b526ed70cf189660d009ea6f17af77a9cca0f38
 References: bsc#1012452
 Subject: [PATCH] btrfs: introduce device delete by devid

@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Wed, 30 Dec 2015 02:42:30 +0000
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 2bc0bb5fe71dee6fdaf81ff81f6e739ff9f7ff19
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix race between free space endio workers and

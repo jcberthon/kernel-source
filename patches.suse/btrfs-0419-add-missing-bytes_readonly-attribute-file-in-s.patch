@@ -1,6 +1,6 @@
 From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
 Date: Tue, 21 Jun 2016 11:12:56 +0800
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: c1fd5c30d1328e0a0c3aafc3768b9cea94d7b28f
 References: bsc#1012452
 Subject: [PATCH] btrfs: add missing bytes_readonly attribute file in

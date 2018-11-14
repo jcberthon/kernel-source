@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Fri, 29 Jul 2016 10:57:55 -0700
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: e46a28ca3d0dce8d939b10d4c94eaa2307b6415a
 References: bsc#1012452
 Subject: [PATCH] Btrfs: remove BUG() in raid56

@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Wed, 27 Apr 2016 02:41:17 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: e721e49dd1681d45d71919f0561f5e978a34153c
 References: bsc#1012452
 Subject: [PATCH] btrfs: make find_workspace always succeed

@@ -1,9 +1,8 @@
-From ecf81ed98c8df8c6d397f4e044af175481b5b831 Mon Sep 17 00:00:00 2001
 From: Andrzej Hajda <a.hajda@samsung.com>
 Date: Tue, 8 May 2018 11:36:58 +0200
 Subject: drm/exynos/dsi: mask frame-done interrupt
 References: bsc#1106929
-Patch-mainline: v4.17-rc3
+Patch-mainline: v4.18-rc1
 Git-commit: ecf81ed98c8df8c6d397f4e044af175481b5b831
 
 DSI driver is not really interested in this interrupt. It causes only

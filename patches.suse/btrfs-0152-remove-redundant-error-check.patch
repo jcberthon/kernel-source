@@ -1,6 +1,6 @@
 From: Byongho Lee <bhlee.kernel@gmail.com>
 Date: Wed, 27 Jan 2016 19:11:53 +0900
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: ac1407ba24d69015f88da18bfac978c493380b81
 References: bsc#1012452
 Subject: [PATCH] btrfs: remove redundant error check

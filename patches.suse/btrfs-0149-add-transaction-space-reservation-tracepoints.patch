@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Wed, 13 Jan 2016 13:21:20 -0500
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 88d3a5aaf6171d9a222961837ba329b850f140e3
 References: bsc#1012452
 Subject: [PATCH] Btrfs: add transaction space reservation tracepoints

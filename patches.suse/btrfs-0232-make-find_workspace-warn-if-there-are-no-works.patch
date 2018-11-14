@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Wed, 27 Apr 2016 03:07:39 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 523567168da04bae0f88802ddef49d00072c5d58
 References: bsc#1012452
 Subject: [PATCH] btrfs: make find_workspace warn if there are no

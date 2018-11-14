@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Fri, 20 Nov 2015 10:42:47 +0000
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 50460e37186a2b932eacea24dca804bd1bcd2012
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix race when finishing dev replace leading to

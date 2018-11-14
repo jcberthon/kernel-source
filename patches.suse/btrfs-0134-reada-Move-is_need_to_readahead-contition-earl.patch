@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Thu, 31 Dec 2015 22:57:52 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: a3f7fde24350a17a589c470265ac2d5a0e6f119f
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: Move is_need_to_readahead contition

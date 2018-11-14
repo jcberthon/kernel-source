@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Tue, 23 Aug 2016 21:13:51 +0100
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc4
 Git-commit: 28a235931b56d4e7bdd51f6733daf95f2b269da8
 References: bsc#1021455
 Subject: [PATCH] Btrfs: fix lockdep warning on deadlock against an

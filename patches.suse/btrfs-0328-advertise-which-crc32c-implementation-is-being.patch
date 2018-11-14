@@ -3,7 +3,7 @@ Date: Wed, 16 Sep 2015 15:34:53 +0200
 Subject: [PATCH] btrfs: advertise which crc32c implementation is being
  used at module load
 References: bsc#946057
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc3
 Git-commit: 5f9e1059d9347191b271bf7d13bd83db57594d2a
 
 Since several architectures support hardware-accelerated crc32c

@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Tue, 10 Nov 2015 18:53:56 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: a1ee736268448d74af25737568e383acb84c3c18
 References: bsc#1012452
 Subject: [PATCH] btrfs: do an allocation earlier during snapshot

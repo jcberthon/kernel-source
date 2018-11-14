@@ -1,6 +1,6 @@
 From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
 Date: Tue, 18 Oct 2016 15:56:13 +0800
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc4
 Git-commit: dd4b857aabbce57518f2d32d9805365d3ff34fc6
 References: bsc#1012452
 Subject: [PATCH] btrfs: pass correct args to

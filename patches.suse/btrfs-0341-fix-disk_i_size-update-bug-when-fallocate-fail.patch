@@ -1,6 +1,6 @@
 From: Wang Xiaoguang <wangxg.fnst@cn.fujitsu.com>
 Date: Wed, 22 Jun 2016 09:57:01 +0800
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc5
 Git-commit: c0d2f6104e8ab2eb75e58e72494ad4b69c5227f8
 References: bsc#1012452
 Subject: [PATCH] btrfs: fix disk_i_size update bug when fallocate()

@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Fri, 25 Mar 2016 13:25:52 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: c83f8effefa46c15f2fd43de598d9839d0056096
 References: bsc#1012452
 Subject: [PATCH] Btrfs: add tracepoint for adding block groups

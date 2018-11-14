@@ -1,6 +1,6 @@
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
 Date: Mon, 15 Aug 2016 10:36:51 +0800
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc4
 Git-commit: 62b99540a1d91e46422f0e04de50fc723812c421
 References: bsc#983087, bsc#986255
 Subject: [PATCH] btrfs: relocation: Fix leaking qgroups numbers on

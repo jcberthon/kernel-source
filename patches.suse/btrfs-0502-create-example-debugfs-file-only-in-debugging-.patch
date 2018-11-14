@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 1 Sep 2016 14:37:53 +0200
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: b0de6c4c81099494d7863a31db06366f74395cda
 References: bsc#1012452
 Subject: [PATCH] btrfs: create example debugfs file only in debugging

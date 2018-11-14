@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Thu, 3 Dec 2015 14:30:40 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: ff13db41f184f8222aca0cb653347ccdd48a057a
 References: bsc#1012452
 Subject: [PATCH] btrfs: drop unused parameter from lock_extent_bits

@@ -1,6 +1,6 @@
 From: Filipe Manana <fdmanana@suse.com>
 Date: Fri, 12 Feb 2016 14:44:00 +0000
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: f4dfe6871006c62abdccc77b2818b11f376e98e2
 References: bsc#1012452
 Subject: [PATCH] Btrfs: fix extent_same allowing destination offset

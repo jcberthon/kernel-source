@@ -1,4 +1,3 @@
-From 3e750143a57a2c724c5e7f91964c034e432753f3 Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@suse.de>
 Date: Tue, 11 Jul 2017 12:44:39 +0200
 Subject: [PATCH] cifs: Check for timeout on Negotiate stage
@@ -6,7 +5,7 @@ Mime-version: 1.0
 Content-type: text/plain; charset=UTF-8
 Content-transfer-encoding: 8bit
 Git-commit: 76e752701a8af4404bbd9c45723f7cbd6e4a251e
-Patch-mainline: v4.14
+Patch-mainline: v4.14-rc1
 References: bsc#1091171
 
 Some servers seem to accept connections while booting but never send

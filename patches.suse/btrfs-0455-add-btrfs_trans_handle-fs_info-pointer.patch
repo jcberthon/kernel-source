@@ -1,6 +1,6 @@
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Mon, 20 Jun 2016 17:23:41 -0400
-Patch-mainline: 4.8
+Patch-mainline: v4.8-rc1
 Git-commit: 64b63580728ef19137d35363a1c28794b70ad416
 References: bsc#1012452
 Subject: [PATCH] btrfs: add btrfs_trans_handle->fs_info pointer

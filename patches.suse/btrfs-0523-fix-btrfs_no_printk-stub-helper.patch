@@ -1,6 +1,6 @@
 From: Arnd Bergmann <arnd@arndb.de>
 Date: Fri, 23 Sep 2016 18:05:21 +0200
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: 2fd57fcb16483d718043940fd6dfeb176d4dc09c
 References: bsc#1012452
 Subject: [PATCH] btrfs: fix btrfs_no_printk stub helper

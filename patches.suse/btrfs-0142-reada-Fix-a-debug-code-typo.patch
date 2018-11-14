@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Thu, 31 Dec 2015 22:28:51 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 8afd6841e13f8bbdf543c576bc1b919d331003ea
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: Fix a debug code typo

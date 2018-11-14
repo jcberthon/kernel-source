@@ -2,7 +2,7 @@ From: Max Gurtovoy <maxg@mellanox.com>
 Date: Mon, 6 Jun 2016 19:34:40 +0300
 Subject: [PATCH 317/453] IB/core: Make all casts in ib_device_cap_flags enum
  consistent
-Patch-mainline: v4.7-rc5
+Patch-mainline: v4.7-rc3
 Git-commit: c7e162a417488f3c79eb09f3c4f1d36f1e042463
 References: FATE#321231 FATE#321473 FATE#322153 FATE#322149
 

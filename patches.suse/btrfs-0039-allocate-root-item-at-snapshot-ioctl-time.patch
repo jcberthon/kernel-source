@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Tue, 10 Nov 2015 18:54:00 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: b0c0ea6338d5018e02d27c5315084fb1a5d099f6
 References: bsc#1012452
 Subject: [PATCH] btrfs: allocate root item at snapshot ioctl time

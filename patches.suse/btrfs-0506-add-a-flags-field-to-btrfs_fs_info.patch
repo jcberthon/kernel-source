@@ -1,6 +1,6 @@
 From: Josef Bacik <jbacik@fb.com>
 Date: Fri, 2 Sep 2016 15:40:02 -0400
-Patch-mainline: 4.9
+Patch-mainline: v4.9-rc1
 Git-commit: afcdd129e05a9210a5d19d4aa6e0afa475fc49e2
 References: bsc#1012452
 Subject: [PATCH] Btrfs: add a flags field to btrfs_fs_info

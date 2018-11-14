@@ -1,9 +1,8 @@
-From b24791fe00f8b089d5b10cb7bcc4e1ae88b4831b Mon Sep 17 00:00:00 2001
 From: Daniel Stone <daniels@collabora.com>
 Date: Tue, 20 Mar 2018 22:58:39 +0000
 Subject: drm: Reject getfb for multi-plane framebuffers
 References: bsc#1106929
-Patch-mainline: v4.16-rc4
+Patch-mainline: v4.16-rc7
 Git-commit: b24791fe00f8b089d5b10cb7bcc4e1ae88b4831b
 
 getfb can only return a single plane, so reject attempts to use it with

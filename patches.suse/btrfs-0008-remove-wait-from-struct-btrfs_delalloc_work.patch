@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Fri, 27 Nov 2015 19:27:11 +0100
-Patch-mainline: 4.5
+Patch-mainline: v4.5-rc1
 Git-commit: 3042460136bee7bf48860f16a391e6d75f2d0d5c
 References: bsc#1012452
 Subject: [PATCH] btrfs: remove wait from struct btrfs_delalloc_work

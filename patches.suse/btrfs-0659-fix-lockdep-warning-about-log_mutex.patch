@@ -1,6 +1,6 @@
 From: Liu Bo <bo.li.liu@oracle.com>
 Date: Wed, 30 Nov 2016 16:20:25 -0800
-Patch-mainline: 4.10
+Patch-mainline: v4.10-rc4
 Git-commit: 781feef7e6befafd4d9787d1f7ada1f9ccd504e4
 References: bsc#1021455
 Subject: [PATCH] Btrfs: fix lockdep warning about log_mutex

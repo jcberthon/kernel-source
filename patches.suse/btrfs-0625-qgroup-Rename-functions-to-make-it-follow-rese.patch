@@ -1,6 +1,6 @@
 From: Qu Wenruo <quwenruo@cn.fujitsu.com>
 Date: Tue, 18 Oct 2016 09:31:27 +0800
-Patch-mainline: 4.10
+Patch-mainline: v4.10-rc1
 Git-commit: 50b3e040b7c092c3c157f3febaaac77038e9f6fd
 References: bsc#983087, bsc#986255
 Subject: [PATCH] btrfs: qgroup: Rename functions to make it follow

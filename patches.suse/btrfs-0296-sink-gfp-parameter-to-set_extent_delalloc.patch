@@ -1,6 +1,6 @@
 From: David Sterba <dsterba@suse.com>
 Date: Tue, 26 Apr 2016 23:54:39 +0200
-Patch-mainline: 4.7
+Patch-mainline: v4.7-rc1
 Git-commit: 7cd8c7527cb3ad3b397fecfa1bdc8eec9fa33dd8
 References: bsc#1012452
 Subject: [PATCH] btrfs: sink gfp parameter to set_extent_delalloc

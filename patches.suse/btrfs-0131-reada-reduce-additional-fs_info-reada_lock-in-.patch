@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Fri, 18 Dec 2015 21:48:48 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: c37f49c7ef317fb8043fd28594d1e5d728a1ef89
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: reduce additional fs_info->reada_lock in

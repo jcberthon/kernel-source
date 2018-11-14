@@ -1,6 +1,6 @@
 From: Zhao Lei <zhaolei@cn.fujitsu.com>
 Date: Thu, 31 Dec 2015 18:15:47 +0800
-Patch-mainline: 4.6
+Patch-mainline: v4.6-rc1
 Git-commit: 6a159d2ae488a835a8ca5f1f658db72b7e13d064
 References: bsc#1012452
 Subject: [PATCH] btrfs: reada: add all reachable mirrors into reada
