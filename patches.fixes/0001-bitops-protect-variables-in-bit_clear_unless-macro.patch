@@ -1,0 +1,58 @@
+From a54826ff61abfefdf9359755c7e75f2f448933a8 Mon Sep 17 00:00:00 2001
+From: Guoqing Jiang <gqjiang@suse.com>
+Date: Fri, 16 Nov 2018 16:35:45 +0800
+Subject: [PATCH] bitops: protect variables in bit_clear_unless() macro
+Git-commit: edfa87281f4fa1b78a21f6db999935a2faa2f6b8
+Patch-mainline: v4.20-rc1
+References: bsc#1116285
+
+Unprotected naming of local variables within bit_clear_unless() can easily
+lead to using the wrong scope.
+
+Noticed this by code review after having hit this issue in set_mask_bits()
+
+Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
+Fixes: 85ad1d13ee9b ("md: set MD_CHANGE_PENDING in a atomic region")
+Cc: Guoqing Jiang <gqjiang@suse.com>
+[Guoqing] ACCESS_ONCE instead of READ_ONCE is appeared in this patch since
+commit 6aa7de059173a "locking/atomics: COCCINELLE/treewide: Convert trivial
+ACCESS_ONCE() patterns to READ_ONCE()/WRITE_ONCE()" is not in SLE12SP3.
+Acked-by: Guoqing Jiang <gqjiang@suse.com>
+---
+ include/linux/bitops.h | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/include/linux/bitops.h b/include/linux/bitops.h
+index 299e76b59fe9..2ed5cad3238f 100644
+--- a/include/linux/bitops.h
++++ b/include/linux/bitops.h
+@@ -228,18 +228,18 @@ static inline unsigned long __ffs64(u64 word)
+ #endif
+ 
+ #ifndef bit_clear_unless
+-#define bit_clear_unless(ptr, _clear, _test)	\
++#define bit_clear_unless(ptr, clear, test)	\
+ ({								\
+-	const typeof(*ptr) clear = (_clear), test = (_test);	\
+-	typeof(*ptr) old, new;					\
++	const typeof(*ptr) clear__ = (clear), test__ = (test);	\
++	typeof(*ptr) old__, new__;				\
+ 								\
+ 	do {							\
+-		old = ACCESS_ONCE(*ptr);			\
+-		new = old & ~clear;				\
+-	} while (!(old & test) &&				\
+-		 cmpxchg(ptr, old, new) != old);		\
++		old__ = ACCESS_ONCE(*ptr);			\
++		new__ = old__ & ~clear__;			\
++	} while (!(old__ & test__) &&				\
++		 cmpxchg(ptr, old__, new__) != old__);		\
+ 								\
+-	!(old & test);						\
++	!(old__ & test__);					\
+ })
+ #endif
+ 
+-- 
+2.12.3
+
