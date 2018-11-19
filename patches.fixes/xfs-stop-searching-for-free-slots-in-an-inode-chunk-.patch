@@ -36,8 +36,8 @@ Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 Acked-by: Anthony Iliopoulos <ailiopoulos@suse.com>
 
 ---
- fs/xfs/xfs_ialloc.c |   54 ++++++++++++++++++++++++++--------------------------
- 1 file changed, 27 insertions(+), 27 deletions(-)
+ fs/xfs/xfs_ialloc.c |   55 +++++++++++++++++++++++++---------------------------
+ 1 file changed, 27 insertions(+), 28 deletions(-)
 
 --- a/fs/xfs/xfs_ialloc.c
 +++ b/fs/xfs/xfs_ialloc.c
@@ -80,7 +80,7 @@ Acked-by: Anthony Iliopoulos <ailiopoulos@suse.com>
  			/* figure out the closer block if both are valid. */
  			if (!doneleft && !doneright) {
  				useleft = pagino -
-@@ -925,19 +913,31 @@
+@@ -925,26 +913,37 @@
  				goto error1;
  		}
  
@@ -125,3 +125,10 @@ Acked-by: Anthony Iliopoulos <ailiopoulos@suse.com>
  	}
  
  	/*
+ 	 * In a different AG from the parent.
+ 	 * See if the most recently allocated block has any free.
+ 	 */
+-newino:
+ 	if (be32_to_cpu(agi->agi_newino) != NULLAGINO) {
+ 		error = xfs_inobt_lookup(cur, be32_to_cpu(agi->agi_newino),
+ 					 XFS_LOOKUP_EQ, &i);
