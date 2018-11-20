@@ -20,15 +20,13 @@ Acked-by: Will Deacon <will.deacon@arm.com>
 Signed-off-by: Joerg Roedel <jroedel@suse.de>
 Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 ---
- drivers/iommu/arm-smmu-v3.c | 3 +++
- drivers/iommu/arm-smmu.c    | 3 +++
+ drivers/iommu/arm-smmu-v3.c |    3 +++
+ drivers/iommu/arm-smmu.c    |    3 +++
  2 files changed, 6 insertions(+)
 
-diff --git a/drivers/iommu/arm-smmu-v3.c b/drivers/iommu/arm-smmu-v3.c
-index b62595182bb4..35313081e506 100644
 --- a/drivers/iommu/arm-smmu-v3.c
 +++ b/drivers/iommu/arm-smmu-v3.c
-@@ -1717,6 +1717,9 @@ arm_smmu_iova_to_phys(struct iommu_domain *domain, dma_addr_t iova)
+@@ -1727,6 +1727,9 @@ arm_smmu_iova_to_phys(struct iommu_domai
  	struct arm_smmu_domain *smmu_domain = to_smmu_domain(domain);
  	struct io_pgtable_ops *ops = smmu_domain->pgtbl_ops;
  
@@ -38,11 +36,9 @@ index b62595182bb4..35313081e506 100644
  	if (!ops)
  		return 0;
  
-diff --git a/drivers/iommu/arm-smmu.c b/drivers/iommu/arm-smmu.c
-index 45543f141dc0..a65583c9c7aa 100644
 --- a/drivers/iommu/arm-smmu.c
 +++ b/drivers/iommu/arm-smmu.c
-@@ -1406,6 +1406,9 @@ static phys_addr_t arm_smmu_iova_to_phys(struct iommu_domain *domain,
+@@ -1412,6 +1412,9 @@ static phys_addr_t arm_smmu_iova_to_phys
  	struct arm_smmu_domain *smmu_domain = to_smmu_domain(domain);
  	struct io_pgtable_ops *ops= smmu_domain->pgtbl_ops;
  
@@ -52,6 +48,3 @@ index 45543f141dc0..a65583c9c7aa 100644
  	if (!ops)
  		return 0;
  
--- 
-2.11.0
-
