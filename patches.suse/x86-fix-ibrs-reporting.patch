@@ -21,7 +21,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
 
 --- a/arch/x86/kernel/cpu/bugs.c
 +++ b/arch/x86/kernel/cpu/bugs.c
-@@ -138,6 +138,7 @@ static const char *spectre_v2_strings[]
+@@ -140,6 +140,7 @@ static const char *spectre_v2_strings[]
  	[SPECTRE_V2_RETPOLINE_MINIMAL_AMD]	= "Vulnerable: Minimal AMD ASM retpoline",
  	[SPECTRE_V2_RETPOLINE_GENERIC]		= "Mitigation: Full generic retpoline",
  	[SPECTRE_V2_RETPOLINE_AMD]		= "Mitigation: Full AMD retpoline",
@@ -29,7 +29,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  };
  
  #undef pr_fmt
-@@ -456,6 +457,17 @@ retpoline_auto:
+@@ -418,6 +419,17 @@ retpoline_auto:
  		setup_force_cpu_cap(X86_FEATURE_RETPOLINE);
  	}
  
@@ -47,7 +47,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  	spectre_v2_enabled = mode;
  	pr_info("%s\n", spectre_v2_strings[mode]);
  
-@@ -470,15 +482,10 @@ retpoline_auto:
+@@ -432,15 +444,10 @@ retpoline_auto:
  	setup_force_cpu_cap(X86_FEATURE_RSB_CTXSW);
  	pr_info("Spectre v2 / SpectreRSB mitigation: Filling RSB on context switch\n");
  
@@ -64,16 +64,16 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  	}
  
  	/*
-@@ -892,9 +899,9 @@ static ssize_t cpu_show_common(struct de
+@@ -849,9 +856,9 @@ static ssize_t cpu_show_common(struct de
  		return sprintf(buf, "Mitigation: __user pointer sanitization\n");
  
  	case X86_BUG_SPECTRE_V2:
 -		if (boot_cpu_has(X86_FEATURE_SPEC_CTRL) && x86_ibrs_enabled())
 -			return sprintf(buf, "Mitigation: IBRS+IBPB\n");
--		ret = sprintf(buf, "%s%s%s%s%s%s\n", spectre_v2_strings[spectre_v2_enabled],
-+		ret = sprintf(buf, "%s%s%s%s%s%s\n",
+-		ret = sprintf(buf, "%s%s%s%s%s\n", spectre_v2_strings[spectre_v2_enabled],
++		ret = sprintf(buf, "%s%s%s%s%s\n",
 +			      (x86_ibrs_enabled() ? "Mitigation: IBRS+IBPB"
 +						  : spectre_v2_strings[spectre_v2_enabled]),
  			       boot_cpu_has(X86_FEATURE_USE_IBPB) && x86_ibpb_enabled() ? ", IBPB" : "",
  			       boot_cpu_has(X86_FEATURE_USE_IBRS_FW) ? ", IBRS_FW" : "",
- 			       (x86_spec_ctrl_base & SPEC_CTRL_STIBP) ? ", STIBP" : "",
+ 			       boot_cpu_has(X86_FEATURE_RSB_CTXSW) ? ", RSB filling" : "",
