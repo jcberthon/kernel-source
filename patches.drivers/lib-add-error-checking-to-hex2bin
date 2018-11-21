@@ -3,7 +3,7 @@ Date: Tue, 20 Sep 2011 11:23:49 -0400
 Subject: lib: add error checking to hex2bin
 Git-commit: b78049831ffed65f0b4e61f69df14f3ab17922cb
 Patch-mainline: v3.2-rc1
-References: bsc#11078229 CVE-2018-14633
+References: bsc#1107829 CVE-2018-14633
 
 hex2bin converts a hexadecimal string to its binary representation.
 The original version of hex2bin did not do any error checking.  This
