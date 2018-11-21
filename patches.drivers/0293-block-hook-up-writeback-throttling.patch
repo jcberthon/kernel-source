@@ -460,8 +460,8 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  {
  	int ret;
 @@ -765,6 +851,8 @@ int blk_register_queue(struct gendisk *d
- 	if (q->mq_ops)
- 		blk_mq_register_dev(dev, q);
+ 
+ 	kobject_uevent(&q->kobj, KOBJ_ADD);
  
 +	blk_wb_init(q);
 +
