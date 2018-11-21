@@ -60,11 +60,11 @@ index bd4bdbf..289c481 100644
  	}
  
 @@ -1522,9 +1523,9 @@ static void fc_fcp_rec_resp(struct fc_seq *seq, struct fc_frame *fp, void *arg)
+ 			break;
  		case ELS_RJT_LOGIC:
  		case ELS_RJT_UNAB:
- 			FC_FCP_DBG(fsp, "device %x REC reject "
--				   "reason %d expl %d\n",
-+				   "reason %x expl %x xfer_len %zx\n",
+-			FC_FCP_DBG(fsp, "device %x REC reject %d/%d\n"
++			FC_FCP_DBG(fsp, "device %x REC reject %d/%d xfer_len %zx\n",
  				   fsp->rport->port_id, rjt->er_reason,
 -				   rjt->er_explan);
 +				   rjt->er_explan, fsp->xfer_len);
