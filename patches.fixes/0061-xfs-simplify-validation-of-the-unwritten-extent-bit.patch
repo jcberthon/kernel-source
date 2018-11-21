@@ -245,19 +245,19 @@ index 40e41bf47ac9..e6a3d28a3634 100644
 +	struct xfs_dinode	*dip,
 +	int			whichfork)
  {
+-	int		state = xfs_bmap_fork_to_state(whichfork);
 -	xfs_bmbt_rec_t  *dp;
 -	xfs_ifork_t	*ifp;
 -	int		nex;
 -	int		size;
 -	int		i;
--	int		state = xfs_bmap_fork_to_state(whichfork);
 +	struct xfs_mount	*mp = ip->i_mount;
 +	struct xfs_ifork	*ifp = XFS_IFORK_PTR(ip, whichfork);
++	int			state = xfs_bmap_fork_to_state(whichfork);
 +	int			nex = XFS_DFORK_NEXTENTS(dip, whichfork);
 +	int			size = nex * sizeof(xfs_bmbt_rec_t);
 +	xfs_bmbt_rec_t		*dp;
 +	int			i;
-+	int			state = xfs_bmap_fork_to_state(whichfork);
  
 -	ifp = XFS_IFORK_PTR(ip, whichfork);
 -	nex = XFS_DFORK_NEXTENTS(dip, whichfork);

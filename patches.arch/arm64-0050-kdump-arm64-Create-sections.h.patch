@@ -101,15 +101,15 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	in = ptr >= (unsigned long)&__exception_text_start &&
 --- a/arch/arm64/include/asm/virt.h
 +++ b/arch/arm64/include/asm/virt.h
-@@ -47,6 +47,7 @@
+@@ -53,6 +53,7 @@
+ #ifndef __ASSEMBLY__
+ 
  #include <asm/ptrace.h>
++#include <asm/sections.h>
  #include <asm/sysreg.h>
  #include <asm/cpufeature.h>
-+#include <asm/sections.h>
  
- /*
-  * __boot_cpu_mode records what mode CPUs were booted in.
-@@ -80,14 +81,6 @@ static inline bool is_kernel_in_hyp_mode
+@@ -88,14 +89,6 @@ static inline bool is_kernel_in_hyp_mode
  	return read_sysreg(CurrentEL) == CurrentEL_EL2;
  }
  

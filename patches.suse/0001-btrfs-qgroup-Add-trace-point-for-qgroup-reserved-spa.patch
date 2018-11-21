@@ -192,15 +192,15 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 --- a/include/trace/events/btrfs.h
 +++ b/include/trace/events/btrfs.h
 @@ -25,6 +25,7 @@ struct btrfs_work;
+ struct btrfs_work;
  struct __btrfs_workqueue;
  struct btrfs_qgroup_extent_record;
- struct prelim_ref;
 +struct btrfs_qgroup;
+ struct prelim_ref;
  
  #define show_ref_type(type)						\
- 	__print_symbolic(type,						\
 @@ -1543,6 +1544,49 @@ DEFINE_EVENT(btrfs__prelim_ref, btrfs_pr
- 	TP_ARGS(fs_info, oldref, newref, tree_size)
+ 		  __entry->cur_new_count)
  );
  
 +TRACE_EVENT(qgroup_update_reserve,
@@ -246,6 +246,6 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 +		show_root_type(__entry->refroot), __entry->diff)
 +);
 +
- #endif /* _TRACE_BTRFS_H */
- 
- /* This part must be outside protection */
+ DECLARE_EVENT_CLASS(btrfs__prelim_ref,
+ 	TP_PROTO(const struct btrfs_fs_info *fs_info,
+ 		 const struct prelim_ref *oldref,

@@ -45,11 +45,12 @@ diff --git a/drivers/infiniband/hw/Makefile b/drivers/infiniband/hw/Makefile
 index 6867c99..2fed29c 100644
 --- a/drivers/infiniband/hw/Makefile
 +++ b/drivers/infiniband/hw/Makefile
-@@ -12,3 +12,4 @@ obj-$(CONFIG_INFINIBAND_BNXT_RE)	+= bnxt_re/
- 
+@@ -12,4 +12,5 @@ obj-$(CONFIG_INFINIBAND_BNXT_RE)	+= bnxt_re/
+ obj-$(CONFIG_INFINIBAND_USNIC)		+= usnic/
  obj-$(CONFIG_INFINIBAND_HFI1)		+= hfi1/
  obj-$(CONFIG_INFINIBAND_HNS)		+= hns/
 +obj-$(CONFIG_INFINIBAND_QEDR)		+= qedr/
+ obj-$(CONFIG_INFINIBAND_BNXT_RE)	+= bnxt_re/
 diff --git a/drivers/infiniband/hw/qedr/Kconfig b/drivers/infiniband/hw/qedr/Kconfig
 new file mode 100644
 index 0000000..6c9f392

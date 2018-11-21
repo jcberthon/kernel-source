@@ -37,8 +37,8 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  arch/x86/kvm/vmx.c                |    2 -
  arch/x86/kvm/x86.c                |   15 +++++++++++++
  include/trace/events/kvm.h        |    5 ++--
- include/uapi/linux/kvm.h          |    2 +
- 8 files changed, 98 insertions(+), 13 deletions(-)
+ include/uapi/linux/kvm.h          |    3 ++
+ 8 files changed, 99 insertions(+), 13 deletions(-)
 
 --- a/Documentation/virtual/kvm/api.txt
 +++ b/Documentation/virtual/kvm/api.txt
@@ -120,7 +120,7 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  
 --- a/arch/x86/include/asm/kvm_host.h
 +++ b/arch/x86/include/asm/kvm_host.h
-@@ -738,6 +738,8 @@ struct kvm_arch {
+@@ -734,6 +734,8 @@ struct kvm_arch {
  	struct hlist_node hnode;
  
  	bool disabled_lapic_found;
@@ -129,7 +129,7 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  };
  
  struct kvm_vm_stat {
-@@ -1311,7 +1313,7 @@ bool kvm_vcpu_is_bsp(struct kvm_vcpu *vc
+@@ -1313,7 +1315,7 @@ bool kvm_vcpu_is_bsp(struct kvm_vcpu *vc
  bool kvm_intr_is_single_vcpu(struct kvm *kvm, struct kvm_lapic_irq *irq,
  			     struct kvm_vcpu **dest_vcpu);
  
@@ -219,7 +219,7 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  						irq.dest_id, irq.dest_mode))
 --- a/arch/x86/kvm/lapic.c
 +++ b/arch/x86/kvm/lapic.c
-@@ -1930,10 +1930,15 @@ static int kvm_apic_state_fixup(struct k
+@@ -1938,10 +1938,15 @@ static int kvm_apic_state_fixup(struct k
  	if (apic_x2apic_mode(vcpu->arch.apic)) {
  		u32 *id = (u32 *)(s->regs + APIC_ID);
  
@@ -241,7 +241,7 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  	return 0;
 --- a/arch/x86/kvm/vmx.c
 +++ b/arch/x86/kvm/vmx.c
-@@ -10822,7 +10822,7 @@ static int vmx_update_pi_irte(struct kvm
+@@ -10829,7 +10829,7 @@ static int vmx_update_pi_irte(struct kvm
  		 * We will support full lowest-priority interrupt later.
  		 */
  
@@ -261,7 +261,7 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  static void update_cr8_intercept(struct kvm_vcpu *vcpu);
  static void process_nmi(struct kvm_vcpu *vcpu);
  static void process_smi(struct kvm_vcpu *vcpu);
-@@ -2627,6 +2629,9 @@ int kvm_vm_ioctl_check_extension(struct
+@@ -2631,6 +2633,9 @@ int kvm_vm_ioctl_check_extension(struct
  	case KVM_CAP_TSC_CONTROL:
  		r = kvm_has_tsc_control;
  		break;
@@ -271,7 +271,7 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  	default:
  		r = 0;
  		break;
-@@ -3791,6 +3796,16 @@ split_irqchip_unlock:
+@@ -3813,6 +3818,16 @@ split_irqchip_unlock:
  		mutex_unlock(&kvm->lock);
  		break;
  	}
@@ -310,12 +310,14 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  #define KVM_CAP_MAX_VCPU_ID 128
 +#define KVM_CAP_X2APIC_API 129
  #define KVM_CAP_MSI_DEVID 131
- #define KVM_CAP_X86_GUEST_MWAIT 143
  #define KVM_CAP_ARM_USER_IRQ (0x1000 | 137) /* Will only be fixed in 4.12 */
-@@ -1296,5 +1297,6 @@ struct kvm_assigned_msix_entry {
- #define KVM_ARM_DEV_EL1_VTIMER		(1 << 0)
- #define KVM_ARM_DEV_EL1_PTIMER		(1 << 1)
- #define KVM_ARM_DEV_PMU			(1 << 2)
-+#define KVM_X2APIC_API_USE_32BIT_IDS            (1ULL << 0)
+ #define KVM_CAP_X86_GUEST_MWAIT 143
+@@ -1291,6 +1292,8 @@ struct kvm_assigned_msix_entry {
+ 	__u16 padding[3];
+ };
  
- #endif /* __LINUX_KVM_H */
++#define KVM_X2APIC_API_USE_32BIT_IDS            (1ULL << 0)
++
+ /* Available with KVM_CAP_ARM_USER_IRQ */
+ 
+ /* Bits for run->s.regs.device_irq_level */

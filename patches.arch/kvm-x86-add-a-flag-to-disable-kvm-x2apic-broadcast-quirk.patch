@@ -186,13 +186,14 @@ diff --git a/include/uapi/linux/kvm.h b/include/uapi/linux/kvm.h
 index 7c7de9652258..03987092a653 100644
 --- a/include/uapi/linux/kvm.h
 +++ b/include/uapi/linux/kvm.h
-@@ -1297,5 +1297,6 @@ struct kvm_assigned_msix_entry {
- #define KVM_ARM_DEV_EL1_PTIMER		(1 << 1)
- #define KVM_ARM_DEV_PMU			(1 << 2)
+@@ -1297,6 +1297,7 @@ struct kvm_assigned_msix_entry {
+ };
+ 
  #define KVM_X2APIC_API_USE_32BIT_IDS            (1ULL << 0)
 +#define KVM_X2APIC_API_DISABLE_BROADCAST_QUIRK  (1ULL << 1)
  
- #endif /* __LINUX_KVM_H */
+ /* Available with KVM_CAP_ARM_USER_IRQ */
+ 
 -- 
 2.12.2
 

@@ -16,8 +16,8 @@ Acked-by: Michal Marek <mmarek@suse.com>
 --- a/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts
 +++ b/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts
 @@ -34,3 +34,20 @@
- &hdmi {
- 	hpd-gpios = <&gpio 46 GPIO_ACTIVE_HIGH>;
+ 	pinctrl-0 = <&uart1_gpio32>;
+ 	status = "okay";
  };
 +
 +/* SDHCI is used to control the SDIO for wireless */

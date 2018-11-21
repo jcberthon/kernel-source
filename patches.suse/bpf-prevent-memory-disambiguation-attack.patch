@@ -36,13 +36,13 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
 --- a/kernel/bpf/verifier.c
 +++ b/kernel/bpf/verifier.c
 @@ -192,6 +192,7 @@ struct bpf_insn_aux_data {
+ 		enum bpf_reg_type ptr_type;	/* pointer type for load/store insns */
  		unsigned long map_state;        /* pointer/poison value for maps */
  	};
- 	bool seen; /* this insn was processed by the verifier */
 +	int sanitize_stack_off; /* stack slot to be cleared */
+ 	bool seen; /* this insn was processed by the verifier */
  };
  
- #define MAX_USED_MAPS 64 /* max number of maps accessed by one eBPF program */
 @@ -585,10 +586,12 @@ static bool is_spillable_regtype(enum bp
  /* check_stack_read/write functions track spill/fill of registers,
   * stack boundary and alignment are checked in check_mem_access()

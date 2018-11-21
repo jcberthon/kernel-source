@@ -37,7 +37,7 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 
 --- a/arch/x86/include/asm/pgtable.h
 +++ b/arch/x86/include/asm/pgtable.h
-@@ -496,6 +496,13 @@ static inline int pte_present(pte_t a)
+@@ -551,6 +551,13 @@ static inline int pte_present(pte_t a)
  	return pte_flags(a) & (_PAGE_PRESENT | _PAGE_PROTNONE);
  }
  
@@ -61,8 +61,8 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
  
  #include <asm/mmu_context.h>
  #include <asm/pgtable.h>
-@@ -86,6 +87,16 @@ static inline int pte_allows_gup(unsigne
- 	return 1;
+@@ -64,6 +65,16 @@ retry:
+ #endif
  }
  
 +static void undo_dev_pagemap(int *nr, int nr_start, struct page **pages)
@@ -76,8 +76,8 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 +}
 +
  /*
-  * The performance critical leaf functions are made noinline otherwise gcc
-  * inlines everything into a single function which results in too much
+  * 'pteval' can come from a pte, pmd or pud.  We only check
+  * _PAGE_PRESENT, _PAGE_USER, and _PAGE_RW in here which are the
 @@ -94,6 +105,8 @@ static inline int pte_allows_gup(unsigne
  static noinline int gup_pte_range(pmd_t pmd, unsigned long addr,
  		unsigned long end, int write, struct page **pages, int *nr)

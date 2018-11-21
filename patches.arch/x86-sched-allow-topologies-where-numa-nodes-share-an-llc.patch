@@ -82,14 +82,14 @@ index f22808d70fb3..684b95f6e8c9 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -78,6 +78,8 @@
+ #include <asm/misc.h>
  #include <asm/qspinlock.h>
  #include <asm/spec-ctrl.h>
- #include <asm/spec_ctrl.h>
 +#include <asm/intel-family.h>
 +#include <asm/cpu_device_id.h>
+ #include <asm/spec_ctrl.h>
  
  /* Number of siblings per CPU package */
- int smp_num_siblings = 1;
 @@ -319,15 +321,47 @@ static bool match_smt(struct cpuinfo_x86 *c, struct cpuinfo_x86 *o)
  	return false;
  }

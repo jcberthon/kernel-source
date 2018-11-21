@@ -25,9 +25,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 
 --- a/drivers/pci/host/Kconfig
 +++ b/drivers/pci/host/Kconfig
-@@ -217,4 +217,15 @@ config PCIE_ROCKCHIP
- 	  There is 1 internal PCIe port available to support GEN2 with
- 	  4 slots.
+@@ -217,6 +217,17 @@ config PCIE_ROCKCHIP
+ 	help
+ 	  Say Y here if you want ECAM support for CN88XX-Pass-1.x Cavium Thunder SoCs.
  
 +config PCIE_ARMADA_8K
 +	bool "Marvell Armada-8K PCIe controller"
@@ -40,7 +40,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	  Designware hardware and therefore the driver re-uses the
 +	  Designware core functions to implement the driver.
 +
- endmenu
+ config PCIE_ROCKCHIP
+ 	bool "Rockchip PCIe controller"
+ 	depends on ARCH_ROCKCHIP || COMPILE_TEST
 --- a/drivers/pci/host/Makefile
 +++ b/drivers/pci/host/Makefile
 @@ -25,4 +25,5 @@ obj-$(CONFIG_PCIE_ALTERA_MSI) += pcie-al

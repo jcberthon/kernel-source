@@ -296,13 +296,13 @@ index 91cbc30e0a14..fcfa0dfb1b6d 100644
 --- a/fs/xfs/xfs_inode.c
 +++ b/fs/xfs/xfs_inode.c
 @@ -49,6 +49,7 @@
+ #include "xfs_trans_priv.h"
  #include "xfs_log.h"
  #include "xfs_bmap_btree.h"
- #include "xfs_dmapi.h"
 +#include "xfs_dir2_priv.h"
+ #include "xfs_dmapi.h"
  
  kmem_zone_t *xfs_inode_zone;
- 
 @@ -3534,7 +3535,6 @@ xfs_iflush_int(
  	struct xfs_inode_log_item *iip = ip->i_itemp;
  	struct xfs_dinode	*dip;

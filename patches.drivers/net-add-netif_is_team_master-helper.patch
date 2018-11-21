@@ -18,7 +18,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 
 --- a/drivers/net/team/team.c
 +++ b/drivers/net/team/team.c
-@@ -2059,6 +2059,7 @@ static void team_setup(struct net_device
+@@ -2081,6 +2081,7 @@ static void team_setup(struct net_device
  	dev->flags |= IFF_MULTICAST;
  	dev->priv_flags &= ~(IFF_XMIT_DST_RELEASE | IFF_TX_SKB_SHARING);
  	dev->priv_flags |= IFF_NO_QUEUE;
@@ -52,8 +52,8 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  #define IFF_RXFH_CONFIGURED		IFF_RXFH_CONFIGURED
  
  /**
-@@ -4012,6 +4015,11 @@ static inline bool netif_is_rxfh_configu
- 	return dev->priv_flags & IFF_RXFH_CONFIGURED;
+@@ -4031,6 +4034,11 @@ static inline bool netif_is_ovs_master(c
+ 	return dev->priv_flags & IFF_OPENVSWITCH;
  }
  
 +static inline bool netif_is_team_master(struct net_device *dev)
@@ -61,6 +61,6 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 +	return dev->priv_flags & IFF_TEAM;
 +}
 +
- /* This device needs to keep skb dst for qdisc enqueue or ndo_start_xmit() */
- static inline void netif_keep_dst(struct net_device *dev)
+ static inline bool netif_is_rxfh_configured(const struct net_device *dev)
  {
+ 	return dev->priv_flags & IFF_RXFH_CONFIGURED;

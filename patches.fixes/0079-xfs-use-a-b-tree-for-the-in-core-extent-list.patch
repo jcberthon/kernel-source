@@ -1500,7 +1500,7 @@ index ce1a48bdeeae..a2b4e33a30c6 100644
  	struct xfs_bmbt_rec	*dp;
 +	struct xfs_bmbt_irec	new;
  	int			i;
- 	int			state = xfs_bmap_fork_to_state(whichfork);
+ 
  
 @@ -306,27 +307,22 @@ xfs_iformat_extents(
  	}

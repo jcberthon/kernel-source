@@ -32,7 +32,7 @@ Signed-off-by: Qu Wenruo <wqu@suse.com>
 --- a/include/trace/events/btrfs.h
 +++ b/include/trace/events/btrfs.h
 @@ -1595,6 +1595,27 @@ TRACE_EVENT(qgroup_meta_reserve,
- 		show_root_type(__entry->refroot), __entry->diff)
+ 	TP_ARGS(fs_info, oldref, newref, tree_size)
  );
  
 +TRACE_EVENT(btrfs_inode_mod_outstanding_extents,

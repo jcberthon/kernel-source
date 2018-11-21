@@ -45,10 +45,11 @@ Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
 
 --- a/Documentation/virtual/kvm/api.txt
 +++ b/Documentation/virtual/kvm/api.txt
-@@ -3721,6 +3721,15 @@ H_RANDOM hypercall backed by a hardware
- If present, the kernel H_RANDOM handler can be enabled for guest use
- with the KVM_CAP_PPC_ENABLE_HCALL capability.
- 
+@@ -3761,3 +3761,12 @@ Currently the following bits are defined
+ Future versions of kvm may implement additional events. These will get
+ indicated by returning a higher number from KVM_CHECK_EXTENSION and will be
+ listed above.
++
 +8.8 KVM_CAP_X86_GUEST_MWAIT
 +
 +Architectures: x86
@@ -57,13 +58,9 @@ Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
 +(MWAIT/MWAITX) to stop the virtual CPU will not cause a VM exit.  As such time
 +spent while virtual CPU is halted in this way will then be accounted for as
 +guest running time on the host (as opposed to e.g. HLT).
-+
- 8.5 KVM_CAP_ARM_USER_IRQ
- 
- Architectures: arm, arm64
 --- a/arch/x86/kvm/svm.c
 +++ b/arch/x86/kvm/svm.c
-@@ -1224,10 +1224,13 @@ static void init_vmcb(struct vcpu_svm *s
+@@ -1223,10 +1223,13 @@ static void init_vmcb(struct vcpu_svm *s
  	set_intercept(svm, INTERCEPT_CLGI);
  	set_intercept(svm, INTERCEPT_SKINIT);
  	set_intercept(svm, INTERCEPT_WBINVD);
@@ -81,7 +78,7 @@ Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
  	control->int_ctl = V_INTR_MASKING_MASK;
 --- a/arch/x86/kvm/vmx.c
 +++ b/arch/x86/kvm/vmx.c
-@@ -3219,11 +3219,13 @@ static __init int setup_vmcs_config(stru
+@@ -3161,11 +3161,13 @@ static __init int setup_vmcs_config(stru
  	      CPU_BASED_USE_IO_BITMAPS |
  	      CPU_BASED_MOV_DR_EXITING |
  	      CPU_BASED_USE_TSC_OFFSETING |
@@ -162,11 +159,11 @@ Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
  #endif
 --- a/include/uapi/linux/kvm.h
 +++ b/include/uapi/linux/kvm.h
-@@ -834,6 +834,7 @@ struct kvm_ppc_smmu_info {
- #define KVM_CAP_ARM_PMU_V3 125
+@@ -835,6 +835,7 @@ struct kvm_ppc_smmu_info {
  #define KVM_CAP_VCPU_ATTRIBUTES 126
  #define KVM_CAP_MSI_DEVID 131
-+#define KVM_CAP_X86_GUEST_MWAIT 143
  #define KVM_CAP_ARM_USER_IRQ (0x1000 | 137) /* Will only be fixed in 4.12 */
++#define KVM_CAP_X86_GUEST_MWAIT 143
  #define KVM_CAP_S390_BPB 152
  
+ #ifdef KVM_CAP_IRQ_ROUTING

@@ -585,9 +585,9 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  			rc = PTR_ERR(ptr);
 --- a/arch/s390/include/asm/diag.h
 +++ b/arch/s390/include/asm/diag.h
-@@ -105,4 +105,131 @@ struct diag26c_mac_resp {
+@@ -80,6 +80,132 @@ struct diag210 {
  
- int diag26c(void *req, void *resp, enum diag26c_sc subcode);
+ extern int diag210(struct diag210 *addr);
  
 +/* bit is set in flags, when physical cpu info is included in diag 204 data */
 +#define DIAG204_LPAR_PHYS_FLG 0x80
@@ -715,7 +715,15 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 +	char  reserved3[80];
 +} __packed;
 +
+ enum diag26c_sc {
+ 	DIAG26C_MAC_SERVICES = 0x00000030
+ };
+@@ -103,5 +229,6 @@ struct diag26c_mac_resp {
+ 	u8	res[2];
+ } __aligned(8);
+ 
 +int diag204(unsigned long subcode, unsigned long size, void *addr);
+ int diag26c(void *req, void *resp, enum diag26c_sc subcode);
  #endif /* _ASM_S390_DIAG_H */
 --- a/arch/s390/kernel/diag.c
 +++ b/arch/s390/kernel/diag.c

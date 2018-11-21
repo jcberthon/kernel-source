@@ -61,11 +61,12 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  	/* memory must be below 2GB */
 --- a/arch/s390/include/asm/diag.h
 +++ b/arch/s390/include/asm/diag.h
-@@ -232,4 +232,5 @@ struct diag204_x_phys_cpu {
- } __packed;
+@@ -232,5 +232,6 @@ struct diag204_x_phys_cpu {
+ } __aligned(8);
  
  int diag204(unsigned long subcode, unsigned long size, void *addr);
 +int diag224(void *ptr);
+ int diag26c(void *req, void *resp, enum diag26c_sc subcode);
  #endif /* _ASM_S390_DIAG_H */
 --- a/arch/s390/kernel/diag.c
 +++ b/arch/s390/kernel/diag.c

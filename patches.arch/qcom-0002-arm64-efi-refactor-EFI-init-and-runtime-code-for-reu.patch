@@ -13,25 +13,26 @@ Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: Will Deacon <will.deacon@arm.com>
 Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 ---
- arch/arm64/include/asm/efi.h       |    9 +++++++
- arch/arm64/kernel/efi.c            |   23 +++++++++++++++++++
- drivers/firmware/efi/arm-init.c    |    7 +++---
- drivers/firmware/efi/arm-runtime.c |   43 +++++++++++++------------------------
+ arch/arm64/include/asm/efi.h       |    9 ++++++
+ arch/arm64/kernel/efi.c            |   23 +++++++++++++++++
+ drivers/firmware/efi/arm-init.c    |    7 +++--
+ drivers/firmware/efi/arm-runtime.c |   48 ++++++++++++-------------------------
  drivers/firmware/efi/efi.c         |    2 +
- 5 files changed, 54 insertions(+), 30 deletions(-)
+ 5 files changed, 54 insertions(+), 35 deletions(-)
 
 --- a/arch/arm64/include/asm/efi.h
 +++ b/arch/arm64/include/asm/efi.h
-@@ -2,7 +2,9 @@
+@@ -2,8 +2,10 @@
  #define _ASM_EFI_H
  
  #include <asm/io.h>
 +#include <asm/mmu_context.h>
  #include <asm/neon.h>
-+#include <asm/tlbflush.h>
  #include <asm/ptrace.h>
++#include <asm/tlbflush.h>
  
  #ifdef CONFIG_EFI
+ extern void efi_init(void);
 @@ -11,6 +13,8 @@ extern void efi_init(void);
  #define efi_init()
  #endif
@@ -202,7 +203,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  {
  	u64 mapsize;
  
-@@ -131,12 +120,7 @@ static int __init arm64_enable_runtime_services(void)
+@@ -131,12 +120,7 @@ static int __init arm64_enable_runtime_s
  
  	return 0;
  }
