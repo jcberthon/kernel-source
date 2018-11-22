@@ -47,19 +47,20 @@ instead of open-coding it, and removes the HMT_MEDIUM_PPR_DISCARD
 from the relocation-on vectors (since any CPU that supports
 relocation-on interrupts also has the PPR).
 
+[note: we have SLE-specific 0xf60 vector handler which was not upstream when
+this patch landed]
+
 Signed-off-by: Paul Mackerras <paulus@samba.org>
 Signed-off-by: Benjamin Herrenschmidt <benh@kernel.crashing.org>
 Acked-by: Michal Suchanek <msuchanek@suse.de>
 ---
- arch/powerpc/include/asm/exception-64s.h | 58 ++++++++++++++++++++++++--------
- arch/powerpc/kernel/exceptions-64s.S     | 48 +++++++++++++++++++-------
- 2 files changed, 79 insertions(+), 27 deletions(-)
+ arch/powerpc/include/asm/exception-64s.h |   58 +++++++++++++++++++++++--------
+ arch/powerpc/kernel/exceptions-64s.S     |   51 ++++++++++++++++++++-------
+ 2 files changed, 82 insertions(+), 27 deletions(-)
 
-diff --git a/arch/powerpc/include/asm/exception-64s.h b/arch/powerpc/include/asm/exception-64s.h
-index 1081091d934c..7bbe0f231a6b 100644
 --- a/arch/powerpc/include/asm/exception-64s.h
 +++ b/arch/powerpc/include/asm/exception-64s.h
-@@ -89,25 +89,32 @@ BEGIN_FTR_SECTION_NESTED(942)						\
+@@ -90,25 +90,32 @@ BEGIN_FTR_SECTION_NESTED(942)						\
  END_FTR_SECTION_NESTED(CPU_FTR_HAS_PPR,0,942)	/* non P7 */
  
  /*
@@ -105,7 +106,7 @@ index 1081091d934c..7bbe0f231a6b 100644
  	mfcr	r9;							\
  	extra(vec);							\
  	std	r11,area+EX_R11(r13);					\
-@@ -131,6 +138,7 @@ END_FTR_SECTION_NESTED(CPU_FTR_HAS_PPR,CPU_FTR_HAS_PPR,943)
+@@ -132,6 +139,7 @@ END_FTR_SECTION_NESTED(CPU_FTR_HAS_PPR,C
  	__EXCEPTION_PROLOG_PSERIES_1(label, h)
  
  #define EXCEPTION_PROLOG_PSERIES(area, label, h, extra, vec)		\
@@ -113,7 +114,7 @@ index 1081091d934c..7bbe0f231a6b 100644
  	EXCEPTION_PROLOG_1(area, extra, vec);				\
  	EXCEPTION_PROLOG_PSERIES_1(label, h);
  
-@@ -253,6 +261,13 @@ label##_pSeries:					\
+@@ -254,6 +262,13 @@ label##_pSeries:					\
  	EXCEPTION_PROLOG_PSERIES(PACA_EXGEN, label##_common,	\
  				 EXC_STD, KVMTEST, vec)
  
@@ -127,7 +128,7 @@ index 1081091d934c..7bbe0f231a6b 100644
  #define STD_EXCEPTION_HV(loc, vec, label)		\
  	. = loc;					\
  	.globl label##_hv;				\
-@@ -262,6 +277,13 @@ label##_hv:						\
+@@ -263,6 +278,13 @@ label##_hv:						\
  	EXCEPTION_PROLOG_PSERIES(PACA_EXGEN, label##_common,	\
  				 EXC_HV, KVMTEST, vec)
  
@@ -141,7 +142,7 @@ index 1081091d934c..7bbe0f231a6b 100644
  #define __SOFTEN_TEST(h)						\
  	lbz	r10,PACASOFTIRQEN(r13);					\
  	cmpwi	r10,0;							\
-@@ -279,8 +301,10 @@ label##_hv:						\
+@@ -280,8 +302,10 @@ label##_hv:						\
  #define __MASKABLE_EXCEPTION_PSERIES(vec, label, h, extra)		\
  	HMT_MEDIUM_PPR_DISCARD;						\
  	SET_SCRATCH0(r13);    /* save r13 */				\
@@ -153,7 +154,7 @@ index 1081091d934c..7bbe0f231a6b 100644
  #define _MASKABLE_EXCEPTION_PSERIES(vec, label, h, extra)		\
  	__MASKABLE_EXCEPTION_PSERIES(vec, label, h, extra)
  
-@@ -298,6 +322,12 @@ label##_hv:								\
+@@ -299,6 +323,12 @@ label##_hv:								\
  	_MASKABLE_EXCEPTION_PSERIES(vec, label,				\
  				    EXC_HV, SOFTEN_TEST_HV)
  
@@ -166,7 +167,6 @@ index 1081091d934c..7bbe0f231a6b 100644
  #ifdef CONFIG_PPC_ISERIES
  #define DISABLE_INTS				\
  	li	r11,0;				\
-diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptions-64s.S
 --- a/arch/powerpc/kernel/exceptions-64s.S
 +++ b/arch/powerpc/kernel/exceptions-64s.S
 @@ -73,7 +73,10 @@ machine_check_pSeries_1:
@@ -223,7 +223,7 @@ diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptio
  	b	hmi_exception_hv
  
  	/* We need to deal with the Altivec unavailable exception
-@@ -243,14 +257,20 @@ hv_exception_trampoline:
+@@ -243,17 +257,26 @@ hv_exception_trampoline:
  	 */
  performance_monitor_pSeries_1:
  	. = 0xf00
@@ -243,8 +243,14 @@ diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptio
 +	EXCEPTION_PROLOG_0(PACA_EXGEN)
  	b	vsx_unavailable_pSeries
  
++facility_unavailable_pSeries_1:
  	. = 0xf60
-@@ -287,8 +307,10 @@ machine_check_pSeries:
++	SET_SCRATCH0(r13)
++	EXCEPTION_PROLOG_0(PACA_EXGEN)
+ 	b	facility_unavailable_pSeries
+ 
+ #ifdef CONFIG_CBE_RAS
+@@ -287,8 +310,10 @@ machine_check_pSeries:
  machine_check_fwnmi:
  	HMT_MEDIUM_PPR_DISCARD
  	SET_SCRATCH0(r13)		/* save r13 */
@@ -257,7 +263,7 @@ diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptio
  	KVM_HANDLER_SKIP(PACA_EXMC, EXC_STD, 0x200)
  
  #ifndef CONFIG_POWER4_ONLY
-@@ -329,23 +351,23 @@ do_stab_bolted_pSeries:
+@@ -329,23 +354,23 @@ do_stab_bolted_pSeries:
  
  	.align	7
  	/* moved from 0xe00 */
@@ -289,6 +295,3 @@ diff --git a/arch/powerpc/kernel/exceptions-64s.S b/arch/powerpc/kernel/exceptio
  	KVM_HANDLER(PACA_EXGEN, EXC_STD, 0xf60)
  
  /*
--- 
-2.13.7
-
