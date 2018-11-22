@@ -2,9 +2,8 @@ From fc8f47f278e3cca7cd875d37ae1388b57ea70a6b Mon Sep 17 00:00:00 2001
 From: Eric Anholt <eric@anholt.net>
 Date: Wed, 13 Apr 2016 11:53:34 -0700
 Subject: [PATCH 081/101] don't force serial pins to uart0
-Git-commit: 25ed24864cceceb58cbc9b3f73e4fcda5863aeec
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://github.com/anholt/linux.git
+Git-commit: 4188ea2aeb6dd8f99ab77662f463e41bc464a704 (partial)
+Patch-mainline: v4.14-rc1
 References: FATE#319481
 
 Signed-off-by: Alexander Graf <agraf@suse.de>

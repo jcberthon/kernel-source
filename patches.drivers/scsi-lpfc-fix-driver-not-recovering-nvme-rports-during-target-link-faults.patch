@@ -2,9 +2,8 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 9 Apr 2018 14:24:29 -0700
 Subject: scsi: lpfc: Fix driver not recovering NVME rports during target link
  faults
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
-Git-commit: 5cc68ed2f1019dd623d284773a40a6129b90251f
+Patch-mainline: v4.18-rc1
+Git-commit: b04744ce52a8da883c8b87b66082f9805bb4ca32
 References: bsc#1088865
 
 During target-side port faults, the driver would not recover all target

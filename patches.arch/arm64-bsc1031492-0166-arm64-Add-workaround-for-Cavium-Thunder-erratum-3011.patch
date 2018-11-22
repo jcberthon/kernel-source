@@ -3,8 +3,9 @@ From: David Daney <david.daney@cavium.com>
 Date: Fri, 9 Jun 2017 12:49:48 +0100
 Subject: [PATCH 166/174] arm64: Add workaround for Cavium Thunder erratum
  30115
-Patch-mainline: Submitted, https://www.spinics.net/lists/arm-kernel/msg587082.html
 References: bsc#1031492
+Git-commit: 690a341577f9adf2c275ababe0dcefe91898bbf0
+Patch-mainline: v4.13-rc1
 
 Some Cavium Thunder CPUs suffer a problem where a KVM guest may
 inadvertently cause the host kernel to quit receiving interrupts.

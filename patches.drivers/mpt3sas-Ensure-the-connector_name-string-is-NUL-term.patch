@@ -2,7 +2,8 @@ From: Calvin Owens <calvinowens@fb.com>
 Date: Wed, 27 Jul 2016 21:45:51 -0700
 Subject: mpt3sas: Ensure the connector_name string is NUL-terminated
 References: bsc#989113
-Patch-Mainline: submitted linux-scsi 06/28/2016
+Patch-mainline: v4.9-rc1
+Git-commit: 310c8e40d5cd2512b6d46177563460726cc6166a
 
 We blindly trust the hardware to give us NUL-terminated strings, which
 is a bad idea because it doesn't always do that. For example:

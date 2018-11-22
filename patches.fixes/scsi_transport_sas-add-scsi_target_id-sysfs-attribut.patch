@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 10 Mar 2016 13:31:32 +0100
 Subject: scsi_transport_sas: add 'scsi_target_id' sysfs attribute
 References: FATE#319786
-Patch-Mainline: Submitted to linux-scsi 03/14/2016
+Patch-mainline: v4.6-rc1
+Git-commit: cdc43ae34c25693fa8de30c9a95243cd45548023
 
 There is no way to detect the scsi_target_id for any given SAS
 remote port, so add a new sysfs attribute 'scsi_target_id'.

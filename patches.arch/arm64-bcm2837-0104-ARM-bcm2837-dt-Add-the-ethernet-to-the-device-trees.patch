@@ -3,11 +3,13 @@ From: Gerd Hoffmann <kraxel@redhat.com>
 Date: Mon, 9 May 2016 12:54:41 +0200
 Subject: [PATCH 104/110] ARM: bcm2837: dt: Add the ethernet to the device
  trees
-Patch-mainline: Submitted 06/01/2016 linux-rpi-kernel@lists.infradead.org
+Patch-mainline: v4.8-rc1
 References: bsc#983145
+Git-commit: 02d08603649816a941246c18252e5c41fd07625a
 
 Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 (cherry picked from commit 0a53344b7d2fc6e93d558a119b5809eaee679fcc)
+
 Signed-off-by: Alexander Graf <agraf@suse.de>
 ---
  arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts | 1 +

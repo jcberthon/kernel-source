@@ -2,9 +2,8 @@ From: Marc Zyngier <marc.zyngier@arm.com>
 Date: Thu, 19 Jan 2017 17:20:59 +0000
 Subject: arm64: arch_timer: Add infrastructure for multiple erratum detection
  methods
-Git-commit: 180cb954f2b26c6bccfd1a1229e6bb7c8fb07167
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/maz/arm-platforms.git
+Git-commit: 651bb2e9dca6e6dbad3fba5f6e6086a23575b8b5
+Patch-mainline: v4.12-rc1
 References: fate#322150
 
 We're currently stuck with DT when it comes to handling errata, which

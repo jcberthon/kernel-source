@@ -1,9 +1,8 @@
 From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 9 Apr 2018 14:24:31 -0700
 Subject: scsi: lpfc: Fix NULL pointer reference when resetting adapter
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
-Git-commit: 2448820426b05db472238ca58d319f8348d1c4fb
+Patch-mainline: v4.18-rc1
+Git-commit: 66a85155d4851fe10e7c08c386507d92b45c0ec1
 References: bsc#1088865
 
 Points referencing local port structures didn't accommodate cases where

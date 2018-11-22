@@ -1,8 +1,8 @@
 From: Hannes Reinecke <hare@suse.de>
-Date: Mon, 19 Dec 2016 11:44:27 +0100
-Subject: [PATCH] scsi: Modify HITACHI OPEN-V blacklist entry
+Subject: scsi: scsi_devinfo: Add TRY_VPD_PAGES to HITACHI OPEN-V blacklist entry
 References: bsc#1006469
-Patch-Mainline: submitted linux-scsi 2016/12/21
+Git-commit: 56f3d383f37becdbf0325f8c132903347ba04354
+Patch-mainline: v4.15-rc1
 
 HITACHI is always supporting VPD pages, even though it's claiming
 to support SCSI Revision 3 only.

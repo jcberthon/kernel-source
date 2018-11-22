@@ -2,9 +2,8 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 20 Nov 2017 16:00:42 -0800
 Subject: scsi: lpfc: Fix driver handling of nvme resources during unload
 References: bsc#1067735
-Patch-mainline: Queued in subsystem maintainer repository
-Git-commit: ab08f6e0ccfc8581f28a3f6b0cff0aa808699bf3
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Patch-mainline: v4.16-rc1
+Git-commit: c3725bdcdf28f5e2f3a78b69e9dd010f49284a09
 
 During driver unload, the driver may crash due to NULL pointers.  The
 NULL pointers were due to the driver not protecting itself sufficiently

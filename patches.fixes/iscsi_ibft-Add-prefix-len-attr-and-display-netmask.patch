@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 25 Feb 2016 09:56:04 -0800
 Subject: [PATCHv3 1/1] iscsi_ibft: Add prefix-len attr and display netmask
 References: bnc#887542 bnc#897960
-Patch-Mainline: Submitted, to linux-scsi 2/29/2016
+Patch-mainline: v4.7-rc1
+Git-commit: 9a99425f0736a416442525ac7b15903173888b86
 
 The iBFT table only specifies a prefix length, not a netmask.
 And the netmask is pretty much pointless for IPv6.

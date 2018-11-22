@@ -3,7 +3,8 @@ From: Marc Zyngier <marc.zyngier@arm.com>
 Date: Fri, 9 Jun 2017 12:49:31 +0100
 Subject: [PATCH 149/174] KVM: arm/arm64: vgic-v3: Add accessors for the
  ICH_APxRn_EL2 registers
-Patch-mainline: Submitted, https://www.spinics.net/lists/arm-kernel/msg587082.html
+Git-commit: 63000dd8006dc987db31ba670edc23142ea91e01
+Patch-mainline: v4.13-rc1
 References: bsc#1031492
 
 As we're about to access the Active Priority registers a lot more,
@@ -14,7 +15,6 @@ Acked-by: David Daney <david.daney@cavium.com>
 Reviewed-by: Eric Auger <eric.auger@redhat.com>
 Signed-off-by: Marc Zyngier <marc.zyngier@arm.com>
 Signed-off-by: Alexander Graf <agraf@suse.de>
-
 ---
  virt/kvm/arm/hyp/vgic-v3-sr.c | 116 ++++++++++++++++++++++++++++++++++++------
  1 file changed, 100 insertions(+), 16 deletions(-)

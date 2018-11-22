@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 18 Aug 2016 13:09:25 +0200
 Subject: libfc: fixup RTV handling
 References: bsc#990245
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Git-commit: 7c5a51b8f82fcfba1925fa64f08413c8258590d2
+Patch-mainline: v4.10-rc1
 
 A missing case label was causing the RTV handler never to be called,
 and always resulting in an RTV reject.

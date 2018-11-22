@@ -150,11 +150,10 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	spin_unlock_irq(q->queue_lock);
  
  	/* allocate and init request */
-@@ -1153,11 +1154,11 @@ static struct request *__get_request(str
- 
+@@ -1153,10 +1154,11 @@ static struct request *__get_request(str
  	blk_rq_init(q, rq);
  	blk_rq_set_rl(rq, rl);
--	blk_rq_set_prio(rq, ioc);
+ 	blk_rq_set_prio(rq, ioc);
 -	req_set_op_attrs(rq, op, op_flags | REQ_ALLOCED);
 +	req_set_op_attrs(rq, op, op_flags);
 +	rq->rq_flags = rq_flags;

@@ -2,9 +2,8 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 20 Nov 2017 16:00:44 -0800
 Subject: scsi: lpfc: update driver version to 11.4.0.5
 References: bsc#1067735
-Patch-mainline: Queued in subsystem maintainer repository
-Git-commit: 42cd8c0105ac53a6b40cab1f3748cd18ac3a94ef
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Patch-mainline: v4.16-rc1
+Git-commit: ba48077f23d29218c25e057b037c0813f78de94c
 
 Update the driver version to 11.4.0.5
 

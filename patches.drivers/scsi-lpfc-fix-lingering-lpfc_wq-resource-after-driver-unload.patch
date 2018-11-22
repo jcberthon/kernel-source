@@ -1,9 +1,8 @@
 From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 9 Apr 2018 14:24:26 -0700
 Subject: scsi: lpfc: Fix lingering lpfc_wq resource after driver unload
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
-Git-commit: a49a7d4ca46f8c9ec583ce8295184304ce4d8745
+Patch-mainline: v4.18-rc1
+Git-commit: 0cdb84ec26e455326a8ee1b7c69ce1c281ba38cb
 References: bsc#1088865
 
 After driver unloads, lpfc_wq remains active. The destroy_workqueue

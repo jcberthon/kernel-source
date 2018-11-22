@@ -1,10 +1,10 @@
 From 76869490f5305d4b45f0d7079a4f8735d6152261 Mon Sep 17 00:00:00 2001
 From: Hannes Reinecke <hare@suse.de>
 Date: Wed, 3 Aug 2016 14:16:46 +0200
-Subject: [PATCH 10/22] libfc: use configured e_d_tov for remote port state
+Subject: [PATCH 10/22] libfc: use configured e_d_tov for remote port state retries
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
- retries
+Git-commit: a50cc9eccce6ae9708e8a713c4070dc2efd1b3d5
+Patch-mainline: v4.10-rc1
 
 If fc_rport_error_retry() is attempting to retry the remote
 port state we should be waiting for the configured e_d_tov

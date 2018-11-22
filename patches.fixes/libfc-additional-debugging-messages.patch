@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Mon, 18 Jul 2016 11:13:13 +0200
 Subject: [PATCH 02/22] libfc: additional debugging messages
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Git-commit: 57d3ec7e468bb6659d9a461294d8747906fb7231
+Patch-mainline: v4.10-rc1
 
 Signed-off-by: Hannes Reinecke <hare@suse.com>
 Acked-by: Hannes Reinecke <hare@suse.de>
@@ -127,15 +128,14 @@ index 5121272..bd4bdbf 100644
  			fc_fcp_timer_set(fsp, 2);
  			return;
  		}
-@@ -959,8 +968,12 @@ static void fc_fcp_complete_locked(struct fc_fcp_pkt *fsp)
+@@ -959,8 +968,11 @@ static void fc_fcp_complete_locked(struct fc_fcp_pkt *fsp)
  		if (fsp->cdb_status == SAM_STAT_GOOD &&
  		    fsp->xfer_len < fsp->data_len && !fsp->io_status &&
  		    (!(fsp->scsi_comp_flags & FCP_RESID_UNDER) ||
 -		     fsp->xfer_len < fsp->data_len - fsp->scsi_resid))
 +		     fsp->xfer_len < fsp->data_len - fsp->scsi_resid)) {
-+			FC_FCP_DBG( fsp, "data underrun, "
-+				    "xfer_len %zx data_len %x\n",
-+				    fsp->xfer_len, fsp->data_len );
++			FC_FCP_DBG(fsp, "data underrun, xfer %zx data %x\n",
++				    fsp->xfer_len, fsp->data_len);
  			fsp->status_code = FC_DATA_UNDRUN;
 +		}
  	}
@@ -163,12 +163,22 @@ index 5121272..bd4bdbf 100644
  	fsp->state |= FC_SRB_FCP_PROCESSING_TMO;
  
  	if (rpriv->flags & FC_RP_FLAGS_REC_SUPPORTED)
-@@ -1503,6 +1521,10 @@ static void fc_fcp_rec_resp(struct fc_seq *seq, struct fc_frame *fp, void *arg)
+@@ -1486,8 +1503,8 @@ static void fc_fcp_rec_resp(struct fc_seq *seq, struct fc_frame *fp, void *arg)
+ 		rjt = fc_frame_payload_get(fp, sizeof(*rjt));
+ 		switch (rjt->er_reason) {
+ 		default:
+-			FC_FCP_DBG(fsp, "device %x unexpected REC reject "
+-				   "reason %d expl %d\n",
++			FC_FCP_DBG(fsp,
++				   "device %x invalid REC reject %d/%d\n",
+ 				   fsp->rport->port_id, rjt->er_reason,
+ 				   rjt->er_explan);
+ 			/* fall through */
+@@ -1503,6 +1521,9 @@ static void fc_fcp_rec_resp(struct fc_seq *seq, struct fc_frame *fp, void *arg)
  			break;
  		case ELS_RJT_LOGIC:
  		case ELS_RJT_UNAB:
-+			FC_FCP_DBG(fsp, "device %x REC reject "
-+				   "reason %d expl %d\n",
++			FC_FCP_DBG(fsp, "device %x REC reject %d/%d\n"
 +				   fsp->rport->port_id, rjt->er_reason,
 +				   rjt->er_explan);
  			/*
@@ -247,7 +257,7 @@ index 6a98bb8..afc1f9b 100644
  	} else {
 -		FC_RPORT_DBG(rdata, "Bad ELS response for PRLI command\n");
 -		fc_rport_error_retry(rdata, fp);
-+		rjt = fc_frame_payload_get(fp, sizeof (*rjt));
++		rjt = fc_frame_payload_get(fp, sizeof(*rjt));
 +		FC_RPORT_DBG(rdata, "PRLI ELS rejected, reason %x expl %x\n",
 +			     rjt->er_reason, rjt->er_explan);
 +		fc_rport_error_retry(rdata, NULL);

@@ -3,9 +3,8 @@ From: Peter Zijlstra <peterz@infradead.org>
 Date: Mon, 3 Oct 2016 16:35:32 +0200
 Subject: [PATCH 03/11] sched: Add missing update_rq_clock() call for
  task_hot().
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/peterz/queue.git
-Git-commit: 08118b281b2052030a69fb727c9e8d7a8d29e2d4
+Git-commit: 3bed5e2166a5e433bf62162f3cd3c5174d335934
+Patch-mainline: v4.11-rc1
 References: bsc#981825
 
 Add the update_rq_clock() call at the top of the callstack instead of

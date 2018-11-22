@@ -2,8 +2,7 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Wed, 7 Mar 2018 15:59:36 -0800
 Subject: [PATCH] nvme_fc: rework sqsize handling
 Git-commit: d157e5343cb360a525e6b3e7924612a9a90df3b7
-Git-repo: git://git.infradead.org/nvme
-Patch-Mainline: queued in subsystem maintainer repository
+Patch-Mainline: v4.16-rc5
 References: bsc#1076760
 
 Corrected four outstanding issues in the transport around sqsize.

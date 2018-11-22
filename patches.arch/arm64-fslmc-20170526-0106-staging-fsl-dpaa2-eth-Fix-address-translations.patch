@@ -2,8 +2,9 @@ From dbce4a0254faf5b239e40da74b171f30948d9b10 Mon Sep 17 00:00:00 2001
 From: Ioana Radulescu <ruxandra.radulescu@nxp.com>
 Date: Wed, 24 May 2017 07:13:27 -0500
 Subject: [PATCH 106/107] staging: fsl-dpaa2/eth: Fix address translations
-Patch-mainline: Submitted, https://lkml.org/lkml/2017/5/24/495
+Patch-mainline: v4.13-rc1
 References: bsc#1041022
+Git-commit: 08eb23974e994a34776e7a83227509d4e4296aa5
 
 Use the correct mechanisms for translating a DMA-mapped IOVA
 address into a virtual one. Without this fix, once SMMU is
@@ -13,7 +14,6 @@ IOMMU translation faults.
 Signed-off-by: Nipun Gupta <nipun.gupta@nxp.com>
 Signed-off-by: Ioana Radulescu <ruxandra.radulescu@nxp.com>
 Signed-off-by: Alexander Graf <agraf@suse.de>
-
 ---
  drivers/staging/fsl-dpaa2/ethernet/dpaa2-eth.c | 25 +++++++++++++++++++------
  drivers/staging/fsl-dpaa2/ethernet/dpaa2-eth.h |  1 +

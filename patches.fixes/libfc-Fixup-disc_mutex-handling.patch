@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 11 Aug 2016 09:08:14 +0200
 Subject: libfc: Fixup disc_mutex handling
 References: bsc#962846
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Git-commit: a407c593398c886db4fa1fc5c6fec55e61187a09
+Patch-mainline: v4.10-rc1
 
 The list of attached 'rdata' remote port structures is RCU
 protected, so there is no need to take the 'disc_mutex' when

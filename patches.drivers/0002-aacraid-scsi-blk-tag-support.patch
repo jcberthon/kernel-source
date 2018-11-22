@@ -1,8 +1,8 @@
 From: Raghava Aditya Renukunta <raghavaaditya.renukunta@pmcs.com>
 Date: Wed, 3 Feb 2016 15:05:59 -0800
 Subject: aacraid: SCSI blk tag support
-Git-commit: 453d9a679f697b91f202e8ee54bd1e342f3e4e91
-Patch-mainline: v4.6 or v4.5-rc4 (next release)
+Git-commit: 6bf3b630d0a733b74f7167a1cfac457358e67074
+Patch-mainline: v4.6-rc1
 References: FATE#320140
 
 The method to allocate and free FIB's in the present code utilizes

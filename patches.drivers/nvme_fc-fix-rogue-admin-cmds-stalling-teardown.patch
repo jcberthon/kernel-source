@@ -1,9 +1,8 @@
 From: James Smart <jsmart2021@gmail.com>
 Date: Thu, 11 Jan 2018 14:29:22 -0800
-Subject: nvme_fc: fix rogue admin cmds stalling teardown
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.infradead.org/nvme.git
-Git-commit: d8b1ca38c771df4b676727225a678d8cd1b7ccf7
+Subject: nvme-fc: fix rogue admin cmds stalling teardown
+Git-commit: d625d05ef0f0914a706d824fab85472a42be6659
+Patch-mainline: v4.16-rc1
 References: bsc#1075811
 
 When connectivity is lost to a device, the association is terminated

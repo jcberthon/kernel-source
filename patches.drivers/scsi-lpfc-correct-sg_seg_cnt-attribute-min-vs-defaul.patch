@@ -1,8 +1,7 @@
 From: James Smart <jsmart2021@gmail.com>
 Date: Tue, 19 Dec 2017 10:57:50 -0800
 Subject: scsi: lpfc: correct sg_seg_cnt attribute min vs default
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/jejb/scsi.git
+Patch-mainline: v4.16-rc1
 Git-commit: b996ce39960e6239d3d30745749b0b17239cadce
 References: bsc#1072166
 

@@ -2,9 +2,8 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 20 Nov 2017 16:00:43 -0800
 Subject: scsi: lpfc: small sg cnt cleanup
 References: bsc#1067735
-Patch-mainline: Queued in subsystem maintainer repository
-Git-commit: f61c75edcfbb834ab2b56d5e97f15c0700397725
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Git-commit: 81e6a63728a409ae0e0061c1dc5adb4a85cc4869
+Patch-mainline: v4.16-rc1
 
 The logic for sg_seg_cnt is a bit convoluted. This patch tries to clean
 up a couple of areas, especially around the +2 and +1 logic.

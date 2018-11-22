@@ -2,9 +2,8 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 9 Apr 2018 14:24:32 -0700
 Subject: scsi: lpfc: Correct missing remoteport registration during link
  bounces
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
-Git-commit: c19ffb5ca34dcbd3a6b9819e393678b0991ef5be
+Patch-mainline: v4.18-rc1
+Git-commit: b0a00d8d2bb7b88980bad48f6458089878422d86
 References: bsc#1088865
 
 Remote port disappearance/reappearances would cause a series of RSCN

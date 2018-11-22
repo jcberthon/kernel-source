@@ -3,8 +3,7 @@ Date: Mon, 5 Mar 2018 12:04:02 -0800
 Subject: [PATCH] scsi: lpfc: Fix NVME Initiator FirstBurst
 References: bsc#1085383
 Git-commit: 0709263abe0de70a798dcdf481d5dd489ca4752e
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/jejb/scsi.git
+Patch-mainline: v4.17-rc1
 
 First Burst support was not properly indicated in NVMe PRLI.
 

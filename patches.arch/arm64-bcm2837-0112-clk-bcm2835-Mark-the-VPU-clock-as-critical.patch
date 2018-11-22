@@ -2,8 +2,9 @@ From 8e512838627220b1edfe126045b9baf71d1e273c Mon Sep 17 00:00:00 2001
 From: Eric Anholt <eric@anholt.net>
 Date: Wed, 1 Jun 2016 12:05:33 -0700
 Subject: [PATCH 112/114] clk: bcm2835: Mark the VPU clock as critical
-Patch-mainline: Submitted 06/01/2016 linux-rpi-kernel@lists.infradead.org
+Patch-mainline: v4.9-rc1
 References: bsc#983145
+Git-commit: e69fdcca836f0b81a2260b69429c8622a80ea891
 
 The VPU clock is also the clock for our AXI bus, so we really can't
 disable it.  This might have happened during boot if, for example,
@@ -13,6 +14,7 @@ consumers of the VPU clock had probed.
 Signed-off-by: Eric Anholt <eric@anholt.net>
 Message-id: 1464807936-532-2-git-send-email-eric@anholt.net
 (cherry picked from commit 48b72b29d176928c52d65d49e282dc89bd05dda5)
+
 Signed-off-by: Alexander Graf <agraf@suse.de>
 ---
  drivers/clk/bcm/clk-bcm2835.c | 5 ++++-

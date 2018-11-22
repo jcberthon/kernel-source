@@ -2,9 +2,8 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 20 Nov 2017 16:00:33 -0800
 Subject: scsi: lpfc: Raise maximum NVME sg list size for 256 elements
 References: bsc#1067735
-Patch-mainline: Queued in subsystem maintainer repository
-Git-commit: d35be7064840ff5c463b26e015f5b04a57225d93
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Patch-mainline: v4.16-rc1
+Git-commit: d73154ba3294e02de01cb60effe938c68621fe32
 
 Raise the maximum NVME sg list size allowed to 256 elements.
 

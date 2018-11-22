@@ -1,7 +1,8 @@
 From: Tom Lendacky <thomas.lendacky@amd.com>
 Date: Mon, 18 Dec 2017 12:53:04 +0100
 Subject: KVM: x86: Add speculative control CPUID support for guests
-Patch-mainline: submitted on 2018/1/9
+Git-commit: 15d45071523d89b3fb7372e2135fbd72f6af9506 (partial)
+Patch-mainline: v4.16-rc1
 References: bsc#1068032
 
 Provide the guest with the speculative control CPUID related values.

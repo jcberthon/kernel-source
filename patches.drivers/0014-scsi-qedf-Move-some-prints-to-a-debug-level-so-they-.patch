@@ -4,14 +4,12 @@ Date: Wed, 31 May 2017 06:33:59 -0700
 Subject: scsi: qedf: Move some prints to a debug level so they do not print
  when no debugging is enabled.
 References: bsc#1040813
-Git-commit: 408cf4e115abde731d231f7f0bb986afd9a87d22
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Git-commit: f7e8d57be143523189543dfaf183af92b4c85204
+Patch-mainline: v4.13-rc1
 
 Signed-off-by: Chad Dupuis <chad.dupuis@cavium.com>
 Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
-
 ---
  drivers/scsi/qedf/qedf_main.c | 13 ++++++++-----
  1 file changed, 8 insertions(+), 5 deletions(-)

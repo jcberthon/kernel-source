@@ -3,8 +3,9 @@ From: Ioana Radulescu <ruxandra.radulescu@nxp.com>
 Date: Wed, 24 May 2017 07:13:28 -0500
 Subject: [PATCH 107/107] staging: fsl-dpaa2/eth: Map Tx buffers as
  bidirectional
-Patch-mainline: Submitted, https://lkml.org/lkml/2017/5/24/495
+Patch-mainline: v4.13-rc1
 References: bsc#1041022
+Git-commit: 1e5fa9e2607181ba198ffa3f0efe4ad067fda5b4
 
 WRIOP hardware may need to write to the hardware annotation
 area of Tx buffers (e.g. frame status bits) and also to
@@ -16,7 +17,6 @@ write transaction through SMMU will not be allowed.
 Signed-off-by: Nipun Gupta <nipun.gupta@nxp.com>
 Signed-off-by: Ioana Radulescu <ruxandra.radulescu@nxp.com>
 Signed-off-by: Alexander Graf <agraf@suse.de>
-
 ---
  drivers/staging/fsl-dpaa2/ethernet/dpaa2-eth.c | 14 +++++++-------
  1 file changed, 7 insertions(+), 7 deletions(-)

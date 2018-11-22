@@ -2,9 +2,9 @@ From 33241e13b5575db3933b6551825a1ac0990240d0 Mon Sep 17 00:00:00 2001
 From: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 Date: Wed, 1 Mar 2017 20:30:12 +0100
 Subject: [PATCH] irqdomain: add empty irq_domain_check_msi_remap
-
+Git-commit: b3e228473e6cec7cf83b4025b4570c8066ab2dd8
+Patch-mainline: v4.11-rc2
 References: fate#321947
-Patch-mainline: Submitted, https://patchwork.kernel.org/patch/9600391/
 
 Fix following build error for s390:
 drivers/vfio/vfio_iommu_type1.c: In function 'vfio_iommu_type1_attach_group':
