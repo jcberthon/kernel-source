@@ -102,9 +102,9 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		goto rq_starved;
  
 @@ -1154,7 +1152,7 @@ static struct request *__get_request(str
- 
  	blk_rq_init(q, rq);
  	blk_rq_set_rl(rq, rl);
+ 	blk_rq_set_prio(rq, ioc);
 -	req_set_op_attrs(rq, op, op_flags);
 +	rq->cmd_flags = op;
  	rq->rq_flags = rq_flags;

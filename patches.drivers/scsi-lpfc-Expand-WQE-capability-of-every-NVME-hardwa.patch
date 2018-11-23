@@ -2,9 +2,8 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 20 Nov 2017 16:00:29 -0800
 Subject: scsi: lpfc: Expand WQE capability of every NVME hardware queue
 References: bsc#1067735
-Patch-mainline: Queued in subsystem maintainer repository
-Git-commit: 09aa2dec2aa6e23a4d64ca0e116351d2472f7bd8
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Patch-mainline: v4.16-rc1
+Git-commit: 81b96eda5ff8077873072facd20b9d85a80c61bd
 
 Hardware queues are a fast staging area to push commands into the
 adapter.  The adapter should drain them extremely quickly. However,

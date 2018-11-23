@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 5 Aug 2016 14:37:40 +0200
 Subject: libfc: reset exchange manager during LOGO handling
 References: bsc#962846
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Git-commit: 649eb8693857e9b9fca009fba4eb7e80f9f3a326
+Patch-mainline: v4.9-rc1
 
 FC-LS mandates that we should invalidate all sequences before
 sending a LOGO. And we should set the event to RPORT_EV_STOP

@@ -2,7 +2,8 @@ From c64f96b05f37bb4b603b72818db903a6ab9e4fb6 Mon Sep 17 00:00:00 2001
 From: Oliver Neukum <oneukum@suse.com>
 Date: Mon, 2 May 2016 11:57:22 +0200
 Subject: [PATCH 2/2] uvc: correct speed testing
-Patch-Mainline: Submitted (linux-media@vger.kernel.org)
+Git-commit: 92a63459c396386664b30415d1751593ee91a2cc
+Patch-mainline: v4.8-rc1
 References: FATE#319959
 
 Allow for SS+ USB devices

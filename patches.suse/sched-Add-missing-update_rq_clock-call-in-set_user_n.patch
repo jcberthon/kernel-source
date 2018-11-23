@@ -3,9 +3,8 @@ From: Peter Zijlstra <peterz@infradead.org>
 Date: Mon, 3 Oct 2016 16:44:25 +0200
 Subject: [PATCH 04/11] sched: Add missing update_rq_clock() call in
  set_user_nice()
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/peterz/queue.git
-Git-commit: 763b0d30259b4b4c5cb46cbc7c575254a89bc29f
+Git-commit: 2fb8d36787affe26f3536c3d8ec094995a48037d
+Patch-mainline: v4.11-rc1
 References: bsc#981825
 
 4------------[ cut here ]------------

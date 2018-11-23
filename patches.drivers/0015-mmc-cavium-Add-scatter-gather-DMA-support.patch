@@ -1,11 +1,7 @@
-From eda5406321d8cbc3b86f279f6c2909b9cc610f84 Mon Sep 17 00:00:00 2001
 From: Jan Glauber <jglauber@cavium.com>
-Date: Thu, 30 Mar 2017 17:31:26 +0200
 Subject: [PATCH 15/17] mmc: cavium: Add scatter-gather DMA support
-
-Git-commit: 6e6d67a2aaf4e1dabaa6d636eed51c8d3d16b827
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Git-commit: cd76e5c565e82af62f708120068ec5d226d98c95
+Patch-mainline: v4.12-rc1
 References: fate#321995
 
 Add Support for the scatter-gather DMA available in the

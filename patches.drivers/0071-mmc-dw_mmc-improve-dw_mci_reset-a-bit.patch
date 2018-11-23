@@ -1,11 +1,7 @@
-From e8a1443cad75db385f27dee15b48dae0026730c0 Mon Sep 17 00:00:00 2001
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Date: Fri, 17 Feb 2017 10:59:52 +0800
 Subject: [PATCH 71/95] mmc: dw_mmc: improve dw_mci_reset a bit
-
-Git-commit: 8cf19e5db9a42f28e6a51b37090297881b5652be
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Git-commit: bc2dcc1a2a5e3e796b71f742d6d241ba0523739b
+Patch-mainline: v4.12-rc1
 References: bsc#1033484
 
 Too much condition iteration makes the code

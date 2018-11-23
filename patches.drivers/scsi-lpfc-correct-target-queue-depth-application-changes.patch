@@ -1,9 +1,8 @@
 From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 9 Apr 2018 14:24:22 -0700
 Subject: scsi: lpfc: Correct target queue depth application changes
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
-Git-commit: b86c3e03bf081fca309e566753603d96141cb422
+Git-commit: f91bc594ba963a9354c9da8bb85c21606c2b6289
+Patch-mainline: v4.18-rc1
 References: bsc#1088865
 
 The max_scsicmpl_time parameter can be used to perform scsi cmd queue

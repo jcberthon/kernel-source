@@ -1,8 +1,9 @@
 From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 21 Jul 2016 10:09:05 +0200
 Subject: fcoe: Add FIP responder on the real network device
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Patch-Mainline: v4.8-rc1
 References: bsc#989133
+Git-commit: d242e6680e81cea0343bd93ba862efa70a91a56c
 
 FIP VLAN traffic has to run on the underlying network device,
 not the VLAN device.

@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Tue, 25 Apr 2017 09:26:55 +0200
 Subject: target: fixup error message in target_tg_pt_gp_tg_pt_gp_id_store()
 References: bsc#1035889
-Patch-Mainline: submitted, https://patchwork.kernel.org/patch/9702919
+Git-commit: 3d035237a57777b7672eb116133da01493b607c1
+Patch-mainline: v4.12-rc1
 
 When setting up an ALUA target port group with an invalid ID the
 error message

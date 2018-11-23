@@ -2,7 +2,8 @@ From: Shaohua Li <shli@fb.com>
 Date: Fri, 23 Jun 2017 19:05:59 +0200
 Subject: [PATCH] md: fix a null dereference
 References: bsc#1040351
-Patch-mainline: submitted linux-raid 2017-06-23
+Git-commit: 7f053a6a745557b3f3ad63e9d28ba85c3c0b1563
+Patch-mainline: v4.13-rc1
 
 rdev->mddev could be null in start time.
 

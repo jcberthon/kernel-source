@@ -3,7 +3,8 @@ From: Roy Pledge <roy.pledge@nxp.com>
 Date: Thu, 16 Mar 2017 10:51:18 -0400
 Subject: [PATCH 057/221] soc/fsl/qbman: Use shared-dma-pool for QMan private
  memory allocations
-Patch-mainline: Submitted, https://lkml.org/lkml/2017/5/1/487
+Git-commit: 07f86917a450810107a010cc96e6777b2f400efe
+Patch-mainline: v4.15-rc1
 References: FATE#320030
 
 Use the shared-memory-pool mechanism for frame queue descriptor and

@@ -4,8 +4,7 @@ Date: Tue, 30 Jan 2018 15:58:46 -0800
 Subject: [PATCH 01/18] scsi: lpfc: Increase CQ and WQ sizes for SCSI
 References: bsc#1080656
 Git-commit: c176ffa0841c632593c5007f1d1c9ed126481daa
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Patch-mainline: v4.17-rc1
 
 Increased CQ and WQ sizes for SCSI FCP, matching those used for NVMe
 development.
@@ -14,7 +13,6 @@ Signed-off-by: Dick Kennedy <dick.kennedy@broadcom.com>
 Signed-off-by: James Smart <james.smart@broadcom.com>
 Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
-
 ---
  drivers/scsi/lpfc/lpfc.h      |  1 +
  drivers/scsi/lpfc/lpfc_hw4.h  |  3 +++

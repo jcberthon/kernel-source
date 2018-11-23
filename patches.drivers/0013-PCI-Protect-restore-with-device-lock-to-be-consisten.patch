@@ -4,8 +4,7 @@ Date: Tue, 27 Feb 2018 14:14:08 -0600
 Subject: [PATCH 13/16] PCI: Protect restore with device lock to be consistent
 
 Git-commit: cb5e0d060fb1f3136e96acecbd4001a7f0cbac94
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Patch-mainline: v4.17-rc1
 References: bsc#1084889
 
 Commit b014e96d1abb ("PCI: Protect pci_error_handlers->reset_notify() usage

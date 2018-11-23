@@ -2,8 +2,8 @@ From d745d35d8985c66d0a8ed81bd19445e2cc409d3b Mon Sep 17 00:00:00 2001
 From: Oliver Neukum <oneukum@suse.com>
 Date: Thu, 10 Mar 2016 16:09:10 +0100
 Subject: [PATCH 3/3] USB: PD: additional feature selectors
-Git-commit: d745d35d8985c66d0a8ed81bd19445e2cc409d3b
-Patch-Mainline: v4.7
+Git-commit: 351e67ab5c0582e833c8d67dccb034348879cf25
+Patch-mainline: v4.7-rc1
 References: FATE#319962
 
 This adds the feature selectors from Table 9-8

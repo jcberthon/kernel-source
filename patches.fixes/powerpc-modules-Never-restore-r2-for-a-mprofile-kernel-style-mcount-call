@@ -1,7 +1,7 @@
 From: Michael Ellerman <mpe@ellerman.id.au>
 Subject: powerpc/modules: Never restore r2 for a mprofile-kernel style mcount() call
 Git-commit: 31278b17a0dfed3014786b623fd07ee110b801da
-Patch-mainline: v4.7
+Patch-mainline: v4.8-rc1
 References: FATE#322421
 
  powerpc/modules: Never restore r2 for a mprofile-kernel style mcount() call

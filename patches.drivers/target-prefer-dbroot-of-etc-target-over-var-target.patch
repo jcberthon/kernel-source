@@ -2,7 +2,8 @@ From 356a35179c50ae9cc6589e7a95984eacc8e5b7d7 Mon Sep 17 00:00:00 2001
 From: Lee Duncan <lduncan@suse.com>
 Date: Fri, 6 Apr 2018 10:52:37 -0700
 References: bsc#1087274
-Patch-mainline: submitted, https://www.spinics.net/lists/target-devel/msg16616.html
+Git-commit: 78a6295c71cb276f8ab0bfc786f3543a4e756a8f
+Patch-mainline: v4.18-rc1
 Subject: [PATCHv2] target: prefer dbroot of /etc/target over /var/target
 
 The target database root directory, dbroot, has

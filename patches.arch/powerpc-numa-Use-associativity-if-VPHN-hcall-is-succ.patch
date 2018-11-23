@@ -4,8 +4,7 @@ Date: Tue, 25 Sep 2018 17:55:15 +0530
 Subject: [PATCH] powerpc/numa: Use associativity if VPHN hcall is successful
 
 References: bsc#1110363
-Patch-mainline: queued
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/powerpc/linux.git
+Patch-mainline: v4.19-rc6
 Git-commit: 2483ef056f6e42f61cd266452e2841165dfe1b5c
 
 Currently associativity is used to lookup node-id even if the

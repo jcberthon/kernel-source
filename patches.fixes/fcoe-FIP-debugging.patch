@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Wed, 3 Aug 2016 12:34:16 +0200
 Subject: [PATCH 03/22] fcoe: FIP debugging
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Patch-mainline: v4.10-rc1
+Git-commit: c959655042b8eb4814e849dde4518682c6d963e1
 
 Add additional statements for debugging FIP frames.
 

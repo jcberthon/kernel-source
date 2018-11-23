@@ -5,8 +5,7 @@ Subject: [PATCH 18/18] scsi: lpfc: Update 11.4.0.7 modified files for 2018
  Copyright
 References: bsc#1080656
 Git-commit: 128bddacc4dd7c86070e1e0534687e3083a89d52
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Patch-mainline: v4.17-rc1
 
 Updated Copyright in files updated 11.4.0.7
 
@@ -14,7 +13,6 @@ Signed-off-by: Dick Kennedy <dick.kennedy@broadcom.com>
 Signed-off-by: James Smart <james.smart@broadcom.com>
 Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
-
 ---
  drivers/scsi/lpfc/lpfc.h           | 2 +-
  drivers/scsi/lpfc/lpfc_attr.c      | 2 +-

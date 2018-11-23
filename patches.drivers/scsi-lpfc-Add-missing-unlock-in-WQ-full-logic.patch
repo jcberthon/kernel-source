@@ -3,8 +3,7 @@ Date: Sat, 10 Mar 2018 10:28:48 -0800
 Subject: [PATCH] scsi: lpfc: Add missing unlock in WQ full logic
 References: bsc#1085383
 Git-commit: 917d59ac5e26a45dce8b00d38bb0a338a7f22f23
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/jejb/scsi.git
+Patch-mainline: v4.17-rc1
 
 Commit 6e8e1c14c61e ("scsi: lpfc: Add WQ Full Logic for NVME Target") fails
 the static checker. Checker correctly identified a missing unlock on a

@@ -1,8 +1,13 @@
 From: Joerg Roedel <jroedel@suse.de>
 Date: Mon, 11 Jun 2018 16:02:47 +0200
 Subject: KVM: x86: Sync back MSR_IA32_SPEC_CTRL to VCPU data structure
-Patch-mainline: no, different implementation
+Git-commit: b2ac58f90540e39324e7a29a7ad471407ae0bf48
+Git-commit: d28b387fb74da95d69d2615732f50cceb38e9a4d
+Patch-mainline: v4.16-rc1
 References: bsc#1096242, bsc#1096281
+
+[note: upstream has a different implementation but we use the Git-commit tag
+ here to have it land in the right spot in the sorted series -jeffm]
 
 Sync MSR_IA32_SPEC_CTRL to vcpu->spec_ctrl to make sure the values are never
 going to be out-of-sync.

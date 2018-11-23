@@ -1,11 +1,7 @@
-From f2296f8bad41b512d97244b8f70314af10c8ffe8 Mon Sep 17 00:00:00 2001
 From: Jan Glauber <jglauber@cavium.com>
-Date: Thu, 30 Mar 2017 17:31:28 +0200
 Subject: [PATCH 17/17] MAINTAINERS: Add entry for Cavium MMC driver
-
-Git-commit: 6cf3464ef735758997a5d0f526deb8c073585828
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Git-commit: 25fc846503738c3d4ca886cfee4b4ff4415d0cec
+Patch-mainline: v4.12-rc1
 References: fate#321995
 
 Signed-off-by: Jan Glauber <jglauber@cavium.com>

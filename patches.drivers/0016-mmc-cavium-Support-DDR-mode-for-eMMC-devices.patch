@@ -1,11 +1,7 @@
-From 8c30863a9de97af6fbfd7d6cb00776a2af172279 Mon Sep 17 00:00:00 2001
 From: Jan Glauber <jglauber@cavium.com>
-Date: Thu, 30 Mar 2017 17:31:27 +0200
 Subject: [PATCH 16/17] mmc: cavium: Support DDR mode for eMMC devices
-
-Git-commit: 2346155f806e3143dcad17f5f325505c3afd2b27
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Git-commit: 4ce944074e5e2cb7ee48ff36608d65d0bc9c7647
+Patch-mainline: v4.12-rc1
 References: fate#321995
 
 Add support for switching to DDR mode for eMMC devices.

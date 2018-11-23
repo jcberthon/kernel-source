@@ -2,9 +2,8 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 20 Nov 2017 16:00:32 -0800
 Subject: scsi: lpfc: Fix NVME LS abort_xri
 References: bsc#1067735
-Patch-mainline: Queued in subsystem maintainer repository
-Git-commit: 7d0e9a42360a211b54e6de01326b1b1e6f20ae1f
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Patch-mainline: v4.16-rc1
+Git-commit: 422c4cb7e9d6eaff09ef3d6782819c0e2741fbba
 
 Performing an LS abort results in the following message being seen:
   0603 Invalid CQ subtype 6: 00000300 22000002 ffff0016 d0050000

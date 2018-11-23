@@ -1,9 +1,8 @@
 From: Marc Zyngier <marc.zyngier@arm.com>
 Date: Wed, 1 Feb 2017 11:53:46 +0000
 Subject: arm64: arch_timer: Move clocksource_counter and co around
-Git-commit: 23dc6f861bcd6d1caca323e2ccba70d450838d84
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/maz/arm-platforms.git
+Git-commit: 992dd16f6528bd3f378dbcda43688d374be02943
+Patch-mainline: v4.12-rc1
 References: fate#322150
 
 In order to access clocksource_counter from the errata handling code,

@@ -4,8 +4,7 @@ Date: Wed, 13 Jun 2018 13:05:57 +0000
 Subject: [PATCH] scsi: qla2xxx: Spinlock recursion in qla_target
 Acked-by: David Bond <dbond@suse.com>
 References: bsc#1097501
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Patch-mainline: v4.18-rc3
 Git-commit: 49d7bd36813ea8e6b4c97b640d24e7fbd44c84f0
 
 The patch reverts changes done in qlt_schedule_sess_for_deletion() to

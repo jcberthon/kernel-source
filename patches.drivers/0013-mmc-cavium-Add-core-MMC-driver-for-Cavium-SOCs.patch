@@ -1,11 +1,7 @@
-From 57a174f966c87faafb33910dcd0bc19b790a8c7d Mon Sep 17 00:00:00 2001
 From: Jan Glauber <jglauber@cavium.com>
-Date: Thu, 30 Mar 2017 17:31:24 +0200
 Subject: [PATCH 13/17] mmc: cavium: Add core MMC driver for Cavium SOCs
-
-Git-commit: 8047c753f3d3457b3147d67a0a95090160a5ea5b
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Git-commit: ba3869ff32e4a671b0f9baa73900f9e2bfeb0414
+Patch-mainline: v4.12-rc1
 References: fate#321995
 
 This core driver will be used by a MIPS platform driver

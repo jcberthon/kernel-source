@@ -1,9 +1,8 @@
 From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 9 Apr 2018 14:24:25 -0700
 Subject: scsi: lpfc: Fix Abort request WQ selection
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
-Git-commit: 1402f5bc1bf2bafc91a9b80ab28313ebd958eee2
+Patch-mainline: v4.18-rc1
+Git-commit: 59c68eaad7303f9f1d42a83b223aa6a2c254aaa0
 References: bsc#1088865
 
 When running loads that generated aborts, io errors where seen.  Turns

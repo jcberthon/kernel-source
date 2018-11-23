@@ -39,7 +39,7 @@ index 372387a450df..e400783ebb87 100644
 @@ -1211,8 +1214,11 @@ static void fc_rport_prli_resp(struct fc_seq *sp, struct fc_frame *fp,
  
  	} else {
- 		rjt = fc_frame_payload_get(fp, sizeof (*rjt));
+ 		rjt = fc_frame_payload_get(fp, sizeof(*rjt));
 -		FC_RPORT_DBG(rdata, "PRLI ELS rejected, reason %x expl %x\n",
 -			     rjt->er_reason, rjt->er_explan);
 +		if (!rjt)

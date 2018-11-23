@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 28 Jul 2016 08:56:15 +0200
 Subject: [PATCH 21/22] libfc: reset timeout on queue full
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Git-commit: ad3120cfe0c5dcd5aaa87a0f7c42d4b09a94fa12
+Patch-mainline: v4.10-rc1
 
 When we're receiving a timeout we should be checking for queue
 full status; if there are still some packets pending we should

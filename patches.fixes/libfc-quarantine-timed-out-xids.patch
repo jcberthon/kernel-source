@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Tue, 16 Aug 2016 12:54:45 +0200
 Subject: libfc: quarantine timed out xids
 References: bsc#990245
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Git-commit: 9ca1e182b9d1ef3f97718c4072a18a23dc47d4f9
+Patch-mainline: v4.10-rc1
 
 When a sequence times out we have no idea what happened to the
 frame. And we do not know if we will ever receive the frame.

@@ -1,9 +1,8 @@
 From: Marc Zyngier <marc.zyngier@arm.com>
 Date: Fri, 27 Jan 2017 10:27:09 +0000
 Subject: arm64: arch_timer: Get rid of erratum_workaround_set_sne
-Git-commit: ffc9559fe76cd5bbd6562cf3a68f87b8c38e8176
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/maz/arm-platforms.git
+Git-commit: 8328089f0aeba39173eee3fc109b5c77efd64747
+Patch-mainline: v4.12-rc1
 References: fate#322150
 
 Let's move the handling of workarounds affecting set_next_event

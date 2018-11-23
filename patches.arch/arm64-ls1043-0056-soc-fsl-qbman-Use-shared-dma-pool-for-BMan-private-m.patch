@@ -3,7 +3,8 @@ From: Roy Pledge <roy.pledge@nxp.com>
 Date: Thu, 16 Mar 2017 10:48:15 -0400
 Subject: [PATCH 056/221] soc/fsl/qbman: Use shared-dma-pool for BMan private
  memory allocations
-Patch-mainline: Submitted, https://lkml.org/lkml/2017/5/1/486
+Git-commit: 5ae783c6a1e5441250da8e015141bff6b29f54fc
+Patch-mainline: v4.15-rc1
 References: FATE#320030
 
 Use the shared-memory-pool mechanism for free buffer proxy record

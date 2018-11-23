@@ -3,7 +3,6 @@ From: Daniel Vetter <daniel.vetter@ffwll.ch>
 Date: Tue, 23 Aug 2016 22:15:02 +0200
 Subject: [PATCH] io-mapping: Fixup for different names of writecombine
 Git-commit: 351243897b15aba02ad15317724d616aeaf00c7d
-Git-commit: 80c33624e4723c4e22d9917cd676067ebf652dc2
 Patch-mainline: v4.9-rc1
 References: fate#321223
 

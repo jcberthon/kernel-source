@@ -2,7 +2,8 @@ From: Chad Dupuis <chad.dupuis@qlogic.com>
 Date: Sat, 28 Nov 2015 13:40:00 -0800
 Subject: libfc: Do not take rdata->rp_mutex when processing a -FC_EX_CLOSED ELS response
 References: bsc#962846
-Patch-Mainline: submitted linux-scsi 2016/09/12
+Git-commit: 785141c62a26f055b27355ee9234e145955a51c6
+Patch-mainline: v4.10-rc1
 
 When an ELS response handler receives a -FC_EX_CLOSED, the rdata->rp_mutex is
 already held which can lead to a deadlock condition like the following stack

@@ -1,7 +1,8 @@
 From: Sebastian Ott <sebott@linux.vnet.ibm.com>
 Subject: s390/pci: fmb enhancements
-Patch-mainline: not yet, in process
+Patch-mainline: v4.7-rc1
 References: FATE#319595, LTC#KRN1405
+Git-commit: f9dc447ec8f1f0a9f2ba4e4d5a61758f8df4acd8
 
 Summary:     s390/pci: fmb enhancements
 Description: Implement the function type specific function measurement
@@ -15,7 +16,6 @@ Upstream-Description:
              in new machines.
 
              Signed-off-by: Sebastian Ott <sebott@linux.vnet.ibm.com>
-
 
 Signed-off-by: Sebastian Ott <sebott@linux.vnet.ibm.com>
 Acked-by: John Jolly <jjolly@suse.de>

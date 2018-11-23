@@ -1,7 +1,6 @@
 From: Jason J. Herne <jjherne@linux.vnet.ibm.com>
 Subject: s390: kvm: Cpu model support for msa6, msa7 and msa8
-Patch-mainline: v4.12-rc1
-Git-commit: e000b8e0968dd7bfa09c444607ce1e48e57aafd3
+Patch-mainline: No, feature masks are handled differently now
 References: FATE#324069, LTC#159031
 
 Summary:     kvm-kernel: VS1606 zMidas cpu model checking backport

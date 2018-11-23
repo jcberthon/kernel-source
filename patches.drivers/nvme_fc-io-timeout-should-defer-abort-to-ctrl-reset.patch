@@ -1,8 +1,9 @@
 From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 12 Mar 2018 09:32:22 -0700
 Subject: [PATCH] nvme_fc: io timeout should defer abort to ctrl reset
-Patch-Mainline: submitted linux-nvme 2018/03/12
+Patch-mainline: v4.17-rc1
 References: bsc#1085054
+Git-commit: 041018c634e44d8697879b241e17a9466f2e83ed
 
 The current nvme_fc code, when an io times out, will abort the io
 on the fc link, then call the error recovery routine to reset the
