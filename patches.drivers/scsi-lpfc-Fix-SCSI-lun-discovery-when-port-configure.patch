@@ -4,8 +4,7 @@ Subject: [PATCH] scsi: lpfc: Fix SCSI lun discovery when port configured for
  both SCSI and NVME
 References: bsc#1085383
 Git-commit: a3da825b499f495f959052b848e893550ddaf626
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/jejb/scsi.git
+Patch-mainline: v4.17-rc1
 
 When a port is configured for NVME and SCSI Initiator support and it probes
 a target supporting both SCSI and NVME, NVME devices are discovered, but

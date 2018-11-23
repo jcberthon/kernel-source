@@ -2,7 +2,9 @@ From 75e4e834a758ead946bc31430f60da1d46f9b338 Mon Sep 17 00:00:00 2001
 From: Andrew Lunn <andrew@lunn.ch>
 Date: Wed, 6 Jan 2016 20:11:16 +0100
 Subject: [PATCH 129/221] phy: Add an mdio_device structure
-Patch-mainline: No, partial apply of e5a03bfd8
+Git-commit: e5a03bfd873c29eb786655ef2e95e53ed242b404 (partial)
+Patch-filtered: drivers/net/ethernet/freescale/fman/
+Patch-mainline: v4.5-rc1
 References: FATE#320030
 
 Not all devices attached to an MDIO bus are phys. So add an

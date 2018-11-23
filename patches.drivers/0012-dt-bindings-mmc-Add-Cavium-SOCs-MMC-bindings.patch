@@ -1,19 +1,16 @@
-From c91ae3377e4932d2687e7c9ac3575efdcb0aebea Mon Sep 17 00:00:00 2001
 From: Jan Glauber <jglauber@cavium.com>
 Date: Thu, 30 Mar 2017 17:31:23 +0200
 Subject: [PATCH 12/17] dt-bindings: mmc: Add Cavium SOCs MMC bindings
-
-Git-commit: 8822751d42148cfc16391c9410af4ea6a96e2ad1
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Git-commit: dc5aee3f9f454c35d4e092873b103dc791119e0e
+Patch-mainline: v4.12-rc1
 References: fate#321995
 
 Add description of Cavium Octeon and ThunderX SOC device tree bindings.
 
-CC: Ulf Hansson <ulf.hansson@linaro.org>
-CC: Rob Herring <robh+dt@kernel.org>
-CC: Mark Rutland <mark.rutland@arm.com>
-CC: devicetree@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: devicetree@vger.kernel.org
 
 Signed-off-by: Jan Glauber <jglauber@cavium.com>
 Signed-off-by: David Daney <david.daney@cavium.com>

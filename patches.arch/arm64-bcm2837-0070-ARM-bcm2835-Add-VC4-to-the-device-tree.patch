@@ -2,9 +2,8 @@ From 654c62380a7c61c1d446e4de908e787f71a10342 Mon Sep 17 00:00:00 2001
 From: Eric Anholt <eric@anholt.net>
 Date: Mon, 2 Mar 2015 14:36:16 -0800
 Subject: [PATCH 070/101] ARM: bcm2835: Add VC4 to the device tree.
-Git-commit: 4d8fcc6b1eb337f355317f67db3ef131232c57ba
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://github.com/anholt/linux.git
+Patch-mainline: v4.7-rc1
+Git-commit: 49ac67e0c39cd268371e63ce0662ecb59a164a20
 References: FATE#319481
 
 VC4 is the GPU (display and 3D) present on the 283x.

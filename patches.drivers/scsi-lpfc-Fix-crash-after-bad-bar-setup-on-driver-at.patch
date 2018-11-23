@@ -2,9 +2,8 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 20 Nov 2017 16:00:31 -0800
 Subject: scsi: lpfc: Fix crash after bad bar setup on driver attachment
 References: bsc#1067735
-Patch-mainline: Queued in subsystem maintainer repository
-Git-commit: 7b74569bb1d80133b3eb194c04e9111ba4addc3a
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Patch-mainline: v4.16-rc1
+Git-commit: e4b9794efdce13242f4af6682f3ed48ce3864a87
 
 In test cases where an instance of the driver is detached and
 reattached, the driver will crash on reattachment. There is a compound
@@ -19,7 +18,7 @@ the pci_resource_start call fails, -ENOMEM is now returned.
 Sample stack:
 
 rport-5:0-10: blocked FC remote port time out: removing rport
-BUG: unable to handle kernel NULL pointer dereference at           (null)
+Bug: unable to handle kernel NULL pointer dereference at           (null)
 ... lpfc_sli4_wait_bmbx_ready+0x32/0x70 [lpfc]
 ...
 ...  RIP: 0010:...  ... lpfc_sli4_wait_bmbx_ready+0x32/0x70 [lpfc]

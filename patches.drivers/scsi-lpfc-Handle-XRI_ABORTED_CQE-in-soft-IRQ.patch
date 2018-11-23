@@ -2,9 +2,8 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 20 Nov 2017 16:00:30 -0800
 Subject: scsi: lpfc: Handle XRI_ABORTED_CQE in soft IRQ
 References: bsc#1067735
-Patch-mainline: Queued in subsystem maintainer repository
-Git-commit: 04441cfc57ecba95b25b63d6d9311b7ba2233f01
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Git-commit: 8a5ca109a306db0e4ccb6f43af376c899faee652
+Patch-mainline: v4.16-rc1
 
 XRI_ABORTED_CQE completions were not being handled in the fast path.
 They were being queued and deferred to the lpfc worker thread for

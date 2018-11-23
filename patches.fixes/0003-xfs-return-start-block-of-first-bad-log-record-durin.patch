@@ -25,14 +25,12 @@ Reviewed-by: Dave Chinner <dchinner@redhat.com>
 Signed-off-by: Dave Chinner <david@fromorbit.com>
 Signed-off-by: Luis R. Rodriguez <mcgrof@suse.com>
 ---
- fs/xfs/xfs_log_recover.c | 19 +++++++++++++++----
+ fs/xfs/xfs_log_recover.c |   19 +++++++++++++++----
  1 file changed, 15 insertions(+), 4 deletions(-)
 
-diff --git a/fs/xfs/xfs_log_recover.c b/fs/xfs/xfs_log_recover.c
-index d2d972dbf334..1fb9f4d5a97d 100644
 --- a/fs/xfs/xfs_log_recover.c
 +++ b/fs/xfs/xfs_log_recover.c
-@@ -4314,10 +4314,12 @@ xlog_do_recovery_pass(
+@@ -4306,10 +4306,12 @@ xlog_do_recovery_pass(
  	struct xlog		*log,
  	xfs_daddr_t		head_blk,
  	xfs_daddr_t		tail_blk,
@@ -46,7 +44,7 @@ index d2d972dbf334..1fb9f4d5a97d 100644
  	char			*offset;
  	xfs_buf_t		*hbp, *dbp;
  	int			error = 0, h_size, h_len;
-@@ -4328,6 +4330,7 @@ xlog_do_recovery_pass(
+@@ -4320,6 +4322,7 @@ xlog_do_recovery_pass(
  	LIST_HEAD		(buffer_list);
  
  	ASSERT(head_blk != tail_blk);
@@ -54,7 +52,7 @@ index d2d972dbf334..1fb9f4d5a97d 100644
  
  	/*
  	 * Read the header of the tail block and get the iclog buffer size from
-@@ -4402,7 +4405,7 @@ xlog_do_recovery_pass(
+@@ -4394,7 +4397,7 @@ xlog_do_recovery_pass(
  	}
  
  	memset(rhash, 0, sizeof(rhash));
@@ -63,7 +61,7 @@ index d2d972dbf334..1fb9f4d5a97d 100644
  	if (tail_blk > head_blk) {
  		/*
  		 * Perform recovery around the end of the physical log.
-@@ -4513,11 +4516,14 @@ xlog_do_recovery_pass(
+@@ -4505,11 +4508,14 @@ xlog_do_recovery_pass(
  						     pass, &buffer_list);
  			if (error)
  				goto bread_err2;
@@ -78,7 +76,7 @@ index d2d972dbf334..1fb9f4d5a97d 100644
  	}
  
  	/* read first part of physical log */
-@@ -4542,7 +4548,9 @@ xlog_do_recovery_pass(
+@@ -4534,7 +4540,9 @@ xlog_do_recovery_pass(
  					     &buffer_list);
  		if (error)
  			goto bread_err2;
@@ -88,17 +86,17 @@ index d2d972dbf334..1fb9f4d5a97d 100644
  	}
  
   bread_err2:
-@@ -4550,6 +4558,9 @@ xlog_do_recovery_pass(
-  bread_err1:
- 	xlog_put_bp(hbp);
+@@ -4549,6 +4557,9 @@ xlog_do_recovery_pass(
+ 	if (!list_empty(&buffer_list))
+ 		error2 = xfs_buf_delwri_submit(&buffer_list);
  
 +	if (error && first_bad)
 +		*first_bad = rhead_blk;
 +
- 	/*
- 	 * Submit buffers that have been added from the last record processed,
- 	 * regardless of error status.
-@@ -4594,7 +4605,7 @@ xlog_do_log_recovery(
+ 	return error ? error : error2;
+ }
+ 
+@@ -4586,7 +4597,7 @@ xlog_do_log_recovery(
  		INIT_LIST_HEAD(&log->l_buf_cancel_table[i]);
  
  	error = xlog_do_recovery_pass(log, head_blk, tail_blk,
@@ -107,7 +105,7 @@ index d2d972dbf334..1fb9f4d5a97d 100644
  	if (error != 0) {
  		kmem_free(log->l_buf_cancel_table);
  		log->l_buf_cancel_table = NULL;
-@@ -4605,7 +4616,7 @@ xlog_do_log_recovery(
+@@ -4597,7 +4608,7 @@ xlog_do_log_recovery(
  	 * When it is complete free the table of buf cancel items.
  	 */
  	error = xlog_do_recovery_pass(log, head_blk, tail_blk,
@@ -116,6 +114,3 @@ index d2d972dbf334..1fb9f4d5a97d 100644
  #ifdef DEBUG
  	if (!error) {
  		int	i;
--- 
-2.11.0
-

@@ -1,10 +1,10 @@
 From fea7f6e14f4d07d078228162b2262a7c70584145 Mon Sep 17 00:00:00 2001
 From: Hannes Reinecke <hare@suse.de>
 Date: Mon, 25 Jul 2016 15:04:35 +0200
-Subject: [PATCH 05/22] libfc: Do not attempt to login if the port is already
+Subject: [PATCH 05/22] libfc: Do not login if the port is already started
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
- started
+Patch-mainline: v4.10-rc1
+Git-commit: 06ee2571a438653bd14c33c70379a5f008a91901
 
 When the port is already started we don't need to login; that
 will only confuse the state machine.

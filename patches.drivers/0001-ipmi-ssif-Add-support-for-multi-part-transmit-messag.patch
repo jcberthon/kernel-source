@@ -5,8 +5,7 @@ Subject: [PATCH 01/16] ipmi:ssif: Add support for multi-part transmit messages
  > 2 parts
 
 Git-commit: 10042504ed92c06077b8a20a4edd67ba784847d4
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Patch-mainline: v4.20-rc1
 References: bsc#1103308
 
 The spec was fairly confusing about how multi-part transmit messages

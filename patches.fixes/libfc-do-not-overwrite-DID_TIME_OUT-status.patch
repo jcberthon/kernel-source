@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 28 Jul 2016 08:54:09 +0200
 Subject: [PATCH 13/22] libfc: do not overwrite DID_TIME_OUT status
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Patch-mainline: v4.10-rc1
+Git-commit: 0f4c16a2f41400dba12e5039429e780aa938aa0c
 
 When a command is aborted it might already have the DID_TIME_OUT
 status set, so we shouldn't be overwriting that.

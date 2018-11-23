@@ -2,7 +2,8 @@ From: "Javali, Nilesh" <Nilesh.Javali@cavium.com>
 Date: Mon, 19 Jun 2017 06:44:29 -0700
 Subject: qedi: Add support for offload iSCSI Boot
 References: bsc#1043083
-Patch-mainline: Submitted, https://patchwork.kernel.org/patch/9795949/
+Git-commit: c57ec8fb7c025322f25a077afc94e0ef18cc3d89
+Patch-mainline: v4.13-rc2
 
 This patch adds support for offload iSCSI boot (Boot from SAN
 over iSCSI offload).

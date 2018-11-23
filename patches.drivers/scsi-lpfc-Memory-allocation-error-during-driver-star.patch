@@ -4,8 +4,7 @@ Subject: [PATCH] scsi: lpfc: Memory allocation error during driver start-up on
  power8
 References: bsc#1085383
 Git-commit: f44ac12f1dcccf4a6315cbe34129adb7aa8497ba
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/jejb/scsi.git
+Patch-mainline: v4.17-rc1
 
 The driver fails to allocate command buffers in the routine
 lpfc_new_scsi_buf_s4

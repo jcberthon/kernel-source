@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 5 Jun 2014 08:24:10 +0200
 Subject: scsi: Handle power-on reset unit attention
 References: FATE#315120, bnc#852358
-Patch-Mainline: submitted to linux-scsi
+Git-commit: cf3431bba1df3b4f25b04900cb804d7e6e5eb6a9
+Patch-mainline: v4.15-rc1
 
 As per SAM there is a status precedence, with any sense code 29/XX
 taking second place just after an ACA ACTIVE status.

@@ -4,8 +4,7 @@ Date: Tue, 27 Feb 2018 13:26:18 +0000
 Subject: [PATCH 04/30] i2c: xlp9xx: Check for Bus state before every transfer
 
 Git-commit: d3898a78521cd383d287b3ed5683f914c48c3be9
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Patch-mainline: v4.17-rc1
 References: bsc#1084310
 
 I2C bus enters the STOP condition after the DATA_DONE interrupt is raised.

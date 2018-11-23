@@ -1,8 +1,9 @@
 From: Egbert Eich <eich@suse.de>
 Date: Wed Jun 11 15:04:59 2014 +0200
 Subject: drm/ast: Simplify function ast_bo_unpin()
-Patch-mainline: Not yet, ported from SLE-12
-References: 
+Patch-mainline: v4.14-rc1
+References: <eich?>
+Git-commit: 587b9b1a2a068c01fdf51003a7b6951761041d01
 
 Signed-off-by: Egbert Eich <eich@suse.de>
 Signed-off-by: Egbert Eich <eich@suse.com>

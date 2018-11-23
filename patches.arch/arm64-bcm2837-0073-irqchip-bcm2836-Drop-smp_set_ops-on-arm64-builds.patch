@@ -2,9 +2,8 @@ From 30531241e46b3c3066374f2febad70c962b7e910 Mon Sep 17 00:00:00 2001
 From: Eric Anholt <eric@anholt.net>
 Date: Sun, 20 Mar 2016 21:00:41 -0700
 Subject: [PATCH 073/101] irqchip: bcm2836: Drop smp_set_ops on arm64 builds
-Git-commit: 073130b88c28306d95429d56951f71ff7d622912
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://github.com/anholt/linux.git
+Git-commit: 0dc17be87647cd4c891e748a0753ad0606dc5775
+Patch-mainline: v4.7-rc1
 References: FATE#319481
 
 For arm64, the bootloader will instead be implementing the spin-table

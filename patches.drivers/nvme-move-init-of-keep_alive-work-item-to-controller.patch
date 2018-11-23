@@ -3,9 +3,8 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Tue, 12 Jun 2018 16:28:24 -0700
 Subject: [PATCH] nvme: move init of keep_alive work item to controller initialization
 References: bsc#1098527
-Git-commit: dec684fd36ce87fc16918fb909e5d0f1ae42b2e6
-Patch-Mainline: queued in subsystem maintainer repository
-Git-repo: git://git.infradead.org/nvme.git
+Git-commit: 230f1f9e04e2abee34b1478b3bcc2d947b7cc2a0
+Patch-mainline: v4.19-rc1
 
 Currently, the code initializes the keep alive work item whenever
 nvme_start_keep_alive() is called. However, this routine is called

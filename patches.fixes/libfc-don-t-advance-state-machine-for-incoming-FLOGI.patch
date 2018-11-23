@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 29 Jul 2016 09:13:25 +0200
 Subject: [PATCH 18/22] libfc: don't advance state machine for incoming FLOGI
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Patch-Mainline: v4.10-rc1
+Git-commit: f89b8d67db792a8a303e14e3d02785035e6f1a05
 
 When we receive an FLOGI but have already sent our own we should
 not advance the state machine but rather wait for our FLOGI to

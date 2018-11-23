@@ -2,8 +2,10 @@ From 520b323f30f404731cfa594259c1ca907b4a5146 Mon Sep 17 00:00:00 2001
 From: Roy Pledge <roy.pledge@nxp.com>
 Date: Mon, 9 Jan 2017 16:29:03 -0500
 Subject: [PATCH 061/221] soc/fsl/qbman: Rework ioremap() calls for ARM/PPC
-Patch-mainline: Submitted, https://lkml.org/lkml/2017/5/1/365
 References: FATE#320030
+Git-commit: e6e2df69c8321fcb5497a409a1a2a3139b15c3d8
+Patch-mainline: v4.15-rc1
+X-notes: The upstream version has been reworked to abstract out the ifdefs and use memremap
 
 Rework ioremap() for PPC and ARM. The PPC devices require a
 non-coherent mapping while ARM will work with a non-cachable/write

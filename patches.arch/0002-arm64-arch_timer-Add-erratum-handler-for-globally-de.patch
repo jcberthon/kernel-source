@@ -2,9 +2,7 @@ From: Marc Zyngier <marc.zyngier@arm.com>
 Date: Fri, 27 Jan 2017 11:27:26 +0000
 Subject: arm64: arch_timer: Add erratum handler for globally defined
  capability
-Git-commit: b50b1f54abc59e7f4913b9bf476c6e89259776b7
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/maz/arm-platforms.git
+Patch-mainline: Submitted, https://lkml.org/lkml/2017/3/6/306
 References: fate#322150
 
 Should we ever have a workaround for an erratum that is detected using

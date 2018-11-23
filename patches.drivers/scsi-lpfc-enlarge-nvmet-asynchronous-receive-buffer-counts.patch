@@ -1,9 +1,8 @@
 From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 9 Apr 2018 14:24:24 -0700
 Subject: scsi: lpfc: Enlarge nvmet asynchronous receive buffer counts
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
-Git-commit: 76709b2961547db867e0dfd30a8a602b569b1f49
+Git-commit: 2448e484259debb1cb8f00a06a8a0a2c6edd9d80
+Patch-mainline: v4.18-rc1
 References: bsc#1088865
 
 Under large io load, the current sizing of asynchronous buffer counts

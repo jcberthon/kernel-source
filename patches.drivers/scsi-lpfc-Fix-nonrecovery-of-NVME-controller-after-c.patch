@@ -5,8 +5,7 @@ Subject: [PATCH 16/18] scsi: lpfc: Fix nonrecovery of NVME controller after
  cable swap.
 References: bsc#1080656
 Git-commit: 815a9c437617e221842d12b3366ff6911b3df628
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Patch-mainline: v4.17-rc1
 
 In a test that is doing large numbers of cable swaps on the target, the
 nvme controllers wouldn't reconnect.
@@ -35,7 +34,6 @@ Signed-off-by: Dick Kennedy <dick.kennedy@broadcom.com>
 Signed-off-by: James Smart <james.smart@broadcom.com>
 Reviewed-by: Hannes Reinecke <hare@suse.com>
 Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
-
 ---
  drivers/scsi/lpfc/lpfc_nvme.c | 24 +++++++++++++-----------
  1 file changed, 13 insertions(+), 11 deletions(-)

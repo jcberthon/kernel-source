@@ -4,8 +4,7 @@ Date: Tue, 27 Feb 2018 13:26:19 +0000
 Subject: [PATCH 05/30] i2c: xlp9xx: Handle NACK on DATA properly
 
 Git-commit: e349d7d08e7044caf37a36409305edbd5af013c7
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Patch-mainline: v4.17-rc1
 References: bsc#1084310
 
 In case we receive NACK on DATA we shouldn't be resetting the controller,

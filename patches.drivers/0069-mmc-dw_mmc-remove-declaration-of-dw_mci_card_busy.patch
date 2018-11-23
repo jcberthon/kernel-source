@@ -1,11 +1,7 @@
-From 9e8843b3766e9c3459108142731d8b3dfdef6386 Mon Sep 17 00:00:00 2001
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Date: Fri, 17 Feb 2017 10:59:35 +0800
 Subject: [PATCH 69/95] mmc: dw_mmc: remove declaration of dw_mci_card_busy
-
-Git-commit: 50a3df4a4112dbd28fc2d50b9e5d70e1be7144a8
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Git-commit: 132b3b6aa61864ef9f4fa21e88f2e9dab6caeec3
+Patch-mainline: v4.12-rc1
 References: bsc#1033484
 
 No need to declar it there, remove it.

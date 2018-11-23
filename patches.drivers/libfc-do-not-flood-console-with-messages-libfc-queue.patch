@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Wed, 26 Apr 2017 10:13:57 +0200
 Subject: libfc: do not flood console with messages 'libfc: queue full ...'
 References: bsc#1035889
-Patch-Mainline: submitted, https://patchwork.kernel.org/patch/9702941
+Patch-mainline: v4.12-rc2
+Git-commit: c1061255031dea76ee9e082d081b88ac6d6c8265
 
 When the FCoE sending side becomes congested libfc tries to
 reduce the queue depth on the host; however due to the built-in

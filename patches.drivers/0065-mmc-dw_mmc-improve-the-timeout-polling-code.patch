@@ -2,10 +2,8 @@ From c2c3f525da28a43fd316d175399220cd5c1d85e3 Mon Sep 17 00:00:00 2001
 From: Shawn Lin <shawn.lin@rock-chips.com>
 Date: Fri, 17 Feb 2017 10:56:39 +0800
 Subject: [PATCH 65/95] mmc: dw_mmc: improve the timeout polling code
-
-Git-commit: 49d1d86b6357101de7c26d58a9db8cf272a55961
-Patch-mainline: Queued
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+Git-commit: b6d2d81c5c2de6b3c69da3be9b2044dd008dbe45
+Patch-mainline: v4.12-rc1
 References: bsc#1033484
 
 Just use the readl_poll_timeout{_atomic} to avold open

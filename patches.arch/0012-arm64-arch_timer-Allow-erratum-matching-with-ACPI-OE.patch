@@ -1,9 +1,8 @@
 From: Marc Zyngier <marc.zyngier@arm.com>
 Date: Tue, 21 Feb 2017 14:37:30 +0000
 Subject: arm64: arch_timer: Allow erratum matching with ACPI OEM information
-Git-commit: 2221587253f84fa888cfe991e83b7c7449bbd979
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/maz/arm-platforms.git
+Git-commit: 5a38bcac1f2f0bd0d24700690e36a277ffd0396d
+Patch-mainline: v4.12-rc1
 References: fate#322150
 
 Just as we're able to identify a broken platform using some DT

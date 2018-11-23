@@ -2,8 +2,9 @@ From 2b6b2b96471cca958e21a55f8e307073c63f8a01 Mon Sep 17 00:00:00 2001
 From: Eric Sandeen <sandeen@sandeen.net>
 Date: Tue, 17 Oct 2017 14:18:22 -0700
 Subject: [PATCH] xfs: handle error if xfs_btree_get_bufs fails
-Patch-mainline: Not yet, it slipped through the rocks I pushed it again
+Patch-mainline: v4.14-rc5
 References: bsc#1059863
+Git-commit: 93e8befc17f6d6ea92b0aee3741ceac8bca4590f
 
 Jason reported that a corrupted filesystem failed to replay
 the log with a metadata block out of bounds warning:

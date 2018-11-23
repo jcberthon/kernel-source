@@ -2,9 +2,8 @@ From: James Smart <jsmart2021@gmail.com>
 Date: Mon, 20 Nov 2017 16:00:41 -0800
 Subject: scsi: lpfc: Fix crash during driver unload with running nvme traffic
 References: bsc#1067735
-Patch-mainline: Queued in subsystem maintainer repository
-Git-commit: b9df6cea8385848f7f73fb8fad7fa865551e3f9d
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
+Git-commit: 3386f4bdd243ad5a9094d390297602543abe9902
+Patch-mainline: v4.16-rc1
 
 When the driver is unloading, the nvme transport could be in the process
 of submitting new requests, will send abort requests to terminate

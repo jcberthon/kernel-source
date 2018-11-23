@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 12 Aug 2016 16:03:52 +0200
 Subject: libfc: sanitize E_D_TOV and R_A_TOV setting
 References: bsc#990245
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Patch-mainline: v4.10-rc1
+Git-commit: 76e72ad117812bb79abf647ac40ca6df1740b729
 
 When setting the FCP timeout we need to ensure a lower boundary
 for E_D_TOV and R_A_TOV, otherwise we'd be getting spurious I/O

@@ -2,9 +2,8 @@ From: Marc Zyngier <marc.zyngier@arm.com>
 Date: Mon, 20 Feb 2017 18:34:48 +0000
 Subject: arm64: arch_timer: Allows a CPU-specific erratum to only affect a
  subset of CPUs
-Git-commit: dcda59567e612941136caa8c32b90b969522b488
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/maz/arm-platforms.git
+Git-commit: 6acc71ccac7187fc0ef85f10bd09c2058f21fab5
+Patch-mainline: v4.12-rc1
 References: fate#322150
 
 Instead of applying a CPU-specific workaround to all CPUs in the system,

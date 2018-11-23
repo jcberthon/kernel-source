@@ -1,7 +1,8 @@
 From: James Smart <jsmart2021@gmail.com>
 Subject: nvme_fc: correct hang in nvme_ns_remove()
 Date: Thu, 11 Jan 2018 15:21:38 -0800
-Patch-mainline: Submitted, http://lists.infradead.org/pipermail/linux-nvme/2018-January/014854.html
+Git-commit: 0fd997d3f77296522e836f7002e8a0636c9886aa
+Patch-mainline: v4.16-rc1
 References: bsc#1075811
 
 When connectivity is lost to a device, the association is terminated

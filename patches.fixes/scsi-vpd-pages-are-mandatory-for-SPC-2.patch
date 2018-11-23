@@ -1,7 +1,8 @@
 From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 11 Mar 2016 14:33:24 +0100
 Subject: scsi: vpd pages are mandatory for SPC-2
-Patch-Mainline: Submitted linux-scsi 09/03/2016
+Patch-mainline: v4.7-rc1
+Git-commit: e4c36ad756ec2de36b05c66bb50ed4ff47b0fdb0
 
 VPD pages 0x0 and 0x83 are mandatory even for SPC-2, so we should
 be lowering the restriction to avoid having to whitelist every

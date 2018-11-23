@@ -1,6 +1,7 @@
 From: Stefan Haberland <sth@linux.vnet.ibm.com>
 Subject: dasd: add query host access to volume support
-Patch-mainline: not yet, in process
+Patch-mainline: v4.7-rc1
+Git-commit: 5a3b7b112884f80ff19b18028fabeb4f9c035518
 References: FATE#319605, LTC#131276
 
 Summary:     dasd: add query host access to volume support

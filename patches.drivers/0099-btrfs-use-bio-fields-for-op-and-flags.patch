@@ -452,7 +452,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  {
  	struct btrfs_device *dev = bbio->stripes[dev_nr].dev;
  
-@@ -6134,15 +6134,14 @@ static void submit_stripe_bio(struct btr
+@@ -6134,16 +6134,15 @@ static void submit_stripe_bio(struct btr
  	btrfs_io_bio(bio)->stripe_index = dev_nr;
  	bio->bi_end_io = btrfs_end_bio;
  	bio->bi_iter.bi_sector = physical >> 9;
@@ -463,13 +463,14 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
  		rcu_read_lock();
  		name = rcu_dereference(dev->name);
--		btrfs_debug("btrfs_map_bio: rw %d, sector=%llu, dev=%lu (%s id %llu), size=%u",
+ 		btrfs_debug(fs_info,
+-			"btrfs_map_bio: rw %d, sector=%llu, dev=%lu (%s id %llu), size=%u",
 -			rw,
-+		btrfs_debug("btrfs_map_bio: rw %d 0x%x, sector=%llu, dev=%lu "
-+			 "(%s id %llu), size=%u\n", bio_op(bio), bio->bi_rw,
- 			 (u64)bio->bi_iter.bi_sector, (u_long)dev->bdev->bd_dev,
- 			 name->str, dev->devid, bio->bi_iter.bi_size);
- 		rcu_read_unlock();
++			"btrfs_map_bio: rw %d 0x%x, sector=%llu, dev=%lu (%s id %llu), size=%u",
++			bio_op(bio), bio->bi_rw,
+ 			(u64)bio->bi_iter.bi_sector,
+ 			(u_long)dev->bdev->bd_dev, name->str, dev->devid,
+ 			bio->bi_iter.bi_size);
 @@ -6172,7 +6171,7 @@ static void bbio_error(struct btrfs_bio
  	}
  }

@@ -3,9 +3,8 @@ From: Eric Anholt <eric@anholt.net>
 Date: Sun, 20 Mar 2016 21:03:24 -0700
 Subject: [PATCH 074/101] irqchip: bcm2836: Fix compiler warning on 64-bit
  build
-Git-commit: e3f840fe0810a0377c23b1672eb24a76b4cea906
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://github.com/anholt/linux.git
+Git-commit: cb290d827eb0378447095093b4ea712482d31ae8
+Patch-mainline: v4.7-rc1
 References: FATE#319481
 
 Signed-off-by: Eric Anholt <eric@anholt.net>
