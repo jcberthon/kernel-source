@@ -36,9 +36,9 @@ Signed-off-by: David S. Miller <davem@davemloft.net>
 +		goto ret_orig;
 +	}
 +
+ 	skb_orphan(skb);
  	fq = fq_find(net, fhdr->identification, user, &hdr->saddr, &hdr->daddr,
  		     skb->dev ? skb->dev->ifindex : 0, ip6_frag_ecn(hdr));
- 	if (fq == NULL) {
 --- a/net/ipv6/reassembly.c
 +++ b/net/ipv6/reassembly.c
 @@ -552,6 +552,10 @@ static int ipv6_frag_rcv(struct sk_buff

@@ -7011,9 +7011,9 @@ Signed-off-by: Coly Li <colyli@suse.de>
  #include <linux/stat.h>
 --- a/drivers/infiniband/core/ucm.c
 +++ b/drivers/infiniband/core/ucm.c
-@@ -46,7 +46,7 @@
- #include <linux/mutex.h>
- #include <linux/slab.h>
+@@ -48,7 +48,7 @@
+ 
+ #include <linux/nospec.h>
  
 -#include <asm/uaccess.h>
 +#include <linux/uaccess.h>

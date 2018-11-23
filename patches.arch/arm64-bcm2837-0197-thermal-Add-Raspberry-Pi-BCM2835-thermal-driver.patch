@@ -43,8 +43,8 @@ https://github.com/anholt/linux
 +	  chip, with one trip point and no cooling devices.
 +
  config DB8500_THERMAL
- 	bool "DB8500 thermal management"
- 	depends on ARCH_U8500
+ 	tristate "DB8500 thermal management"
+ 	depends on MFD_DB8500_PRCMU
 --- a/drivers/thermal/Makefile
 +++ b/drivers/thermal/Makefile
 @@ -48,3 +48,4 @@ obj-$(CONFIG_INTEL_PCH_THERMAL)	+= intel
