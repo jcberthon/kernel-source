@@ -9,6 +9,9 @@ Content-transfer-encoding: 8bit
 Git-commit: 67c2315def06c1ef18492b214686531e69682800
 Patch-mainline: v4.12-rc1
 References: FATE#320030
+Backport-note: gcc on SLE12-SP3 seems to have a problem building
+ function-scoped percpus.  This version moves 'last_cpu' out of function
+ context. -agraf [-jeffm]
 
 CAAM engine supports two interfaces for crypto job submission:
 -job ring interface - already existing caam/jr driver
@@ -57,20 +60,18 @@ Conflicts: drivers/crypto/caam/ctrl.c
 	drivers/crypto/caam/intern.h
 
 ---
- drivers/crypto/caam/Makefile |   4 +
- drivers/crypto/caam/ctrl.c   |  58 ++--
- drivers/crypto/caam/intern.h |  24 ++
- drivers/crypto/caam/qi.c     | 805 +++++++++++++++++++++++++++++++++++++++++++
- drivers/crypto/caam/qi.h     | 201 +++++++++++
+ drivers/crypto/caam/Makefile |    4 
+ drivers/crypto/caam/ctrl.c   |   58 +--
+ drivers/crypto/caam/intern.h |   24 +
+ drivers/crypto/caam/qi.c     |  805 +++++++++++++++++++++++++++++++++++++++++++
+ drivers/crypto/caam/qi.h     |  201 ++++++++++
  5 files changed, 1064 insertions(+), 28 deletions(-)
  create mode 100644 drivers/crypto/caam/qi.c
  create mode 100644 drivers/crypto/caam/qi.h
 
-diff --git a/drivers/crypto/caam/Makefile b/drivers/crypto/caam/Makefile
-index 6554742..2e60e45 100644
 --- a/drivers/crypto/caam/Makefile
 +++ b/drivers/crypto/caam/Makefile
-@@ -16,3 +16,7 @@ obj-$(CONFIG_CRYPTO_DEV_FSL_CAAM_PKC_API) += caam_pkc.o
+@@ -16,3 +16,7 @@ obj-$(CONFIG_CRYPTO_DEV_FSL_CAAM_PKC_API
  caam-objs := ctrl.o
  caam_jr-objs := jr.o key_gen.o error.o
  caam_pkc-y := caampkc.o pkc_desc.o
@@ -78,8 +79,6 @@ index 6554742..2e60e45 100644
 +	ccflags-y += -DCONFIG_CAAM_QI
 +	caam-objs += qi.o
 +endif
-diff --git a/drivers/crypto/caam/ctrl.c b/drivers/crypto/caam/ctrl.c
-index 5120a10..6041cbe 100644
 --- a/drivers/crypto/caam/ctrl.c
 +++ b/drivers/crypto/caam/ctrl.c
 @@ -18,6 +18,10 @@
@@ -93,7 +92,7 @@ index 5120a10..6041cbe 100644
  /*
   * i.MX targets tend to have clock control subsystems that can
   * enable/disable clocking to our device.
-@@ -310,6 +314,11 @@ static int caam_remove(struct platform_device *pdev)
+@@ -314,6 +318,11 @@ static int caam_remove(struct platform_d
  	/* Remove platform devices under the crypto node */
  	of_platform_depopulate(ctrldev);
  
@@ -105,7 +104,7 @@ index 5120a10..6041cbe 100644
  	/* De-initialize RNG state handles initialized by this driver. */
  	if (ctrlpriv->rng4_sh_init)
  		deinstantiate_rng(ctrldev, ctrlpriv->rng4_sh_init);
-@@ -400,23 +409,6 @@ int caam_get_era(void)
+@@ -404,23 +413,6 @@ int caam_get_era(void)
  }
  EXPORT_SYMBOL(caam_get_era);
  
@@ -129,7 +128,7 @@ index 5120a10..6041cbe 100644
  static const struct of_device_id caam_match[] = {
  	{
  		.compatible = "fsl,sec-v4.0",
-@@ -613,6 +605,17 @@ static int caam_probe(struct platform_device *pdev)
+@@ -617,6 +609,17 @@ static int caam_probe(struct platform_de
  		goto iounmap_ctrl;
  	}
  
@@ -147,7 +146,7 @@ index 5120a10..6041cbe 100644
  	ring = 0;
  	for_each_available_child_of_node(nprop, np)
  		if (of_device_is_compatible(np, "fsl,sec-v4.0-job-ring") ||
-@@ -637,6 +640,13 @@ static int caam_probe(struct platform_device *pdev)
+@@ -641,6 +644,13 @@ static int caam_probe(struct platform_de
  			       );
  		/* This is all that's required to physically enable QI */
  		wr_reg32(&ctrlpriv->qi->qi_control_lo, QICTL_DQEN);
@@ -161,7 +160,7 @@ index 5120a10..6041cbe 100644
  	}
  
  	/* If no QI and no rings specified, quit and go home */
-@@ -724,17 +734,6 @@ static int caam_probe(struct platform_device *pdev)
+@@ -728,17 +738,6 @@ static int caam_probe(struct platform_de
  		 ctrlpriv->total_jobrs, ctrlpriv->qi_present);
  
  #ifdef CONFIG_DEBUG_FS
@@ -179,7 +178,7 @@ index 5120a10..6041cbe 100644
  
  	ctrlpriv->ctl_rq_dequeued =
  		debugfs_create_file("rq_dequeued",
-@@ -817,6 +816,9 @@ static int caam_probe(struct platform_device *pdev)
+@@ -821,6 +820,9 @@ static int caam_probe(struct platform_de
  	return 0;
  
  caam_remove:
@@ -189,8 +188,6 @@ index 5120a10..6041cbe 100644
  	caam_remove(pdev);
  	return ret;
  
-diff --git a/drivers/crypto/caam/intern.h b/drivers/crypto/caam/intern.h
-index dbed8ba..85b6c58 100644
 --- a/drivers/crypto/caam/intern.h
 +++ b/drivers/crypto/caam/intern.h
 @@ -66,6 +66,9 @@ struct caam_drv_private_jr {
@@ -234,9 +231,6 @@ index dbed8ba..85b6c58 100644
 +#endif
 +
  #endif /* INTERN_H */
-diff --git a/drivers/crypto/caam/qi.c b/drivers/crypto/caam/qi.c
-new file mode 100644
-index 0000000..45de8fd
 --- /dev/null
 +++ b/drivers/crypto/caam/qi.c
 @@ -0,0 +1,805 @@
@@ -625,6 +619,7 @@ index 0000000..45de8fd
 +}
 +EXPORT_SYMBOL(caam_drv_ctx_update);
 +
++static DEFINE_PER_CPU(int, last_cpu);
 +struct caam_drv_ctx *caam_drv_ctx_init(struct device *qidev,
 +				       int *cpu,
 +				       u32 *sh_desc)
@@ -634,7 +629,6 @@ index 0000000..45de8fd
 +	dma_addr_t hwdesc;
 +	struct caam_drv_ctx *drv_ctx;
 +	const cpumask_t *cpus = qman_affine_cpus();
-+	static DEFINE_PER_CPU(int, last_cpu);
 +
 +	num_words = desc_len(sh_desc);
 +	if (num_words > MAX_SDLEN) {
@@ -1045,9 +1039,6 @@ index 0000000..45de8fd
 +	dev_info(qidev, "Linux CAAM Queue I/F driver initialised\n");
 +	return 0;
 +}
-diff --git a/drivers/crypto/caam/qi.h b/drivers/crypto/caam/qi.h
-new file mode 100644
-index 0000000..33b0433
 --- /dev/null
 +++ b/drivers/crypto/caam/qi.h
 @@ -0,0 +1,201 @@
@@ -1252,6 +1243,3 @@ index 0000000..33b0433
 +void qi_cache_free(void *obj);
 +
 +#endif /* __QI_H__ */
--- 
-1.8.5.6
-
