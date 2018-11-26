@@ -293,7 +293,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	vma->phys_addr	= pa_start;
 @@ -471,14 +521,18 @@ static void __init map_kernel(pgd_t *pgd
  	 */
- 	pgprot_t text_prot = true ? PAGE_KERNEL_ROX : PAGE_KERNEL_EXEC;
+ 	pgprot_t text_prot = rodata_enabled ? PAGE_KERNEL_ROX : PAGE_KERNEL_EXEC;
  
 -	map_kernel_segment(pgd, _text, _etext, text_prot, &vmlinux_text);
 +	/*
