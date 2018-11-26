@@ -1,0 +1,27 @@
+From: NeilBrown <neilb@suse.com>
+Subject: Fix breakage in nfs-idmap-hang.fix
+Patch-mainline: never, upstream code has changed substantially.
+References: bsc#1105799, bsc#1117042
+
+The name string is not nul terminated, so strnlen() might
+return a larger number.
+We only want to check for embedded nuls, so only check up to 'namelen'.
+
+Acked-by: NeilBrown <neilb@suse.com>
+Signed-off-by: Neil Brown <neilb@suse.com>
+
+---
+ fs/nfs/idmap.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/fs/nfs/idmap.c
++++ b/fs/nfs/idmap.c
+@@ -526,7 +526,7 @@ nfs_idmap_id(struct idmap *idmap, struct
+ 	}
+ 	if (namelen >= IDMAP_NAMESZ)
+ 		return -EINVAL;
+-	if (strnlen(name, IDMAP_NAMESZ) != namelen)
++	if (strnlen(name, namelen) != namelen)
+ 		/* Embedded nuls cause problems */
+ 		return -EINVAL;
+ 
