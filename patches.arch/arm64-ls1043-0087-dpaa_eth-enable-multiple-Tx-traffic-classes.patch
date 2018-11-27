@@ -23,7 +23,7 @@ index eadfa5b..3ff14cf 100644
 --- a/drivers/net/ethernet/freescale/dpaa/dpaa_eth.c
 +++ b/drivers/net/ethernet/freescale/dpaa/dpaa_eth.c
 @@ -344,6 +344,41 @@ static struct rtnl_link_stats64 *dpaa_get_stats64(struct net_device *net_dev,
- 	return s;
+ 	}
  }
  
 +static int dpaa_setup_tc(struct net_device *net_dev, u32 handle, __be16 proto,

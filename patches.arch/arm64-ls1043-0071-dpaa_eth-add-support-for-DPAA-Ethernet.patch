@@ -86,7 +86,7 @@ new file mode 100644
 index 0000000..8b9b0720f
 --- /dev/null
 +++ b/drivers/net/ethernet/freescale/dpaa/dpaa_eth.c
-@@ -0,0 +1,2682 @@
+@@ -0,0 +1,2680 @@
 +/* Copyright 2008 - 2016 Freescale Semiconductor Inc.
 + *
 + * Redistribution and use in source and binary forms, with or without
@@ -394,8 +394,8 @@ index 0000000..8b9b0720f
 +/* Calculates the statistics for the given device by adding the statistics
 + * collected by each CPU.
 + */
-+static struct rtnl_link_stats64 *dpaa_get_stats64(struct net_device *net_dev,
-+						  struct rtnl_link_stats64 *s)
++static void dpaa_get_stats64(struct net_device *net_dev,
++			     struct rtnl_link_stats64 *s)
 +{
 +	int numstats = sizeof(struct rtnl_link_stats64) / sizeof(u64);
 +	struct dpaa_priv *priv = netdev_priv(net_dev);
@@ -413,8 +413,6 @@ index 0000000..8b9b0720f
 +		for (j = 0; j < numstats; j++)
 +			netstats[j] += cpustats[j];
 +	}
-+
-+	return s;
 +}
 +
 +static struct mac_device *dpaa_mac_dev_get(struct platform_device *pdev)
