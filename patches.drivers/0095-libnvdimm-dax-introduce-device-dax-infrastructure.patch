@@ -15,23 +15,21 @@ than the pmem driver.
 Signed-off-by: Dan Williams <dan.j.williams@intel.com>
 Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 ---
- drivers/nvdimm/Kconfig          |  13 ++++++
- drivers/nvdimm/Makefile         |   1 +
- drivers/nvdimm/bus.c            |   4 ++
- drivers/nvdimm/claim.c          |   2 +
- drivers/nvdimm/dax_devs.c       |  99 +++++++++++++++++++++++++++++++++++++++
- drivers/nvdimm/namespace_devs.c |  19 +++++++-
- drivers/nvdimm/nd-core.h        |   1 +
- drivers/nvdimm/nd.h             |  25 ++++++++++
- drivers/nvdimm/pfn_devs.c       | 100 +++++++++++++++++++++++++++-------------
- drivers/nvdimm/region.c         |   2 +
- drivers/nvdimm/region_devs.c    |  29 ++++++++++++
- include/uapi/linux/ndctl.h      |   2 +
- tools/testing/nvdimm/Kbuild     |   1 +
+ drivers/nvdimm/Kconfig          |   13 +++++
+ drivers/nvdimm/Makefile         |    1 
+ drivers/nvdimm/bus.c            |    4 +
+ drivers/nvdimm/claim.c          |    2 
+ drivers/nvdimm/dax_devs.c       |   99 +++++++++++++++++++++++++++++++++++++++
+ drivers/nvdimm/namespace_devs.c |   19 +++++++
+ drivers/nvdimm/nd-core.h        |    1 
+ drivers/nvdimm/nd.h             |   25 ++++++++++
+ drivers/nvdimm/pfn_devs.c       |  100 ++++++++++++++++++++++++++--------------
+ drivers/nvdimm/region.c         |    2 
+ drivers/nvdimm/region_devs.c    |   29 +++++++++++
+ include/uapi/linux/ndctl.h      |    2 
+ tools/testing/nvdimm/Kbuild     |    1 
  13 files changed, 264 insertions(+), 34 deletions(-)
 
-diff --git a/drivers/nvdimm/Kconfig b/drivers/nvdimm/Kconfig
-index 53c1162..7c8a3bf 100644
 --- a/drivers/nvdimm/Kconfig
 +++ b/drivers/nvdimm/Kconfig
 @@ -88,4 +88,17 @@ config NVDIMM_PFN
@@ -52,8 +50,6 @@ index 53c1162..7c8a3bf 100644
 +	  Select Y if unsure
 +
  endif
-diff --git a/drivers/nvdimm/Makefile b/drivers/nvdimm/Makefile
-index ea84d3c..909554c 100644
 --- a/drivers/nvdimm/Makefile
 +++ b/drivers/nvdimm/Makefile
 @@ -23,3 +23,4 @@ libnvdimm-y += label.o
@@ -61,11 +57,9 @@ index ea84d3c..909554c 100644
  libnvdimm-$(CONFIG_BTT) += btt_devs.o
  libnvdimm-$(CONFIG_NVDIMM_PFN) += pfn_devs.o
 +libnvdimm-$(CONFIG_NVDIMM_DAX) += dax_devs.o
-diff --git a/drivers/nvdimm/bus.c b/drivers/nvdimm/bus.c
-index 19f822d..97589e3 100644
 --- a/drivers/nvdimm/bus.c
 +++ b/drivers/nvdimm/bus.c
-@@ -40,6 +40,8 @@ static int to_nd_device_type(struct device *dev)
+@@ -40,6 +40,8 @@ static int to_nd_device_type(struct devi
  		return ND_DEVICE_REGION_PMEM;
  	else if (is_nd_blk(dev))
  		return ND_DEVICE_REGION_BLK;
@@ -74,20 +68,18 @@ index 19f822d..97589e3 100644
  	else if (is_nd_pmem(dev->parent) || is_nd_blk(dev->parent))
  		return nd_region_to_nstype(to_nd_region(dev->parent));
  
-@@ -246,6 +248,8 @@ static void nd_async_device_unregister(void *d, async_cookie_t cookie)
+@@ -248,6 +250,8 @@ static void nd_async_device_unregister(v
  
  void __nd_device_register(struct device *dev)
  {
 +	if (!dev)
 +		return;
  	dev->bus = &nvdimm_bus_type;
- 	get_device(dev);
- 	async_schedule_domain(nd_async_device_register, dev,
-diff --git a/drivers/nvdimm/claim.c b/drivers/nvdimm/claim.c
-index 6bbd0a3..5f53db5 100644
+ 	if (dev->parent)
+ 		get_device(dev->parent);
 --- a/drivers/nvdimm/claim.c
 +++ b/drivers/nvdimm/claim.c
-@@ -85,6 +85,8 @@ static bool is_idle(struct device *dev, struct nd_namespace_common *ndns)
+@@ -85,6 +85,8 @@ static bool is_idle(struct device *dev,
  		seed = nd_region->btt_seed;
  	else if (is_nd_pfn(dev))
  		seed = nd_region->pfn_seed;
@@ -96,9 +88,6 @@ index 6bbd0a3..5f53db5 100644
  
  	if (seed == dev || ndns || dev->driver)
  		return false;
-diff --git a/drivers/nvdimm/dax_devs.c b/drivers/nvdimm/dax_devs.c
-new file mode 100644
-index 0000000..f90f754
 --- /dev/null
 +++ b/drivers/nvdimm/dax_devs.c
 @@ -0,0 +1,99 @@
@@ -201,11 +190,9 @@ index 0000000..f90f754
 +	__nd_device_register(dev);
 +	return dev;
 +}
-diff --git a/drivers/nvdimm/namespace_devs.c b/drivers/nvdimm/namespace_devs.c
-index e5ad516..c5e3196 100644
 --- a/drivers/nvdimm/namespace_devs.c
 +++ b/drivers/nvdimm/namespace_devs.c
-@@ -1288,6 +1288,8 @@ static ssize_t mode_show(struct device *dev,
+@@ -1288,6 +1288,8 @@ static ssize_t mode_show(struct device *
  		mode = "safe";
  	else if (claim && is_nd_pfn(claim))
  		mode = "memory";
@@ -214,7 +201,7 @@ index e5ad516..c5e3196 100644
  	else if (!claim && pmem_should_map_pages(dev))
  		mode = "memory";
  	else
-@@ -1379,14 +1381,17 @@ struct nd_namespace_common *nvdimm_namespace_common_probe(struct device *dev)
+@@ -1379,14 +1381,17 @@ struct nd_namespace_common *nvdimm_names
  {
  	struct nd_btt *nd_btt = is_nd_btt(dev) ? to_nd_btt(dev) : NULL;
  	struct nd_pfn *nd_pfn = is_nd_pfn(dev) ? to_nd_pfn(dev) : NULL;
@@ -233,7 +220,7 @@ index e5ad516..c5e3196 100644
  
  		if (!ndns)
  			return ERR_PTR(-ENODEV);
-@@ -1779,6 +1784,18 @@ void nd_region_create_blk_seed(struct nd_region *nd_region)
+@@ -1793,6 +1798,18 @@ void nd_region_create_blk_seed(struct nd
  		nd_device_register(nd_region->ns_seed);
  }
  
@@ -252,8 +239,6 @@ index e5ad516..c5e3196 100644
  void nd_region_create_pfn_seed(struct nd_region *nd_region)
  {
  	WARN_ON(!is_nvdimm_bus_locked(&nd_region->dev));
-diff --git a/drivers/nvdimm/nd-core.h b/drivers/nvdimm/nd-core.h
-index 1d1500f..cb65308 100644
 --- a/drivers/nvdimm/nd-core.h
 +++ b/drivers/nvdimm/nd-core.h
 @@ -54,6 +54,7 @@ struct nd_region;
@@ -264,8 +249,6 @@ index 1d1500f..cb65308 100644
  void nd_region_disable(struct nvdimm_bus *nvdimm_bus, struct device *dev);
  int nvdimm_bus_create_ndctl(struct nvdimm_bus *nvdimm_bus);
  void nvdimm_bus_destroy_ndctl(struct nvdimm_bus *nvdimm_bus);
-diff --git a/drivers/nvdimm/nd.h b/drivers/nvdimm/nd.h
-index 6c36509..46910b8 100644
 --- a/drivers/nvdimm/nd.h
 +++ b/drivers/nvdimm/nd.h
 @@ -101,10 +101,12 @@ struct nd_region {
@@ -292,7 +275,7 @@ index 6c36509..46910b8 100644
  enum nd_async_mode {
  	ND_SYNC,
  	ND_ASYNC,
-@@ -224,7 +230,10 @@ struct nd_pfn *to_nd_pfn(struct device *dev);
+@@ -224,7 +230,10 @@ struct nd_pfn *to_nd_pfn(struct device *
  int nd_pfn_probe(struct device *dev, struct nd_namespace_common *ndns);
  bool is_nd_pfn(struct device *dev);
  struct device *nd_pfn_create(struct nd_region *nd_region);
@@ -303,7 +286,7 @@ index 6c36509..46910b8 100644
  #else
  static inline int nd_pfn_probe(struct device *dev,
  		struct nd_namespace_common *ndns)
-@@ -248,6 +257,22 @@ static inline int nd_pfn_validate(struct nd_pfn *nd_pfn)
+@@ -248,6 +257,22 @@ static inline int nd_pfn_validate(struct
  }
  #endif
  
@@ -326,8 +309,6 @@ index 6c36509..46910b8 100644
  struct nd_region *to_nd_region(struct device *dev);
  int nd_region_to_nstype(struct nd_region *nd_region);
  int nd_region_register_namespaces(struct nd_region *nd_region, int *err);
-diff --git a/drivers/nvdimm/pfn_devs.c b/drivers/nvdimm/pfn_devs.c
-index e8693fe..6ade2eb 100644
 --- a/drivers/nvdimm/pfn_devs.c
 +++ b/drivers/nvdimm/pfn_devs.c
 @@ -1,5 +1,5 @@
@@ -337,7 +318,7 @@ index e8693fe..6ade2eb 100644
   *
   * This program is free software; you can redistribute it and/or modify
   * it under the terms of version 2 of the GNU General Public License as
-@@ -54,10 +54,29 @@ struct nd_pfn *to_nd_pfn(struct device *dev)
+@@ -54,10 +54,29 @@ struct nd_pfn *to_nd_pfn(struct device *
  }
  EXPORT_SYMBOL(to_nd_pfn);
  
@@ -368,7 +349,7 @@ index e8693fe..6ade2eb 100644
  
  	switch (nd_pfn->mode) {
  	case PFN_MODE_RAM:
-@@ -72,7 +91,7 @@ static ssize_t mode_show(struct device *dev,
+@@ -72,7 +91,7 @@ static ssize_t mode_show(struct device *
  static ssize_t mode_store(struct device *dev,
  		struct device_attribute *attr, const char *buf, size_t len)
  {
@@ -386,7 +367,7 @@ index e8693fe..6ade2eb 100644
  
  	return sprintf(buf, "%lx\n", nd_pfn->align);
  }
-@@ -134,7 +153,7 @@ static ssize_t __align_store(struct nd_pfn *nd_pfn, const char *buf)
+@@ -134,7 +153,7 @@ static ssize_t __align_store(struct nd_p
  static ssize_t align_store(struct device *dev,
  		struct device_attribute *attr, const char *buf, size_t len)
  {
@@ -404,7 +385,7 @@ index e8693fe..6ade2eb 100644
  
  	if (nd_pfn->uuid)
  		return sprintf(buf, "%pUb\n", nd_pfn->uuid);
-@@ -162,7 +181,7 @@ static ssize_t uuid_show(struct device *dev,
+@@ -162,7 +181,7 @@ static ssize_t uuid_show(struct device *
  static ssize_t uuid_store(struct device *dev,
  		struct device_attribute *attr, const char *buf, size_t len)
  {
@@ -422,7 +403,7 @@ index e8693fe..6ade2eb 100644
  	ssize_t rc;
  
  	nvdimm_bus_lock(dev);
-@@ -191,7 +210,7 @@ static ssize_t namespace_show(struct device *dev,
+@@ -191,7 +210,7 @@ static ssize_t namespace_show(struct dev
  static ssize_t namespace_store(struct device *dev,
  		struct device_attribute *attr, const char *buf, size_t len)
  {
@@ -449,7 +430,7 @@ index e8693fe..6ade2eb 100644
  	ssize_t rc;
  
  	device_lock(dev);
-@@ -270,7 +289,7 @@ static struct attribute *nd_pfn_attributes[] = {
+@@ -270,7 +289,7 @@ static struct attribute *nd_pfn_attribut
  	NULL,
  };
  
@@ -458,7 +439,7 @@ index e8693fe..6ade2eb 100644
  	.attrs = nd_pfn_attributes,
  };
  
-@@ -281,15 +300,31 @@ static const struct attribute_group *nd_pfn_attribute_groups[] = {
+@@ -281,15 +300,31 @@ static const struct attribute_group *nd_
  	NULL,
  };
  
@@ -495,7 +476,7 @@ index e8693fe..6ade2eb 100644
  
  	nd_pfn = kzalloc(sizeof(*nd_pfn), GFP_KERNEL);
  	if (!nd_pfn)
-@@ -301,29 +336,27 @@ static struct device *__nd_pfn_create(struct nd_region *nd_region,
+@@ -301,29 +336,27 @@ static struct device *__nd_pfn_create(st
  		return NULL;
  	}
  
@@ -538,7 +519,7 @@ index e8693fe..6ade2eb 100644
  	return dev;
  }
  
-@@ -423,7 +456,8 @@ int nd_pfn_probe(struct device *dev, struct nd_namespace_common *ndns)
+@@ -423,7 +456,8 @@ int nd_pfn_probe(struct device *dev, str
  		return -ENODEV;
  
  	nvdimm_bus_lock(&ndns->dev);
@@ -548,11 +529,9 @@ index e8693fe..6ade2eb 100644
  	nvdimm_bus_unlock(&ndns->dev);
  	if (!pfn_dev)
  		return -ENOMEM;
-diff --git a/drivers/nvdimm/region.c b/drivers/nvdimm/region.c
-index 4b7715e..05a9123 100644
 --- a/drivers/nvdimm/region.c
 +++ b/drivers/nvdimm/region.c
-@@ -54,6 +54,7 @@ static int nd_region_probe(struct device *dev)
+@@ -54,6 +54,7 @@ static int nd_region_probe(struct device
  
  	nd_region->btt_seed = nd_btt_create(nd_region);
  	nd_region->pfn_seed = nd_pfn_create(nd_region);
@@ -560,7 +539,7 @@ index 4b7715e..05a9123 100644
  	if (err == 0)
  		return 0;
  
-@@ -86,6 +87,7 @@ static int nd_region_remove(struct device *dev)
+@@ -86,6 +87,7 @@ static int nd_region_remove(struct devic
  	nd_region->ns_seed = NULL;
  	nd_region->btt_seed = NULL;
  	nd_region->pfn_seed = NULL;
@@ -568,11 +547,9 @@ index 4b7715e..05a9123 100644
  	dev_set_drvdata(dev, NULL);
  	nvdimm_bus_unlock(dev);
  
-diff --git a/drivers/nvdimm/region_devs.c b/drivers/nvdimm/region_devs.c
-index 139bf71..9e1b054 100644
 --- a/drivers/nvdimm/region_devs.c
 +++ b/drivers/nvdimm/region_devs.c
-@@ -306,6 +306,23 @@ static ssize_t pfn_seed_show(struct device *dev,
+@@ -306,6 +306,23 @@ static ssize_t pfn_seed_show(struct devi
  }
  static DEVICE_ATTR_RO(pfn_seed);
  
@@ -596,7 +573,7 @@ index 139bf71..9e1b054 100644
  static ssize_t read_only_show(struct device *dev,
  		struct device_attribute *attr, char *buf)
  {
-@@ -335,6 +352,7 @@ static struct attribute *nd_region_attributes[] = {
+@@ -335,6 +352,7 @@ static struct attribute *nd_region_attri
  	&dev_attr_mappings.attr,
  	&dev_attr_btt_seed.attr,
  	&dev_attr_pfn_seed.attr,
@@ -604,7 +581,7 @@ index 139bf71..9e1b054 100644
  	&dev_attr_read_only.attr,
  	&dev_attr_set_cookie.attr,
  	&dev_attr_available_size.attr,
-@@ -353,6 +371,9 @@ static umode_t region_visible(struct kobject *kobj, struct attribute *a, int n)
+@@ -353,6 +371,9 @@ static umode_t region_visible(struct kob
  	if (!is_nd_pmem(dev) && a == &dev_attr_pfn_seed.attr)
  		return 0;
  
@@ -614,7 +591,7 @@ index 139bf71..9e1b054 100644
  	if (a != &dev_attr_set_cookie.attr
  			&& a != &dev_attr_available_size.attr)
  		return a->mode;
-@@ -441,6 +462,13 @@ static void nd_region_notify_driver_action(struct nvdimm_bus *nvdimm_bus,
+@@ -450,6 +471,13 @@ static void nd_region_notify_driver_acti
  			nd_region_create_pfn_seed(nd_region);
  		nvdimm_bus_unlock(dev);
  	}
@@ -628,7 +605,7 @@ index 139bf71..9e1b054 100644
  }
  
  void nd_region_probe_success(struct nvdimm_bus *nvdimm_bus, struct device *dev)
-@@ -718,6 +746,7 @@ static struct nd_region *nd_region_create(struct nvdimm_bus *nvdimm_bus,
+@@ -727,6 +755,7 @@ static struct nd_region *nd_region_creat
  	ida_init(&nd_region->ns_ida);
  	ida_init(&nd_region->btt_ida);
  	ida_init(&nd_region->pfn_ida);
@@ -636,11 +613,9 @@ index 139bf71..9e1b054 100644
  	dev = &nd_region->dev;
  	dev_set_name(dev, "region%d", nd_region->id);
  	dev->parent = &nvdimm_bus->dev;
-diff --git a/include/uapi/linux/ndctl.h b/include/uapi/linux/ndctl.h
-index 7cc28ab..4f29d24 100644
 --- a/include/uapi/linux/ndctl.h
 +++ b/include/uapi/linux/ndctl.h
-@@ -206,6 +206,7 @@ static inline const char *nvdimm_cmd_name(unsigned cmd)
+@@ -242,6 +242,7 @@ static inline const char *nvdimm_cmd_nam
  #define ND_DEVICE_NAMESPACE_IO 4    /* legacy persistent memory */
  #define ND_DEVICE_NAMESPACE_PMEM 5  /* PMEM namespace (may alias with BLK) */
  #define ND_DEVICE_NAMESPACE_BLK 6   /* BLK namespace (may alias with PMEM) */
@@ -648,7 +623,7 @@ index 7cc28ab..4f29d24 100644
  
  enum nd_driver_flags {
  	ND_DRIVER_DIMM            = 1 << ND_DEVICE_DIMM,
-@@ -214,6 +215,7 @@ enum nd_driver_flags {
+@@ -250,6 +251,7 @@ enum nd_driver_flags {
  	ND_DRIVER_NAMESPACE_IO    = 1 << ND_DEVICE_NAMESPACE_IO,
  	ND_DRIVER_NAMESPACE_PMEM  = 1 << ND_DEVICE_NAMESPACE_PMEM,
  	ND_DRIVER_NAMESPACE_BLK   = 1 << ND_DEVICE_NAMESPACE_BLK,
@@ -656,8 +631,6 @@ index 7cc28ab..4f29d24 100644
  };
  
  enum {
-diff --git a/tools/testing/nvdimm/Kbuild b/tools/testing/nvdimm/Kbuild
-index d5bc8c0..5ff6d3c 100644
 --- a/tools/testing/nvdimm/Kbuild
 +++ b/tools/testing/nvdimm/Kbuild
 @@ -50,6 +50,7 @@ libnvdimm-y += $(NVDIMM_SRC)/label.o
@@ -668,4 +641,3 @@ index d5bc8c0..5ff6d3c 100644
  libnvdimm-y += config_check.o
  
  obj-m += test/
-

@@ -1,9 +1,11 @@
 From: Ilya Dryomov <idryomov@gmail.com>
 Date: Wed, 26 Sep 2018 18:03:16 +0200
-Subject: libceph: bump CEPH_MSG_MAX_DATA_LEN
+Subject: [PATCH] libceph: bump CEPH_MSG_MAX_DATA_LEN
+Patch-mainline: 4.4.164
+References: bnc#1012382 bsc#1114839
 Git-commit: 94e6992bb560be8bffb47f287194adf070b57695
-Patch-mainline: v4.20-rc1
-References: bsc#1114839
+
+commit 94e6992bb560be8bffb47f287194adf070b57695 upstream.
 
 If the read is large enough, we end up spinning in the messenger:
 
@@ -15,14 +17,17 @@ This is a receive side limit, so only reads were affected.
 
 Cc: stable@vger.kernel.org
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-Acked-by: Luis Henriques <lhenriques@suse.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- include/linux/ceph/libceph.h |    8 +++++++-
+ include/linux/ceph/libceph.h | 8 +++++++-
  1 file changed, 7 insertions(+), 1 deletion(-)
 
+diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+index 3e3799cdc6e6..9b9fe0588008 100644
 --- a/include/linux/ceph/libceph.h
 +++ b/include/linux/ceph/libceph.h
-@@ -79,7 +79,13 @@ struct ceph_options {
+@@ -72,7 +72,13 @@ struct ceph_options {
  
  #define CEPH_MSG_MAX_FRONT_LEN	(16*1024*1024)
  #define CEPH_MSG_MAX_MIDDLE_LEN	(16*1024*1024)
@@ -37,3 +42,6 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
  
  #define CEPH_AUTH_NAME_DEFAULT   "guest"
  
+-- 
+2.19.1
+

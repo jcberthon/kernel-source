@@ -290,7 +290,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  		return 0;
  	default:
  		/* be safe, default to 1. list exceptions explicitly */
-@@ -256,6 +260,163 @@ static long madvise_willneed(struct vm_a
+@@ -254,6 +258,163 @@ static long madvise_willneed(struct vm_a
  	return 0;
  }
  
@@ -454,7 +454,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  /*
   * Application no longer needs these pages.  If the pages are dirty,
   * it's OK to just throw them away.  The app will be more careful about
-@@ -379,6 +540,14 @@ madvise_vma(struct vm_area_struct *vma,
+@@ -384,6 +545,14 @@ madvise_vma(struct vm_area_struct *vma,
  		return madvise_remove(vma, prev, start, end);
  	case MADV_WILLNEED:
  		return madvise_willneed(vma, prev, start, end);
@@ -469,7 +469,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  	case MADV_DONTNEED:
  		return madvise_dontneed(vma, prev, start, end);
  	default:
-@@ -398,6 +567,7 @@ madvise_behavior_valid(int behavior)
+@@ -403,6 +572,7 @@ madvise_behavior_valid(int behavior)
  	case MADV_REMOVE:
  	case MADV_WILLNEED:
  	case MADV_DONTNEED:
@@ -479,7 +479,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  	case MADV_UNMERGEABLE:
 --- a/mm/rmap.c
 +++ b/mm/rmap.c
-@@ -1277,6 +1277,11 @@ void page_remove_rmap(struct page *page)
+@@ -1313,6 +1313,11 @@ void page_remove_rmap(struct page *page)
  	 */
  }
  
@@ -491,17 +491,17 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  /*
   * @arg: enum ttu_flags will be passed to this argument
   */
-@@ -1288,7 +1293,8 @@ static int try_to_unmap_one(struct page
- 	pte_t pteval;
- 	spinlock_t *ptl;
- 	int ret = SWAP_AGAIN;
+@@ -1327,7 +1332,8 @@ static int try_to_unmap_one(struct page
+ 	unsigned long sh_address;
+ 	bool pmd_sharing_possible = false;
+ 	unsigned long spmd_start, spmd_end;
 -	enum ttu_flags flags = (enum ttu_flags)arg;
 +	struct rmap_private *rp = arg;
 +	enum ttu_flags flags = rp->flags;
  
  	/* munlock has nothing to gain from examining un-locked vmas */
  	if ((flags & TTU_MUNLOCK) && !(vma->vm_flags & VM_LOCKED))
-@@ -1380,6 +1386,14 @@ static int try_to_unmap_one(struct page
+@@ -1469,6 +1475,14 @@ static int try_to_unmap_one(struct page
  		 * See handle_pte_fault() ...
  		 */
  		VM_BUG_ON_PAGE(!PageSwapCache(page), page);
@@ -516,7 +516,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  		if (swap_duplicate(entry) < 0) {
  			set_pte_at(mm, address, pte, pteval);
  			ret = SWAP_FAIL;
-@@ -1400,6 +1414,7 @@ static int try_to_unmap_one(struct page
+@@ -1489,6 +1503,7 @@ static int try_to_unmap_one(struct page
  	} else
  		dec_mm_counter(mm, mm_counter_file(page));
  
@@ -524,7 +524,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  	page_remove_rmap(page);
  	page_cache_release(page);
  
-@@ -1452,9 +1467,14 @@ static int page_not_mapped(struct page *
+@@ -1544,9 +1559,14 @@ static int page_not_mapped(struct page *
  int try_to_unmap(struct page *page, enum ttu_flags flags)
  {
  	int ret;
@@ -540,7 +540,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  		.done = page_not_mapped,
  		.anon_lock = page_lock_anon_vma_read,
  	};
-@@ -1474,8 +1494,11 @@ int try_to_unmap(struct page *page, enum
+@@ -1566,8 +1586,11 @@ int try_to_unmap(struct page *page, enum
  
  	ret = rmap_walk(page, &rwc);
  
@@ -553,7 +553,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  	return ret;
  }
  
-@@ -1497,9 +1520,14 @@ int try_to_unmap(struct page *page, enum
+@@ -1589,9 +1612,14 @@ int try_to_unmap(struct page *page, enum
  int try_to_munlock(struct page *page)
  {
  	int ret;
@@ -571,7 +571,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  
 --- a/mm/swap_state.c
 +++ b/mm/swap_state.c
-@@ -185,13 +185,12 @@ int add_to_swap(struct page *page, struc
+@@ -187,13 +187,12 @@ int add_to_swap(struct page *page, struc
  	 * deadlock in the swap out path.
  	 */
  	/*
@@ -589,7 +589,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  		/*
 --- a/mm/vmscan.c
 +++ b/mm/vmscan.c
-@@ -910,6 +910,8 @@ static unsigned long shrink_page_list(st
+@@ -921,6 +921,8 @@ static unsigned long shrink_page_list(st
  		int may_enter_fs;
  		enum page_references references = PAGEREF_RECLAIM_CLEAN;
  		bool dirty, writeback;
@@ -598,7 +598,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  
  		cond_resched();
  
-@@ -1053,6 +1055,7 @@ static unsigned long shrink_page_list(st
+@@ -1064,6 +1066,7 @@ static unsigned long shrink_page_list(st
  				goto keep_locked;
  			if (!add_to_swap(page, page_list))
  				goto activate_locked;
@@ -606,7 +606,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  			may_enter_fs = 1;
  
  			/* Adding to swap updated mapping */
-@@ -1064,14 +1067,17 @@ static unsigned long shrink_page_list(st
+@@ -1075,14 +1078,17 @@ static unsigned long shrink_page_list(st
  		 * processes. Try to unmap it here.
  		 */
  		if (page_mapped(page) && mapping) {
@@ -626,7 +626,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  			case SWAP_SUCCESS:
  				; /* try to free the page below */
  			}
-@@ -1178,6 +1184,7 @@ static unsigned long shrink_page_list(st
+@@ -1189,6 +1195,7 @@ static unsigned long shrink_page_list(st
  			}
  		}
  
@@ -634,7 +634,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  		if (!mapping || !__remove_mapping(mapping, page, true))
  			goto keep_locked;
  
-@@ -1190,6 +1197,9 @@ static unsigned long shrink_page_list(st
+@@ -1201,6 +1208,9 @@ static unsigned long shrink_page_list(st
  		 */
  		__clear_page_locked(page);
  free_it:
