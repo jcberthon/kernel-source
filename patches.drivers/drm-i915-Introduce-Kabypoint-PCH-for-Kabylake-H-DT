@@ -1,10 +1,10 @@
-From 22dea0be50b2eb0bafd3c82e1fb080113e0c889e Mon Sep 17 00:00:00 2001
 From: Rodrigo Vivi <rodrigo.vivi@intel.com>
 Date: Fri, 1 Jul 2016 17:07:12 -0700
 Subject: [PATCH] drm/i915: Introduce Kabypoint PCH for Kabylake H/DT.
 Git-commit: 22dea0be50b2eb0bafd3c82e1fb080113e0c889e
 Patch-mainline: 4.8-rc1
 References: bsc#1032581
+
 # this patch already contains the fix below
 No-fix: 853277481178fdf14d1a4e9e6ac7174d6046176f
 No-fix: 3aac4acb89710fe782c9e78e7b1febf76e112c6c
