@@ -38,7 +38,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
   * @flags: tpm transmit flags - bitmap
   * @desc: command description used in the error message
   *
-@@ -433,26 +434,35 @@ out:
+@@ -433,27 +434,36 @@ out:
   *     A negative number for system errors (errno).
   *     A positive number for a TPM error.
   */
@@ -65,7 +65,8 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
 +		return -EFAULT;
  
  	err = be32_to_cpu(header->return_code);
- 	if (err != 0 && desc)
+ 	if (err != 0 && err != TPM_ERR_DISABLED && err != TPM_ERR_DEACTIVATED
+ 	    && desc)
  		dev_err(&chip->dev, "A TPM error (%d) occurred %s\n", err,
  			desc);
 +	if (err)
@@ -79,7 +80,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  }
  
  #define TPM_DIGEST_SIZE 20
-@@ -468,7 +478,7 @@ static const struct tpm_input_header tpm
+@@ -469,7 +479,7 @@ static const struct tpm_input_header tpm
  };
  
  ssize_t tpm_getcap(struct tpm_chip *chip, u32 subcap_id, cap_t *cap,
@@ -88,7 +89,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  {
  	struct tpm_cmd_t tpm_cmd;
  	int rc;
-@@ -491,8 +501,8 @@ ssize_t tpm_getcap(struct tpm_chip *chip
+@@ -492,8 +502,8 @@ ssize_t tpm_getcap(struct tpm_chip *chip
  		tpm_cmd.params.getcap_in.subcap_size = cpu_to_be32(4);
  		tpm_cmd.params.getcap_in.subcap = cpu_to_be32(subcap_id);
  	}
@@ -99,7 +100,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  	if (!rc)
  		*cap = tpm_cmd.params.getcap_out.cap;
  	return rc;
-@@ -516,7 +526,7 @@ static int tpm_startup(struct tpm_chip *
+@@ -517,7 +527,7 @@ static int tpm_startup(struct tpm_chip *
  
  	start_cmd.params.startup_in.startup_type = startup_type;
  	return tpm_transmit_cmd(chip, &start_cmd, TPM_INTERNAL_RESULT_SIZE, 0,
@@ -108,7 +109,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  }
  
  int tpm_get_timeouts(struct tpm_chip *chip)
-@@ -545,7 +555,8 @@ int tpm_get_timeouts(struct tpm_chip *ch
+@@ -546,7 +556,8 @@ int tpm_get_timeouts(struct tpm_chip *ch
  		return 0;
  	}
  
@@ -118,7 +119,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  	if (rc == TPM_ERR_INVALID_POSTINIT) {
  		/* The TPM is not started, we are the first to talk to it.
  		   Execute a startup command. */
-@@ -554,8 +565,10 @@ int tpm_get_timeouts(struct tpm_chip *ch
+@@ -555,8 +566,10 @@ int tpm_get_timeouts(struct tpm_chip *ch
  			return rc;
  
  		rc = tpm_getcap(chip, TPM_CAP_PROP_TIS_TIMEOUT, &cap,
@@ -130,7 +131,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  	if (rc) {
  		dev_err(&chip->dev,
  			"A TPM error (%zd) occurred attempting to determine the timeouts\n",
-@@ -617,7 +630,8 @@ int tpm_get_timeouts(struct tpm_chip *ch
+@@ -618,7 +631,8 @@ int tpm_get_timeouts(struct tpm_chip *ch
  	chip->timeout_d = usecs_to_jiffies(timeout_eff[3]);
  
  	rc = tpm_getcap(chip, TPM_CAP_PROP_TIS_DURATION, &cap,
@@ -140,7 +141,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  	if (rc)
  		return rc;
  
-@@ -668,13 +682,14 @@ static int tpm_continue_selftest(struct
+@@ -669,13 +683,14 @@ static int tpm_continue_selftest(struct
  	struct tpm_cmd_t cmd;
  
  	cmd.header.in = continue_selftest_header;
@@ -156,7 +157,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  static const struct tpm_input_header pcrread_header = {
  	.tag = TPM_TAG_RQU_COMMAND,
  	.length = cpu_to_be32(14),
-@@ -688,7 +703,8 @@ int tpm_pcr_read_dev(struct tpm_chip *ch
+@@ -689,7 +704,8 @@ int tpm_pcr_read_dev(struct tpm_chip *ch
  
  	cmd.header.in = pcrread_header;
  	cmd.params.pcrread_in.pcr_idx = cpu_to_be32(pcr_idx);
@@ -166,7 +167,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  			      "attempting to read a pcr value");
  
  	if (rc == 0)
-@@ -751,6 +767,7 @@ EXPORT_SYMBOL_GPL(tpm_pcr_read);
+@@ -752,6 +768,7 @@ EXPORT_SYMBOL_GPL(tpm_pcr_read);
  
  #define TPM_ORD_PCR_EXTEND cpu_to_be32(20)
  #define EXTEND_PCR_RESULT_SIZE 34
@@ -174,7 +175,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  static const struct tpm_input_header pcrextend_header = {
  	.tag = TPM_TAG_RQU_COMMAND,
  	.length = cpu_to_be32(34),
-@@ -786,7 +803,8 @@ int tpm_pcr_extend(u32 chip_num, int pcr
+@@ -787,7 +804,8 @@ int tpm_pcr_extend(u32 chip_num, int pcr
  	cmd.header.in = pcrextend_header;
  	cmd.params.pcrextend_in.pcr_idx = cpu_to_be32(pcr_idx);
  	memcpy(cmd.params.pcrextend_in.hash, hash, TPM_DIGEST_SIZE);
@@ -184,7 +185,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  			      "attempting extend a PCR value");
  
  	tpm_put_ops(chip);
-@@ -890,7 +908,7 @@ int tpm_send(u32 chip_num, void *cmd, si
+@@ -895,7 +913,7 @@ int tpm_send(u32 chip_num, void *cmd, si
  	if (chip == NULL)
  		return -ENODEV;
  
@@ -193,7 +194,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  
  	tpm_put_ops(chip);
  	return rc;
-@@ -992,7 +1010,8 @@ int tpm_pm_suspend(struct device *dev)
+@@ -1000,7 +1018,8 @@ int tpm_pm_suspend(struct device *dev)
  		cmd.params.pcrextend_in.pcr_idx = cpu_to_be32(tpm_suspend_pcr);
  		memcpy(cmd.params.pcrextend_in.hash, dummy_hash,
  		       TPM_DIGEST_SIZE);
@@ -203,7 +204,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  				      "extending dummy pcr before suspend");
  	}
  
-@@ -1000,7 +1019,7 @@ int tpm_pm_suspend(struct device *dev)
+@@ -1008,7 +1027,7 @@ int tpm_pm_suspend(struct device *dev)
  	for (try = 0; try < TPM_RETRY; try++) {
  		cmd.header.in = savestate_header;
  		rc = tpm_transmit_cmd(chip, &cmd, SAVESTATE_RESULT_SIZE, 0,
@@ -212,7 +213,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  
  		/*
  		 * If the TPM indicates that it is too busy to respond to
-@@ -1062,7 +1081,7 @@ int tpm_get_random(u32 chip_num, u8 *out
+@@ -1070,7 +1089,7 @@ int tpm_get_random(u32 chip_num, u8 *out
  {
  	struct tpm_chip *chip;
  	struct tpm_cmd_t tpm_cmd;
@@ -221,7 +222,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  	int err, total = 0, retries = 5;
  	u8 *dest = out;
  
-@@ -1085,6 +1104,8 @@ int tpm_get_random(u32 chip_num, u8 *out
+@@ -1093,6 +1112,8 @@ int tpm_get_random(u32 chip_num, u8 *out
  
  		err = tpm_transmit_cmd(chip, &tpm_cmd,
  				       TPM_GETRANDOM_RESULT_SIZE + num_bytes,
@@ -230,7 +231,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  				       0, "attempting get random");
  		if (err)
  			break;
-@@ -1095,6 +1116,12 @@ int tpm_get_random(u32 chip_num, u8 *out
+@@ -1103,6 +1124,12 @@ int tpm_get_random(u32 chip_num, u8 *out
  			break;
  		}
  
@@ -345,7 +346,7 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  		str += sprintf(str,
 --- a/drivers/char/tpm/tpm.h
 +++ b/drivers/char/tpm/tpm.h
-@@ -493,10 +493,11 @@ enum tpm_transmit_flags {
+@@ -494,10 +494,11 @@ enum tpm_transmit_flags {
  
  ssize_t tpm_transmit(struct tpm_chip *chip, const u8 *buf, size_t bufsiz,
  		     unsigned int flags);

@@ -1,0 +1,30 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: kABI: protect struct fuse_io_priv
+Patch-mainline: never, kabi
+References: kabi
+
+In 4.4.163, commit 1b6a863ff29ccd7b65b0112bbec1cda26b7f9c4e (fuse:
+Dont call set_page_dirty_lock() for ITER_BVEC pages for async_dio),
+upstream commit 61c12b49e1c9c77d7a1bcc161de540d0fd21cf0c added a bool
+to struct fuse_io_priv. It made the kABI checker to complain.
+
+Given this is only a fuse's internal header, just hide the change from
+the kABI checker.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ fs/fuse/fuse_i.h |    2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/fs/fuse/fuse_i.h
++++ b/fs/fuse/fuse_i.h
+@@ -252,7 +252,9 @@ struct fuse_io_priv {
+ 	size_t size;
+ 	__u64 offset;
+ 	bool write;
++#ifndef __GENKSYMS__
+ 	bool should_dirty;
++#endif
+ 	int err;
+ 	struct kiocb *iocb;
+ 	struct file *file;

@@ -34,7 +34,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  	/* If link is not up, then there is no setup necessary so return  */
  	status = ixgbe_ext_phy_t_x550em_get_link(hw, &link_up);
  	if (status)
-@@ -1931,7 +1937,6 @@ static s32 ixgbe_enter_lplu_t_x550em(str
+@@ -1927,7 +1933,6 @@ static s32 ixgbe_enter_lplu_t_x550em(str
  static s32 ixgbe_init_phy_ops_X550em(struct ixgbe_hw *hw)
  {
  	struct ixgbe_phy_info *phy = &hw->phy;
@@ -42,7 +42,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  	s32 ret_val;
  
  	hw->mac.ops.set_lan_id(hw);
-@@ -1944,10 +1949,6 @@ static s32 ixgbe_init_phy_ops_X550em(str
+@@ -1940,10 +1945,6 @@ static s32 ixgbe_init_phy_ops_X550em(str
  		 * to determine internal PHY mode.
  		 */
  		phy->nw_mng_if_sel = IXGBE_READ_REG(hw, IXGBE_NW_MNG_IF_SEL);
@@ -53,7 +53,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  	}
  
  	/* Identify the PHY or SFP module */
-@@ -1979,14 +1980,8 @@ static s32 ixgbe_init_phy_ops_X550em(str
+@@ -1975,14 +1976,8 @@ static s32 ixgbe_init_phy_ops_X550em(str
  		/* If internal link mode is XFI, then setup iXFI internal link,
  		 * else setup KR now.
  		 */
@@ -69,4 +69,4 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 +					      ixgbe_setup_internal_phy_t_x550em;
  
  		/* setup SW LPLU only for first revision */
- 		if (!(IXGBE_FUSES0_REV1 & IXGBE_READ_REG(hw,
+ 		if (hw->mac.type == ixgbe_mac_X550EM_x &&

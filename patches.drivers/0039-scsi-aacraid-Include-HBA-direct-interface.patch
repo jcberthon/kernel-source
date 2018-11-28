@@ -1166,7 +1166,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 --- a/drivers/scsi/aacraid/src.c
 +++ b/drivers/scsi/aacraid/src.c
 @@ -470,6 +470,11 @@ err_blink:
- 	return (status > 16) & 0xFF;
+ 	return (status >> 16) & 0xFF;
  }
  
 +static inline u32 aac_get_vector(struct aac_dev *dev)

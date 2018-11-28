@@ -1,0 +1,25 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Date: Tue, 27 Nov 2018 16:21:01 +0100
+Subject: Revert "x86/kconfig: Fall back to ticket spinlocks"
+Patch-mainline: never, kabi
+References: kabi
+
+This reverts commit 97b8ca659ab410c6955da052592959244d041fa8. Changing
+the type of spinlock mechanism breaks kABI heavily -- on more than 10000
+places. Kill this patch.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ arch/x86/Kconfig |    1 +
+ 1 file changed, 1 insertion(+)
+
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -41,6 +41,7 @@ config X86
+ 	select ARCH_USE_BUILTIN_BSWAP
+ 	select ARCH_USE_CMPXCHG_LOCKREF		if X86_64
+ 	select ARCH_USE_QUEUED_RWLOCKS
++	select ARCH_USE_QUEUED_SPINLOCKS
+ 	select ARCH_WANT_BATCHED_UNMAP_TLB_FLUSH
+ 	select ARCH_WANTS_DYNAMIC_TASK_STRUCT
+ 	select ARCH_WANT_FRAME_POINTERS

@@ -311,7 +311,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
 --- a/drivers/gpu/drm/omapdrm/omap_dmm_tiler.c
 +++ b/drivers/gpu/drm/omapdrm/omap_dmm_tiler.c
-@@ -570,10 +570,9 @@ static int omap_dmm_remove(struct platfo
+@@ -575,10 +575,9 @@ static int omap_dmm_remove(struct platfo
  
  		kfree(omap_dmm->engines);
  		if (omap_dmm->refill_va)
@@ -325,7 +325,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  		if (omap_dmm->dummy_page)
  			__free_page(omap_dmm->dummy_page);
  
-@@ -698,9 +697,9 @@ static int omap_dmm_probe(struct platfor
+@@ -704,9 +703,9 @@ static int omap_dmm_probe(struct platfor
  	omap_dmm->dummy_pa = page_to_phys(omap_dmm->dummy_page);
  
  	/* alloc refill memory */
@@ -849,7 +849,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	dma_free_wc(fbi->dev, PAGE_ALIGN(info->fix.smem_len),
 +		    info->screen_base, info->fix.smem_start);
  
- 	clk_disable(fbi->clk);
+ 	clk_disable_unprepare(fbi->clk);
  
 --- a/drivers/video/fbdev/pxafb.c
 +++ b/drivers/video/fbdev/pxafb.c

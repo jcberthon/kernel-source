@@ -1,0 +1,34 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: kABI: protect struct cfs_bandwidth
+Patch-mainline: never, kabi
+References: kabi
+
+In 4.4.163, commit 4a2b54a750bf18be02997944464396485b7ef284
+(sched/fair: Fix throttle_list starvation with low CFS quota),
+upstream commit baa9be4ffb55876923dc9716abc0a448e510ba30 added a bool
+to the end of struct cfs_bandwidth. It made the kABI checker to
+complain.
+
+This struct is inlined only at the end of struct task_group and the
+added bool is also at the end of struct cfs_bandwidth. Given struct
+task_group is allocated internally in sched_create_group, we can hide
+the change from the kABI checker.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ kernel/sched/sched.h |    2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/kernel/sched/sched.h
++++ b/kernel/sched/sched.h
+@@ -247,8 +247,10 @@ struct cfs_bandwidth {
+ 	int nr_periods, nr_throttled;
+ 	u64 throttled_time;
+ 
++#ifndef __GENKSYMS__
+ 	bool distribute_running;
+ #endif
++#endif
+ };
+ 
+ /* task group related information */

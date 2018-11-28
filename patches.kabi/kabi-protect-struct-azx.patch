@@ -1,0 +1,30 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: kABI: protect struct azx
+Patch-mainline: never, kabi
+References: kabi
+
+In 4.4.164, commit a9d21a73909f3bce076ecdaed589640d001bc5b2 (ALSA:
+hda: Check the non-cached stream buffers more explicitly), upstream
+commit 78c9be61c3a5cd9e2439fd27a5ffad73a81958c7 added a bit to struct
+azx. It made the kABI checker to complain.
+
+Given this is only an hda's internal header, just hide the change from
+the kABI checker.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ sound/pci/hda/hda_controller.h |    2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/sound/pci/hda/hda_controller.h
++++ b/sound/pci/hda/hda_controller.h
+@@ -151,7 +151,9 @@ struct azx {
+ 	unsigned int msi:1;
+ 	unsigned int probing:1; /* codec probing phase */
+ 	unsigned int snoop:1;
++#ifndef __GENKSYMS__
+ 	unsigned int uc_buffer:1; /* non-cached pages for stream buffers */
++#endif
+ 	unsigned int align_buffer_size:1;
+ 	unsigned int region_requested:1;
+ 	unsigned int disabled:1; /* disabled by vga_switcheroo */

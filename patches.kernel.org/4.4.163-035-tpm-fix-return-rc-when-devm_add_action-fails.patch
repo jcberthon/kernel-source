@@ -1,0 +1,40 @@
+From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+Date: Sat, 13 Feb 2016 11:58:16 +0200
+Subject: [PATCH] tpm: fix: return rc when devm_add_action() fails
+Patch-mainline: 4.4.163
+References: FATE#321435 FATE#321507 FATE#321600 bnc#1012382 bsc#1020645
+Git-commit: 4f3b193dee4423d8c89c9a3e8e05f9197ea459a4
+
+[ Upstream commit 4f3b193dee4423d8c89c9a3e8e05f9197ea459a4 ]
+
+Call put_device() and return error code if devm_add_action() fails.
+
+Signed-off-by: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+Reported-by: Jason Gunthorpe <jgunthorpe@obsidianresearch.com>
+Fixes: 8e0ee3c9faed ("tpm: fix the cleanup of struct tpm_chip")
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/char/tpm/tpm-chip.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/char/tpm/tpm-chip.c b/drivers/char/tpm/tpm-chip.c
+index e759100e41a7..28894878dcd5 100644
+--- a/drivers/char/tpm/tpm-chip.c
++++ b/drivers/char/tpm/tpm-chip.c
+@@ -230,7 +230,11 @@ struct tpm_chip *tpmm_chip_alloc(struct device *dev,
+ 	chip->cdev.owner = dev->driver->owner;
+ 	chip->cdev.kobj.parent = &chip->dev.kobj;
+ 
+-	devm_add_action(dev, (void (*)(void *)) put_device, &chip->dev);
++	rc = devm_add_action(dev, (void (*)(void *)) put_device, &chip->dev);
++	if (rc) {
++		put_device(&chip->dev);
++		return ERR_PTR(rc);
++	}
+ 
+ 	return chip;
+ }
+-- 
+2.19.1
+
