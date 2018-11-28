@@ -7,7 +7,6 @@ Patch-mainline: v4.8-rc1
 References: FATE#321732
 References: FATE#321590
 References: bsc#993388
-39ebeb1dba290fde33fa7ec8ef8b3e79a468b945
 
 Kas: keep-alive support and granularity of kato in units of 100 ms
 nvme_admin_keep_alive opcode: 0x18

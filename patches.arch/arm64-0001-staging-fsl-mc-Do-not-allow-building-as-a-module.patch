@@ -2,15 +2,15 @@ From dfb11fe2281cf6e6e62170513604ca4b51cabe9f Mon Sep 17 00:00:00 2001
 From: Thierry Reding <treding@nvidia.com>
 Date: Mon, 15 Feb 2016 14:22:22 +0100
 Subject: [PATCH] staging: fsl-mc: Do not allow building as a module
+Patch-mainline: v4.6-rc1
+Git-commit: dfb11fe2281cf6e6e62170513604ca4b51cabe9f
+References: fate#319900
 
 This driver uses functionality (MSI IRQ domain) whose symbols aren't
 exported, and hence the modular build fails. While arguably there might
 be reasons to make these symbols available to modules, that change would
 be fairly involved and the set of exported functions should be carefully
 auditioned. Fix the build failure for now by marking the driver boolean.
-Patch-mainline: v4.6-rc1
-Git-commit: dfb11fe2281cf6e6e62170513604ca4b51cabe9f
-References: fate#319900
 
 Cc: J. German Rivera <German.Rivera@freescale.com>
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
