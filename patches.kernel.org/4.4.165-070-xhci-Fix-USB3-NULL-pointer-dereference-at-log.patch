@@ -1,9 +1,12 @@
 From: Mathias Nyman <mathias.nyman@linux.intel.com>
 Date: Mon, 14 May 2018 11:57:23 +0300
-Subject: xhci: Fix USB3 NULL pointer dereference at logical disconnect.
+Subject: [PATCH] xhci: Fix USB3 NULL pointer dereference at logical
+ disconnect.
+Patch-mainline: 4.4.165
+References: bnc#1012382 git-fixes
 Git-commit: 2278446e2b7cd33ad894b32e7eb63afc7db6c86e
-Patch-mainline: v4.17-rc6
-References: git-fixes
+
+commit 2278446e2b7cd33ad894b32e7eb63afc7db6c86e upstream.
 
 Hub driver will try to disable a USB3 device twice at logical disconnect,
 racing with xhci_free_dev() callback from the first port disable.
@@ -39,15 +42,18 @@ Cc: <stable@vger.kernel.org>
 Reported-by: Jordan Glover <Golden_Miller83@protonmail.ch>
 Tested-by: Jordan Glover <Golden_Miller83@protonmail.ch>
 Signed-off-by: Mathias Nyman <mathias.nyman@linux.intel.com>
+Cc: Guenter Roeck <linux@roeck-us.net>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- drivers/usb/host/xhci-hub.c |    2 +-
+ drivers/usb/host/xhci-hub.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/drivers/usb/host/xhci-hub.c b/drivers/usb/host/xhci-hub.c
+index f788f80fe1aa..aee29604bd79 100644
 --- a/drivers/usb/host/xhci-hub.c
 +++ b/drivers/usb/host/xhci-hub.c
-@@ -357,7 +357,7 @@ int xhci_find_slot_id_by_port(struct usb
+@@ -348,7 +348,7 @@ int xhci_find_slot_id_by_port(struct usb_hcd *hcd, struct xhci_hcd *xhci,
  
  	slot_id = 0;
  	for (i = 0; i < MAX_HC_SLOTS; i++) {
@@ -56,3 +62,6 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  			continue;
  		speed = xhci->devs[i]->udev->speed;
  		if (((speed >= USB_SPEED_SUPER) == (hcd->speed >= HCD_USB3))
+-- 
+2.19.2
+
