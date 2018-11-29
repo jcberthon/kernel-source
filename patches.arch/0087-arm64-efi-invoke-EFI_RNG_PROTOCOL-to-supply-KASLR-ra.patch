@@ -22,17 +22,15 @@ Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: Catalin Marinas <catalin.marinas@arm.com>
 Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 ---
- arch/arm64/Kconfig                        |  5 ++
- drivers/firmware/efi/libstub/arm-stub.c   | 43 +++++++++++------
- drivers/firmware/efi/libstub/arm64-stub.c | 78 ++++++++++++++++++++++---------
- drivers/firmware/efi/libstub/fdt.c        | 14 ++++++
- 4 files changed, 103 insertions(+), 37 deletions(-)
+ arch/arm64/Kconfig                        |    5 +
+ drivers/firmware/efi/libstub/arm-stub.c   |   41 ++++++++++-----
+ drivers/firmware/efi/libstub/arm64-stub.c |   78 +++++++++++++++++++++---------
+ drivers/firmware/efi/libstub/fdt.c        |   14 +++++
+ 4 files changed, 102 insertions(+), 36 deletions(-)
 
-diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 30de758..4fdf0c3 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -824,6 +824,11 @@ config RANDOMIZE_BASE
+@@ -782,6 +782,11 @@ config RANDOMIZE_BASE
  	  It is the bootloader's job to provide entropy, by passing a
  	  random u64 value in /chosen/kaslr-seed at kernel entry.
  
@@ -44,8 +42,6 @@ index 30de758..4fdf0c3 100644
  	  If unsure, say N.
  
  config RANDOMIZE_MODULE_REGION_FULL
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index a4df61b..83f0575 100644
 --- a/drivers/firmware/efi/libstub/arm-stub.c
 +++ b/drivers/firmware/efi/libstub/arm-stub.c
 @@ -18,6 +18,8 @@
@@ -57,7 +53,7 @@ index a4df61b..83f0575 100644
  static int efi_secureboot_enabled(efi_system_table_t *sys_table_arg)
  {
  	static efi_guid_t const var_guid = EFI_GLOBAL_VARIABLE_GUID;
-@@ -230,15 +232,6 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+@@ -207,15 +209,6 @@ unsigned long efi_entry(void *handle, ef
  		pr_efi_err(sys_table, "Failed to find DRAM base\n");
  		goto fail;
  	}
@@ -73,7 +69,7 @@ index a4df61b..83f0575 100644
  	/*
  	 * Get the command line from EFI, using the LOADED_IMAGE
  	 * protocol. We are going to copy the command line into the
-@@ -247,7 +240,28 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+@@ -224,7 +217,28 @@ unsigned long efi_entry(void *handle, ef
  	cmdline_ptr = efi_convert_cmdline(sys_table, image, &cmdline_size);
  	if (!cmdline_ptr) {
  		pr_efi_err(sys_table, "getting command line via LOADED_IMAGE_PROTOCOL\n");
@@ -103,7 +99,7 @@ index a4df61b..83f0575 100644
  	}
  
  	status = efi_parse_options(cmdline_ptr);
-@@ -267,7 +281,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+@@ -244,7 +258,7 @@ unsigned long efi_entry(void *handle, ef
  
  		if (status != EFI_SUCCESS) {
  			pr_efi_err(sys_table, "Failed to load device tree!\n");
@@ -112,7 +108,7 @@ index a4df61b..83f0575 100644
  		}
  	}
  
-@@ -309,12 +323,11 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+@@ -286,12 +300,11 @@ unsigned long efi_entry(void *handle, ef
  	efi_free(sys_table, initrd_size, initrd_addr);
  	efi_free(sys_table, fdt_size, fdt_addr);
  
@@ -127,13 +123,11 @@ index a4df61b..83f0575 100644
  fail:
  	return EFI_ERROR;
  }
-diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
-index 78dfbd3..e0e6b74 100644
 --- a/drivers/firmware/efi/libstub/arm64-stub.c
 +++ b/drivers/firmware/efi/libstub/arm64-stub.c
-@@ -13,6 +13,10 @@
+@@ -21,6 +21,10 @@
+ #include <linux/efi.h>
  #include <asm/efi.h>
- #include <asm/sections.h>
  
 +#include "efistub.h"
 +
@@ -142,7 +136,7 @@ index 78dfbd3..e0e6b74 100644
  efi_status_t __init handle_kernel_image(efi_system_table_t *sys_table_arg,
  					unsigned long *image_addr,
  					unsigned long *image_size,
-@@ -23,26 +27,52 @@ efi_status_t __init handle_kernel_image(efi_system_table_t *sys_table_arg,
+@@ -31,26 +35,52 @@ efi_status_t __init handle_kernel_image(
  {
  	efi_status_t status;
  	unsigned long kernel_size, kernel_memsize = 0;
@@ -202,7 +196,7 @@ index 78dfbd3..e0e6b74 100644
  		 * This will work around the issue where, if dram_base == 0x0,
  		 * efi_low_alloc() refuses to allocate at 0x0 (to prevent the
  		 * address of the allocation to be mistaken for a FAIL return
-@@ -52,27 +82,31 @@ efi_status_t __init handle_kernel_image(efi_system_table_t *sys_table_arg,
+@@ -60,27 +90,31 @@ efi_status_t __init handle_kernel_image(
  		 * Mustang), we can still place the kernel at the address
  		 * 'dram_base + TEXT_OFFSET'.
  		 */
@@ -249,11 +243,9 @@ index 78dfbd3..e0e6b74 100644
  
  	return EFI_SUCCESS;
  }
-diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index 44e0ea8..9f614ee 100644
 --- a/drivers/firmware/efi/libstub/fdt.c
 +++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -125,6 +125,20 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+@@ -147,6 +147,20 @@ efi_status_t update_fdt(efi_system_table
  	if (status)
  		goto fdt_set_fail;
  
@@ -274,6 +266,3 @@ index 44e0ea8..9f614ee 100644
  	return EFI_SUCCESS;
  
  fdt_set_fail:
--- 
-2.11.0
-

@@ -1,0 +1,34 @@
+From: Al Viro <viro@zeniv.linux.org.uk>
+Date: Mon, 20 Mar 2017 21:08:07 -0400
+Subject: [PATCH] new helper: uaccess_kernel()
+References: bnc#1012382
+Patch-mainline: 4.4.165
+Git-commit: db68ce10c4f0a27c1ff9fa0e789e5c41f8c4ea63
+
+commit db68ce10c4f0a27c1ff9fa0e789e5c41f8c4ea63 upstream.
+
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+[only take the include/linux/uaccess.h portion - gregkh]
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ include/linux/uaccess.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/include/linux/uaccess.h b/include/linux/uaccess.h
+index 558129af828a..15c7b5420d8a 100644
+--- a/include/linux/uaccess.h
++++ b/include/linux/uaccess.h
+@@ -2,6 +2,9 @@
+ #define __LINUX_UACCESS_H__
+ 
+ #include <linux/sched.h>
++
++#define uaccess_kernel() segment_eq(get_fs(), KERNEL_DS)
++
+ #include <asm/uaccess.h>
+ 
+ static __always_inline void pagefault_disabled_inc(void)
+-- 
+2.19.2
+
