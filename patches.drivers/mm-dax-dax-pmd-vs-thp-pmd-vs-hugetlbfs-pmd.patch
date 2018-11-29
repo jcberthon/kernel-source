@@ -209,7 +209,7 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 -		if (!pmd_trans_huge(*pmd) && pmd_none_or_clear_bad(pmd))
 +		if (!pmd_trans_huge(*pmd) && !pmd_devmap(*pmd)
 +				&& pmd_none_or_clear_bad(pmd))
- 			goto next;
+ 			continue;
  
  		/* invoke the mmu notifier if the pmd is populated */
 @@ -175,7 +176,7 @@ static inline unsigned long change_pmd_r

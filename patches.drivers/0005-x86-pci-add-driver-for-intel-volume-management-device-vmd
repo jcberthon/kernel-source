@@ -80,7 +80,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -8228,6 +8228,12 @@ F:	Documentation/devicetree/bindings/pci
- F:	drivers/pci/host/pci-host-common.c
+ F:	Documentation/devicetree/bindings/pci/host-generic-pci.txt
  F:	drivers/pci/host/pci-host-generic.c
  
 +PCI DRIVER FOR INTEL VOLUME MANAGEMENT DEVICE (VMD)

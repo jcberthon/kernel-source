@@ -138,9 +138,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/arch/arm64/kernel/Makefile
 +++ b/arch/arm64/kernel/Makefile
 @@ -44,6 +44,7 @@ arm64-obj-$(CONFIG_PCI)			+= pci.o
+ arm64-obj-$(CONFIG_PCI)			+= pci.o
  arm64-obj-$(CONFIG_ARMV8_DEPRECATED)	+= armv8_deprecated.o
  arm64-obj-$(CONFIG_ACPI)		+= acpi.o
- arm64-obj-$(CONFIG_ACPI_NUMA)		+= acpi_numa.o
 +arm64-obj-$(CONFIG_ARM64_ACPI_PARKING_PROTOCOL)	+= acpi_parking_protocol.o
  
  obj-y					+= $(arm64-obj-y) vdso/
@@ -380,9 +380,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	 */
 +	acpi_set_mailbox_entry(cpu_count, processor);
 +
- 	early_map_cpu_to_node(cpu_count, acpi_numa_get_nid(cpu_count, hwid));
- 
  	cpu_count++;
+ }
+
 @@ -629,6 +641,7 @@ static const char *ipi_types[NR_IPI] __t
  	S(IPI_CPU_STOP, "CPU stop interrupts"),
  	S(IPI_TIMER, "Timer broadcast interrupts"),

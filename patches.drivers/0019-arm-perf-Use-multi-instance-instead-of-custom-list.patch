@@ -122,8 +122,8 @@ index d1e530c7..8330729f 100644
 -	struct list_head	entry;
 +	struct hlist_node	node;
  	struct notifier_block	cpu_pm_nb;
- };
- 
+ 	/* the attr_groups array must be NULL-terminated */
+ 	const struct attribute_group *attr_groups[ARMPMU_NR_ATTR_GROUPS + 1];
 -- 
 2.11.0
 

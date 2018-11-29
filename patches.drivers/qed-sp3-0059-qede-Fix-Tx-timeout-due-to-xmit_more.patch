@@ -49,8 +49,8 @@ index 855aaa01..eeb7fb4 100644
 +			qede_update_tx_producer(txq);
 +
  		netif_tx_stop_queue(netdev_txq);
- 		txq->stopped_cnt++;
  		DP_VERBOSE(edev, NETIF_MSG_TX_QUEUED,
+ 			   "Stop queue was called\n");
 -- 
 1.8.5.6
 

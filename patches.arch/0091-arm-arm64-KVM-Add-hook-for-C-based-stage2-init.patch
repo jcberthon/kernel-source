@@ -39,7 +39,7 @@ index d691f04..ac344f5 100644
 --- a/arch/arm/kvm/arm.c
 +++ b/arch/arm/kvm/arm.c
 @@ -983,6 +983,7 @@ static void cpu_init_hyp_mode(void *dummy)
- 	vector_ptr = (unsigned long)kvm_ksym_ref(__kvm_hyp_vector);
+ 	vector_ptr = (unsigned long)__kvm_hyp_vector;
  
  	__cpu_init_hyp_mode(boot_pgd_ptr, pgd_ptr, hyp_stack_ptr, vector_ptr);
 +	__cpu_init_stage2();
@@ -51,7 +51,7 @@ index e3d67ff..5d79ebe 100644
 --- a/arch/arm64/include/asm/kvm_host.h
 +++ b/arch/arm64/include/asm/kvm_host.h
 @@ -332,6 +332,10 @@ static inline void __cpu_init_hyp_mode(phys_addr_t boot_pgd_ptr,
- 		       hyp_stack_ptr, vector_ptr);
+ 		     hyp_stack_ptr, vector_ptr);
  }
  
 +static inline void __cpu_init_stage2(void)

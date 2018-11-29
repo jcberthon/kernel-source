@@ -142,7 +142,7 @@ index fa74dde..fac6345 100644
 +	struct qla_qpair *qpair;
  	union {
  		struct srb_iocb iocb_cmd;
- 		struct fc_bsg_job *bsg_job;
+ 		struct bsg_job *bsg_job;
 @@ -2719,6 +2720,7 @@ struct isp_operations {
  
  	int (*get_flash_version) (struct scsi_qla_host *, void *);

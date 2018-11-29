@@ -29,7 +29,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 
 --- a/arch/arm64/kernel/efi.c
 +++ b/arch/arm64/kernel/efi.c
-@@ -11,347 +11,15 @@
+@@ -11,319 +11,12 @@
   *
   */
  
@@ -48,7 +48,6 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 -#include <linux/sched.h>
 -#include <linux/slab.h>
 -#include <linux/spinlock.h>
--#include <linux/platform_device.h>
 +#include <linux/init.h>
  
 -#include <asm/cacheflush.h>
@@ -57,9 +56,6 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 -#include <asm/mmu_context.h>
 -#include <asm/mmu.h>
 -#include <asm/pgtable.h>
- 
- /* we will fill this structure from the stub, so don't put it in .bss */
- struct screen_info screen_info __section(.data);
  
 -struct efi_memory_map memmap;
 -
@@ -195,14 +191,6 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 -	if (efi_enabled(EFI_DBG))
 -		pr_info("Processing EFI memory map:\n");
 -
--	/*
--	 * Discard memblocks discovered so far: if there are any at this
--	 * point, they originate from memory nodes in the DT, and UEFI
--	 * uses its own memory map instead.
--	 */
--	memblock_dump_all();
--	memblock_remove(0, (phys_addr_t)ULLONG_MAX);
--
 -	for_each_efi_memory_desc(&memmap, md) {
 -		paddr = md->phys_addr;
 -		npages = md->num_pages;
@@ -263,26 +251,10 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 -
 -	reserve_regions();
 -	early_memunmap(memmap.map, params.mmap_size);
--	memblock_reserve(params.mmap & PAGE_MASK,
--			 PAGE_ALIGN(params.mmap_size +
--				    (params.mmap & ~PAGE_MASK)));
--
--	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI)
--		memblock_reserve(screen_info.lfb_base, screen_info.lfb_size);
+-	memblock_mark_nomap(params.mmap & PAGE_MASK,
+-			    PAGE_ALIGN(params.mmap_size +
+-				       (params.mmap & ~PAGE_MASK)));
 -}
--
--static int __init register_gop_device(void)
--{
--	void *pd;
--
--	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
--		return 0;
--
--	/* the efifb driver accesses screen_info directly, no need to pass it */
--	pd = platform_device_register_simple("efi-framebuffer", 0, NULL, 0);
--	return PTR_ERR_OR_ZERO(pd);
--}
--subsys_initcall(register_gop_device);
 -
 -static bool __init efi_virtmap_init(void)
 -{
@@ -404,16 +376,16 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
   * ResetSystem().
 --- a/drivers/firmware/efi/Makefile
 +++ b/drivers/firmware/efi/Makefile
-@@ -21,4 +21,6 @@ obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= ru
+@@ -21,3 +21,6 @@ obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= ru
+ obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= runtime-wrappers.o
  obj-$(CONFIG_EFI_STUB)			+= libstub/
  obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
- 
++
 +arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
 +obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
- obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
 --- /dev/null
 +++ b/drivers/firmware/efi/arm-init.c
-@@ -0,0 +1,233 @@
+@@ -0,0 +1,208 @@
 +/*
 + * Extensible Firmware Interface
 + *
@@ -433,7 +405,6 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +#include <linux/mm_types.h>
 +#include <linux/of.h>
 +#include <linux/of_fdt.h>
-+#include <linux/platform_device.h>
 +
 +#include <asm/efi.h>
 +
@@ -559,14 +530,6 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	if (efi_enabled(EFI_DBG))
 +		pr_info("Processing EFI memory map:\n");
 +
-+	/*
-+	 * Discard memblocks discovered so far: if there are any at this
-+	 * point, they originate from memory nodes in the DT, and UEFI
-+	 * uses its own memory map instead.
-+	 */
-+	memblock_dump_all();
-+	memblock_remove(0, (phys_addr_t)ULLONG_MAX);
-+
 +	for_each_efi_memory_desc(&memmap, md) {
 +		paddr = md->phys_addr;
 +		npages = md->num_pages;
@@ -627,26 +590,10 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +
 +	reserve_regions();
 +	early_memunmap(memmap.map, params.mmap_size);
-+	memblock_reserve(params.mmap & PAGE_MASK,
-+			 PAGE_ALIGN(params.mmap_size +
-+				    (params.mmap & ~PAGE_MASK)));
-+
-+	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI)
-+		memblock_reserve(screen_info.lfb_base, screen_info.lfb_size);
++	memblock_mark_nomap(params.mmap & PAGE_MASK,
++			    PAGE_ALIGN(params.mmap_size +
++				       (params.mmap & ~PAGE_MASK)));
 +}
-+
-+static int __init register_gop_device(void)
-+{
-+	void *pd;
-+
-+	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
-+		return 0;
-+
-+	/* the efifb driver accesses screen_info directly, no need to pass it */
-+	pd = platform_device_register_simple("efi-framebuffer", 0, NULL, 0);
-+	return PTR_ERR_OR_ZERO(pd);
-+}
-+subsys_initcall(register_gop_device);
 --- /dev/null
 +++ b/drivers/firmware/efi/arm-runtime.c
 @@ -0,0 +1,151 @@

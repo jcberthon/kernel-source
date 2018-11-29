@@ -53,7 +53,7 @@ index a01dab1..1b880ea 100644
 +#include <asm/mmu_context.h>
  #include <asm/processor.h>
  #include <asm/sysreg.h>
- 
+ #include <asm/virt.h>
 @@ -880,6 +881,15 @@ static u64 __raw_read_system_reg(u32 sys_id)
  }
  

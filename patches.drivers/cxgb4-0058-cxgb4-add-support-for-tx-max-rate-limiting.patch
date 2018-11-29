@@ -147,7 +147,7 @@ index a3d140d..9a06093 100644
 +	.ndo_set_tx_maxrate   = cxgb_set_tx_maxrate,
  };
  
- #ifdef CONFIG_PCI_IOV
+ static const struct net_device_ops cxgb4_mgmt_netdev_ops = {
 diff --git a/drivers/net/ethernet/chelsio/cxgb4/sched.h b/drivers/net/ethernet/chelsio/cxgb4/sched.h
 index ac415eb..77b2b3f 100644
 --- a/drivers/net/ethernet/chelsio/cxgb4/sched.h

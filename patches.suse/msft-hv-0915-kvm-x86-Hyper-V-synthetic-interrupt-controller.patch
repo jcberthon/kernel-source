@@ -79,8 +79,8 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  #define KVM_IRQ_ROUTING_S390_ADAPTER 3
 +#define KVM_IRQ_ROUTING_HV_SINT 4
  
- flags:
- - KVM_MSI_VALID_DEVID: used along with KVM_IRQ_ROUTING_MSI
+ No flags are specified so far, the corresponding field must be set to zero.
+ 
 @@ -1500,6 +1502,10 @@ struct kvm_irq_routing_s390_adapter {
  	__u32 adapter_id;
  };
@@ -92,10 +92,11 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  
  4.53 KVM_ASSIGN_SET_MSIX_NR (deprecated)
  
-@@ -3730,6 +3736,19 @@ This capability indicates that guest usi
- spent while virtual CPU is halted in this way will then be accounted for as
- guest running time on the host (as opposed to e.g. HLT).
- 
+@@ -3730,3 +3736,16 @@ This capability indicates that guest usi
+ H_RANDOM hypercall backed by a hardware random-number generator.
+ If present, the kernel H_RANDOM handler can be enabled for guest use
+ with the KVM_CAP_PPC_ENABLE_HCALL capability.
++
 +8.2 KVM_CAP_HYPERV_SYNIC
 +
 +Architectures: x86
@@ -108,10 +109,6 @@ Acked-by: Bruce Rogers <brogers@suse.com>
 +capability via KVM_ENABLE_CAP ioctl on the vcpu fd. Note that this
 +will disable the use of APIC hardware virtualization even if supported
 +by the CPU, as it's incompatible with SynIC auto-EOI behavior.
-+
- 8.5 KVM_CAP_ARM_USER_IRQ
- 
- Architectures: arm, arm64
 --- a/arch/x86/include/asm/kvm_host.h
 +++ b/arch/x86/include/asm/kvm_host.h
 @@ -25,6 +25,7 @@
@@ -120,8 +117,8 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  #include <linux/irqbypass.h>
 +#include <linux/hyperv.h>
  
- #include <asm/apic.h>
  #include <asm/pvclock-abi.h>
+ #include <asm/desc.h>
 @@ -386,10 +387,24 @@ struct kvm_mtrr {
  	struct list_head head;
  };
@@ -599,7 +596,7 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  
 -static inline int kvm_apic_id(struct kvm_lapic *apic)
 -{
--	return (kvm_lapic_get_reg(apic, APIC_ID) >> 24) & 0xff;
+-	return (kvm_apic_get_reg(apic, APIC_ID) >> 24) & 0xff;
 -}
 -
  /* The logical map is definitely wrong if we have multiple
@@ -649,7 +646,7 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  	HV_X64_MSR_VP_INDEX,
  	HV_X64_MSR_VP_RUNTIME,
 +	HV_X64_MSR_SCONTROL,
- 	HV_X64_MSR_VP_ASSIST_PAGE, MSR_KVM_ASYNC_PF_EN, MSR_KVM_STEAL_TIME,
+ 	HV_X64_MSR_APIC_ASSIST_PAGE, MSR_KVM_ASYNC_PF_EN, MSR_KVM_STEAL_TIME,
  	MSR_KVM_PV_EOI_EN,
  
 @@ -2554,6 +2555,7 @@ int kvm_vm_ioctl_check_extension(struct
@@ -742,8 +739,8 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  	u32 gsi;
  	u32 type;
 @@ -339,6 +344,7 @@ struct kvm_kernel_irq_routing_entry {
- 			u32 devid;
- 		} msi;
+ 		} irqchip;
+ 		struct msi_msg msi;
  		struct kvm_s390_adapter_int adapter;
 +		struct kvm_hv_sint hv_sint;
  	};
@@ -756,9 +753,9 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  #define KVM_CAP_SPLIT_IRQCHIP 121
  #define KVM_CAP_IOEVENTFD_ANY_LENGTH 122
 +#define KVM_CAP_HYPERV_SYNIC 123
- #define KVM_CAP_ARM_PMU_V3 125
- #define KVM_CAP_VCPU_ATTRIBUTES 126
- #define KVM_CAP_MSI_DEVID 131
+ #define KVM_CAP_S390_BPB 152
+
+ #ifdef KVM_CAP_IRQ_ROUTING
 @@ -862,10 +863,16 @@ struct kvm_irq_routing_s390_adapter {
  	__u32 adapter_id;
  };

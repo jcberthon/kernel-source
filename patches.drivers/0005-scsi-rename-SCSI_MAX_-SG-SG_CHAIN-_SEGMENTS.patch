@@ -132,7 +132,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 +#define HISI_SAS_SGE_PAGE_CNT SG_CHUNK_SIZE
  struct hisi_sas_sge_page {
  	struct hisi_sas_sge sge[HISI_SAS_SGE_PAGE_CNT];
- }  __aligned(16);
+ };
 --- a/drivers/scsi/mpt3sas/mpt3sas_base.c
 +++ b/drivers/scsi/mpt3sas/mpt3sas_base.c
 @@ -3329,10 +3329,10 @@ _base_allocate_memory_pools(struct MPT3S
@@ -163,7 +163,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 +++ b/drivers/scsi/scsi_debug.c
 @@ -5431,7 +5431,7 @@ static struct scsi_host_template sdebug_
  	.eh_host_reset_handler = scsi_debug_host_reset,
- 	.can_queue =		SDEBUG_CANQUEUE,
+ 	.can_queue =		SCSI_DEBUG_CANQUEUE,
  	.this_id =		7,
 -	.sg_tablesize =		SCSI_MAX_SG_CHAIN_SEGMENTS,
 +	.sg_tablesize =		SG_MAX_SEGMENTS,

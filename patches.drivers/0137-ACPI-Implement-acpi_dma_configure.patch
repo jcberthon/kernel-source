@@ -158,4 +158,4 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +
  #define ACPI_PTR(_ptr)	(NULL)
  
- static inline struct acpi_device *acpi_resource_consumer(struct resource *res)
+ #endif	/* !CONFIG_ACPI */

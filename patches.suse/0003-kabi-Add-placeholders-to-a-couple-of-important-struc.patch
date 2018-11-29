@@ -84,8 +84,8 @@ Signed-off-by: Michal Marek <mmarek@suse.cz>
  
  enum zone_flags {
 @@ -691,6 +692,7 @@ typedef struct pglist_data {
- 	/* Number of non-deferred pages */
  	unsigned long static_init_pgcnt;
+ #endif
  #endif /* CONFIG_DEFERRED_STRUCT_PAGE_INIT */
 +	void *suse_kabi_padding;
  } pg_data_t;
@@ -122,8 +122,8 @@ Signed-off-by: Michal Marek <mmarek@suse.cz>
  
  /*
 @@ -1283,6 +1284,7 @@ struct sched_entity {
- 	/* Per entity load average tracking */
- 	struct sched_avg	avg;
+ 	 */
+ 	struct sched_avg	avg ____cacheline_aligned_in_smp;
  #endif
 +	void *suse_kabi_padding;
  };

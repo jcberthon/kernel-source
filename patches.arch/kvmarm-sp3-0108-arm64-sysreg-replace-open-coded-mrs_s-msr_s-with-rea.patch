@@ -19,15 +19,13 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 Conflicts: arch/arm64/include/asm/sysreg.h
 
 ---
- arch/arm64/include/asm/cputype.h |  6 +-----
- arch/arm64/include/asm/sysreg.h  | 35 +++++++++++++++++++++++++----------
- 2 files changed, 26 insertions(+), 15 deletions(-)
+ arch/arm64/include/asm/cputype.h |    6 +-----
+ arch/arm64/include/asm/sysreg.h  |   15 +++++++++++++++
+ 2 files changed, 16 insertions(+), 5 deletions(-)
 
-diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h
-index f297ce7..c67ffda 100644
 --- a/arch/arm64/include/asm/cputype.h
 +++ b/arch/arm64/include/asm/cputype.h
-@@ -102,11 +102,7 @@
+@@ -104,11 +104,7 @@
  
  #include <asm/sysreg.h>
  
@@ -40,29 +38,10 @@ index f297ce7..c67ffda 100644
  
  /*
   * The CPU ID never changes at run time, so we might as well tell the
-diff --git a/arch/arm64/include/asm/sysreg.h b/arch/arm64/include/asm/sysreg.h
-index fcf0aa4..76c8719 100644
 --- a/arch/arm64/include/asm/sysreg.h
 +++ b/arch/arm64/include/asm/sysreg.h
-@@ -250,16 +250,6 @@ asm(
- "	.endm\n"
- );
- 
--static inline void config_sctlr_el1(u32 clear, u32 set)
--{
--	u32 val;
--
--	asm volatile("mrs %0, sctlr_el1" : "=r" (val));
--	val &= ~clear;
--	val |= set;
--	asm volatile("msr sctlr_el1, %0" : : "r" (val));
--}
--
- /*
-  * Unlike read_cpuid, calls to read_sysreg are never expected to be
-  * optimized away or replaced with synthetic values.
-@@ -276,6 +266,31 @@ static inline void config_sctlr_el1(u32 clear, u32 set)
- 		     : : "r" (__val));				\
+@@ -273,6 +273,21 @@ asm(
+ 		     : : "rZ" (__val));				\
  } while (0)
  
 +/*
@@ -80,19 +59,6 @@ index fcf0aa4..76c8719 100644
 +	asm volatile("msr_s " __stringify(r) ", %0" : : "rZ" (__val));	\
 +} while (0)
 +
-+static inline void config_sctlr_el1(u32 clear, u32 set)
-+{
-+	u32 val;
-+
-+	val = read_sysreg(sctlr_el1);
-+	val &= ~clear;
-+	val |= set;
-+	write_sysreg(val, sctlr_el1);
-+}
-+
- #endif
- 
- #endif	/* __ASM_SYSREG_H */
--- 
-1.8.5.6
-
+ static inline void config_sctlr_el1(u32 clear, u32 set)
+ {
+ 	u32 val;

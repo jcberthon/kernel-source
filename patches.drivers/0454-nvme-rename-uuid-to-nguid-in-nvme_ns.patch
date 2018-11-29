@@ -30,13 +30,13 @@ Signed-off-by: Christoph Hellwig <hch@lst.de>
 +++ b/drivers/nvme/host/core.c
 @@ -976,7 +976,7 @@ static int nvme_revalidate_disk(struct g
  	if (ns->ctrl->vs >= NVME_VS(1, 1, 0))
- 		memcpy(ns->eui, id->eui64, sizeof(ns->eui));
+ 		memcpy(ns->eui, (*id)->eui64, sizeof(ns->eui));
  	if (ns->ctrl->vs >= NVME_VS(1, 2, 0))
--		memcpy(ns->uuid, id->nguid, sizeof(ns->uuid));
-+		memcpy(ns->nguid, id->nguid, sizeof(ns->nguid));
+-		memcpy(ns->uuid, (*id)->nguid, sizeof(ns->uuid));
++		memcpy(ns->nguid, (*id)->nguid, sizeof(ns->nguid));
  
- 	old_ms = ns->ms;
- 	lbaf = id->flbas & NVME_NS_FLBAS_LBA_MASK;
+ 	return 0;
+ }
 @@ -1467,8 +1467,8 @@ static ssize_t wwid_show(struct device *
  	int serial_len = sizeof(ctrl->serial);
  	int model_len = sizeof(ctrl->model);

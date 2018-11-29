@@ -327,8 +327,8 @@ diff --git a/drivers/net/hyperv/netvsc_drv.c b/drivers/net/hyperv/netvsc_drv.c
 +	}
 +}
 +
- static struct rtnl_link_stats64 *netvsc_get_stats64(struct net_device *net,
- 						    struct rtnl_link_stats64 *t)
+ static void netvsc_get_stats64(struct net_device *net,
+ 			       struct rtnl_link_stats64 *t)
  {
  	struct net_device_context *ndev_ctx = netdev_priv(net);
  	struct netvsc_device *nvdev = rcu_dereference_rtnl(ndev_ctx->nvdev);
@@ -361,9 +361,9 @@ diff --git a/drivers/net/hyperv/netvsc_drv.c b/drivers/net/hyperv/netvsc_drv.c
 -
 -	t->rx_dropped	= net->stats.rx_dropped;
 -	t->rx_errors	= net->stats.rx_errors;
- 
- 	return t;
  }
+ 
+ static int netvsc_set_mac_addr(struct net_device *ndev, void *p)
 @@ -980,9 +1087,16 @@ static const struct {
  	{ "tx_no_space",  offsetof(struct netvsc_ethtool_stats, tx_no_space) },
  	{ "tx_too_big",	  offsetof(struct netvsc_ethtool_stats, tx_too_big) },

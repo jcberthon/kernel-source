@@ -113,7 +113,7 @@ diff --git a/drivers/net/hyperv/netvsc_drv.c b/drivers/net/hyperv/netvsc_drv.c
 +	return 0;
  }
  
- static struct rtnl_link_stats64 *netvsc_get_stats64(struct net_device *net,
+ static void netvsc_get_stats64(struct net_device *net,
 diff --git a/drivers/net/hyperv/rndis_filter.c b/drivers/net/hyperv/rndis_filter.c
 --- a/drivers/net/hyperv/rndis_filter.c
 +++ b/drivers/net/hyperv/rndis_filter.c

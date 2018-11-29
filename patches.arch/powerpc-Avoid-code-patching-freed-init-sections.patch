@@ -64,7 +64,7 @@ index d5edbeb8eb82..8dc1b3a35bd5 100644
 +#include <asm/setup.h>
 +#include <asm/sections.h>
  #include <asm/code-patching.h>
- #include <asm/uaccess.h>
+ #include <linux/uaccess.h>
  
 @@ -20,6 +22,12 @@ int patch_instruction(unsigned int *addr, unsigned int instr)
  {

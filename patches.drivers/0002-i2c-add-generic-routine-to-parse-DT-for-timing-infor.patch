@@ -26,7 +26,7 @@ index e90f2f8e9327..84f653308e7e 100644
 +++ b/drivers/i2c/i2c-core.c
 @@ -53,6 +53,7 @@
  #include <linux/jump_label.h>
- #include <linux/uaccess.h>
+ #include <asm/uaccess.h>
  #include <linux/err.h>
 +#include <linux/property.h>
  

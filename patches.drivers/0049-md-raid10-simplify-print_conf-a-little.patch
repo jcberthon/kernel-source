@@ -25,8 +25,8 @@ index c61edf31..1756963 100644
 -	struct raid10_info *tmp;
 +	struct md_rdev *rdev;
  
- 	if (conf && conf->geo.raid_disks >= 16)
- 		/* Too many disks, too noisy */
+ 	printk(KERN_DEBUG "RAID10 conf printout:\n");
+ 	if (!conf) {
 @@ -1610,14 +1610,16 @@ static void print_conf(struct r10conf *conf)
  	printk(KERN_DEBUG " --- wd:%d rd:%d\n", conf->geo.raid_disks - conf->mddev->degraded,
  		conf->geo.raid_disks);

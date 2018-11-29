@@ -123,7 +123,7 @@ index 560278e4ad41..a0b42d8dc9be 100644
  			 * Only do the realloc if the underlying size
  			 * is really changing.
 @@ -620,12 +588,6 @@ xfs_idata_realloc(
- 							ifp->if_real_bytes,
+ 							real_size,
  							KM_SLEEP | KM_NOFS);
  			}
 -		} else {

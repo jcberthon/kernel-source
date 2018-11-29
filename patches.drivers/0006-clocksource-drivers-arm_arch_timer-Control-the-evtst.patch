@@ -43,9 +43,9 @@ index 000c3398a2d0..eb543d88ce50 100644
 +			loops can be debugged more effectively on production
 +			systems.
 +
- 	clocksource.arm_arch_timer.fsl-a008585=
- 			[ARM64]
- 			Format: <bool>
+ 	clearcpuid=BITNUM [X86]
+ 			Disable CPUID feature X for the kernel. See
+ 			arch/x86/include/asm/cpufeatures.h for the valid bit
 diff --git a/drivers/clocksource/Kconfig b/drivers/clocksource/Kconfig
 index 177f9c75ccde..f3f1cbae08b5 100644
 --- a/drivers/clocksource/Kconfig
@@ -77,8 +77,8 @@ index caa2b637f43e..ee6039ded6cf 100644
 --- a/drivers/clocksource/arm_arch_timer.c
 +++ b/drivers/clocksource/arm_arch_timer.c
 @@ -81,6 +81,14 @@ static bool arch_timer_mem_use_virtual;
- static bool arch_counter_suspend_stop;
- static bool vdso_default = true;
+ static bool arch_timer_c3stop;
+ static bool arch_timer_mem_use_virtual;
  
 +static bool evtstrm_enable = IS_ENABLED(CONFIG_ARM_ARCH_TIMER_EVTSTREAM);
 +

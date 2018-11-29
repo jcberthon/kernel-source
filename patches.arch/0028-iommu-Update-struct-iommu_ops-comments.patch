@@ -46,9 +46,9 @@ index cfd241d981e3..af8dc89e97c4 100644
 + * @domain_window_disable: Disable a particular window for a domain
 + * @domain_set_windows: Set the number of windows for a domain
 + * @domain_get_windows: Return the number of windows for a domain
-  * @apply_dm_region: Temporary helper call-back for iova reserved ranges
   * @of_xlate: add OF master IDs to iommu grouping
   * @pgsize_bitmap: bitmap of supported page sizes
+  * @priv: per-instance data private to the iommu driver
 @@ -186,9 +194,9 @@ struct iommu_ops {
  	int (*domain_window_enable)(struct iommu_domain *domain, u32 wnd_nr,
  				    phys_addr_t paddr, u64 size, int prot);

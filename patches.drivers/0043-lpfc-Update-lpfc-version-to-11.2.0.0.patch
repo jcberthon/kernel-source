@@ -26,7 +26,7 @@ index 84ccae2..c9bf20e 100644
   * included with this package.                                     *
   *******************************************************************/
  
--#define LPFC_DRIVER_VERSION "11.1.0.1."
+-#define LPFC_DRIVER_VERSION "11.0.0.10."
 +#define LPFC_DRIVER_VERSION "11.2.0.0."
  #define LPFC_DRIVER_NAME		"lpfc"
  

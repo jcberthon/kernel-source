@@ -32,14 +32,14 @@ index 44d4a1e..52248bc 100644
 +}
 +
  static ssize_t
- blkdev_direct_IO(struct kiocb *iocb, struct iov_iter *iter)
+ blkdev_direct_IO(struct kiocb *iocb, struct iov_iter *iter, loff_t offset)
  {
  	struct file *file = iocb->ki_filp;
 -	struct inode *inode = file->f_mapping->host;
 +	struct inode *inode = bdev_file_inode(file);
  
  	if (IS_DAX(inode))
- 		return dax_do_io(iocb, inode, iter, blkdev_get_block,
+ 		return dax_do_io(iocb, inode, iter, offset, blkdev_get_block,
 @@ -338,7 +343,7 @@ static int blkdev_write_end(struct file *file, struct address_space *mapping,
   */
  static loff_t block_llseek(struct file *file, loff_t offset, int whence)

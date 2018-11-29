@@ -23,7 +23,7 @@ Acked-by: jbeulich@suse.com
  
  	xenbus_switch_state(info->xbdev, XenbusStateConnected);
 @@ -2084,6 +2084,11 @@ static void blkfront_connect(struct blkf
- 	add_disk(info->gd);
+ 	device_add_disk(&info->xbdev->dev, info->gd);
  
  	info->is_ready = 1;
 +	return;

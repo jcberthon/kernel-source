@@ -153,15 +153,6 @@ index 527706f..296199c 100644
  		goto drop;
  	}
  
-@@ -1602,7 +1602,7 @@ static void fc_rport_recv_adisc_req(struct fc_rport_priv *rdata,
- 	if (!fp) {
- 		rjt_data.reason = ELS_RJT_UNAB;
- 		rjt_data.explan = ELS_EXPL_INSUF_RES;
--		lport->tt.seq_els_rsp_send(in_fp, ELS_LS_RJT, &rjt_data);
-+		fc_seq_els_rsp_send(in_fp, ELS_LS_RJT, &rjt_data);
- 		goto drop;
- 	}
- 	fc_adisc_fill(lport, fp);
 @@ -1674,7 +1674,7 @@ static void fc_rport_recv_rls_req(struct fc_rport_priv *rdata,
  	goto out;
  

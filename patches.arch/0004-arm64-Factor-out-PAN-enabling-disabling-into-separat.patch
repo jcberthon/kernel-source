@@ -236,7 +236,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 -#include <asm/alternative.h>
  #include <asm/cpufeature.h>
  #include <asm/insn.h>
- #include <asm/sysreg.h>
+ #include <asm/opcodes.h>
 @@ -284,10 +283,10 @@ static void __init register_insn_emulati
  #define __SWP_LL_SC_LOOPS	4
  

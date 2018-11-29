@@ -149,8 +149,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  }
 +EXPORT_SYMBOL_GPL(kvm_apic_match_dest);
  
- bool kvm_irq_delivery_to_apic_fast(struct kvm *kvm, struct kvm_lapic *src,
- 		struct kvm_lapic_irq *irq, int *r, struct dest_map *dest_map)
+ int kvm_vector_to_index(u32 vector, u32 dest_vcpus,
+ 		       const unsigned long *bitmap, u32 bitmap_size)
 @@ -858,7 +835,7 @@ static int __apic_accept_irq(struct kvm_
  
  		if (apic_test_vector(vector, apic->regs + APIC_TMR) != !!trig_mode) {
@@ -219,7 +219,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
 -			for (i = 0; i < APIC_LVT_NUM; i++) {
 +			for (i = 0; i < KVM_APIC_LVT_NUM; i++) {
- 				lvt_val = kvm_lapic_get_reg(apic,
+ 				lvt_val = kvm_apic_get_reg(apic,
  						       APIC_LVTT + 0x10 * i);
 -				apic_set_reg(apic, APIC_LVTT + 0x10 * i,
 +				kvm_lapic_set_reg(apic, APIC_LVTT + 0x10 * i,
@@ -339,7 +339,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 -		apic_set_reg(apic, APIC_LVT0,
 +		kvm_lapic_set_reg(apic, APIC_LVT0,
  			     SET_APIC_DELIVERY_MODE(0, APIC_MODE_EXTINT));
- 	apic_manage_nmi_watchdog(apic, kvm_lapic_get_reg(apic, APIC_LVT0));
+ 	apic_manage_nmi_watchdog(apic, kvm_apic_get_reg(apic, APIC_LVT0));
  
 -	apic_set_reg(apic, APIC_DFR, 0xffffffffU);
 +	kvm_lapic_set_reg(apic, APIC_DFR, 0xffffffffU);
@@ -460,9 +460,9 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 +	apic->irr_pending = true;
 +}
 +
- static inline u32 kvm_lapic_get_reg(struct kvm_lapic *apic, int reg_off)
+ static inline u32 kvm_apic_get_reg(struct kvm_lapic *apic, int reg_off)
  {
- 	return *((u32 *) (apic->regs + reg_off));
+ 	        return *((u32 *) (apic->regs + reg_off));
  }
  
 +static inline void kvm_lapic_set_reg(struct kvm_lapic *apic, int reg_off, u32 val)

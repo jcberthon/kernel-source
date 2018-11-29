@@ -156,8 +156,8 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  #include <asm/fixmap.h>
 +#include <asm/kasan.h>
  #include <asm/memory.h>
- #include <asm/numa.h>
  #include <asm/sections.h>
+ #include <asm/setup.h>
 @@ -327,22 +328,26 @@ void __init mem_init(void)
  #ifdef CONFIG_KASAN
  		  "    kasan   : 0x%16lx - 0x%16lx   (%6ld GB)\n"
@@ -254,12 +254,13 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  	do {
  		next = pud_addr_end(addr, end);
  		kasan_early_pmd_populate(pud, addr, next);
-@@ -126,8 +128,12 @@ static void __init clear_pgds(unsigned l
+@@ -126,9 +128,13 @@ static void __init clear_pgds(unsigned l
  
  void __init kasan_init(void)
  {
 +	u64 kimg_shadow_start, kimg_shadow_end;
  	struct memblock_region *reg;
+ 	int i;
  
 +	kimg_shadow_start = (u64)kasan_mem_to_shadow(_text);
 +	kimg_shadow_end = (u64)kasan_mem_to_shadow(_end);
@@ -354,8 +355,8 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  
  static void __init map_mem(pgd_t *pgd)
 @@ -390,25 +403,28 @@ static void __init map_mem(pgd_t *pgd)
- 	}
- }
+ /* Hardcode rodata=true to fix compilation errors */
+ static const bool rodata_enabled = true;
  
 -#ifdef CONFIG_DEBUG_RODATA
  void mark_rodata_ro(void)

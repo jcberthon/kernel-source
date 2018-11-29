@@ -887,7 +887,7 @@ index b7034e0..717fe41 100644
  	rxbmp = kmalloc(sizeof(struct lpfc_dmabuf), GFP_KERNEL);
  	if (rxbmp != NULL) {
 @@ -5328,13 +5335,15 @@ lpfc_bsg_timeout(struct fc_bsg_job *job)
- 	struct lpfc_vport *vport = (struct lpfc_vport *)job->shost->hostdata;
+ 	struct lpfc_vport *vport = shost_priv(fc_bsg_to_shost(job));
  	struct lpfc_hba *phba = vport->phba;
  	struct lpfc_iocbq *cmdiocb;
 -	struct lpfc_sli_ring *pring = &phba->sli.ring[LPFC_ELS_RING];

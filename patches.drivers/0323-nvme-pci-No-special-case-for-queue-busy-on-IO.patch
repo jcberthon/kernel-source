@@ -45,7 +45,7 @@ index 907525a..d088191 100644
 -			ret = BLK_MQ_RQ_QUEUE_ERROR;
 +		ret = BLK_MQ_RQ_QUEUE_ERROR;
  		spin_unlock_irq(&nvmeq->q_lock);
- 		goto out;
+ 		goto out_cleanup_iod;
  	}
 -- 
 1.8.5.6

@@ -55,9 +55,9 @@ Signed-off-by: Matt Fleming <mfleming@suse.de>
  arch/arm64/kernel/efi.c |    6 +++---
  1 file changed, 3 insertions(+), 3 deletions(-)
 
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -240,9 +240,9 @@ void __init efi_init(void)
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -240,7 +240,7 @@ void __init efi_init(void)
  
  	reserve_regions();
  	early_memunmap(memmap.map, params.mmap_size);
@@ -67,6 +67,4 @@ Signed-off-by: Matt Fleming <mfleming@suse.de>
 +	memblock_reserve(params.mmap & PAGE_MASK,
 +			 PAGE_ALIGN(params.mmap_size +
 +				    (params.mmap & ~PAGE_MASK)));
- 
- 	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI)
- 		memblock_reserve(screen_info.lfb_base, screen_info.lfb_size);
+ }

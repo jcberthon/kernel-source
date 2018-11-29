@@ -19,7 +19,7 @@ index 30cfd64..b362eae 100644
 --- a/arch/x86/include/asm/kvm_host.h
 +++ b/arch/x86/include/asm/kvm_host.h
 @@ -33,7 +33,7 @@
- #include <asm/hyperv-tlfs.h>
+ #include <asm/asm.h>
  
  #define KVM_MAX_VCPUS 255
 -#define KVM_SOFT_MAX_VCPUS 160

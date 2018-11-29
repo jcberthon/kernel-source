@@ -79,7 +79,7 @@ index 563799f..0a06bf9 100644
  		 * which may decide to handle it or also return an unmapped
 @@ -642,8 +642,8 @@ static int get_more_blocks(struct dio *dio, struct dio_submit *sdio,
  		 */
- 		create = dio->op == REQ_OP_WRITE;
+ 		create = dio->rw & WRITE;
  		if (dio->flags & DIO_SKIP_HOLES) {
 -			if (sdio->block_in_file < (i_size_read(dio->inode) >>
 -							sdio->blkbits))

@@ -84,7 +84,7 @@ index 314f16b..70a9a8c 100644
 -
  	ret = isert_alloc_comps(device);
  	if (ret)
- 		return ret;
+ 		goto out;
 @@ -414,146 +396,6 @@ isert_device_get(struct rdma_cm_id *cma_id)
  }
  

@@ -34,7 +34,7 @@ index 90429ed..3090fbb 100644
 --- a/drivers/target/iscsi/iscsi_target_util.c
 +++ b/drivers/target/iscsi/iscsi_target_util.c
 @@ -1364,33 +1364,6 @@ int tx_data(
- 	return total_tx;
+ 	return iscsit_do_tx_data(conn, &c);
  }
  
 -static bool sockaddr_equal(struct sockaddr_storage *x, struct sockaddr_storage *y)

@@ -78,7 +78,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	unsigned long i, num_pages;
  	unsigned long bio_flags = 0;
 +	unsigned long start, end;
- 	int rw = (epd->sync_io ? WRITE_SYNC : WRITE) | REQ_META;
+ 	int write_flags = (epd->sync_io ? WRITE_SYNC : 0) | REQ_META;
  	int ret = 0;
  
 @@ -3741,15 +3743,21 @@ static noinline_for_stack int write_one_

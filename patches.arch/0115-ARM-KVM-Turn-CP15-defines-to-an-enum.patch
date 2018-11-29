@@ -114,7 +114,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +++ b/arch/arm/kvm/guest.c
 @@ -25,7 +25,6 @@
  #include <asm/cputype.h>
- #include <linux/uaccess.h>
+ #include <asm/uaccess.h>
  #include <asm/kvm.h>
 -#include <asm/kvm_asm.h>
  #include <asm/kvm_emulate.h>

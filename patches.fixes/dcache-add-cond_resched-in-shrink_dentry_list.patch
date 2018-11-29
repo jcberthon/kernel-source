@@ -110,9 +110,9 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  }
  EXPORT_SYMBOL(shrink_dcache_parent);
 @@ -1566,8 +1567,6 @@ void d_invalidate(struct dentry *dentry)
- 
- 		if (!data.mountpoint && !data.select.found)
- 			break;
+ 			detach_mounts(data.mountpoint);
+ 			dput(data.mountpoint);
+ 		}
 -
 -		cond_resched();
  	}

@@ -1439,14 +1439,14 @@ index 92489f9741de..0ff8e6771795 100644
 --- a/fs/xfs/libxfs/xfs_inode_fork.c
 +++ b/fs/xfs/libxfs/xfs_inode_fork.c
 @@ -289,7 +289,8 @@ xfs_iformat_extents(
- 	struct xfs_ifork	*ifp = XFS_IFORK_PTR(ip, whichfork);
+ 	int			state = xfs_bmap_fork_to_state(whichfork);
  	int			nex = XFS_DFORK_NEXTENTS(dip, whichfork);
  	int			size = nex * sizeof(xfs_bmbt_rec_t);
 -	xfs_bmbt_rec_t		*dp;
 +	struct xfs_iext_cursor	icur;
 +	struct xfs_bmbt_rec	*dp;
  	int			i;
- 	int			state = xfs_bmap_fork_to_state(whichfork);
+ 
  
 @@ -317,16 +318,21 @@ xfs_iformat_extents(
  	ifp->if_bytes = size;

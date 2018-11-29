@@ -27,13 +27,12 @@ diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
 index c1d646f..7856fda 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -2496,8 +2496,10 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
- 		return 0;
- 	if (!mmc_attach_sd(host))
- 		return 0;
+@@ -2496,8 +2496,9 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+ 		if (!mmc_attach_sd(host))
+ 			return 0;
+ 
 -	if (!mmc_attach_mmc(host))
 -		return 0;
-+
 +	if (!(host->caps2 & MMC_CAP2_NO_MMC))
 +		if (!mmc_attach_mmc(host))
 +			return 0;
@@ -45,9 +44,9 @@ index 86f54ea..9db74ca 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
 @@ -296,6 +296,7 @@ struct mmc_host {
- #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
- #define MMC_CAP2_NO_WRITE_PROTECT (1 << 18)	/* No physical write protect pin, assume that card is always read-write */
+ #define MMC_CAP2_NO_SDIO	(1 << 19)	/* Do not send SDIO commands during initialization */
  #define MMC_CAP2_HS400_ES	(1 << 20)	/* Host supports enhanced strobe */
+ #define MMC_CAP2_NO_SD		(1 << 21)	/* Do not send SD commands during initialization */
 +#define MMC_CAP2_NO_MMC		(1 << 22)	/* Do not send (e)MMC commands during initialization */
  
  	mmc_pm_flag_t		pm_caps;	/* supported pm features */

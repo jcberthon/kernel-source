@@ -1683,7 +1683,7 @@ index 4e3f255..baceb4a 100644
  {
  	struct queue_limits *limits = dm_get_queue_limits(md);
  
-@@ -1060,378 +855,6 @@ static void clone_endio(struct bio *bio)
+@@ -1060,371 +855,6 @@ static void clone_endio(struct bio *bio)
  }
  
  /*
@@ -1910,14 +1910,8 @@ index 4e3f255..baceb4a 100644
 -{
 -	if (!q->mq_ops)
 -		dm_old_stop_queue(q);
--	else {
--		spin_lock_irq(q->queue_lock);
--		queue_flag_set(QUEUE_FLAG_STOPPED, q);
--		spin_unlock_irq(q->queue_lock);
--
--		blk_mq_cancel_requeue_work(q);
+-	else
 -		blk_mq_stop_hw_queues(q);
--	}
 -}
 -
 -static void dm_old_start_queue(struct request_queue *q)
@@ -1935,7 +1929,6 @@ index 4e3f255..baceb4a 100644
 -	if (!q->mq_ops)
 -		dm_old_start_queue(q);
 -	else {
--		queue_flag_clear_unlocked(QUEUE_FLAG_STOPPED, q);
 -		blk_mq_start_stopped_hw_queues(q, true);
 -		blk_mq_kick_requeue_list(q);
 -	}
@@ -2462,7 +2455,7 @@ index 4e3f255..baceb4a 100644
  
  	free_table_devices(&md->table_devices);
  	dm_stats_cleanup(&md->stats);
-@@ -2661,170 +1736,6 @@ struct queue_limits *dm_get_queue_limits(struct mapped_device *md)
+@@ -2661,159 +1736,6 @@ struct queue_limits *dm_get_queue_limits(struct mapped_device *md)
  }
  EXPORT_SYMBOL_GPL(dm_get_queue_limits);
  
@@ -2533,17 +2526,6 @@ index 4e3f255..baceb4a 100644
 -		ti = dm_table_find_target(map, 0);
 -		dm_put_live_table(md, srcu_idx);
 -	}
--
--	/*
--	 * On suspend dm_stop_queue() handles stopping the blk-mq
--	 * request_queue BUT: even though the hw_queues are marked
--	 * BLK_MQ_S_STOPPED at that point there is still a race that
--	 * is allowing block/blk-mq.c to call ->queue_rq against a
--	 * hctx that it really shouldn't.  The following check guards
--	 * against this rarity (albeit _not_ race-free).
--	 */
--	if (unlikely(test_bit(BLK_MQ_S_STOPPED, &hctx->state)))
--		return BLK_MQ_RQ_QUEUE_BUSY;
 -
 -	if (ti->type->busy && ti->type->busy(ti))
 -		return BLK_MQ_RQ_QUEUE_BUSY;

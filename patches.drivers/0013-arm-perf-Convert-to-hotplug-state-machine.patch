@@ -113,8 +113,8 @@ index b8ba4510..042d5c7b 100644
  	struct pmu_hw_events	__percpu *hw_events;
 -	struct notifier_block	hotplug_nb;
  	struct notifier_block	cpu_pm_nb;
- };
- 
+ 	/* the attr_groups array must be NULL-terminated */
+ 	const struct attribute_group *attr_groups[ARMPMU_NR_ATTR_GROUPS + 1];
 -- 
 2.11.0
 

@@ -31,8 +31,8 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
  						obj_request->page_count);
  		break;
 @@ -2376,13 +2378,6 @@ static bool rbd_img_obj_end_request(stru
+ 		xferred = obj_request->length;
  	}
- 	img_request->completed += xferred;
  
 -	/* Image object requests don't own their page array */
 -

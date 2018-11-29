@@ -119,8 +119,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
  	if (status != EFI_SUCCESS) {
 @@ -973,17 +1002,6 @@ static void __init __efi_enter_virtual_m
- 
- 	efi_runtime_mkexec();
+ 	efi_runtime_update_mappings();
+ 	efi_dump_pagetable();
  
 -	/*
 -	 * We mapped the descriptor array into the EFI pagetable above

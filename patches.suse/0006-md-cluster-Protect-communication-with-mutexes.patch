@@ -55,8 +55,8 @@ index 427ba27..1e18a2d 100644
  	struct completion completion;
 +	struct mutex recv_mutex;
  	struct dlm_lock_resource *bitmap_lockres;
+ 	struct dlm_lock_resource **other_bitmap_lockres;
  	struct dlm_lock_resource *resync_lockres;
- 	struct list_head suspend_list;
 @@ -67,6 +81,7 @@ struct md_cluster_info {
  	struct dlm_lock_resource *no_new_dev_lockres;
  	struct md_thread *recv_thread;

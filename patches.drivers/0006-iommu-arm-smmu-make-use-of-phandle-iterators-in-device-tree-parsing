@@ -99,4 +99,4 @@ Signed-off-by: Rob Herring <robh@kernel.org>
 +
  	parse_driver_options(smmu);
  
- 	if (smmu->version > ARM_SMMU_V1 &&
+ 	if (smmu->version == ARM_SMMU_V2 &&

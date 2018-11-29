@@ -58,7 +58,7 @@ index 33defaddc000..60d78f45aa04 100644
 +				goto err;
  			}
  
- 			resid = mtu;
+ 			qp->resp.resid = mtu;
  		} else {
  			if (pktlen != resid) {
  				state = RESPST_ERR_LENGTH;

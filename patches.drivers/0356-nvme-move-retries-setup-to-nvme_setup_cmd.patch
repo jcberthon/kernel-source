@@ -27,14 +27,14 @@ index c2400eb..82d1fa1 100644
  {
  	int ret = BLK_MQ_RQ_QUEUE_OK;
  
-+	if (!(req->cmd_flags & REQ_DONTPREP)) {
++	if (!(req->rq_flags & RQF_DONTPREP)) {
 +		req->retries = 0;
-+		req->cmd_flags |= REQ_DONTPREP;
++		req->rq_flags |= RQF_DONTPREP;
 +	}
 +
  	if (req->cmd_type == REQ_TYPE_DRV_PRIV)
  		memcpy(cmd, nvme_req(req)->cmd, sizeof(*cmd));
- 	else if (req->cmd_flags & REQ_FLUSH)
+ 	else if (req_op(req) == REQ_OP_FLUSH)
 diff --git a/drivers/nvme/host/pci.c b/drivers/nvme/host/pci.c
 index 8619cd4..0b3de3b 100644
 --- a/drivers/nvme/host/pci.c
@@ -43,9 +43,9 @@ index 8619cd4..0b3de3b 100644
  	iod->nents = 0;
  	iod->length = size;
  
--	if (!(rq->cmd_flags & REQ_DONTPREP)) {
+-	if (!(rq->rq_flags & RQF_DONTPREP)) {
 -		rq->retries = 0;
--		rq->cmd_flags |= REQ_DONTPREP;
+-		rq->rq_flags |= RQF_DONTPREP;
 -	}
  	return BLK_MQ_RQ_QUEUE_OK;
  }

@@ -48,9 +48,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
 -obj-$(CONFIG_EFI)			+= efi.o vars.o reboot.o
 +obj-$(CONFIG_EFI)			+= efi.o vars.o reboot.o memattr.o
- obj-$(CONFIG_EFI)			+= capsule.o
  obj-$(CONFIG_EFI_VARS)			+= efivars.o
  obj-$(CONFIG_EFI_ESRT)			+= esrt.o
+ obj-$(CONFIG_EFI_VARS_PSTORE)		+= efi-pstore.o
 --- /dev/null
 +++ b/drivers/firmware/efi/memattr.c
 @@ -0,0 +1,182 @@

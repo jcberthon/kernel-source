@@ -156,8 +156,8 @@ index 042d5c7b..d1e530c7 100644
  	struct pmu_hw_events	__percpu *hw_events;
 +	struct list_head	entry;
  	struct notifier_block	cpu_pm_nb;
- };
- 
+ 	/* the attr_groups array must be NULL-terminated */
+ 	const struct attribute_group *attr_groups[ARMPMU_NR_ATTR_GROUPS + 1];
 -- 
 2.11.0
 

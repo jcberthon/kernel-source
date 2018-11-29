@@ -15,15 +15,15 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
 
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
-@@ -76,6 +76,7 @@
- #include <asm/realmode.h>
- #include <asm/misc.h>
+@@ -78,6 +78,7 @@
  #include <asm/spec-ctrl.h>
+ #include <asm/intel-family.h>
+ #include <asm/cpu_device_id.h>
 +#include <asm/spec_ctrl.h>
  
  /* Number of siblings per CPU package */
  int smp_num_siblings = 1;
-@@ -1543,9 +1544,13 @@ void native_play_dead(void)
+@@ -1621,9 +1622,13 @@ void native_play_dead(void)
  	play_dead_common();
  	tboot_shutdown(TB_SHUTDOWN_WFS);
  

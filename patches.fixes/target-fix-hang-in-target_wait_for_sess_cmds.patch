@@ -52,7 +52,7 @@ index 24f715e..60a1ad1 100644
  		wait_for_completion(&cmd->cmd_wait_comp);
  		cmd->se_tfo->release_cmd(cmd);
 @@ -2653,9 +2653,11 @@ void target_sess_cmd_list_set_waiting(struct se_session *se_sess)
- 	list_for_each_entry(se_cmd, &se_sess->sess_wait_list, se_cmd_list) {
+ 				 &se_sess->sess_wait_list, se_cmd_list) {
  		rc = kref_get_unless_zero(&se_cmd->cmd_kref);
  		if (rc) {
 -			se_cmd->cmd_wait_set = 1;
@@ -63,8 +63,8 @@ index 24f715e..60a1ad1 100644
 +				se_cmd->transport_state |= CMD_T_FABRIC_STOP;
 +			}
  			spin_unlock(&se_cmd->t_state_lock);
- 		}
- 	}
+ 		} else
+ 			list_del_init(&se_cmd->se_cmd_list);
 @@ -2675,24 +2677,26 @@ void target_wait_for_sess_cmds(struct se_session *se_sess)
  
  	list_for_each_entry_safe(se_cmd, tmp_cmd,

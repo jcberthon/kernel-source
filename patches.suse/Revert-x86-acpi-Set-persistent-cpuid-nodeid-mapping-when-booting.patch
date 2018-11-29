@@ -73,9 +73,9 @@ index e923502d79e0..d4ba825b170c 100644
 --- a/drivers/acpi/bus.c
 +++ b/drivers/acpi/bus.c
 @@ -1164,7 +1164,6 @@ static int __init acpi_init(void)
- 	acpi_debugfs_init();
  	acpi_sleep_proc_init();
  	acpi_wakeup_device_init();
+ 	acpi_setup_sb_notify_handler();
 -	acpi_set_processor_mapping();
  	return 0;
  }

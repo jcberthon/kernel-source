@@ -100,7 +100,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 +
  static void vcpu_scan_ioapic(struct kvm_vcpu *vcpu)
  {
- 	if (!kvm_apic_hw_enabled(vcpu->arch.apic))
+ 	u64 eoi_exit_bitmap[4];
 @@ -6455,7 +6455,7 @@ static int vcpu_enter_guest(struct kvm_v
  		if (kvm_check_request(KVM_REQ_STEAL_UPDATE, vcpu))
  			record_steal_time(vcpu);

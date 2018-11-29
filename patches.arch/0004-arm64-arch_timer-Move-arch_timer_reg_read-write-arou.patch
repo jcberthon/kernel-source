@@ -1,4 +1,5 @@
 From: Marc Zyngier <marc.zyngier@arm.com>
+Acked-by: Jeff Mahoney <jeffm@suse.com>
 Date: Fri, 20 Jan 2017 18:28:32 +0000
 Subject: arm64: arch_timer: Move arch_timer_reg_read/write around
 Git-commit: f4e00a1a55c7f9b08a48b57088ac5d044d5523d5

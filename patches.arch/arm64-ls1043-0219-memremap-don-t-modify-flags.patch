@@ -79,8 +79,8 @@ index 2369741..5e913a9 100644
  		addr = ioremap_wt(offset, size);
 -	}
  
- 	if (!addr && (flags & MEMREMAP_WC))
- 		addr = ioremap_wc(offset, size);
+ 	return addr;
+ }
 -- 
 1.8.5.6
 

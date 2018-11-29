@@ -1,11 +1,10 @@
 From 39d6897342903589791a26f132574506309a10d5 Mon Sep 17 00:00:00 2001
 From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 29 Jul 2016 15:58:24 +0200
-Subject: [PATCH 09/22] libfc: use configured lport R_A_TOV when sending
+Subject: [PATCH 09/22] libfc: use configured lport R_A_TOV when sending exchange
 References: bnc#990245
 Git-commit: f7ce413ceac01d502ea4a27c0ba542b57b728e5c
 Patch-mainline: v4.10-rc1
- exchange
 
 We should be using the configured R_A_TOV value when sending the
 exchange.

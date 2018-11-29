@@ -104,4 +104,4 @@ Signed-off-by: Joerg Roedel <jroedel@suse.de>
 +		if (devid < 0)
  			return NULL;
  
- 		if (devid >= 0) {
+ 		iommu = amd_iommu_rlookup_table[devid];

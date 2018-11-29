@@ -244,4 +244,4 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +#endif
  }
  
- void mark_rodata_ro(void)
+ /* Hardcode rodata=true to fix compilation errors */

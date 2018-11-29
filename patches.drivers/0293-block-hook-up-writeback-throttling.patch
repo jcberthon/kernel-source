@@ -466,7 +466,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
 +	blk_wb_init(q);
 +
  	if (!q->request_fn)
- 		goto unlock;
+ 		return 0;
  
 --- a/block/cfq-iosched.c
 +++ b/block/cfq-iosched.c

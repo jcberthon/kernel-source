@@ -168,7 +168,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 +++ b/drivers/infiniband/ulp/isert/ib_isert.c
 @@ -349,7 +349,7 @@ isert_create_device_ib_res(struct isert_
  	if (ret)
- 		return ret;
+ 		goto out;
  
 -	device->pd = ib_alloc_pd(ib_dev);
 +	device->pd = ib_alloc_pd(ib_dev, 0);
@@ -190,7 +190,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 +++ b/drivers/infiniband/ulp/srpt/ib_srpt.c
 @@ -2968,7 +2968,7 @@ static void srpt_add_one(struct ib_devic
  	init_waitqueue_head(&sdev->ch_releaseQ);
- 	spin_lock_init(&sdev->spinlock);
+ 	mutex_init(&sdev->mutex);
  
 -	sdev->pd = ib_alloc_pd(device);
 +	sdev->pd = ib_alloc_pd(device, 0);

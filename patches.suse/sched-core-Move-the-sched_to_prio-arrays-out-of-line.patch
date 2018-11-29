@@ -55,9 +55,9 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  
  static inline void enqueue_task(struct rq *rq, struct task_struct *p, int flags)
 @@ -8675,3 +8675,45 @@ static int __init parse_nortsched(char *
- 	return 0;
+ 	pr_info("Task dump for CPU %d:\n", cpu);
+ 	sched_show_task(cpu_curr(cpu));
  }
- early_param("nortsched", parse_nortsched);
 +
 +/*
 + * Nice levels are multiplicative, with a gentle 10% change for every

@@ -11,14 +11,20 @@ Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
 Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 Signed-off-by: Borislav Petkov <bp@suse.de>
 ---
- arch/x86/kvm/svm.c | 2 ++
- 1 file changed, 2 insertions(+)
+ arch/x86/kvm/svm.c |    3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/arch/x86/kvm/svm.c b/arch/x86/kvm/svm.c
-index bc86daf689b1..7773534f9f76 100644
 --- a/arch/x86/kvm/svm.c
 +++ b/arch/x86/kvm/svm.c
-@@ -247,6 +247,8 @@ static const struct svm_direct_access_msrs {
+@@ -45,6 +45,7 @@
+ #include <asm/kvm_para.h>
+ #include <asm/spec-ctrl.h>
+ #include <asm/irq_remapping.h>
++#include <asm/spec_ctrl.h>
+ 
+ #include <asm/virtext.h>
+ #include "trace.h"
+@@ -256,6 +257,8 @@ static const struct svm_direct_access_ms
  	{ .index = MSR_CSTAR,				.always = true  },
  	{ .index = MSR_SYSCALL_MASK,			.always = true  },
  #endif
@@ -27,4 +33,3 @@ index bc86daf689b1..7773534f9f76 100644
  	{ .index = MSR_IA32_LASTBRANCHFROMIP,		.always = false },
  	{ .index = MSR_IA32_LASTBRANCHTOIP,		.always = false },
  	{ .index = MSR_IA32_LASTINTFROMIP,		.always = false },
-

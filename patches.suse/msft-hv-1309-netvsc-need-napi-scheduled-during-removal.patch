@@ -36,11 +36,13 @@ diff --git a/drivers/net/hyperv/netvsc.c b/drivers/net/hyperv/netvsc.c
  static struct netvsc_device *get_outbound_net_device(struct hv_device *device)
  {
  	struct netvsc_device *net_device = hv_device_to_netvsc_device(device);
-@@ -1273,13 +1264,10 @@ void netvsc_channel_cb(void *context)
+@@ -1273,15 +1264,10 @@ void netvsc_channel_cb(void *context)
  	if (unlikely(!ndev))
  		return;
  
 -	net_device = net_device_to_netvsc_device(ndev);
+-	if (unlikely(!net_device))
+-		return;
 -	if (unlikely(net_device->destroy) &&
 -	    netvsc_channel_idle(net_device, q_idx))
 -		return;

@@ -45,16 +45,6 @@ Acked-by: Borislav Petkov <bp@suse.de>
  kernel/ptrace.c                 |   20 ++++++++++++++++++++
  4 files changed, 67 insertions(+), 3 deletions(-)
 
---- a/arch/x86/kernel/cpu/spec_ctrl.c
-+++ b/arch/x86/kernel/cpu/spec_ctrl.c
-@@ -6,6 +6,7 @@
- #include <asm/msr.h>
- #include <asm/processor.h>
- #include <asm/spec_ctrl.h>
-+#include <asm/cpufeature.h>
- 
- void x86_disable_ibrs(void)
- {
 --- a/arch/x86/mm/tlb.c
 +++ b/arch/x86/mm/tlb.c
 @@ -7,6 +7,7 @@

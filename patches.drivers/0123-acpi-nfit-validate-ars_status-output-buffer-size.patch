@@ -24,7 +24,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 @@ -146,7 +146,8 @@ static int xlat_status(void *buf, unsign
  		 * then just continue with the returned results.
  		 */
- 		if (ars_status->status == NFIT_ARS_STATUS_INTR) {
+ 		if (status == NFIT_ARS_STATUS_INTR) {
 -			if (ars_status->flags & NFIT_ARS_F_OVERFLOW)
 +			if (ars_status->out_length >= 40 && (ars_status->flags
 +						& NFIT_ARS_F_OVERFLOW))

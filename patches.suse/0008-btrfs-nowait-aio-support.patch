@@ -94,5 +94,5 @@ Acked-by: David Sterba <dsterba@suse.com>
 +			ret = -EAGAIN;
 +			goto out;
  		}
- 		ret = btrfs_delalloc_reserve_space(inode, &data_reserved,
- 						   offset, count);
+ 		ret = btrfs_delalloc_reserve_space(inode, offset, count);
+ 		if (ret)

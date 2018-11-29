@@ -79,7 +79,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  static ssize_t
  armv8pmu_events_sysfs_show(struct device *dev,
 @@ -924,6 +967,13 @@ static int armv8_thunder_map_event(struc
- 				ARMV8_EVTYPE_EVENT);
+ 				ARMV8_PMU_EVTYPE_EVENT);
  }
  
 +static int armv8_vulcan_map_event(struct perf_event *event)

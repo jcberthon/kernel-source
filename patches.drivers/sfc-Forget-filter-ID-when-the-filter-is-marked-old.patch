@@ -138,8 +138,8 @@ Acked-by: David Chang <dchang@suse.com>
  		}
  	}
 @@ -4096,6 +4104,8 @@ static int efx_ef10_filter_insert_def(st
- 			       "%scast mismatch filter insert failed rc=%d\n",
- 			       multicast ? "Multi" : "Uni", rc);
+ 			     "%scast mismatch filter insert failed rc=%d\n",
+ 			     multicast ? "Multi" : "Uni", rc);
  	} else if (multicast) {
 +		EFX_WARN_ON_PARANOID(table->mcdef_id !=
 +				     EFX_EF10_FILTER_ID_INVALID);

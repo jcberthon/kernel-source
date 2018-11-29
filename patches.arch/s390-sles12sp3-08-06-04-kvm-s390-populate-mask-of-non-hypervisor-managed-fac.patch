@@ -57,9 +57,9 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 -	0x005effffffffffffUL,
 +	0xffe6000000000000UL,
 +	0x005e000000000000UL,
- 	0x3000000000000000UL,
  };
  
+ unsigned long kvm_s390_fac_list_mask_size(void)
 @@ -2759,13 +2759,26 @@ void kvm_arch_commit_memory_region(struc
  	return;
  }

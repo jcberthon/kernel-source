@@ -129,7 +129,7 @@ Signed-off-by: Matt Fleming <mfleming@suse.de>
 +	}
  
  assign:
- 	assigned = true;
+ 	task_numa_assign(env, cur, imp);
 @@ -4597,6 +4604,10 @@ static void dequeue_task_fair(struct rq
  
  #ifdef CONFIG_SMP

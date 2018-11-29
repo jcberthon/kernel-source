@@ -62,5 +62,5 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  
 +#include <asm/debug-monitors.h>
  #include <asm/kvm_asm.h>
- #include <asm/kvm_mmu.h>
+ #include <asm/kvm_hyp.h>
  

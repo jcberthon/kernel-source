@@ -54,9 +54,9 @@ index 282344b..7a73786 100644
  		return -EINVAL;
  	}
  
--	cpu_base = ioremap(cpu_phy_base, ACPI_GIC_CPU_IF_MEM_SIZE);
-+	cpu_base = ioremap(acpi_data.cpu_phys_base, ACPI_GIC_CPU_IF_MEM_SIZE);
- 	if (!cpu_base) {
+-	gic->raw_cpu_base = ioremap(cpu_phy_base, ACPI_GIC_CPU_IF_MEM_SIZE);
++	gic->raw_cpu_base = ioremap(acpi_data.cpu_phys_base, ACPI_GIC_CPU_IF_MEM_SIZE);
+ 	if (!gic->raw_cpu_base) {
  		pr_err("Unable to map GICC registers\n");
  		return -ENOMEM;
 -- 

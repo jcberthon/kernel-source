@@ -34,9 +34,9 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
  #include <linux/percpu.h>
  #include <linux/msi.h>
 +#include <linux/irq.h>
+ #include <linux/bitops.h>
  
  #include <scsi/scsi.h>
- #include <scsi/scsi_device.h>
 @@ -6181,7 +6182,7 @@ lpfc_sli4_driver_resource_setup(struct l
  
  	phba->sli4_hba.msix_entries = kzalloc((sizeof(struct msix_entry) *

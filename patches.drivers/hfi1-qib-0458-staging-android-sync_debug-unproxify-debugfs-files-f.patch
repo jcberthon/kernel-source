@@ -30,13 +30,11 @@ Signed-off-by: Nicolai Stange <nicstange@gmail.com>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Acked-by: Thomas Bogendoerfer <tbogendoerfer@suse.de>
 ---
- drivers/dma-buf/sync_debug.c | 9 +++++++--
+ drivers/staging/android/sync_debug.c | 9 +++++++--
  1 file changed, 7 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/dma-buf/sync_debug.c b/drivers/dma-buf/sync_debug.c
-index 13378ebb8ebc..b8ce9627e9d0 100644
---- a/drivers/dma-buf/sync_debug.c
-+++ b/drivers/dma-buf/sync_debug.c
+--- a/drivers/staging/android/sync_debug.c
++++ b/drivers/staging/android/sync_debug.c
 @@ -195,8 +195,13 @@ static __init int sync_debugfs_init(void)
  {
  	dbgfs = debugfs_create_dir("sync", NULL);

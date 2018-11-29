@@ -60,8 +60,8 @@ index 4c9aa88..d58ea21 100644
 +	pltfm_host = sdhci_priv(host);
 +	sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
  
- 	match = of_match_node(sdhci_arasan_of_match, pdev->dev.of_node);
- 	sdhci_arasan->soc_ctl_map = match->data;
+ 	sdhci_arasan->clk_ahb = devm_clk_get(&pdev->dev, "clk_ahb");
+ 	if (IS_ERR(sdhci_arasan->clk_ahb)) {
 @@ -427,15 +430,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
  		goto clk_dis_ahb;
  	}
@@ -77,18 +77,14 @@ index 4c9aa88..d58ea21 100644
 -	pltfm_host->priv = sdhci_arasan;
  	pltfm_host->clk = clk_xin;
  
- 	if (of_device_is_compatible(pdev->dev.of_node,
-@@ -492,7 +487,8 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
+ 	ret = mmc_of_parse(host->mmc);
+@@ -492,11 +487,12 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
  	int ret;
  	struct sdhci_host *host = platform_get_drvdata(pdev);
  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 -	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
 +	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
 +	struct clk *clk_ahb = sdhci_arasan->clk_ahb;
- 
- 	if (!IS_ERR(sdhci_arasan->phy)) {
- 		phy_power_off(sdhci_arasan->phy);
-@@ -501,7 +497,7 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
  
  	ret = sdhci_pltfm_unregister(pdev);
  

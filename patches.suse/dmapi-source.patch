@@ -1673,7 +1673,7 @@ Acked-by: Jan Kara <jack@suse.cz>
 + * http://oss.sgi.com/projects/GenInfo/SGIGPLNoticeExplan/
 + */
 +
-+#include <asm/uaccess.h>
++#include <linux/uaccess.h>
 +#include "dmapi.h"
 +#include "dmapi_kern.h"
 +#include "dmapi_private.h"
@@ -2023,7 +2023,7 @@ Acked-by: Jan Kara <jack@suse.cz>
 + *
 + * http://oss.sgi.com/projects/GenInfo/SGIGPLNoticeExplan/
 + */
-+#include <asm/uaccess.h>
++#include <linux/uaccess.h>
 +#include "dmapi.h"
 +#include "dmapi_kern.h"
 +#include "dmapi_private.h"
@@ -5270,7 +5270,7 @@ Acked-by: Jan Kara <jack@suse.cz>
 +#include <linux/module.h>
 +#include <linux/mount.h>
 +#include <linux/namei.h>
-+#include <asm/uaccess.h>
++#include <linux/uaccess.h>
 +#include <linux/fs.h>
 +#include <linux/file.h>
 +#include <linux/seq_file.h>
@@ -6860,7 +6860,7 @@ Acked-by: Jan Kara <jack@suse.cz>
 + *
 + * http://oss.sgi.com/projects/GenInfo/SGIGPLNoticeExplan/
 + */
-+#include <asm/uaccess.h>
++#include <linux/uaccess.h>
 +#include "dmapi.h"
 +#include "dmapi_kern.h"
 +#include "dmapi_private.h"
@@ -8122,7 +8122,7 @@ Acked-by: Jan Kara <jack@suse.cz>
 +
 +#include <linux/init.h>
 +#include <linux/proc_fs.h>
-+#include <asm/uaccess.h>
++#include <linux/uaccess.h>
 +#ifdef CONFIG_PROC_FS
 +#include <linux/module.h>
 +#endif
@@ -9966,7 +9966,7 @@ Acked-by: Jan Kara <jack@suse.cz>
 +#include <linux/module.h>
 +#include <linux/seq_file.h>
 +
-+#include <asm/uaccess.h>
++#include <linux/uaccess.h>
 +
 +#include "dmapi.h"
 +#include "dmapi_kern.h"

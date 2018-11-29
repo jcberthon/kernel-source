@@ -12,16 +12,23 @@ format 2 specific fields.
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 Reviewed-by: Jason Dillaman <dillaman@redhat.com>
 Acked-by: Luis Henriques <lhenriques@suse.com>
-[luis: struct rbd_image_header is defined in librbd.h]
 ---
- drivers/block/rbd.c         |    7 -------
- drivers/block/rbd_types.h   |    3 ---
- include/linux/ceph/librbd.h |    2 --
- 3 files changed, 12 deletions(-)
+ drivers/block/rbd.c       |    9 ---------
+ drivers/block/rbd_types.h |    3 ---
+ 2 files changed, 12 deletions(-)
 
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -868,12 +868,6 @@ static int rbd_header_from_disk(struct r
+@@ -138,8 +138,6 @@ struct rbd_image_header {
+ 	/* These six fields never change for a given rbd image */
+ 	char *object_prefix;
+ 	__u8 obj_order;
+-	__u8 crypt_type;
+-	__u8 comp_type;
+ 	u64 stripe_unit;
+ 	u64 stripe_count;
+ 	u64 features;		/* Might be changeable someday? */
+@@ -980,12 +978,6 @@ static int rbd_header_from_disk(struct r
  	if (first_time) {
  		header->object_prefix = object_prefix;
  		header->obj_order = ondisk->options.order;
@@ -34,7 +41,7 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
  	} else {
  		ceph_put_snap_context(header->snapc);
  		kfree(header->snap_names);
-@@ -5737,7 +5731,6 @@ static int rbd_dev_v2_header_onetime(str
+@@ -5057,7 +5049,6 @@ static int rbd_dev_v2_header_onetime(str
  		if (ret < 0)
  			goto out_err;
  	}
@@ -54,14 +61,3 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
  #define RBD_HEADER_TEXT		"<<< Rados Block Device Image >>>\n"
  #define RBD_HEADER_SIGNATURE	"RBD"
  #define RBD_HEADER_VERSION	"001.005"
---- a/include/linux/ceph/librbd.h
-+++ b/include/linux/ceph/librbd.h
-@@ -28,8 +28,6 @@ struct rbd_image_header {
- 	/* These six fields never change for a given rbd image */
- 	char *object_prefix;
- 	__u8 obj_order;
--	__u8 crypt_type;
--	__u8 comp_type;
- 	u64 stripe_unit;
- 	u64 stripe_count;
- 	u64 features;		/* Might be changeable someday? */

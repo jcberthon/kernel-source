@@ -46,5 +46,5 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
 +	rbd_img_request_put(img_request);
 +	return ret;
  }
- EXPORT_SYMBOL(rbd_img_request_submit);
  
+ static void rbd_img_parent_read_callback(struct rbd_img_request *img_request)

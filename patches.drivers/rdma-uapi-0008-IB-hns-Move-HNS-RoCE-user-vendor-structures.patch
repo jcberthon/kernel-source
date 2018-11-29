@@ -46,8 +46,8 @@ index b70531dd492a..6b483b6d714e 100644
 -#include "hns_roce_user.h"
 +#include <rdma/hns-abi.h>
  #include "hns_roce_hem.h"
- #include <linux/hns/hns.h>
  
+ /**
 diff --git a/drivers/infiniband/hw/hns/hns_roce_qp.c b/drivers/infiniband/hw/hns/hns_roce_qp.c
 index 4775b5c725a9..f036f32f15d3 100644
 --- a/drivers/infiniband/hw/hns/hns_roce_qp.c

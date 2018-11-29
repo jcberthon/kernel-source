@@ -53,8 +53,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	efi.runtime_version = efi.systab->hdr.revision;
 +
  	/* Show what we know for posterity */
- 	c16 = early_memremap(efi_to_phys(efi.systab->fw_vendor),
- 			     sizeof(vendor) * sizeof(efi_char16_t));
+ 	c16 = early_memremap_ro(efi_to_phys(efi.systab->fw_vendor),
+ 				sizeof(vendor) * sizeof(efi_char16_t));
 --- a/drivers/firmware/efi/arm-runtime.c
 +++ b/drivers/firmware/efi/arm-runtime.c
 @@ -42,10 +42,12 @@ static struct mm_struct efi_mm = {

@@ -151,15 +151,12 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  	if (op_type == OBJ_OP_DISCARD) {
  		img_request_discard_set(img_request);
  		img_request->snapc = snapc;
-@@ -2306,6 +2352,7 @@ static bool rbd_img_obj_end_request(stru
+@@ -2306,16 +2352,20 @@ static bool rbd_img_obj_end_request(stru
  		 */
  		xferred = obj_request->length;
  	}
 +	img_request->completed += xferred;
  
- 	/* Image object requests don't own their page array */
- 
-@@ -2317,12 +2364,15 @@ static bool rbd_img_obj_end_request(stru
  	if (img_request_child_test(img_request)) {
  		rbd_assert(img_request->obj_request != NULL);
  		more = obj_request->which < img_request->obj_request_count - 1;

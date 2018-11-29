@@ -40,9 +40,9 @@ index 073795f..80ea55d 100644
  	blk_rq_init(q, rq);
  	blk_rq_set_rl(rq, rl);
 +	blk_rq_set_prio(rq, ioc);
- 	req_set_op_attrs(rq, op, op_flags | REQ_ALLOCED);
+ 	rq->cmd_flags = op;
+ 	rq->rq_flags = rq_flags;
  
- 	/* init elvpriv */
 @@ -1656,7 +1657,8 @@ void init_request_from_bio(struct request *req, struct bio *bio)
  
  	req->errors = 0;

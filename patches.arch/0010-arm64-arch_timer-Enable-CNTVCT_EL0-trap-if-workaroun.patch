@@ -23,8 +23,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  static bool arch_counter_suspend_stop;
 +static bool vdso_default = true;
  
- /*
-  * Architected system timer support.
+ static bool evtstrm_enable = IS_ENABLED(CONFIG_ARM_ARCH_TIMER_EVTSTREAM);
+ 
 @@ -370,6 +371,17 @@ void arch_timer_enable_workaround(const
  	}
  

@@ -53,13 +53,13 @@ index 2f3e0b0..6f0d54d 100644
 --- a/arch/arm/kernel/asm-offsets.c
 +++ b/arch/arm/kernel/asm-offsets.c
 @@ -190,7 +190,6 @@ int main(void)
-   DEFINE(VCPU_HSR,		offsetof(struct kvm_vcpu, arch.fault.hsr));
-   DEFINE(VCPU_HxFAR,		offsetof(struct kvm_vcpu, arch.fault.hxfar));
-   DEFINE(VCPU_HPFAR,		offsetof(struct kvm_vcpu, arch.fault.hpfar));
+   DEFINE(CPU_CTXT_VFP,		offsetof(struct kvm_cpu_context, vfp));
+   DEFINE(CPU_CTXT_GP_REGS,	offsetof(struct kvm_cpu_context, gp_regs));
+   DEFINE(GP_REGS_USR,		offsetof(struct kvm_regs, usr_regs));
 -  DEFINE(VCPU_HYP_PC,		offsetof(struct kvm_vcpu, arch.fault.hyp_pc));
-   DEFINE(VCPU_VGIC_CPU,		offsetof(struct kvm_vcpu, arch.vgic_cpu));
-   DEFINE(VGIC_V2_CPU_HCR,	offsetof(struct vgic_cpu, vgic_v2.vgic_hcr));
-   DEFINE(VGIC_V2_CPU_VMCR,	offsetof(struct vgic_cpu, vgic_v2.vgic_vmcr));
+ #endif
+   BLANK();
+ #ifdef CONFIG_VDSO
 diff --git a/arch/arm/kvm/handle_exit.c b/arch/arm/kvm/handle_exit.c
 index 3ede90d..5377d75 100644
 --- a/arch/arm/kvm/handle_exit.c

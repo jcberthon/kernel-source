@@ -31,7 +31,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 -static int arm_smmu_install_ste_for_dev(struct iommu_fwspec *fwspec)
 +static void arm_smmu_install_ste_for_dev(struct iommu_fwspec *fwspec)
  {
- 	int i, j;
+ 	int i;
  	struct arm_smmu_master_data *master = fwspec->iommu_priv;
 @@ -1603,8 +1603,6 @@ static int arm_smmu_install_ste_for_dev(
  

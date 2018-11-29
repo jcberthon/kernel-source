@@ -109,7 +109,7 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
  		goto release_sq;
  
 @@ -1309,6 +1319,7 @@ static struct blk_mq_ops nvme_mq_ops = {
- 	.complete	= nvme_pci_complete_rq,
+ 	.complete	= nvme_complete_rq,
  	.init_hctx	= nvme_init_hctx,
  	.init_request	= nvme_init_request,
 +	.map_queues	= nvme_pci_map_queues,
@@ -124,7 +124,7 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
 +	result = queue_request_irq(nvmeq);
  	if (result) {
  		nvmeq->cq_vector = -1;
- 		return result;
+ 		goto free_nvmeq;
 @@ -1523,7 +1534,7 @@ static int nvme_setup_io_queues(struct n
  {
  	struct nvme_queue *adminq = dev->queues[0];
@@ -182,9 +182,9 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
 +	result = queue_request_irq(adminq);
  	if (result) {
  		adminq->cq_vector = -1;
- 		return result;
+ 		goto free_queues;
 @@ -1599,23 +1597,6 @@ static int nvme_setup_io_queues(struct n
- 	return nvme_create_io_queues(dev);
+ 	return result;
  }
  
 -static void nvme_pci_post_scan(struct nvme_ctrl *ctrl)
@@ -227,9 +227,9 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
  	cap = lo_hi_readq(dev->bar + NVME_REG_CAP);
  
 @@ -1816,10 +1791,7 @@ static void nvme_pci_disable(struct nvme
+ {
  	struct pci_dev *pdev = to_pci_dev(dev->dev);
  
- 	nvme_release_cmb(dev);
 -	if (pdev->msi_enabled)
 -		pci_disable_msi(pdev);
 -	else if (pdev->msix_enabled)

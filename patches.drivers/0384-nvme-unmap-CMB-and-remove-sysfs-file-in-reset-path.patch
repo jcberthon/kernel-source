@@ -42,9 +42,9 @@ index cc82293..ac4f85d 100644
  	struct pci_dev *pdev = to_pci_dev(dev->dev);
  
 +	nvme_release_cmb(dev);
- 	if (pdev->msi_enabled)
- 		pci_disable_msi(pdev);
- 	else if (pdev->msix_enabled)
+ 	pci_free_irq_vectors(pdev);
+ 
+ 	if (pci_is_enabled(pdev)) {
 @@ -2155,7 +2161,6 @@ static void nvme_remove(struct pci_dev *pdev)
  	flush_work(&dev->reset_work);
  	nvme_dev_remove_admin(dev);

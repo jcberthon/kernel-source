@@ -240,8 +240,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	struct sdhci_host *host;
  	struct sdhci_pltfm_host *pltfm_host;
 @@ -188,6 +344,23 @@ static int sdhci_arasan_probe(struct pla
- 	if (!sdhci_arasan)
- 		return -ENOMEM;
+ 	pltfm_host = sdhci_priv(host);
+ 	sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
  
 +	match = of_match_node(sdhci_arasan_of_match, pdev->dev.of_node);
 +	sdhci_arasan->soc_ctl_map = match->data;
@@ -264,7 +264,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	if (IS_ERR(sdhci_arasan->clk_ahb)) {
  		dev_err(&pdev->dev, "clk_ahb clock not found.\n");
 @@ -223,6 +396,8 @@ static int sdhci_arasan_probe(struct pla
- 	pltfm_host->priv = sdhci_arasan;
+ 	sdhci_get_of_property(pdev);
  	pltfm_host->clk = clk_xin;
  
 +	sdhci_arasan_update_baseclkfreq(host);
@@ -273,7 +273,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	if (ret) {
  		dev_err(&pdev->dev, "parsing dt failed (%u)\n", ret);
 @@ -282,14 +457,6 @@ static int sdhci_arasan_remove(struct pl
- 	return sdhci_pltfm_unregister(pdev);
+ 	return ret;
  }
  
 -static const struct of_device_id sdhci_arasan_of_match[] = {

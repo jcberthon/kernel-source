@@ -21,7 +21,7 @@ Acked-by: Olaf Hering <ohering@suse.de>
 diff --git a/drivers/net/hyperv/netvsc.c b/drivers/net/hyperv/netvsc.c
 --- a/drivers/net/hyperv/netvsc.c
 +++ b/drivers/net/hyperv/netvsc.c
-@@ -1250,23 +1250,12 @@ int netvsc_poll(struct napi_struct *napi, int budget)
+@@ -1250,21 +1250,12 @@ int netvsc_poll(struct napi_struct *napi, int budget)
  
  void netvsc_channel_cb(void *context)
  {
@@ -41,8 +41,6 @@ diff --git a/drivers/net/hyperv/netvsc.c b/drivers/net/hyperv/netvsc.c
 +	hv_begin_read(&nvchan->channel->inbound);
  
 -	net_device = net_device_to_netvsc_device(ndev);
--	if (unlikely(!net_device))
--		return;
 -	napi_schedule(&net_device->chan_table[q_idx].napi);
 +	napi_schedule(&nvchan->napi);
  }

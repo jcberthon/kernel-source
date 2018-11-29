@@ -62,9 +62,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
 @@ -3,6 +3,7 @@ config ARM64
- 	select ACPI_CCA_REQUIRED if ACPI
  	select ACPI_GENERIC_GSI if ACPI
  	select ACPI_REDUCED_HARDWARE_ONLY if ACPI
+ 	select ACPI_MCFG if ACPI
 +	select ARCH_CLOCKSOURCE_DATA
  	select ARCH_HAS_ATOMIC64_DEC_IF_POSITIVE
  	select ARCH_HAS_ELF_RANDOMIZE

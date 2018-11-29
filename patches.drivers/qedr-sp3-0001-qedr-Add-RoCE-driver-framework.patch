@@ -32,21 +32,19 @@ diff --git a/drivers/infiniband/Kconfig b/drivers/infiniband/Kconfig
 index 90d63a6..257172c 100644
 --- a/drivers/infiniband/Kconfig
 +++ b/drivers/infiniband/Kconfig
-@@ -89,6 +89,8 @@ source "drivers/infiniband/sw/rxe/Kconfig"
+@@ -89,4 +89,6 @@ source "drivers/infiniband/sw/rxe/Kconfig"
  
  source "drivers/infiniband/hw/hfi1/Kconfig"
  
 +source "drivers/infiniband/hw/qedr/Kconfig"
 +
- source "drivers/infiniband/hw/bnxt_re/Kconfig"
- 
  endif # INFINIBAND
 diff --git a/drivers/infiniband/hw/Makefile b/drivers/infiniband/hw/Makefile
 index 6867c99..2fed29c 100644
 --- a/drivers/infiniband/hw/Makefile
 +++ b/drivers/infiniband/hw/Makefile
 @@ -12,3 +12,4 @@ obj-$(CONFIG_INFINIBAND_BNXT_RE)	+= bnxt_re/
- 
+ obj-$(CONFIG_INFINIBAND_USNIC)		+= usnic/
  obj-$(CONFIG_INFINIBAND_HFI1)		+= hfi1/
  obj-$(CONFIG_INFINIBAND_HNS)		+= hns/
 +obj-$(CONFIG_INFINIBAND_QEDR)		+= qedr/
@@ -55,12 +53,11 @@ new file mode 100644
 index 0000000..6c9f392
 --- /dev/null
 +++ b/drivers/infiniband/hw/qedr/Kconfig
-@@ -0,0 +1,8 @@
+@@ -0,0 +1,7 @@
 +config INFINIBAND_QEDR
 +	tristate "QLogic RoCE driver"
 +	depends on 64BIT && QEDE
 +	select QED_LL2
-+	select QED_RDMA
 +	---help---
 +	  This driver provides low-level InfiniBand over Ethernet
 +	  support for QLogic QED host channel adapters (HCAs).
@@ -404,15 +401,14 @@ diff --git a/drivers/net/ethernet/qlogic/Kconfig b/drivers/net/ethernet/qlogic/K
 index 7ce1b92..44c0469 100644
 --- a/drivers/net/ethernet/qlogic/Kconfig
 +++ b/drivers/net/ethernet/qlogic/Kconfig
-@@ -147,16 +147,4 @@ config QED_ISCSI
- config QED_FCOE
- 	bool
+@@ -147,15 +147,4 @@ config QED_ISCSI
+ 	  Say Y here if you want to enable hardware offload support for
+ 	  Generic Network Virtualization Encapsulation (GENEVE) in the driver.
  
 -config INFINIBAND_QEDR
 -	tristate "QLogic qede RoCE sources [debug]"
 -	depends on QEDE && 64BIT
 -	select QED_LL2
--	select QED_RDMA
 -	default n
 -	---help---
 -	  This provides a temporary node that allows the compilation

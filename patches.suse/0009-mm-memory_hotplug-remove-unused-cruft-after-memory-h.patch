@@ -223,9 +223,9 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
 -	return 0;
 -}
 -
- static int __meminit __add_section(int nid, unsigned long phys_start_pfn)
+ static int __meminit __add_section(int nid, unsigned long phys_start_pfn,
+ 		bool want_memblock)
  {
- 	int ret;
 @@ -1312,39 +1125,6 @@ static int check_hotplug_memory_range(u6
  	return 0;
  }

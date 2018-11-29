@@ -59,7 +59,7 @@ index 2af2243..7c24291 100644
 @@ -1397,6 +1414,10 @@ read_again:
  		mbio->bi_bdev = conf->mirrors[i].rdev->bdev;
  		mbio->bi_end_io	= raid1_end_write_request;
- 		bio_set_op_attrs(mbio, op, do_flush_fua | do_sync | do_sec);
+ 		bio_set_op_attrs(mbio, op, do_flush_fua | do_sync);
 +		if (test_bit(FailFast, &conf->mirrors[i].rdev->flags) &&
 +		    !test_bit(WriteMostly, &conf->mirrors[i].rdev->flags) &&
 +		    conf->raid_disks - mddev->degraded > 1)

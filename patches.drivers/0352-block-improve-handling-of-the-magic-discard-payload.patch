@@ -270,7 +270,7 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
 +	}
  }
  
- static inline void nvme_end_request(struct request *req, __le16 status,
+ static inline int nvme_error_status(u16 status)
 --- a/drivers/nvme/host/pci.c
 +++ b/drivers/nvme/host/pci.c
 @@ -303,14 +303,14 @@ static void __nvme_submit_cmd(struct nvm
@@ -344,8 +344,8 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
  	blk_mq_start_request(req);
  
 @@ -620,14 +619,16 @@ static int nvme_queue_rq(struct blk_mq_h
- 	if (unlikely(nvmeq->cq_vector < 0)) {
- 		ret = BLK_MQ_RQ_QUEUE_ERROR;
+ 		else
+ 			ret = BLK_MQ_RQ_QUEUE_ERROR;
  		spin_unlock_irq(&nvmeq->q_lock);
 -		goto out;
 +		goto out_cleanup_iod;
@@ -428,11 +428,11 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
  	/* 
 @@ -1040,7 +1040,7 @@ int scsi_init_io(struct scsi_cmnd *cmd)
  	bool is_mq = (rq->mq_ctx != NULL);
- 	int error = BLKPREP_KILL;
+ 	int error;
  
 -	if (WARN_ON_ONCE(!rq->nr_phys_segments))
 +	if (WARN_ON_ONCE(!blk_rq_nr_phys_segments(rq)))
- 		goto err_exit;
+ 		return -EINVAL;
  
  	error = scsi_init_sgtable(rq, &cmd->sdb);
 --- a/drivers/scsi/sd.c

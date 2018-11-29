@@ -198,12 +198,14 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  }
  
  #ifdef CONFIG_DEBUG_RODATA
-@@ -450,13 +455,10 @@ void __init paging_init(void)
+@@ -450,15 +455,12 @@ void __init paging_init(void)
  	fixup_executable();
  
  	/* allocate the zero page. */
 -	zero_page = early_alloc(PAGE_SIZE);
 +	zero_page = early_pgtable_alloc(PAGE_SIZE);
+ 
+ 	bootmem_init();
  
  	empty_zero_page = virt_to_page(zero_page);
  

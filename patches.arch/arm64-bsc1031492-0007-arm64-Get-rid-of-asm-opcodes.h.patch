@@ -79,7 +79,7 @@ index 794cc44..735c905 100644
 --- a/arch/arm64/kernel/armv8_deprecated.c
 +++ b/arch/arm64/kernel/armv8_deprecated.c
 @@ -17,7 +17,6 @@
- #include <asm/alternative.h>
+ 
  #include <asm/cpufeature.h>
  #include <asm/insn.h>
 -#include <asm/opcodes.h>

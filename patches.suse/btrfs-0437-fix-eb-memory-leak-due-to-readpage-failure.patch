@@ -76,7 +76,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			err = __extent_read_full_page(tree, page,
  						      get_extent, &bio,
  						      mirror_num, &bio_flags,
- 						      READ | REQ_META);
+ 						      REQ_META);
 -			if (err)
 +			if (err) {
  				ret = err;

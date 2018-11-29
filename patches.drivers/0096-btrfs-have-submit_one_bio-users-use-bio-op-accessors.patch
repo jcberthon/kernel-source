@@ -39,8 +39,8 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	}
 +	bio_set_op_attrs(bio, REQ_OP_READ, read_mode);
  
- 	btrfs_debug(btrfs_sb(inode->i_sb),
- 		"Repair Read Error: submitting new read[%#x] to this_mirror=%d, in_validation=%d",
+ 	pr_debug("Repair Read Error: submitting new read[%#x] to this_mirror=%d, in_validation=%d\n",
+ 		 read_mode, failrec->this_mirror, failrec->in_validation);
 @@ -2724,8 +2725,8 @@ struct bio *btrfs_io_bio_alloc(gfp_t gfp
  }
  
@@ -68,7 +68,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	else
  		btrfsic_submit_bio(bio);
  
-@@ -2749,19 +2750,19 @@ static int __must_check submit_one_bio(i
+@@ -2749,20 +2750,20 @@ static int __must_check submit_one_bio(i
  	return ret;
  }
  
@@ -83,6 +83,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
 -						bio_flags);
 +		ret = tree->ops->merge_bio_hook(bio_op(bio), page, offset, size,
 +						bio, bio_flags);
+ 	BUG_ON(ret < 0);
  	return ret;
  
  }
@@ -244,9 +245,9 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	trace___extent_writepage(page, inode, wbc);
  
 @@ -3735,7 +3734,7 @@ static noinline_for_stack int write_one_
+ 	u64 offset = eb->start;
  	unsigned long i, num_pages;
  	unsigned long bio_flags = 0;
- 	unsigned long start, end;
 -	int rw = (epd->sync_io ? WRITE_SYNC : WRITE) | REQ_META;
 +	int write_flags = (epd->sync_io ? WRITE_SYNC : 0) | REQ_META;
  	int ret = 0;
@@ -312,9 +313,9 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  						      mirror_num, &bio_flags,
 -						      READ | REQ_META);
 +						      REQ_META);
- 			if (err) {
+ 			if (err)
  				ret = err;
- 				/*
+ 		} else {
 @@ -5275,8 +5274,7 @@ int read_extent_buffer_pages(struct exte
  	}
  

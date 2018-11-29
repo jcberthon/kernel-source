@@ -29,7 +29,7 @@ diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-aras
 index ed6ea6c..4c9aa88 100644
 --- a/drivers/mmc/host/sdhci-of-arasan.c
 +++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -489,6 +489,7 @@ clk_dis_ahb:
+@@ -489,13 +489,16 @@ clk_dis_ahb:
  
  static int sdhci_arasan_remove(struct platform_device *pdev)
  {
@@ -37,9 +37,6 @@ index ed6ea6c..4c9aa88 100644
  	struct sdhci_host *host = platform_get_drvdata(pdev);
  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
  	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
-@@ -498,9 +499,11 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
- 		phy_exit(sdhci_arasan->phy);
- 	}
  
 +	ret = sdhci_pltfm_unregister(pdev);
 +
@@ -49,7 +46,7 @@ index ed6ea6c..4c9aa88 100644
 +	return ret;
  }
  
- static struct platform_driver sdhci_arasan_driver = {
+ static const struct of_device_id sdhci_arasan_of_match[] = {
 -- 
 2.11.0
 

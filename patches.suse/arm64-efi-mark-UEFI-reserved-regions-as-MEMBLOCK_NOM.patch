@@ -49,6 +49,6 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +	memblock_mark_nomap(params.mmap & PAGE_MASK,
 +			    PAGE_ALIGN(params.mmap_size +
 +				       (params.mmap & ~PAGE_MASK)));
+ }
  
- 	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI)
- 		memblock_reserve(screen_info.lfb_base, screen_info.lfb_size);
+ static bool __init efi_virtmap_init(void)

@@ -16,13 +16,11 @@ Signed-off-by: Stephen Hemminger <sthemmin@microsoft.com>
 Signed-off-by: David S. Miller <davem@davemloft.net>
 Acked-by: Olaf Hering <ohering@suse.de>
 ---
- drivers/net/hyperv/hyperv_net.h   |  5 ---
- drivers/net/hyperv/netvsc.c       | 83 ++++++---------------------------------
- drivers/net/hyperv/rndis_filter.c | 11 ------
- 3 files changed, 11 insertions(+), 88 deletions(-)
+ drivers/net/hyperv/hyperv_net.h   |    5 --
+ drivers/net/hyperv/netvsc.c       |   84 ++++----------------------------------
+ drivers/net/hyperv/rndis_filter.c |   11 ----
+ 3 files changed, 10 insertions(+), 90 deletions(-)
 
-diff --git a/drivers/net/hyperv/hyperv_net.h b/drivers/net/hyperv/hyperv_net.h
-index 3958adade7eb..cce70ceba6d5 100644
 --- a/drivers/net/hyperv/hyperv_net.h
 +++ b/drivers/net/hyperv/hyperv_net.h
 @@ -748,11 +748,6 @@ struct netvsc_device {
@@ -37,11 +35,9 @@ index 3958adade7eb..cce70ceba6d5 100644
  	struct multi_send_data msd[VRSS_CHANNEL_MAX];
  	u32 max_pkt; /* max number of pkt in one send, e.g. 8 */
  	u32 pkt_align; /* alignment bytes, e.g. 8 */
-diff --git a/drivers/net/hyperv/netvsc.c b/drivers/net/hyperv/netvsc.c
-index 5a1cc089acb7..5e90c7fb1bd2 100644
 --- a/drivers/net/hyperv/netvsc.c
 +++ b/drivers/net/hyperv/netvsc.c
-@@ -67,12 +67,6 @@ static struct netvsc_device *alloc_net_device(void)
+@@ -67,12 +67,6 @@ static struct netvsc_device *alloc_net_d
  	if (!net_device)
  		return NULL;
  
@@ -54,7 +50,7 @@ index 5a1cc089acb7..5e90c7fb1bd2 100644
  	net_device->mrc[0].buf = vzalloc(NETVSC_RECVSLOT_MAX *
  					 sizeof(struct recv_comp_data));
  
-@@ -93,7 +87,6 @@ static void free_netvsc_device(struct netvsc_device *nvdev)
+@@ -93,7 +87,6 @@ static void free_netvsc_device(struct ne
  	for (i = 0; i < VRSS_CHANNEL_MAX; i++)
  		vfree(nvdev->mrc[i].buf);
  
@@ -62,7 +58,7 @@ index 5a1cc089acb7..5e90c7fb1bd2 100644
  	kfree(nvdev);
  }
  
-@@ -584,7 +577,6 @@ void netvsc_device_remove(struct hv_device *device)
+@@ -584,7 +577,6 @@ void netvsc_device_remove(struct hv_devi
  	vmbus_close(device->channel);
  
  	/* Release all resources */
@@ -70,7 +66,7 @@ index 5a1cc089acb7..5e90c7fb1bd2 100644
  	free_netvsc_device(net_device);
  }
  
-@@ -1271,16 +1263,11 @@ static void netvsc_process_raw_pkt(struct hv_device *device,
+@@ -1271,16 +1263,11 @@ static void netvsc_process_raw_pkt(struc
  
  void netvsc_channel_cb(void *context)
  {
@@ -88,14 +84,17 @@ index 5a1cc089acb7..5e90c7fb1bd2 100644
  	struct net_device *ndev;
  	bool need_to_commit = false;
  
-@@ -1292,65 +1279,19 @@ void netvsc_channel_cb(void *context)
+@@ -1292,71 +1279,22 @@ void netvsc_channel_cb(void *context)
  	net_device = get_inbound_net_device(device);
  	if (!net_device)
  		return;
 +
  	ndev = hv_get_drvdata(device);
 -	buffer = get_per_channel_state(channel);
--
+ 
+ 	/* commit_rd_index() -> hv_signal_on_read() needs this. */
+ 	init_cached_read_index(channel);
+ 
 -	do {
 -		desc = get_next_pkt_raw(channel);
 -		if (desc != NULL) {
@@ -105,7 +104,10 @@ index 5a1cc089acb7..5e90c7fb1bd2 100644
 -					       ndev,
 -					       desc->trans_id,
 -					       desc);
--
++	while ((desc = get_next_pkt_raw(channel)) != NULL) {
++		netvsc_process_raw_pkt(device, channel, net_device,
++				       ndev, desc->trans_id, desc);
+ 
 -			put_pkt_raw(channel, desc);
 -			need_to_commit = true;
 -			continue;
@@ -114,7 +116,7 @@ index 5a1cc089acb7..5e90c7fb1bd2 100644
 -			need_to_commit = false;
 -			commit_rd_index(channel);
 -		}
- 
+-
 -		ret = vmbus_recvpacket_raw(channel, buffer, bufferlen,
 -					   &bytes_recvd, &request_id);
 -		if (ret == 0) {
@@ -148,23 +150,22 @@ index 5a1cc089acb7..5e90c7fb1bd2 100644
 -
 -			bufferlen = bytes_recvd;
 -		}
+-
+-		init_cached_read_index(channel);
+-
 -	} while (1);
-+	while ((desc = get_next_pkt_raw(channel)) != NULL) {
-+		netvsc_process_raw_pkt(device, channel, net_device,
-+				       ndev, desc->trans_id, desc);
- 
--	if (bufferlen > NETVSC_PACKET_SIZE)
--		kfree(buffer);
 +		put_pkt_raw(channel, desc);
 +		need_to_commit = true;
 +	}
-+
+ 
+-	if (bufferlen > NETVSC_PACKET_SIZE)
+-		kfree(buffer);
 +	if (need_to_commit)
 +		commit_rd_index(channel);
  
  	netvsc_chk_recv_comp(net_device, channel, q_idx);
  }
-@@ -1374,8 +1315,6 @@ int netvsc_device_add(struct hv_device *device, void *additional_info)
+@@ -1380,8 +1318,6 @@ int netvsc_device_add(struct hv_device *
  
  	net_device->ring_size = ring_size;
  
@@ -173,11 +174,9 @@ index 5a1cc089acb7..5e90c7fb1bd2 100644
  	/* Open the channel */
  	ret = vmbus_open(device->channel, ring_size * PAGE_SIZE,
  			 ring_size * PAGE_SIZE, NULL, 0,
-diff --git a/drivers/net/hyperv/rndis_filter.c b/drivers/net/hyperv/rndis_filter.c
-index 8d90904e0e49..113c7f4d1590 100644
 --- a/drivers/net/hyperv/rndis_filter.c
 +++ b/drivers/net/hyperv/rndis_filter.c
-@@ -948,9 +948,6 @@ static void netvsc_sc_open(struct vmbus_channel *new_sc)
+@@ -948,9 +948,6 @@ static void netvsc_sc_open(struct vmbus_
  	if (chn_index >= nvscdev->num_chn)
  		return;
  
@@ -187,7 +186,7 @@ index 8d90904e0e49..113c7f4d1590 100644
  	nvscdev->mrc[chn_index].buf = vzalloc(NETVSC_RECVSLOT_MAX *
  					      sizeof(struct recv_comp_data));
  
-@@ -1099,14 +1096,6 @@ int rndis_filter_device_add(struct hv_device *dev,
+@@ -1099,14 +1096,6 @@ int rndis_filter_device_add(struct hv_de
  	if (net_device->num_chn == 1)
  		goto out;
  

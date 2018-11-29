@@ -25,7 +25,7 @@ index 7f91b60a3e65..724aff2a6658 100644
 +++ b/drivers/i2c/busses/i2c-designware-platdrv.c
 @@ -137,6 +137,7 @@ static const struct acpi_device_id dw_i2c_acpi_match[] = {
  	{ "80860F41", 0 },
- 	{ "808622C1", MODEL_CHERRYTRAIL },
+ 	{ "808622C1", 0 },
  	{ "AMD0010", ACCESS_INTR_MASK },
 +	{ "APMC0D0F", 0 },
  	{ }

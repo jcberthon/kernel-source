@@ -282,7 +282,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
  	/*
  	 * It can happen that the physical address of new_memmap lands in memory
-@@ -215,15 +286,13 @@ int __init efi_setup_page_tables(unsigne
+@@ -215,16 +286,14 @@ int __init efi_setup_page_tables(unsigne
  
  void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages)
  {
@@ -295,11 +295,12 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  static void __init __map_region(efi_memory_desc_t *md, u64 va)
  {
 -	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
- 	unsigned long pf = 0;
+ 	unsigned long flags = 0;
+ 	unsigned long pfn;
 +	pgd_t *pgd = efi_pgd;
  
  	if (!(md->attribute & EFI_MEMORY_WB))
- 		pf |= _PAGE_PCD;
+ 		flags |= _PAGE_PCD;
 @@ -331,9 +400,7 @@ void __init efi_runtime_mkexec(void)
  void __init efi_dump_pagetable(void)
  {

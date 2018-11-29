@@ -37,7 +37,7 @@ Acked-by: Lee Duncan <lduncan@suse.com>
 @@ -179,6 +178,12 @@ int ft_queue_status(struct se_cmd *se_cm
  		return -ENOMEM;
  	}
- 	fc_exch_done(cmd->seq);
+ 	lport->tt.exch_done(cmd->seq);
 +	/*
 +	 * Drop the extra ACK_KREF reference taken by target_submit_cmd()
 +	 * ahead of ft_check_stop_free() -> transport_generic_free_cmd()

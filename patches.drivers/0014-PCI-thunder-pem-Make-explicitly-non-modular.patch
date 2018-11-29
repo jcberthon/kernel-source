@@ -43,7 +43,7 @@ index 2902e34e10d7..4c0c9510d3f8 100644
 +#include <linux/init.h>
  #include <linux/of_address.h>
  #include <linux/of_pci.h>
- #include <linux/pci-acpi.h>
+ #include <linux/pci-ecam.h>
 @@ -365,7 +365,6 @@ static const struct of_device_id thunder_pem_of_match[] = {
  	{ .compatible = "cavium,pci-host-thunder-pem" },
  	{ },
@@ -52,7 +52,7 @@ index 2902e34e10d7..4c0c9510d3f8 100644
  
  static int thunder_pem_probe(struct platform_device *pdev)
  {
-@@ -379,10 +378,7 @@ static struct platform_driver thunder_pem_driver = {
+@@ -379,7 +378,4 @@ static struct platform_driver thunder_pem_driver = {
  	},
  	.probe = thunder_pem_probe,
  };
@@ -61,9 +61,6 @@ index 2902e34e10d7..4c0c9510d3f8 100644
 -MODULE_DESCRIPTION("Thunder PEM PCIe host driver");
 -MODULE_LICENSE("GPL v2");
 +builtin_platform_driver(thunder_pem_driver);
- 
- #endif
- #endif
 -- 
 2.11.0
 

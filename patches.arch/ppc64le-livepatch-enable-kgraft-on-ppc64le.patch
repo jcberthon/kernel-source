@@ -1,0 +1,27 @@
+From: Jeff Mahoney <jeffm@suse.com>
+Subject: ppc64le/livepatch: enable kgraft on ppc64le
+Patch-mainline: Depends on kGraft
+References: FATE#322421
+
+This patch adds the ability to enable kGraft on ppc64le.
+
+Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+---
+ arch/powerpc/Kconfig |    2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/arch/powerpc/Kconfig
++++ b/arch/powerpc/Kconfig
+@@ -165,6 +165,7 @@ config PPC
+ 	select HAVE_ARCH_SECCOMP_FILTER
+ 	select ARCH_SUPPORTS_DEFERRED_STRUCT_PAGE_INIT
+ 	select HAVE_LIVEPATCH if HAVE_DYNAMIC_FTRACE_WITH_REGS
++	select HAVE_KGRAFT if HAVE_DYNAMIC_FTRACE_WITH_REGS
+ 
+ config GENERIC_CSUM
+ 	def_bool CPU_LITTLE_ENDIAN
+@@ -1113,3 +1114,4 @@ config PPC_LIB_RHEAP
+ source "arch/powerpc/kvm/Kconfig"
+ 
+ source "kernel/livepatch/Kconfig"
++source "kernel/Kconfig.kgraft"

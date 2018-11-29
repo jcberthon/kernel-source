@@ -100,8 +100,8 @@ index 41edaba61170..66eef6bb6c35 100644
 +	u16 slb_save_cache_ptr;
 +#endif /* CONFIG_PPC_BOOK3S_64 */
  };
- #endif
  
+ extern void copy_mm_to_paca(struct mm_struct *mm);
 diff --git a/arch/powerpc/mm/slb.c b/arch/powerpc/mm/slb.c
 index 8fd7d5b5bef7..7bb6602555db 100644
 --- a/arch/powerpc/mm/slb.c
@@ -116,7 +116,7 @@ index 8fd7d5b5bef7..7bb6602555db 100644
 +	unsigned long e, v;
 +
 +	/* Save slb_cache_ptr value. */
-+	get_paca()->aux_ptr->slb_save_cache_ptr = get_paca()->slb_cache_ptr;
++	get_paca()->slb_save_cache_ptr = get_paca()->slb_cache_ptr;
 +
 +	if (!slb_ptr)
 +		return;
@@ -170,9 +170,9 @@ index 8fd7d5b5bef7..7bb6602555db 100644
 +	pr_err("----------------------------------\n");
 +
 +	/* Dump slb cache entires as well. */
-+	pr_err("SLB cache ptr value = %d\n", get_paca()->aux_ptr->slb_save_cache_ptr);
++	pr_err("SLB cache ptr value = %d\n", get_paca()->slb_save_cache_ptr);
 +	pr_err("Valid SLB cache entries:\n");
-+	n = min_t(int, get_paca()->aux_ptr->slb_save_cache_ptr, SLB_CACHE_ENTRIES);
++	n = min_t(int, get_paca()->slb_save_cache_ptr, SLB_CACHE_ENTRIES);
 +	for (i = 0; i < n; i++)
 +		pr_err("%02d EA[0-35]=%9x\n", i, get_paca()->slb_cache[i]);
 +	pr_err("Rest of SLB cache entries:\n");
@@ -194,7 +194,7 @@ index b7d9cd81fd71..d29726c878fd 100644
 +#ifdef CONFIG_PPC_BOOK3S_64
 +	/* Display faulty slb contents for SLB errors. */
 +	if (error_type == MC_ERROR_TYPE_SLB)
-+		slb_dump_contents(local_paca->aux_ptr->mce_faulty_slbs);
++		slb_dump_contents(local_paca->mce_faulty_slbs);
 +#endif
 +
  	printk("%s%s Machine check interrupt [%s]\n", level, sevstr,
@@ -214,7 +214,7 @@ index b7d9cd81fd71..d29726c878fd 100644
 +			 * level of recursion.
 +			 */
 +			if (local_paca->in_mce == 1)
-+				slb_save_contents(local_paca->aux_ptr->mce_faulty_slbs);
++				slb_save_contents(local_paca->mce_faulty_slbs);
  			flush_and_reload_slb();
  			disposition = RTAS_DISP_FULLY_RECOVERED;
  			rtas_set_disposition_recovered(errp);
@@ -234,7 +234,7 @@ index 1eb3813c4e3c..be8e1c55b648 100644
  	int ibm_nmi_register = rtas_token("ibm,nmi-register");
  	if (ibm_nmi_register == RTAS_UNKNOWN_SERVICE)
 @@ -130,6 +134,15 @@ static void __init fwnmi_init(void)
- 		paca[i].aux_ptr->mce_data_buf = mce_data_buf +
+ 		paca[i].mce_data_buf = mce_data_buf +
  						(RTAS_ERROR_LOG_MAX * i);
  	}
 +
@@ -244,7 +244,7 @@ index 1eb3813c4e3c..be8e1c55b648 100644
 +	slb_ptr = __va(memblock_alloc_base(size, sizeof(struct slb_entry),
 +					   ppc64_rma_size));
 +	for_each_possible_cpu(i)
-+		paca[i].aux_ptr->mce_faulty_slbs = slb_ptr + (mmu_slb_size * i);
++		paca[i].mce_faulty_slbs = slb_ptr + (mmu_slb_size * i);
 +#endif
  }
  

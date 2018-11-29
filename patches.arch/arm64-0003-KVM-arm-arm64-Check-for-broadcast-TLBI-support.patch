@@ -25,12 +25,12 @@ hardware.
 
 Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 ---
- arch/arm/kvm/arm.c |    7 +++++++
+ virt/kvm/arm/arm.c |    7 +++++++
  1 file changed, 7 insertions(+)
 
---- a/arch/arm/kvm/arm.c
-+++ b/arch/arm/kvm/arm.c
-@@ -1168,6 +1168,13 @@ int kvm_arch_init(void *opaque)
+--- a/virt/kvm/arm/arm.c
++++ b/virt/kvm/arm/arm.c
+@@ -1429,6 +1429,13 @@ int kvm_arch_init(void *opaque)
  	int err;
  	int ret, cpu;
  

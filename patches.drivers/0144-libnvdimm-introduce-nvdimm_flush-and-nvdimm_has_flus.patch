@@ -187,9 +187,9 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
  		return -ENOMEM;
 -	nvdimm_badblocks_populate(to_nd_region(dev->parent), &pmem->bb, res);
 +	nvdimm_badblocks_populate(nd_region, &pmem->bb, res);
- 	add_disk(disk);
+ 	disk->bb = &pmem->bb;
+ 	device_add_disk(dev, disk);
  	revalidate_disk(disk);
- 
 @@ -330,8 +345,8 @@ static int nd_pmem_remove(struct device
  
  static void nd_pmem_notify(struct device *dev, enum nvdimm_event event)

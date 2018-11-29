@@ -451,7 +451,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  };
  
 @@ -720,7 +720,7 @@ static int armv8pmu_get_event_idx(struct
- 	unsigned long evtype = hwc->config_base & ARMV8_EVTYPE_EVENT;
+ 	unsigned long evtype = hwc->config_base & ARMV8_PMU_EVTYPE_EVENT;
  
  	/* Always place a cycle counter into the cycle counter. */
 -	if (evtype == ARMV8_PMUV3_PERFCTR_CLOCK_CYCLES) {

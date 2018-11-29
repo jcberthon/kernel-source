@@ -143,7 +143,7 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
 +	setup_timer(&q->backing_dev_info->laptop_mode_wb_timer,
  		    laptop_mode_timer_fn, (unsigned long) q);
  	setup_timer(&q->timeout, blk_rq_timed_out_timer, (unsigned long) q);
- 	INIT_WORK(&q->timeout_work, NULL);
+ 	INIT_LIST_HEAD(&q->queue_head);
 @@ -770,7 +771,7 @@ struct request_queue *blk_alloc_queue_no
  fail_ref:
  	percpu_ref_exit(&q->q_usage_counter);

@@ -432,8 +432,8 @@ index d552a58a6721..25dcec3d1058 100644
  
  STATIC int
 @@ -1013,7 +1006,9 @@ xfs_vm_writepages(
+ 				xfs_find_bdev_for_inode(mapping->host), wbc);
  
- 	xfs_iflags_clear(XFS_I(mapping->host), XFS_ITRUNCATED);
  	ret = write_cache_pages(mapping, wbc, xfs_do_writepage, &wpc);
 -	return xfs_writepage_submit(&wpc, wbc, ret);
 +	if (wpc.ioend)

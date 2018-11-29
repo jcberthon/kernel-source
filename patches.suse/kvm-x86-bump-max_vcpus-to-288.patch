@@ -21,8 +21,8 @@ index 074b5c760327..21a40dc7aad6 100644
 --- a/arch/x86/include/asm/kvm_host.h
 +++ b/arch/x86/include/asm/kvm_host.h
 @@ -34,7 +34,7 @@
+ #include <asm/msr-index.h>
  #include <asm/asm.h>
- #include <asm/hyperv-tlfs.h>
  
 -#define KVM_MAX_VCPUS 255
 +#define KVM_MAX_VCPUS 288

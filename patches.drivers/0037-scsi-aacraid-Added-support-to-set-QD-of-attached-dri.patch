@@ -41,7 +41,7 @@ index 7c002e8..0957c1f 100644
 +	}
 +
 +
- 	if (!aac_export_fixed && aac->jbod && (sdev->type == TYPE_DISK))
+ 	if (aac->jbod && (sdev->type == TYPE_DISK))
  		sdev->removable = 1;
 -	if ((sdev->type == TYPE_DISK) &&
 -			(sdev_channel(sdev) != CONTAINER_CHANNEL) &&

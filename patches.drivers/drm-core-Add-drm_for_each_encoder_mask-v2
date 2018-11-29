@@ -25,7 +25,7 @@ Acked-by: Takashi Iwai <tiwai@suse.de>
 +++ b/include/drm/drm_crtc.h
 @@ -1173,6 +1173,17 @@ struct drm_mode_config {
  	list_for_each_entry((plane), &(dev)->mode_config.plane_list, head) \
- 		if ((plane_mask) & (1 << drm_plane_index(plane)))
+ 		for_each_if ((plane_mask) & (1 << drm_plane_index(plane)))
  
 +/**
 + * drm_for_each_encoder_mask - iterate over encoders specified by bitmask

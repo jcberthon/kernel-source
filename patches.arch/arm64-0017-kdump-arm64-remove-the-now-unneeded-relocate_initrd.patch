@@ -94,5 +94,5 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	paging_init();
 -	relocate_initrd();
  
- 	if (acpi_disabled)
- 		unflatten_device_tree();
+ 	kasan_init();
+ 

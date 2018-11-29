@@ -72,7 +72,7 @@ index 7919b40eeae2..aab556f0ebd4 100644
 +	SET_PACA(r13)
  	EXCEPTION_PROLOG_0(PACA_EXMC)
  BEGIN_FTR_SECTION
- 	b	machine_check_pSeries_early
+ 	b	machine_check_powernv_early
 @@ -1375,25 +1360,51 @@ machine_check_handle_early:
  	 * Check if thread was in power saving mode. We come here when any
  	 * of the following is true:

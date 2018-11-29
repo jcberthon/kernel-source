@@ -144,7 +144,7 @@ Signed-off-by: Jan Kara <jack@suse.cz>
 +blkdev_direct_IO(struct kiocb *iocb, struct iov_iter *iter)
  {
  	struct file *file = iocb->ki_filp;
- 	struct inode *inode = file->f_mapping->host;
+ 	struct inode *inode = bdev_file_inode(file);
  
  	if (IS_DAX(inode))
 -		return dax_do_io(iocb, inode, iter, offset, blkdev_get_block,
@@ -157,7 +157,7 @@ Signed-off-by: Jan Kara <jack@suse.cz>
  }
 --- a/fs/btrfs/inode.c
 +++ b/fs/btrfs/inode.c
-@@ -8636,14 +8636,14 @@ out:
+@@ -8636,13 +8636,13 @@ out:
  	return retval;
  }
  
@@ -169,7 +169,6 @@ Signed-off-by: Jan Kara <jack@suse.cz>
  	struct inode *inode = file->f_mapping->host;
  	struct btrfs_root *root = BTRFS_I(inode)->root;
  	struct btrfs_dio_data dio_data = { 0 };
- 	struct extent_changeset *data_reserved = NULL;
 +	loff_t offset = iocb->ki_pos;
  	size_t count = 0;
  	int flags = 0;
@@ -902,7 +901,7 @@ Signed-off-by: Jan Kara <jack@suse.cz>
  	trace_xfs_file_direct_write(ip, count, iocb->ki_pos, 0);
  
  	data = *from;
--	ret = mapping->a_ops->direct_IO(iocb, &data, pos);
+-	ret = mapping->a_ops->direct_IO(iocb, &data, iocb->ki_pos);
 +	ret = mapping->a_ops->direct_IO(iocb, &data);
  
  	/* see generic_file_direct_write() for why this is necessary */
@@ -968,11 +967,12 @@ Signed-off-by: Jan Kara <jack@suse.cz>
  
 --- a/mm/filemap.c
 +++ b/mm/filemap.c
-@@ -1891,7 +1891,7 @@ generic_file_read_iter(struct kiocb *ioc
- 					pos + count - 1);
+@@ -1891,8 +1891,7 @@ generic_file_read_iter(struct kiocb *ioc
+ 					iocb->ki_pos + count - 1);
  		if (!retval) {
  			struct iov_iter data = *iter;
--			retval = mapping->a_ops->direct_IO(iocb, &data, pos);
+-			retval = mapping->a_ops->direct_IO(iocb, &data,
+-					iocb->ki_pos);
 +			retval = mapping->a_ops->direct_IO(iocb, &data);
  		}
  

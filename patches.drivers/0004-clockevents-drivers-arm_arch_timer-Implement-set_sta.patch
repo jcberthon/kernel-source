@@ -27,21 +27,19 @@ diff --git a/drivers/clocksource/arm_arch_timer.c b/drivers/clocksource/arm_arch
 index 8c89c53944c8..2fd596f31498 100644
 --- a/drivers/clocksource/arm_arch_timer.c
 +++ b/drivers/clocksource/arm_arch_timer.c
-@@ -688,12 +688,14 @@ static void __arch_timer_setup(unsigned type,
- 		switch (arch_timer_uses_ppi) {
- 		case VIRT_PPI:
+@@ -688,10 +688,12 @@ static void __arch_timer_setup(unsigned type,
+ 		if (arch_timer_use_virtual) {
+ 			clk->irq = arch_timer_ppi[VIRT_PPI];
  			clk->set_state_shutdown = arch_timer_shutdown_virt;
 +			clk->set_state_oneshot_stopped = arch_timer_shutdown_virt;
  			clk->set_next_event = arch_timer_set_next_event_virt;
- 			break;
- 		case PHYS_SECURE_PPI:
- 		case PHYS_NONSECURE_PPI:
- 		case HYP_PPI:
+ 		} else {
+ 			clk->irq = arch_timer_ppi[PHYS_SECURE_PPI];
  			clk->set_state_shutdown = arch_timer_shutdown_phys;
 +			clk->set_state_oneshot_stopped = arch_timer_shutdown_phys;
  			clk->set_next_event = arch_timer_set_next_event_phys;
- 			break;
- 		default:
+ 		}
+ 	} else {
 @@ -708,10 +710,12 @@ static void __arch_timer_setup(unsigned type,
  		clk->cpumask = cpu_all_mask;
  		if (arch_timer_mem_use_virtual) {

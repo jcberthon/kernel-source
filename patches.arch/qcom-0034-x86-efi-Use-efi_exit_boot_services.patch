@@ -189,4 +189,4 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 -	return status;
  }
  
- #ifdef CONFIG_HIBERNATE_VERIFICATION
+ /*

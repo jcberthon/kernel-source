@@ -30,9 +30,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
 -#include "mm.h"
 -
- static void flush_tlb_local(void *info)
+ void flush_cache_range(struct vm_area_struct *vma, unsigned long start,
+ 		       unsigned long end)
  {
- 	local_flush_tlb_all();
 --- a/arch/arm64/mm/init.c
 +++ b/arch/arm64/mm/init.c
 @@ -34,6 +34,7 @@
@@ -81,7 +81,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 -
  u64 idmap_t0sz = TCR_T0SZ(VA_BITS);
  
- u64 kimage_voffset __section(.hyp.text);
+ u64 kimage_voffset __read_mostly;
 @@ -399,16 +397,6 @@ void mark_rodata_ro(void)
  			    section_size, PAGE_KERNEL_RO);
  }

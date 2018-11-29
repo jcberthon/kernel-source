@@ -11,24 +11,12 @@ operation.
 
 Signed-off-by: Jeff Mahoney <jeffm@suse.com>
 ---
- fs/btrfs/btrfs_inode.h |    2 +-
- fs/btrfs/super.c       |    6 ++++++
- 2 files changed, 7 insertions(+), 1 deletion(-)
+ fs/btrfs/super.c |    6 ++++++
+ 1 file changed, 6 insertions(+)
 
---- a/fs/btrfs/btrfs_inode.h
-+++ b/fs/btrfs/btrfs_inode.h
-@@ -211,7 +211,7 @@ struct btrfs_inode {
- 
- extern unsigned char btrfs_filetype_table[];
- 
--static inline struct btrfs_inode *BTRFS_I(struct inode *inode)
-+static inline struct btrfs_inode *BTRFS_I(const struct inode *inode)
- {
- 	return container_of(inode, struct btrfs_inode, vfs_inode);
- }
 --- a/fs/btrfs/super.c
 +++ b/fs/btrfs/super.c
-@@ -2260,6 +2260,11 @@ static int btrfs_show_devname(struct seq
+@@ -2273,6 +2273,11 @@ static int btrfs_show_devname(struct seq
  	return 0;
  }
  
@@ -40,7 +28,7 @@ Signed-off-by: Jeff Mahoney <jeffm@suse.com>
  static const struct super_operations btrfs_super_ops = {
  	.drop_inode	= btrfs_drop_inode,
  	.evict_inode	= btrfs_evict_inode,
-@@ -2274,6 +2279,7 @@ static const struct super_operations btr
+@@ -2287,6 +2292,7 @@ static const struct super_operations btr
  	.remount_fs	= btrfs_remount,
  	.freeze_fs	= btrfs_freeze,
  	.unfreeze_fs	= btrfs_unfreeze,

@@ -193,7 +193,7 @@ index 5572a5e..a65c0f9 100644
 -	u8 i, tc;
 +	u8 tc;
  
- 	if (tc_to_netdev->type != TC_SETUP_MQPRIO)
+ 	if (handle != TC_H_ROOT || tc_to_netdev->type != TC_SETUP_MQPRIO)
  		return -EINVAL;
  
  	tc = tc_to_netdev->tc;

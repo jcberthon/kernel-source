@@ -82,9 +82,9 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
 -	.get_pkru = svm_get_pkru,
 -
- 	.fpu_activate = svm_fpu_activate,
- 	.fpu_deactivate = svm_fpu_deactivate,
+ 	.tlb_flush = svm_flush_tlb,
  
+ 	.run = svm_vcpu_run,
 --- a/arch/x86/kvm/vmx.c
 +++ b/arch/x86/kvm/vmx.c
 @@ -601,8 +601,6 @@ struct vcpu_vmx {
@@ -145,6 +145,6 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
 -	.get_pkru = vmx_get_pkru,
 -
- 	.fpu_activate = vmx_fpu_activate,
- 	.fpu_deactivate = vmx_fpu_deactivate,
+ 	.tlb_flush = vmx_flush_tlb,
  
+ 	.run = vmx_vcpu_run,

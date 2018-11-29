@@ -59,7 +59,7 @@ index 16ac5d6..e7ff7cc 100644
 -						   ib_conn);
 +	struct iser_conn *iser_conn = to_iser_conn(ib_conn);
  	struct iser_device	*device;
- 	struct ib_device_attr *dev_attr;
+ 	struct ib_device	*ib_dev;
  	struct ib_qp_init_attr	init_attr;
 @@ -1166,9 +1165,8 @@ static void
  iser_handle_comp_error(struct ib_conn *ib_conn,

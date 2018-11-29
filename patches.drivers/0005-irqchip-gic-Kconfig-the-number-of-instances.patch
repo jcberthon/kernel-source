@@ -61,8 +61,8 @@ index 29ba671..819b7fc 100644
 -static struct gic_chip_data gic_data[MAX_GIC_NR] __read_mostly;
 +static struct gic_chip_data gic_data[CONFIG_ARM_GIC_MAX_NR] __read_mostly;
  
- static struct gic_kvm_info gic_v2_kvm_info;
- 
+ #ifdef CONFIG_GIC_NON_BANKED
+ static void __iomem *gic_get_percpu_base(union gic_base *base)
 @@ -427,8 +423,7 @@ static struct irq_chip gic_eoimode1_chip = {
  
  void __init gic_cascade_irq(unsigned int gic_nr, unsigned int irq)

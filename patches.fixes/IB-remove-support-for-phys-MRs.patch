@@ -1539,5 +1539,5 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 -						    int mr_access_flags,
 -						    u64 *iova_start);
  	struct ib_mw *             (*alloc_mw)(struct ib_pd *pd,
- 					       enum ib_mw_type type,
- 					       struct ib_udata *udata);
+ 					       enum ib_mw_type type);
+ 	int                        (*bind_mw)(struct ib_qp *qp,

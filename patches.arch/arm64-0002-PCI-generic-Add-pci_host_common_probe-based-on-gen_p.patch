@@ -45,17 +45,16 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	type = of_get_property(np, "device_type", NULL);
  	if (!type || strcmp(type, "pci")) {
  		dev_err(dev, "invalid \"device_type\" %s\n", type);
-@@ -250,9 +246,6 @@ static int gen_pci_probe(struct platform
+@@ -250,8 +246,6 @@ static int gen_pci_probe(struct platform
  
  	of_pci_check_probe_only();
  
 -	of_id = of_match_node(gen_pci_of_match, np);
--	set_dev_node(dev, of_node_to_nid(np));
 -	pci->cfg.ops = (struct gen_pci_cfg_bus_ops *)of_id->data;
  	pci->host.dev.parent = dev;
  	INIT_LIST_HEAD(&pci->host.windows);
  	INIT_LIST_HEAD(&pci->resources);
-@@ -295,6 +288,22 @@ static int gen_pci_probe(struct platform
+@@ -295,6 +288,21 @@ static int gen_pci_probe(struct platform
  	return 0;
  }
  
@@ -69,7 +68,6 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +		return -ENOMEM;
 +
 +	of_id = of_match_node(gen_pci_of_match, dev->of_node);
-+	set_dev_node(dev, of_node_to_nid(dev->of_node));
 +	pci->cfg.ops = (struct gen_pci_cfg_bus_ops *)of_id->data;
 +
 +	return pci_host_common_probe(pdev, pci);

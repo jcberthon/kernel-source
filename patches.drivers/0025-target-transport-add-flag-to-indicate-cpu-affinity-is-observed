@@ -31,8 +31,8 @@ Acked-by: Lee Duncan <lduncan@suse.com>
 +	else
 +		queue_work(target_completion_wq, &cmd->work);
  }
+ EXPORT_SYMBOL(target_complete_cmd);
  
- void target_complete_cmd(struct se_cmd *cmd, u8 scsi_status)
 @@ -1423,6 +1423,12 @@ int target_submit_cmd_map_sgls(struct se
  	 */
  	transport_init_se_cmd(se_cmd, se_tpg->se_tpg_tfo, se_sess,

@@ -27,8 +27,8 @@ index ebc65de24f64..65538149ae0a 100644
 --- a/drivers/i2c/busses/i2c-designware-platdrv.c
 +++ b/drivers/i2c/busses/i2c-designware-platdrv.c
 @@ -132,6 +132,29 @@ static inline int dw_i2c_acpi_configure(struct platform_device *pdev)
+ 	return 0;
  }
- #endif
  
 +static void dw_i2c_set_fifo_size(struct dw_i2c_dev *dev, int id)
 +{
@@ -55,9 +55,9 @@ index ebc65de24f64..65538149ae0a 100644
 +
  static int dw_i2c_plat_probe(struct platform_device *pdev)
  {
- 	struct dw_i2c_dev *dev;
+ 	struct dw_i2c_platform_data *pdata = dev_get_platdata(&pdev->dev);
 @@ -222,13 +245,7 @@ static int dw_i2c_plat_probe(struct platform_device *pdev)
- 					     1000000);
+ 				1000000);
  	}
  
 -	if (!dev->tx_fifo_depth) {

@@ -17,32 +17,18 @@ value and keep the code as is.
 
 Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 ---
- arch/arm64/mm/mmu.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ arch/arm64/mm/mmu.c |    3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index a8ce9703c282..634fadab89a6 100644
 --- a/arch/arm64/mm/mmu.c
 +++ b/arch/arm64/mm/mmu.c
-@@ -51,6 +51,9 @@ u64 idmap_t0sz = TCR_T0SZ(VA_BITS);
- u64 kimage_voffset __section(.hyp.text);
- EXPORT_SYMBOL(kimage_voffset);
+@@ -410,6 +410,9 @@ static void __init map_mem(pgd_t *pgd)
+ #endif
+ }
  
 +/* Hardcode rodata=true to fix compilation errors */
-+static bool rodata_enabled = true;
++static const bool rodata_enabled = true;
 +
- /*
-  * Empty_zero_page is a special page that is used for zero-initialized data
-  * and COW.
-@@ -547,7 +550,7 @@ static void __init map_kernel(pgd_t *pgd)
- 	 * mapping to install SW breakpoints. Allow this (only) when
- 	 * explicitly requested with rodata=off.
- 	 */
--	pgprot_t text_prot = true ? PAGE_KERNEL_ROX : PAGE_KERNEL_EXEC;
-+	pgprot_t text_prot = rodata_enabled ? PAGE_KERNEL_ROX : PAGE_KERNEL_EXEC;
- 
- 	/*
- 	 * Only rodata will be remapped with different permissions later on,
--- 
-2.11.0
-
+ #ifdef CONFIG_DEBUG_RODATA
+ void mark_rodata_ro(void)
+ {

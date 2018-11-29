@@ -106,7 +106,7 @@ index c04890a..d1c7023 100644
 --- a/drivers/pci/host/Kconfig
 +++ b/drivers/pci/host/Kconfig
 @@ -16,6 +16,16 @@ config PCI_MVEBU
- 	depends on ARCH_MVEBU || ARCH_DOVE
+ 	depends on ARM
  	depends on OF
  
 +config PCIE_XILINX_NWL

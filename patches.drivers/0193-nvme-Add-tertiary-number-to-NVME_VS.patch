@@ -27,17 +27,17 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 --- a/drivers/nvme/host/core.c
 +++ b/drivers/nvme/host/core.c
 @@ -922,9 +922,9 @@ static int nvme_revalidate_disk(struct g
- 		ns->type = NVME_NS_LIGHTNVM;
+ 		return -ENODEV;
  	}
  
 -	if (ns->ctrl->vs >= NVME_VS(1, 1))
 +	if (ns->ctrl->vs >= NVME_VS(1, 1, 0))
- 		memcpy(ns->eui, id->eui64, sizeof(ns->eui));
+ 		memcpy(ns->eui, (*id)->eui64, sizeof(ns->eui));
 -	if (ns->ctrl->vs >= NVME_VS(1, 2))
 +	if (ns->ctrl->vs >= NVME_VS(1, 2, 0))
- 		memcpy(ns->uuid, id->nguid, sizeof(ns->uuid));
+ 		memcpy(ns->uuid, (*id)->nguid, sizeof(ns->uuid));
  
- 	old_ms = ns->ms;
+ 	return 0;
 @@ -1231,7 +1231,7 @@ int nvme_init_identify(struct nvme_ctrl
  	}
  	page_shift = NVME_CAP_MPSMIN(cap) + 12;

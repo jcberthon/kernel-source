@@ -101,8 +101,8 @@ Acked-by: Takashi Iwai <tiwai@suse.de>
 --- a/arch/arm/kernel/setup.c
 +++ b/arch/arm/kernel/setup.c
 @@ -40,6 +40,7 @@
+ #include <asm/cpu.h>
  #include <asm/cputype.h>
- #include <asm/efi.h>
  #include <asm/elf.h>
 +#include <asm/early_ioremap.h>
  #include <asm/fixmap.h>

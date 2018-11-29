@@ -30,7 +30,7 @@ diff --git a/drivers/irqchip/irq-gic.c b/drivers/irqchip/irq-gic.c
 index 384daab..34ea0f3 100644
 --- a/drivers/irqchip/irq-gic.c
 +++ b/drivers/irqchip/irq-gic.c
-@@ -1031,31 +1031,33 @@ static const struct irq_domain_ops gic_irq_domain_ops = {
+@@ -1031,29 +1031,31 @@ static const struct irq_domain_ops gic_irq_domain_ops = {
  	.unmap = gic_irq_domain_unmap,
  };
  
@@ -42,8 +42,6 @@ index 384daab..34ea0f3 100644
 -	irq_hw_number_t hwirq_base;
 -	int gic_irqs, irq_base, ret;
 -
- 	gic_check_cpu_features();
- 
  	/* Initialize irq_chip */
  	gic->chip = gic_chip;
 +	gic->chip.name = name;

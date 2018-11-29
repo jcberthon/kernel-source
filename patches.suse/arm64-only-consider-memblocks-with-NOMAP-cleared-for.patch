@@ -40,5 +40,5 @@ Signed-off-by: Matt Fleming <mfleming@suse.de>
 +		if (memblock_is_nomap(reg))
 +			continue;
  
- 		__map_memblock(pgd, start, end);
- 	}
+ 		if (ARM64_SWAPPER_USES_SECTION_MAPS) {
+ 			/*

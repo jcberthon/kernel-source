@@ -14,7 +14,7 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
 
 --- a/fs/xfs/xfs_file.c
 +++ b/fs/xfs/xfs_file.c
-@@ -765,14 +765,14 @@ xfs_file_dio_aio_write(
+@@ -765,18 +765,19 @@ xfs_file_dio_aio_write(
  	int			unaligned_io = 0;
  	int			iolock;
  	size_t			count = iov_iter_count(from);
@@ -30,18 +30,13 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
 +	    ((iocb->ki_pos | count) & target->bt_logical_sectormask))
  		return -EINVAL;
  
- 	/*
-@@ -782,8 +782,8 @@ xfs_file_dio_aio_write(
- 	 * the inode as necessary for EOF zeroing cases and fill out the new
- 	 * inode size as appropriate.
- 	 */
--	if ((pos & mp->m_blockmask) ||
--		((pos + count) & mp->m_blockmask)) {
+ 	/* "unaligned" here means not aligned to a filesystem block */
+-	if ((pos & mp->m_blockmask) || ((pos + count) & mp->m_blockmask))
 +	if ((iocb->ki_pos & mp->m_blockmask) ||
-+	    ((iocb->ki_pos + count) & mp->m_blockmask)) {
++	    ((iocb->ki_pos + count) & mp->m_blockmask))
  		unaligned_io = 1;
- 		iolock = XFS_IOLOCK_EXCL;
- 	} else {
+ 
+ 	/*
 @@ -796,8 +796,7 @@ xfs_file_dio_aio_write(
  	if (ret)
  		goto out;
@@ -50,9 +45,15 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
 -	end = pos + count - 1;
 +	end = iocb->ki_pos + count - 1;
  
- 	if (mapping->nrpages) {
- 		ret = filemap_write_and_wait_range(mapping, iocb->ki_pos, end);
-@@ -835,14 +834,13 @@ xfs_file_dio_aio_write(
+ 	/*
+ 	 * See xfs_file_read_iter() for why we do a full-file flush here.
+@@ -835,19 +834,18 @@ xfs_file_dio_aio_write(
+ 	trace_xfs_file_direct_write(ip, count, iocb->ki_pos, 0);
+ 
+ 	data = *from;
+-	ret = mapping->a_ops->direct_IO(iocb, &data, pos);
++	ret = mapping->a_ops->direct_IO(iocb, &data, iocb->ki_pos);
+ 
  	/* see generic_file_direct_write() for why this is necessary */
  	if (mapping->nrpages) {
  		invalidate_inode_pages2_range(mapping,

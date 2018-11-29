@@ -34,13 +34,12 @@ index 7aa28a6..dfa1e12 100644
  }
  
  static void fc_fcp_abort_done(struct fc_fcp_pkt *fsp)
-@@ -931,6 +933,12 @@ static void fc_fcp_resp(struct fc_fcp_pkt *fsp, struct fc_frame *fp)
+@@ -931,6 +933,11 @@ static void fc_fcp_resp(struct fc_fcp_pkt *fsp, struct fc_frame *fp)
  			 * Wait a at least one jiffy to see if it is delivered.
  			 * If this expires without data, we may do SRR.
  			 */
 +			if (fsp->lp->qfull) {
-+				FC_FCP_DBG(fsp, "tgt %6.6x data underrun, "
-+					   "retry due to queue busy\n",
++				FC_FCP_DBG(fsp, "tgt %6.6x queue busy retry\n",
 +					   fsp->rport->port_id);
 +				return;
 +			}

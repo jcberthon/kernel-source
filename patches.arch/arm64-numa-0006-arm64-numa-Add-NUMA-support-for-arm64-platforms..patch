@@ -43,9 +43,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	select HAVE_PERF_EVENTS
  	select HAVE_PERF_REGS
 @@ -93,6 +94,7 @@ config ARM64
- 	select SPARSE_IRQ
  	select SYSCTL_EXCEPTION_TRACE
  	select HAVE_CONTEXT_TRACKING
+ 	select HAVE_ARM_SMCCC
 +	select OF_NUMA if NUMA && OF
  	help
  	  ARM 64-bit (AArch64) Linux support.
@@ -242,8 +242,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/arch/arm64/mm/init.c
 +++ b/arch/arm64/mm/init.c
 @@ -37,6 +37,7 @@
- 
- #include <asm/fixmap.h>
+ #include <asm/kasan.h>
+ #include <asm/kernel-pgtable.h>
  #include <asm/memory.h>
 +#include <asm/numa.h>
  #include <asm/sections.h>
@@ -281,7 +281,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  int pfn_valid(unsigned long pfn)
  {
 @@ -133,10 +151,15 @@ static void arm64_memory_present(void)
- static void arm64_memory_present(void)
+ static void __init arm64_memory_present(void)
  {
  	struct memblock_region *reg;
 +	int nid = 0;

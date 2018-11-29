@@ -43,8 +43,8 @@ index 4e853ed..8441426 100644
  
 +source "drivers/soc/bcm/Kconfig"
  source "drivers/soc/brcmstb/Kconfig"
+ source "drivers/soc/fsl/qe/Kconfig"
  source "drivers/soc/mediatek/Kconfig"
- source "drivers/soc/qcom/Kconfig"
 diff --git a/drivers/soc/Makefile b/drivers/soc/Makefile
 index f2ba2e9..f3f955c 100644
 --- a/drivers/soc/Makefile
@@ -56,7 +56,7 @@ index f2ba2e9..f3f955c 100644
 +obj-y				+= bcm/
  obj-$(CONFIG_SOC_BRCMSTB)	+= brcmstb/
  obj-$(CONFIG_MACH_DOVE)		+= dove/
- obj-$(CONFIG_ARCH_MEDIATEK)	+= mediatek/
+ obj-y				+= fsl/
 diff --git a/drivers/soc/bcm/Kconfig b/drivers/soc/bcm/Kconfig
 new file mode 100644
 index 0000000..5ba1827

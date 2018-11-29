@@ -38,7 +38,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  obj-$(CONFIG_X86_FEATURE_NAMES) += capflags.o powerflags.o
 --- /dev/null
 +++ b/arch/x86/kernel/cpu/spec_ctrl.c
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,23 @@
 +/*
 + * Speculation control stuff
 + *
@@ -47,6 +47,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
 +#include <asm/msr.h>
 +#include <asm/processor.h>
 +#include <asm/spec_ctrl.h>
++#include <asm/cpufeature.h>
 +
 +void x86_disable_ibrs(void)
 +{

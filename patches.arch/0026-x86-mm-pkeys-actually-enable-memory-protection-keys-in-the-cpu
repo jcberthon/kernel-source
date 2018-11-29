@@ -40,13 +40,13 @@ Link: http://lkml.kernel.org/r/20160212210229.6708027C@viggo.jf.intel.com
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Acked-by: Joerg Roedel <jroedel@suse.de>
 ---
- Documentation/kernel-parameters.txt |  3 +++
- arch/x86/kernel/cpu/common.c        | 43 +++++++++++++++++++++++++++++++++++++
+ Documentation/kernel-parameters.txt |    3 ++
+ arch/x86/kernel/cpu/common.c        |   43 ++++++++++++++++++++++++++++++++++++
  2 files changed, 46 insertions(+)
 
 --- a/Documentation/kernel-parameters.txt
 +++ b/Documentation/kernel-parameters.txt
-@@ -972,6 +972,9 @@ bytes respectively. Such letter suffixes
+@@ -971,6 +971,9 @@ bytes respectively. Such letter suffixes
  			See Documentation/x86/intel_mpx.txt for more
  			information about the feature.
  
@@ -58,7 +58,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  			off	disable eager fpu restore
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -290,6 +290,48 @@ static __always_inline void setup_smap(s
+@@ -357,6 +357,48 @@ static void setup_pcid(struct cpuinfo_x8
  }
  
  /*
@@ -107,7 +107,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
   * Some CPU features depend on higher CPUID levels, which may not always
   * be available due to CPUID level capping or broken virtualization
   * software.  Add those features to this table to auto-disable them.
-@@ -949,6 +991,7 @@ static void identify_cpu(struct cpuinfo_
+@@ -1171,6 +1213,7 @@ static void identify_cpu(struct cpuinfo_
  	init_hypervisor(c);
  	x86_init_rdrand(c);
  	x86_init_cache_qos(c);

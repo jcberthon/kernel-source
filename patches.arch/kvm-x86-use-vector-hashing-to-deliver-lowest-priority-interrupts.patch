@@ -30,9 +30,9 @@ index a9a984bafacb..d2b6857f9ae2 100644
 --- a/arch/x86/include/asm/kvm_host.h
 +++ b/arch/x86/include/asm/kvm_host.h
 @@ -731,6 +731,8 @@ struct kvm_arch {
- 	struct page *avic_logical_id_table_page;
- 	struct page *avic_physical_id_table_page;
- 	struct hlist_node hnode;
+ 
+ 	bool irqchip_split;
+ 	u8 nr_reserved_ioapic_pins;
 +
 +	bool disabled_lapic_found;
  };
@@ -103,8 +103,8 @@ index 5e079d26b98c..6e9d480c65a4 100644
 --- a/arch/x86/kvm/lapic.c
 +++ b/arch/x86/kvm/lapic.c
 @@ -652,6 +652,22 @@ bool kvm_apic_match_dest(struct kvm_vcpu *vcpu, struct kvm_lapic *source,
+ 	}
  }
- EXPORT_SYMBOL_GPL(kvm_apic_match_dest);
  
 +int kvm_vector_to_index(u32 vector, u32 dest_vcpus,
 +		       const unsigned long *bitmap, u32 bitmap_size)
@@ -123,7 +123,7 @@ index 5e079d26b98c..6e9d480c65a4 100644
 +}
 +
  bool kvm_irq_delivery_to_apic_fast(struct kvm *kvm, struct kvm_lapic *src,
- 		struct kvm_lapic_irq *irq, int *r, struct dest_map *dest_map)
+ 		struct kvm_lapic_irq *irq, int *r, unsigned long *dest_map)
  {
 @@ -704,21 +720,49 @@ bool kvm_irq_delivery_to_apic_fast(struct kvm *kvm, struct kvm_lapic *src,
  

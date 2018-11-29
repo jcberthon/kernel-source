@@ -255,7 +255,7 @@ index 5fc7063..a82a125 100644
 +	struct lpfc_vport *vport = shost_priv(fc_bsg_to_shost(job));
  	struct lpfc_hba *phba = vport->phba;
  	struct lpfc_iocbq *cmdiocb;
- 	struct lpfc_sli_ring *pring;
+ 	struct lpfc_sli_ring *pring = &phba->sli.ring[LPFC_ELS_RING];
 diff --git a/drivers/scsi/qla2xxx/qla_bsg.c b/drivers/scsi/qla2xxx/qla_bsg.c
 index 9293d5a..109b852 100644
 --- a/drivers/scsi/qla2xxx/qla_bsg.c

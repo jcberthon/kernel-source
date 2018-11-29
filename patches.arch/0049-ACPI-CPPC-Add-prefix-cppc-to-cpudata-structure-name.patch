@@ -44,14 +44,16 @@ diff --git a/drivers/cpufreq/cppc_cpufreq.c b/drivers/cpufreq/cppc_cpufreq.c
 index e6a33596dea3..6588ec567d93 100644
 --- a/drivers/cpufreq/cppc_cpufreq.c
 +++ b/drivers/cpufreq/cppc_cpufreq.c
-@@ -30,13 +30,13 @@
+@@ -30,7 +30,7 @@
   * performance capabilities, desired performance level
   * requested etc.
   */
 -static struct cpudata **all_cpu_data;
 +static struct cppc_cpudata **all_cpu_data;
  
- static int cppc_cpufreq_set_target(struct cpufreq_policy *policy,
+ /* Capture the max KHz from DMI */
+ static u64 cppc_dmi_max_khz;
+@@ -100,7 +100,7 @@
  		unsigned int target_freq,
  		unsigned int relation)
  {

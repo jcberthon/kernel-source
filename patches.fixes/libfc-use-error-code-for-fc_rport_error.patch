@@ -13,15 +13,13 @@ and pass the error directly.
 Signed-off-by: Hannes Reinecke <hare@suse.com>
 Acked-by: Hannes Reinecke <hare@suse.de>
 ---
- drivers/scsi/libfc/fc_rport.c | 97 +++++++++++++++++++++++++------------------
- include/scsi/libfc.h          |  5 +++
- 2 files changed, 62 insertions(+), 40 deletions(-)
+ drivers/scsi/libfc/fc_rport.c |  101 +++++++++++++++++++++++++-----------------
+ include/scsi/libfc.h          |    5 ++
+ 2 files changed, 66 insertions(+), 40 deletions(-)
 
-diff --git a/drivers/scsi/libfc/fc_rport.c b/drivers/scsi/libfc/fc_rport.c
-index 8fad3e9..ec608ef 100644
 --- a/drivers/scsi/libfc/fc_rport.c
 +++ b/drivers/scsi/libfc/fc_rport.c
-@@ -85,8 +85,8 @@ static void fc_rport_recv_prli_req(struct fc_rport_priv *, struct fc_frame *);
+@@ -85,8 +85,8 @@ static void fc_rport_recv_prli_req(struc
  static void fc_rport_recv_prlo_req(struct fc_rport_priv *, struct fc_frame *);
  static void fc_rport_recv_logo_req(struct fc_lport *, struct fc_frame *);
  static void fc_rport_timeout(struct work_struct *);
@@ -32,7 +30,7 @@ index 8fad3e9..ec608ef 100644
  static void fc_rport_work(struct work_struct *);
  
  static const char *fc_rport_state_names[] = {
-@@ -584,18 +584,17 @@ static void fc_rport_timeout(struct work_struct *work)
+@@ -604,20 +604,19 @@ static void fc_rport_timeout(struct work
  /**
   * fc_rport_error() - Error handler, called once retries have been exhausted
   * @rdata: The remote port the error is happened on
@@ -47,6 +45,8 @@ index 8fad3e9..ec608ef 100644
 -static void fc_rport_error(struct fc_rport_priv *rdata, struct fc_frame *fp)
 +static void fc_rport_error(struct fc_rport_priv *rdata, int err)
  {
+ 	struct fc_lport *lport = rdata->local_port;
+ 
 -	FC_RPORT_DBG(rdata, "Error %ld in state %s, retries %d\n",
 -		     IS_ERR(fp) ? -PTR_ERR(fp) : 0,
 -		     fc_rport_state(rdata), rdata->retries);
@@ -55,7 +55,7 @@ index 8fad3e9..ec608ef 100644
  
  	switch (rdata->rp_state) {
  	case RPORT_ST_FLOGI:
-@@ -621,7 +620,7 @@ static void fc_rport_error(struct fc_rport_priv *rdata, struct fc_frame *fp)
+@@ -649,7 +648,7 @@ static void fc_rport_error(struct fc_rpo
  /**
   * fc_rport_error_retry() - Handler for remote port state retries
   * @rdata: The remote port whose state is to be retried
@@ -64,7 +64,7 @@ index 8fad3e9..ec608ef 100644
   *
   * If the error was an exchange timeout retry immediately,
   * otherwise wait for E_D_TOV.
-@@ -631,22 +630,21 @@ static void fc_rport_error(struct fc_rport_priv *rdata, struct fc_frame *fp)
+@@ -659,22 +658,21 @@ static void fc_rport_error(struct fc_rpo
   *
   * Reference counting: increments kref when scheduling retry_work
   */
@@ -92,7 +92,7 @@ index 8fad3e9..ec608ef 100644
  			delay = 0;
  		kref_get(&rdata->kref);
  		if (!schedule_delayed_work(&rdata->retry_work, delay))
-@@ -655,7 +653,7 @@ static void fc_rport_error_retry(struct fc_rport_priv *rdata,
+@@ -683,7 +681,7 @@ static void fc_rport_error_retry(struct
  	}
  
  out:
@@ -101,19 +101,20 @@ index 8fad3e9..ec608ef 100644
  }
  
  /**
-@@ -715,8 +713,10 @@ static void fc_rport_flogi_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -743,8 +741,11 @@ static void fc_rport_flogi_resp(struct f
  	struct fc_lport *lport = rdata->local_port;
  	struct fc_els_flogi *flogi;
  	unsigned int r_a_tov;
++	u8 opcode;
 +	int err = 0;
  
 -	FC_RPORT_DBG(rdata, "Received a FLOGI %s\n", fc_els_resp_type(fp));
 +	FC_RPORT_DBG(rdata, "Received a FLOGI %s\n",
-+		     IS_ERR(fp)? "error" : fc_els_resp_type(fp));
++		     IS_ERR(fp) ? "error" : fc_els_resp_type(fp));
  
  	if (fp == ERR_PTR(-FC_EX_CLOSED))
  		goto put;
-@@ -732,18 +732,30 @@ static void fc_rport_flogi_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -760,18 +761,32 @@ static void fc_rport_flogi_resp(struct f
  	}
  
  	if (IS_ERR(fp)) {
@@ -121,14 +122,18 @@ index 8fad3e9..ec608ef 100644
 +		fc_rport_error(rdata, PTR_ERR(fp));
  		goto err;
  	}
++	opcode = fc_frame_payload_op(fp);
++	if (opcode == ELS_LS_RJT) {
++		struct fc_els_ls_rjt *rjt;
  
 -	if (fc_frame_payload_op(fp) != ELS_LS_ACC)
-+	if (fc_frame_payload_op(fp) != ELS_LS_ACC) {
-+		struct fc_els_ls_rjt *rjt;
-+
 +		rjt = fc_frame_payload_get(fp, sizeof(*rjt));
 +		FC_RPORT_DBG(rdata, "FLOGI ELS rejected, reason %x expl %x\n",
 +			     rjt->er_reason, rjt->er_explan);
++		err = -FC_EX_ELS_RJT;
++		goto bad;
++	} else if (opcode != ELS_LS_ACC) {
++		FC_RPORT_DBG(rdata, "FLOGI ELS invalid opcode %x\n", opcode);
 +		err = -FC_EX_ELS_RJT;
  		goto bad;
 -	if (fc_rport_login_complete(rdata, fp))
@@ -140,24 +145,23 @@ index 8fad3e9..ec608ef 100644
 +	}
  
  	flogi = fc_frame_payload_get(fp, sizeof(*flogi));
--	if (!flogi)
-+	if (!flogi) {
+ 	if (!flogi) {
+-		FC_RPORT_DBG(rdata, "Bad FLOGI response\n");
 +		err = -FC_EX_ALLOC_ERR;
  		goto bad;
-+	}
+ 	}
  	r_a_tov = ntohl(flogi->fl_csp.sp_r_a_tov);
- 	if (r_a_tov > rdata->r_a_tov)
- 		rdata->r_a_tov = r_a_tov;
-@@ -761,7 +773,7 @@ put:
+@@ -790,7 +805,8 @@ put:
+ 	kref_put(&rdata->kref, lport->tt.rport_destroy);
  	return;
  bad:
- 	FC_RPORT_DBG(rdata, "Bad FLOGI response\n");
 -	fc_rport_error_retry(rdata, fp);
++	FC_RPORT_DBG(rdata, "Bad FLOGI response\n");
 +	fc_rport_error_retry(rdata, err);
  	goto out;
  }
  
-@@ -789,13 +801,13 @@ static void fc_rport_enter_flogi(struct fc_rport_priv *rdata)
+@@ -818,13 +834,13 @@ static void fc_rport_enter_flogi(struct
  
  	fp = fc_frame_alloc(lport, sizeof(struct fc_els_flogi));
  	if (!fp)
@@ -173,7 +177,7 @@ index 8fad3e9..ec608ef 100644
  		kref_put(&rdata->kref, lport->tt.rport_destroy);
  	}
  }
-@@ -952,7 +964,7 @@ static void fc_rport_plogi_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -991,7 +1007,7 @@ static void fc_rport_plogi_resp(struct f
  	}
  
  	if (IS_ERR(fp)) {
@@ -182,7 +186,7 @@ index 8fad3e9..ec608ef 100644
  		goto err;
  	}
  
-@@ -974,9 +986,14 @@ static void fc_rport_plogi_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -1013,9 +1029,14 @@ static void fc_rport_plogi_resp(struct f
  		rdata->max_seq = csp_seq;
  		rdata->maxframe_size = fc_plogi_get_maxframe(plp, lport->mfs);
  		fc_rport_enter_prli(rdata);
@@ -199,7 +203,7 @@ index 8fad3e9..ec608ef 100644
  out:
  	fc_frame_free(fp);
  err:
-@@ -1027,7 +1044,7 @@ static void fc_rport_enter_plogi(struct fc_rport_priv *rdata)
+@@ -1067,7 +1088,7 @@ static void fc_rport_enter_plogi(struct
  	fp = fc_frame_alloc(lport, sizeof(struct fc_els_flogi));
  	if (!fp) {
  		FC_RPORT_DBG(rdata, "%s frame alloc failed\n", __func__);
@@ -208,7 +212,7 @@ index 8fad3e9..ec608ef 100644
  		return;
  	}
  	rdata->e_d_tov = lport->e_d_tov;
-@@ -1036,7 +1053,7 @@ static void fc_rport_enter_plogi(struct fc_rport_priv *rdata)
+@@ -1076,7 +1097,7 @@ static void fc_rport_enter_plogi(struct
  	if (!lport->tt.elsct_send(lport, rdata->ids.port_id, fp, ELS_PLOGI,
  				  fc_rport_plogi_resp, rdata,
  				  2 * lport->r_a_tov)) {
@@ -217,7 +221,7 @@ index 8fad3e9..ec608ef 100644
  		kref_put(&rdata->kref, lport->tt.rport_destroy);
  	}
  }
-@@ -1080,7 +1097,7 @@ static void fc_rport_prli_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -1123,7 +1144,7 @@ static void fc_rport_prli_resp(struct fc
  	}
  
  	if (IS_ERR(fp)) {
@@ -226,7 +230,7 @@ index 8fad3e9..ec608ef 100644
  		goto err;
  	}
  
-@@ -1099,9 +1116,9 @@ static void fc_rport_prli_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -1142,9 +1163,9 @@ static void fc_rport_prli_resp(struct fc
  		rdata->spp_type = pp->spp.spp_type;
  		if (resp_code != FC_SPP_RESP_ACK) {
  			if (resp_code == FC_SPP_RESP_CONF)
@@ -238,7 +242,7 @@ index 8fad3e9..ec608ef 100644
  			goto out;
  		}
  		if (pp->prli.prli_spp_len < sizeof(pp->spp))
-@@ -1133,7 +1150,7 @@ static void fc_rport_prli_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -1176,7 +1197,7 @@ static void fc_rport_prli_resp(struct fc
  		rjt = fc_frame_payload_get(fp, sizeof(*rjt));
  		FC_RPORT_DBG(rdata, "PRLI ELS rejected, reason %x expl %x\n",
  			     rjt->er_reason, rjt->er_explan);
@@ -247,7 +251,7 @@ index 8fad3e9..ec608ef 100644
  	}
  
  out:
-@@ -1178,7 +1195,7 @@ static void fc_rport_enter_prli(struct fc_rport_priv *rdata)
+@@ -1222,7 +1243,7 @@ static void fc_rport_enter_prli(struct f
  
  	fp = fc_frame_alloc(lport, sizeof(*pp));
  	if (!fp) {
@@ -256,7 +260,7 @@ index 8fad3e9..ec608ef 100644
  		return;
  	}
  
-@@ -1197,7 +1214,7 @@ static void fc_rport_enter_prli(struct fc_rport_priv *rdata)
+@@ -1241,7 +1262,7 @@ static void fc_rport_enter_prli(struct f
  	kref_get(&rdata->kref);
  	if (!lport->tt.exch_seq_send(lport, fp, fc_rport_prli_resp,
  				     NULL, rdata, 2 * lport->r_a_tov)) {
@@ -265,7 +269,7 @@ index 8fad3e9..ec608ef 100644
  		kref_put(&rdata->kref, lport->tt.rport_destroy);
  	}
  }
-@@ -1233,7 +1250,7 @@ static void fc_rport_rtv_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -1280,7 +1301,7 @@ static void fc_rport_rtv_resp(struct fc_
  	}
  
  	if (IS_ERR(fp)) {
@@ -274,7 +278,7 @@ index 8fad3e9..ec608ef 100644
  		goto err;
  	}
  
-@@ -1289,7 +1306,7 @@ static void fc_rport_enter_rtv(struct fc_rport_priv *rdata)
+@@ -1339,7 +1360,7 @@ static void fc_rport_enter_rtv(struct fc
  
  	fp = fc_frame_alloc(lport, sizeof(struct fc_els_rtv));
  	if (!fp) {
@@ -283,7 +287,7 @@ index 8fad3e9..ec608ef 100644
  		return;
  	}
  
-@@ -1297,7 +1314,7 @@ static void fc_rport_enter_rtv(struct fc_rport_priv *rdata)
+@@ -1347,7 +1368,7 @@ static void fc_rport_enter_rtv(struct fc
  	if (!lport->tt.elsct_send(lport, rdata->ids.port_id, fp, ELS_RTV,
  				  fc_rport_rtv_resp, rdata,
  				  2 * lport->r_a_tov)) {
@@ -292,7 +296,7 @@ index 8fad3e9..ec608ef 100644
  		kref_put(&rdata->kref, lport->tt.rport_destroy);
  	}
  }
-@@ -1377,7 +1394,7 @@ static void fc_rport_adisc_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -1430,7 +1451,7 @@ static void fc_rport_adisc_resp(struct f
  	}
  
  	if (IS_ERR(fp)) {
@@ -301,7 +305,7 @@ index 8fad3e9..ec608ef 100644
  		goto err;
  	}
  
-@@ -1426,14 +1443,14 @@ static void fc_rport_enter_adisc(struct fc_rport_priv *rdata)
+@@ -1480,14 +1501,14 @@ static void fc_rport_enter_adisc(struct
  
  	fp = fc_frame_alloc(lport, sizeof(struct fc_els_adisc));
  	if (!fp) {
@@ -318,8 +322,6 @@ index 8fad3e9..ec608ef 100644
  		kref_put(&rdata->kref, lport->tt.rport_destroy);
  	}
  }
-diff --git a/include/scsi/libfc.h b/include/scsi/libfc.h
-index 7428a53..dc42d80 100644
 --- a/include/scsi/libfc.h
 +++ b/include/scsi/libfc.h
 @@ -44,6 +44,11 @@
@@ -334,6 +336,3 @@ index 7428a53..dc42d80 100644
  
  /**
   * enum fc_lport_state - Local port states
--- 
-1.8.5.6
-

@@ -50,8 +50,8 @@ index f0cea5f9a6a8..cfbaa8b21f2b 100644
  }
  
 @@ -3003,5 +3003,5 @@ void btrfs_qgroup_check_reserved_leak(struct inode *inode)
- 		}
- 		qgroup_free(BTRFS_I(inode)->root, changeset.bytes_changed);
+ 				changeset.bytes_changed);
+ 
  	}
 -	ulist_fini(&changeset.range_changed);
 +	ulist_release(&changeset.range_changed);

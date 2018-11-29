@@ -41,7 +41,7 @@ Acked-by: Michal Hocko <mhocko@suse.cz>
 --- a/include/linux/mm.h
 +++ b/include/linux/mm.h
 @@ -1827,6 +1827,9 @@ extern void __init mmap_init(void);
- extern void show_mem(unsigned int flags);
+ extern long si_mem_available(void);
  extern void si_meminfo(struct sysinfo * val);
  extern void si_meminfo_node(struct sysinfo *val, int nid);
 +#ifdef __HAVE_ARCH_RESERVED_KERNEL_PAGES

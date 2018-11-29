@@ -107,7 +107,7 @@ index 1dd13da79f02..fe0df72532a3 100644
  	rx_stats->packets++;
  	rx_stats->bytes += len;
 @@ -882,34 +884,39 @@ static void netvsc_get_stats64(struct net_device *net,
- 						    struct rtnl_link_stats64 *t)
+ 			       struct rtnl_link_stats64 *t)
  {
  	struct net_device_context *ndev_ctx = netdev_priv(net);
 -	int cpu;

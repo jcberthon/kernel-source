@@ -37,8 +37,8 @@ index 0f2bc85..7e826c9 100644
 +}
 +
  /**
-  * vgic_v2_probe - probe for a GICv2 compatible interrupt controller
-  * @gic_kvm_info:	pointer to the GIC description
+  * vgic_v2_probe - probe for a GICv2 compatible interrupt controller in DT
+  * @node:	pointer to the DT node
 @@ -249,6 +258,9 @@ int vgic_v2_probe(const struct gic_kvm_info *gic_kvm_info,
  
  	vgic->type = VGIC_V2;

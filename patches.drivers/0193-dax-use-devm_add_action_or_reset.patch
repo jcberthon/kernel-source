@@ -70,8 +70,8 @@ index 1163b47..c3f8f58 100644
  		return rc;
 -	}
  
- 	/* adjust the dax_region resource to the start of data */
- 	res.start += le64_to_cpu(pfn_sb->dataoff);
+ 	nd_region = to_nd_region(dev->parent);
+ 	dax_region = alloc_dax_region(dev, nd_region->id, &res,
 -- 
 1.8.5.6
 

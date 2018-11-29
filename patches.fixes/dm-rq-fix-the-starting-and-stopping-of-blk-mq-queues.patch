@@ -22,14 +22,20 @@ Signed-off-by: Mike Snitzer <snitzer@redhat.com>
 Cc: stable@vger.kernel.org # must patch dm.c on < 4.8 kernels
 Signed-off-by: Hannes Reinecke <hare@suse.com>
 ---
- drivers/md/dm.c | 20 +++++++++++++++++++-
+ drivers/md/dm-rq.c |   20 +++++++++++++++++++-
  1 file changed, 19 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/md/dm.c b/drivers/md/dm.c
-index 87ab831..9ff6f6a 100644
---- a/drivers/md/dm.c
-+++ b/drivers/md/dm.c
-@@ -1297,8 +1297,14 @@ static void dm_stop_queue(struct request_queue *q)
+--- a/drivers/md/dm-rq.c
++++ b/drivers/md/dm-rq.c
+@@ -78,6 +78,7 @@ void dm_start_queue(struct request_queue
+ 	if (!q->mq_ops)
+ 		dm_old_start_queue(q);
+ 	else {
++		queue_flag_clear_unlocked(QUEUE_FLAG_STOPPED, q);
+ 		blk_mq_start_stopped_hw_queues(q, true);
+ 		blk_mq_kick_requeue_list(q);
+ 	}
+@@ -101,8 +102,14 @@ void dm_stop_queue(struct request_queue
  {
  	if (!q->mq_ops)
  		dm_old_stop_queue(q);
@@ -44,16 +50,8 @@ index 87ab831..9ff6f6a 100644
 +	}
  }
  
- static void dm_old_start_queue(struct request_queue *q)
-@@ -1316,6 +1322,7 @@ static void dm_start_queue(struct request_queue *q)
- 	if (!q->mq_ops)
- 		dm_old_start_queue(q);
- 	else {
-+		queue_flag_clear_unlocked(QUEUE_FLAG_STOPPED, q);
- 		blk_mq_start_stopped_hw_queues(q, true);
- 		blk_mq_kick_requeue_list(q);
- 	}
-@@ -2740,6 +2747,17 @@ static int dm_mq_queue_rq(struct blk_mq_hw_ctx *hctx,
+ static struct dm_rq_target_io *alloc_old_rq_tio(struct mapped_device *md,
+@@ -864,6 +871,17 @@ static int dm_mq_queue_rq(struct blk_mq_
  		dm_put_live_table(md, srcu_idx);
  	}
  
@@ -71,6 +69,3 @@ index 87ab831..9ff6f6a 100644
  	if (ti->type->busy && ti->type->busy(ti))
  		return BLK_MQ_RQ_QUEUE_BUSY;
  
--- 
-1.8.5.6
-

@@ -111,18 +111,18 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +err_phy_power:
 +	if (!IS_ERR(sdhci_arasan->phy))
 +		phy_exit(sdhci_arasan->phy);
- err_pltfm_free:
- 	sdhci_pltfm_free(pdev);
  clk_disable_all:
+ 	clk_disable_unprepare(clk_xin);
+ clk_dis_ahb:
 @@ -205,6 +255,11 @@ static int sdhci_arasan_remove(struct pl
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
+ 	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+ 	struct clk *clk_ahb = sdhci_arasan->clk_ahb;
  
 +	if (!IS_ERR(sdhci_arasan->phy)) {
 +		phy_power_off(sdhci_arasan->phy);
 +		phy_exit(sdhci_arasan->phy);
 +	}
 +
- 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
+ 	ret = sdhci_pltfm_unregister(pdev);
  
- 	return sdhci_pltfm_unregister(pdev);
+ 	clk_disable_unprepare(clk_ahb);

@@ -95,17 +95,17 @@ index 8f9a2e44b293..ac8945a20a0f 100644
  	__uint32_t		m_generation;
 +
 +	bool			m_fail_unmount;
- 	const char		*m_mtpt;
  } xfs_mount_t;
  
+ /*
 @@ -188,6 +190,7 @@ typedef struct xfs_mount {
  #define XFS_MOUNT_WSYNC		(1ULL << 0)	/* for nfs - all metadata ops
  						   must be synchronous except
  						   for space allocations */
 +#define XFS_MOUNT_UNMOUNTING	(1ULL << 1)	/* filesystem is unmounting */
- #define XFS_MOUNT_DMAPI		(1ULL << 2)	/* dmapi is enabled */
  #define XFS_MOUNT_WAS_CLEAN	(1ULL << 3)
  #define XFS_MOUNT_FS_SHUTDOWN	(1ULL << 4)	/* atomic stop of all filesystem
+ 						   operations, typically for
 diff --git a/fs/xfs/xfs_sysfs.c b/fs/xfs/xfs_sysfs.c
 index b710a055f3bb..723ef04d4733 100644
 --- a/fs/xfs/xfs_sysfs.c

@@ -30,15 +30,6 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		ASSERT(ent->fields.trig_mode == IOAPIC_LEVEL_TRIG);
 --- a/arch/x86/kvm/lapic.c
 +++ b/arch/x86/kvm/lapic.c
-@@ -130,7 +130,7 @@ static inline int apic_enabled(struct kv
- 
- static inline int kvm_apic_id(struct kvm_lapic *apic)
- {
--	return (kvm_apic_get_reg(apic, APIC_ID) >> 24) & 0xff;
-+	return (kvm_lapic_get_reg(apic, APIC_ID) >> 24) & 0xff;
- }
- 
- /* The logical map is definitely wrong if we have multiple
 @@ -177,7 +177,7 @@ static void recalculate_apic_map(struct
  			continue;
  
@@ -203,11 +194,11 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 @@ -1399,7 +1399,7 @@ static int apic_reg_write(struct kvm_lap
  			u32 lvt_val;
  
- 			for (i = 0; i < APIC_LVT_NUM; i++) {
+ 			for (i = 0; i < KVM_APIC_LVT_NUM; i++) {
 -				lvt_val = kvm_apic_get_reg(apic,
 +				lvt_val = kvm_lapic_get_reg(apic,
  						       APIC_LVTT + 0x10 * i);
- 				apic_set_reg(apic, APIC_LVTT + 0x10 * i,
+ 				kvm_lapic_set_reg(apic, APIC_LVTT + 0x10 * i,
  					     lvt_val | APIC_LVT_MASKED);
 @@ -1597,7 +1597,7 @@ void kvm_lapic_set_tpr(struct kvm_vcpu *
  		return;
@@ -229,12 +220,12 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  }
 @@ -1679,7 +1679,7 @@ void kvm_lapic_reset(struct kvm_vcpu *vc
  	if (kvm_check_has_quirk(vcpu->kvm, KVM_X86_QUIRK_LINT0_REENABLED))
- 		apic_set_reg(apic, APIC_LVT0,
+ 		kvm_lapic_set_reg(apic, APIC_LVT0,
  			     SET_APIC_DELIVERY_MODE(0, APIC_MODE_EXTINT));
 -	apic_manage_nmi_watchdog(apic, kvm_apic_get_reg(apic, APIC_LVT0));
 +	apic_manage_nmi_watchdog(apic, kvm_lapic_get_reg(apic, APIC_LVT0));
  
- 	apic_set_reg(apic, APIC_DFR, 0xffffffffU);
+ 	kvm_lapic_set_reg(apic, APIC_DFR, 0xffffffffU);
  	apic_set_spiv(apic, 0xff);
 @@ -1740,7 +1740,7 @@ int apic_has_pending_timer(struct kvm_vc
  
@@ -283,8 +274,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 --- a/arch/x86/kvm/lapic.h
 +++ b/arch/x86/kvm/lapic.h
 @@ -100,9 +100,9 @@ int kvm_lapic_enable_pv_eoi(struct kvm_v
- void kvm_lapic_init(void);
- void kvm_lapic_exit(void);
+ 	apic->irr_pending = true;
+ }
  
 -static inline u32 kvm_apic_get_reg(struct kvm_lapic *apic, int reg_off)
 +static inline u32 kvm_lapic_get_reg(struct kvm_lapic *apic, int reg_off)
@@ -293,4 +284,13 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 +	return *((u32 *) (apic->regs + reg_off));
  }
  
- extern struct static_key kvm_no_apic_vcpu;
+ static inline void kvm_lapic_set_reg(struct kvm_lapic *apic, int reg_off, u32 val)
+@@ -130,7 +130,7 @@ static inline int apic_enabled(struct kv
+ 
+ static inline int kvm_apic_id(struct kvm_lapic *apic)
+ {
+-	return (kvm_apic_get_reg(apic, APIC_ID) >> 24) & 0xff;
++	return (kvm_lapic_get_reg(apic, APIC_ID) >> 24) & 0xff;
+ }
+ 
+ bool kvm_apic_pending_eoi(struct kvm_vcpu *vcpu, int vector);

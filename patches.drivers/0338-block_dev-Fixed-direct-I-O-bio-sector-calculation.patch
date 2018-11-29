@@ -22,8 +22,8 @@ index 5efdc41..f3d64da 100644
 --- a/fs/block_dev.c
 +++ b/fs/block_dev.c
 @@ -224,7 +224,7 @@ __blkdev_direct_IO_simple(struct kiocb *iocb, struct iov_iter *iter,
- 
- 	bio_init(&bio, vecs, nr_pages);
+ 	bio.bi_max_vecs = nr_pages;
+ 	bio.bi_io_vec = vecs;
  	bio.bi_bdev = bdev;
 -	bio.bi_iter.bi_sector = pos >> blkbits;
 +	bio.bi_iter.bi_sector = pos >> 9;

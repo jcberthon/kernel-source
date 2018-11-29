@@ -30,8 +30,8 @@ index 48fdc1b..ce3078a 100644
  		goto out_unlock;
 -	}
  
- 	rc = acpi_nfit_register_dimms(acpi_desc);
- 	if (rc)
+ 	acpi_nfit_init_dsms(acpi_desc);
+ 
 -- 
 1.8.5.6
 

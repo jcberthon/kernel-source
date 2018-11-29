@@ -54,7 +54,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 +#include <net/ipv6.h>
  
  #include <asm/byteorder.h>
- #include <asm/uaccess.h>
+ #include <linux/uaccess.h>
 @@ -300,6 +302,107 @@ out:
  }
  EXPORT_SYMBOL(in6_pton);

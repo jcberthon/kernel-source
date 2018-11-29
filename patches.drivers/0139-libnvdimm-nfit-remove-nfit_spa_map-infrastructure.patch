@@ -210,12 +210,11 @@ diff --git a/drivers/acpi/nfit.h b/drivers/acpi/nfit.h
 index cdbded8..87c02a4 100644
 --- a/drivers/acpi/nfit.h
 +++ b/drivers/acpi/nfit.h
-@@ -138,9 +138,8 @@ struct nfit_mem {
- struct acpi_nfit_desc {
+@@ -138,9 +138,7 @@ struct nfit_mem {
  	struct nvdimm_bus_descriptor nd_desc;
  	struct acpi_table_header acpi_header;
+ 	struct acpi_nfit_header *nfit;
 -	struct mutex spa_map_mutex;
-+	struct acpi_nfit_header *nfit;
  	struct mutex init_mutex;
 -	struct list_head spa_maps;
  	struct list_head memdevs;

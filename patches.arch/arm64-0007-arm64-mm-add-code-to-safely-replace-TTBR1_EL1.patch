@@ -76,7 +76,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/arch/arm64/mm/proc.S
 +++ b/arch/arm64/mm/proc.S
 @@ -152,6 +152,34 @@ alternative_else
- alternative_endif
+ 	ret
  ENDPROC(cpu_do_switch_mm)
  
 +	.pushsection ".idmap.text", "ax"

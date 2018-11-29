@@ -93,7 +93,7 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
 +		blk_mq_register_dev(dev, q);
  
  	if (!q->request_fn)
- 		goto unlock;
+ 		return 0;
 @@ -735,7 +735,7 @@ void blk_unregister_queue(struct gendisk
  		return;
  

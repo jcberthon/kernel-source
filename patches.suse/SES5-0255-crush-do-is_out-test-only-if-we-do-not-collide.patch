@@ -13,14 +13,12 @@ Reflects ceph.git commit db107cc7f15cf2481894add325dc93e33479f529.
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 Acked-by: Luis Henriques <lhenriques@suse.com>
 ---
- net/ceph/crush/mapper.c | 4 +---
+ net/ceph/crush/mapper.c |    4 +---
  1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-index 2e31217ccae3..84d2de047865 100644
 --- a/net/ceph/crush/mapper.c
 +++ b/net/ceph/crush/mapper.c
-@@ -552,14 +552,12 @@ static int crush_choose_firstn(const struct crush_map *map,
+@@ -552,14 +552,12 @@ static int crush_choose_firstn(const str
  					}
  				}
  
@@ -36,4 +34,3 @@ index 2e31217ccae3..84d2de047865 100644
  				}
  
  reject:
-

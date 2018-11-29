@@ -51,8 +51,8 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
  static DEVICE_ATTR(current_snap, S_IRUGO, rbd_snap_show, NULL);
 +static DEVICE_ATTR(snap_id, S_IRUGO, rbd_snap_id_show, NULL);
  static DEVICE_ATTR(parent, S_IRUGO, rbd_parent_show, NULL);
- static DEVICE_ATTR(setxattr, S_IWUSR, NULL, rbd_setxattr_set);
- static DEVICE_ATTR(cmpsetxattr, S_IWUSR, NULL, rbd_cmpsetxattr_set);
+ 
+ static struct attribute *rbd_attrs[] = {
 @@ -4603,6 +4612,7 @@ static struct attribute *rbd_attrs[] = {
  	&dev_attr_name.attr,
  	&dev_attr_image_id.attr,
@@ -60,4 +60,4 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
 +	&dev_attr_snap_id.attr,
  	&dev_attr_parent.attr,
  	&dev_attr_refresh.attr,
- 	&dev_attr_setxattr.attr,
+ 	NULL

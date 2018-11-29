@@ -32,7 +32,7 @@ Acked-by: David Chang <dchang@suse.com>
  #define QEDE_MIN_PKT_LEN	64
  #define QEDE_RX_HDR_SIZE	256
 +#define QEDE_MAX_JUMBO_PACKET_SIZE	9600
- #define	for_each_rss(i) for (i = 0; i < edev->num_rss; i++)
+ #define	for_each_queue(i) for (i = 0; i < edev->num_queues; i++)
  
  #endif /* _QEDE_H_ */
 --- a/drivers/net/ethernet/qlogic/qede/qede_ethtool.c

@@ -27,9 +27,9 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	struct page *avic_logical_id_table_page;
  	struct page *avic_physical_id_table_page;
 +	struct hlist_node hnode;
- };
  
- struct kvm_vm_stat {
+ 	bool disabled_lapic_found;
+ 
 --- a/arch/x86/kvm/svm.c
 +++ b/arch/x86/kvm/svm.c
 @@ -34,6 +34,8 @@

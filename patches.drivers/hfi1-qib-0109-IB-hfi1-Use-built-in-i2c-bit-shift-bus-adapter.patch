@@ -37,9 +37,9 @@ index a925fb0..bac1860 100644
  	select MMU_NOTIFIER
  	select CRC32
 +	select I2C_ALGOBIT
- 	default m
  	---help---
  	This is a low-level driver for Intel OPA Gen1 adapter.
+ config HFI1_DEBUG_SDMA_ORDER
 diff --git a/drivers/infiniband/hw/hfi1/chip.c b/drivers/infiniband/hw/hfi1/chip.c
 index 0de6c0c..22bfe0e 100644
 --- a/drivers/infiniband/hw/hfi1/chip.c

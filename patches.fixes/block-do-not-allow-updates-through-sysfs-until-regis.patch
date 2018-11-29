@@ -24,17 +24,18 @@ Signed-off-by: Tahsin Erdogan <tahsin@google.com>
 Signed-off-by: Jens Axboe <axboe@fb.com>
 Signed-off-by: Hannes Reinecke <hare@suse.com>
 ---
- block/blk-sysfs.c | 15 ++++++++++-----
- 1 file changed, 10 insertions(+), 5 deletions(-)
+ block/blk-sysfs.c |   20 +++++++++++++-------
+ 1 file changed, 13 insertions(+), 7 deletions(-)
 
-diff --git a/block/blk-sysfs.c b/block/blk-sysfs.c
-index e08a771..de251e3 100644
 --- a/block/blk-sysfs.c
 +++ b/block/blk-sysfs.c
-@@ -695,10 +695,13 @@ int blk_register_queue(struct gendisk *disk)
+@@ -884,21 +884,24 @@ int blk_register_queue(struct gendisk *d
  	if (ret)
  		return ret;
  
++	if (q->mq_ops)
++		blk_mq_register_dev(dev, q);
++
 +	/* Prevent changes through sysfs until registration is completed. */
 +	mutex_lock(&q->sysfs_lock);
 +
@@ -46,8 +47,11 @@ index e08a771..de251e3 100644
  	}
  
  	kobject_uevent(&q->kobj, KOBJ_ADD);
-@@ -707,7 +710,7 @@ int blk_register_queue(struct gendisk *disk)
- 		blk_mq_register_disk(disk);
+ 
+-	if (q->mq_ops)
+-		blk_mq_register_dev(dev, q);
+-
+ 	blk_wb_init(q);
  
  	if (!q->request_fn)
 -		return 0;
@@ -55,7 +59,7 @@ index e08a771..de251e3 100644
  
  	ret = elv_register_queue(q);
  	if (ret) {
-@@ -715,10 +718,12 @@ int blk_register_queue(struct gendisk *disk)
+@@ -906,10 +910,12 @@ int blk_register_queue(struct gendisk *d
  		kobject_del(&q->kobj);
  		blk_trace_remove_sysfs(dev);
  		kobject_put(&dev->kobj);
@@ -71,6 +75,3 @@ index e08a771..de251e3 100644
  }
  
  void blk_unregister_queue(struct gendisk *disk)
--- 
-1.8.5.6
-

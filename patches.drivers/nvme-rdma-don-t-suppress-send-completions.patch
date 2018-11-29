@@ -113,8 +113,8 @@ index 41f81c4203f1..1ddbf04f3777 100644
  	struct nvme_command *c = sqe->data;
 -	bool flush = false;
  	struct ib_device *dev;
- 	bool queue_ready = test_bit(NVME_RDMA_Q_LIVE, &queue->flags);
  	int ret;
+ 
 @@ -1480,14 +1464,14 @@ static int nvme_rdma_queue_rq(struct blk_mq_hw_ctx *hctx,
  		goto err;
  	}

@@ -26,6 +26,6 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 -	select ARMADA_AP806_RING_CLK
 +	select ARMADA_AP806_SYSCON
 +	select ARMADA_CP110_SYSCON
- 	select ARMADA_37XX_CLK
  	select MVEBU_ODMI
  	help
+ 	  This enables support for Marvell EBU familly, including:

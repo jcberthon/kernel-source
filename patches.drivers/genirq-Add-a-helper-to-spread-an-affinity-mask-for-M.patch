@@ -59,9 +59,9 @@ index 2fc9cbd..7c3f010 100644
 --- a/kernel/irq/Makefile
 +++ b/kernel/irq/Makefile
 @@ -8,3 +8,4 @@ obj-$(CONFIG_GENERIC_PENDING_IRQ) += migration.o
- obj-$(CONFIG_GENERIC_IRQ_MIGRATION) += cpuhotplug.o
  obj-$(CONFIG_PM_SLEEP) += pm.o
  obj-$(CONFIG_GENERIC_MSI_IRQ) += msi.o
+ obj-$(CONFIG_GENERIC_IRQ_IPI) += ipi.o
 +obj-$(CONFIG_SMP) += affinity.o
 diff --git a/kernel/irq/affinity.c b/kernel/irq/affinity.c
 new file mode 100644

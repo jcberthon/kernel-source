@@ -69,10 +69,11 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  #endif /* _ASM_S390_DIAG_H */
 --- a/arch/s390/kernel/diag.c
 +++ b/arch/s390/kernel/diag.c
-@@ -220,6 +220,20 @@ int diag210(struct diag210 *addr)
+@@ -220,3 +220,18 @@ int diag210(struct diag210 *addr)
+ 	return ccode;
  }
  EXPORT_SYMBOL(diag210);
- 
++
 +int diag224(void *ptr)
 +{
 +	int rc = -EOPNOTSUPP;
@@ -87,6 +88,3 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 +	return rc;
 +}
 +EXPORT_SYMBOL(diag224);
- /*
-  * Diagnose 26C: Access Certain System Information
-  */

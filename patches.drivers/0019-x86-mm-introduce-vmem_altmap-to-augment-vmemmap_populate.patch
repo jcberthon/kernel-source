@@ -155,13 +155,13 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 @@ -279,7 +279,8 @@ extern int offline_pages(unsigned long s
  extern bool is_memblock_offlined(struct memory_block *mem);
  extern void remove_memory(int nid, u64 start, u64 size);
- extern int sparse_add_one_section(struct pglist_data *pgdat, unsigned long start_pfn);
+ extern int sparse_add_one_section(struct zone *zone, unsigned long start_pfn);
 -extern void sparse_remove_one_section(struct zone *zone, struct mem_section *ms);
 +extern void sparse_remove_one_section(struct zone *zone, struct mem_section *ms,
 +		unsigned long map_offset);
  extern struct page *sparse_decode_mem_map(unsigned long coded_mem_map,
  					  unsigned long pnum);
- extern bool allow_online_pfn_range(int nid, unsigned long pfn, unsigned long nr_pages,
+ 
 --- a/include/linux/memremap.h
 +++ b/include/linux/memremap.h
 @@ -4,21 +4,53 @@
@@ -380,11 +380,13 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  #include <linux/memory_hotplug.h>
  #include <linux/highmem.h>
  #include <linux/vmalloc.h>
-@@ -321,11 +322,25 @@ int __ref __add_pages(int nid, unsigned
+@@ -321,13 +322,27 @@ int __ref __add_pages(int nid, unsigned
  	unsigned long i;
  	int err = 0;
  	int start_sec, end_sec;
 +	struct vmem_altmap *altmap;
+ 
+ 	clear_zone_contiguous(zone);
  
  	/* during initialize mem_map, align hot-added range to section */
  	start_sec = pfn_to_section_nr(phys_start_pfn);
@@ -404,7 +406,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 +	}
 +
  	for (i = start_sec; i <= end_sec; i++) {
- 		err = __add_section(nid, section_nr_to_pfn(i), want_memblock);
+ 		err = __add_section(nid, zone, section_nr_to_pfn(i));
  
 @@ -548,7 +563,8 @@ static void __remove_zone(struct zone *z
  	pgdat_resize_unlock(zone->zone_pgdat, &flags);
@@ -417,7 +419,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  	unsigned long start_pfn;
  	int scn_nr;
 @@ -565,7 +581,7 @@ static int __remove_section(struct zone
- 	start_pfn = section_nr_to_pfn((unsigned long)scn_nr);
+ 	start_pfn = section_nr_to_pfn(scn_nr);
  	__remove_zone(zone, start_pfn);
  
 -	sparse_remove_one_section(zone, ms);
@@ -461,7 +463,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  
  	clear_zone_contiguous(zone);
  
-@@ -596,25 +635,13 @@ int __remove_pages(struct zone *zone, un
+@@ -596,23 +635,11 @@ int __remove_pages(struct zone *zone, un
  	BUG_ON(phys_start_pfn & ~PAGE_SECTION_MASK);
  	BUG_ON(nr_pages % PAGES_PER_SECTION);
  
@@ -481,8 +483,6 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  	sections_to_remove = nr_pages / PAGES_PER_SECTION;
  	for (i = 0; i < sections_to_remove; i++) {
  		unsigned long pfn = phys_start_pfn + i*PAGES_PER_SECTION;
- 
- 		cond_resched();
 -		ret = __remove_section(zone, __pfn_to_section(pfn));
 +		ret = __remove_section(zone, __pfn_to_section(pfn), map_offset);
 +		map_offset = 0;

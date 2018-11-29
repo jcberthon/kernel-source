@@ -57,7 +57,7 @@ index 2ddf62e..9499357 100644
 @@ -2323,11 +2329,6 @@ read_more:
  	} else {
  		const unsigned long do_sync
- 			= r1_bio->master_bio->bi_rw & REQ_SYNC;
+ 			= r1_bio->master_bio->bi_opf & REQ_SYNC;
 -		if (bio) {
 -			r1_bio->bios[r1_bio->read_disk] =
 -				mddev->ro ? IO_BLOCKED : NULL;

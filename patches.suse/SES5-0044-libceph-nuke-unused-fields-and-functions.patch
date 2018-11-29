@@ -68,7 +68,7 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
  	struct rb_root         requests;      /* pending requests */
  	struct list_head       req_lru;	      /* in-flight lru */
 @@ -300,9 +295,6 @@ extern struct ceph_osd_data *osd_req_op_
- extern struct ceph_osd_data *osd_req_op_extent_osd_response_data(
+ extern struct ceph_osd_data *osd_req_op_extent_osd_data(
  					struct ceph_osd_request *osd_req,
  					unsigned int which);
 -extern struct ceph_osd_data *osd_req_op_cls_response_data(
@@ -129,7 +129,7 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
 +++ b/net/ceph/osd_client.c
 @@ -162,14 +162,6 @@ osd_req_op_extent_osd_response_data(stru
  }
- EXPORT_SYMBOL(osd_req_op_extent_osd_response_data);
+ EXPORT_SYMBOL(osd_req_op_extent_osd_data);
  
 -struct ceph_osd_data *
 -osd_req_op_cls_response_data(struct ceph_osd_request *osd_req,

@@ -25,11 +25,10 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  			reader made by F.H. Papenmeier (Germany).
 --- a/kernel/sched/core.c
 +++ b/kernel/sched/core.c
-@@ -8610,3 +8610,13 @@ void dump_cpu_task(int cpu)
- 	pr_info("Task dump for CPU %d:\n", cpu);
- 	sched_show_task(cpu_curr(cpu));
- }
-+
+@@ -8610,3 +8610,12 @@ void dump_cpu_task(int cpu)
+  /*  15 */ 119304647, 148102320, 186737708, 238609294, 286331153,
+ };
+ 
 +/*
 + * Bootline option to disable sched_rt_runtime.
 + */

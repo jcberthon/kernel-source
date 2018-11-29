@@ -49,7 +49,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	 * mapping to install SW breakpoints. Allow this (only) when
 +	 * explicitly requested with rodata=off.
 +	 */
-+	pgprot_t text_prot = true ? PAGE_KERNEL_ROX : PAGE_KERNEL_EXEC;
++	pgprot_t text_prot = rodata_enabled ? PAGE_KERNEL_ROX : PAGE_KERNEL_EXEC;
 +
 +	map_kernel_segment(pgd, _text, _etext, text_prot, &vmlinux_text);
  	map_kernel_segment(pgd, __start_rodata, __init_begin, PAGE_KERNEL, &vmlinux_rodata);

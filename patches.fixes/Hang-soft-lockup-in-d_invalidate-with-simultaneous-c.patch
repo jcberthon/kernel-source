@@ -53,6 +53,6 @@ index c655d6841c2d..7c6e64091c7c 100644
 -
 -		if (!data.mountpoint && !data.select.found)
 -			break;
+ 
+ 		cond_resched();
  	}
- }
- EXPORT_SYMBOL(d_invalidate);

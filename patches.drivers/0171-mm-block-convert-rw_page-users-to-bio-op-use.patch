@@ -363,8 +363,8 @@ Acked-by: Hannes Reinecke <hare@suse.de>
 --- a/include/linux/blk_types.h
 +++ b/include/linux/blk_types.h
 @@ -26,6 +26,17 @@ struct bio_vec {
- 	unsigned int	bv_offset;
- };
+ typedef void (bio_end_io_t) (struct bio *);
+ typedef void (bio_destructor_t) (struct bio *);
  
 +enum req_op {
 +	REQ_OP_READ,
@@ -378,8 +378,8 @@ Acked-by: Hannes Reinecke <hare@suse.de>
 +#define REQ_OP_BITS 3
 +
  #ifdef CONFIG_BLOCK
- 
- struct bvec_iter {
+ /*
+  * main unit of I/O for the block layer and lower layers (ie drivers and
 @@ -248,17 +259,6 @@ enum rq_flag_bits {
  #define REQ_HASHED		(1ULL << __REQ_HASHED)
  #define REQ_MQ_INFLIGHT		(1ULL << __REQ_MQ_INFLIGHT)

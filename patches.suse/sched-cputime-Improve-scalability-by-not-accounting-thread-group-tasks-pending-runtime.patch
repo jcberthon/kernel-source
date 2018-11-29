@@ -105,7 +105,7 @@ index 2ef071338493..ccd910729068 100644
 --- a/kernel/sched/cputime.c
 +++ b/kernel/sched/cputime.c
 @@ -279,6 +279,26 @@ static __always_inline bool steal_account_process_tick(void)
- 	return false;
+ 	return 0;
  }
  
 +#ifdef CONFIG_64BIT

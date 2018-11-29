@@ -31,8 +31,8 @@ index 3e4e0f6..ccc438d 100644
 --- a/Documentation/virtual/kvm/api.txt
 +++ b/Documentation/virtual/kvm/api.txt
 @@ -1460,7 +1460,11 @@ struct kvm_irq_routing_entry {
- #define KVM_IRQ_ROUTING_MSI 2
  #define KVM_IRQ_ROUTING_S390_ADAPTER 3
+ #define KVM_IRQ_ROUTING_HV_SINT 4
  
 -No flags are specified so far, the corresponding field must be set to zero.
 +flags:
@@ -62,9 +62,9 @@ index 3e4e0f6..ccc438d 100644
 +provide the device ID. If this capability is not set, userland cannot
 +rely on the kernel to allow the KVM_MSI_VALID_DEVID flag being set.
 +
- struct kvm_irq_routing_s390_adapter {
- 	__u64 ind_addr;
- 	__u64 summary_addr;
+ On x86, address_hi is ignored unless the KVM_X2APIC_API_USE_32BIT_IDS
+ feature of KVM_CAP_X2APIC_API capability is enabled.  If it is enabled,
+ address_hi bits 31-8 provide bits 31-8 of the destination id.  Bits 7-0 of
 diff --git a/include/uapi/linux/kvm.h b/include/uapi/linux/kvm.h
 index 945ac2c..a810d7f 100644
 --- a/include/uapi/linux/kvm.h

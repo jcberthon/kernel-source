@@ -86,7 +86,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
  	dma_addr_t cmd_hdr_dma[HISI_SAS_MAX_QUEUES];
  	void *complete_hdr[HISI_SAS_MAX_QUEUES];
 @@ -345,7 +353,7 @@ struct hisi_sas_command_table_stp {
- #define HISI_SAS_SGE_PAGE_CNT SCSI_MAX_SG_SEGMENTS
+ #define HISI_SAS_SGE_PAGE_CNT SG_CHUNK_SIZE
  struct hisi_sas_sge_page {
  	struct hisi_sas_sge sge[HISI_SAS_SGE_PAGE_CNT];
 -};

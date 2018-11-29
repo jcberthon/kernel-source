@@ -74,7 +74,7 @@ index f1b5018..e1532a5 100644
 -		mbio->bi_bdev = conf->mirrors[i].rdev->bdev;
 +		mbio->bi_bdev = (void*)conf->mirrors[i].rdev;
  		mbio->bi_end_io	= raid1_end_write_request;
- 		bio_set_op_attrs(mbio, op, do_flush_fua | do_sync | do_sec);
+ 		bio_set_op_attrs(mbio, op, do_flush_fua | do_sync);
  		mbio->bi_private = r1_bio;
 -- 
 1.8.5.6

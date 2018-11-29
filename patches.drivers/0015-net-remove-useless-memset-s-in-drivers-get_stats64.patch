@@ -42,7 +42,7 @@ index 16735851a3c3..fc981ee7a6f6 100644
 -	memset(stats, 0, sizeof(struct rtnl_link_stats64));
 -
  	if (!bp->bnapi)
- 		return stats;
+ 		return;
  
 diff --git a/drivers/net/ethernet/intel/e1000e/netdev.c b/drivers/net/ethernet/intel/e1000e/netdev.c
 index 34fec5c536bf..d45634469290 100644

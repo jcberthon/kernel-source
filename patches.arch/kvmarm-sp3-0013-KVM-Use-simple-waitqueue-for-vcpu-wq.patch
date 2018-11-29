@@ -111,18 +111,18 @@ index ce8825c..f6c21b1 100644
 --- a/arch/arm/kvm/arm.c
 +++ b/arch/arm/kvm/arm.c
 @@ -531,10 +531,10 @@ void kvm_arm_halt_vcpu(struct kvm_vcpu *vcpu)
+ 	struct kvm_vcpu *vcpu;
  
- void kvm_arm_resume_vcpu(struct kvm_vcpu *vcpu)
- {
--	wait_queue_head_t *wq = kvm_arch_vcpu_wq(vcpu);
-+	struct swait_queue_head *wq = kvm_arch_vcpu_wq(vcpu);
+ 	kvm_for_each_vcpu(i, vcpu, kvm) {
+-		wait_queue_head_t *wq = kvm_arch_vcpu_wq(vcpu);
++		struct swait_queue_head *wq = kvm_arch_vcpu_wq(vcpu);
  
- 	vcpu->arch.pause = false;
--	wake_up_interruptible(wq);
-+	swake_up(wq);
+ 		vcpu->arch.pause = false;
+-		wake_up_interruptible(wq);
++		swake_up(wq);
+ 	}
  }
  
- void kvm_arm_resume_guest(struct kvm *kvm)
 @@ -548,9 +548,9 @@ void kvm_arm_resume_guest(struct kvm *kvm)
  
  static void vcpu_sleep(struct kvm_vcpu *vcpu)
@@ -428,9 +428,9 @@ index 472bf06..18808c2 100644
  
  	kvm_arch_vcpu_unblocking(vcpu);
 @@ -2069,11 +2068,11 @@ EXPORT_SYMBOL_GPL(kvm_vcpu_block);
- #ifndef CONFIG_S390
- void kvm_vcpu_wake_up(struct kvm_vcpu *vcpu)
  {
+ 	int me;
+ 	int cpu = vcpu->cpu;
 -	wait_queue_head_t *wqp;
 +	struct swait_queue_head *wqp;
  

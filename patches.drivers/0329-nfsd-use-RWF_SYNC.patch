@@ -26,13 +26,13 @@ index a06775f..abb0f5a 100644
  
  	if (test_bit(RQ_LOCAL, &rqstp->rq_flags))
  		/*
-@@ -971,10 +971,12 @@ nfsd_vfs_write(struct svc_rqst *rqstp, struct svc_fh *fhp, struct file *file,
- 	/* Support HSMs -- see comment in nfsd_setattr() */
- 	if (rqstp->rq_vers >= 3)
- 		file->f_flags |= O_NONBLOCK;
+@@ -971,9 +971,12 @@ nfsd_vfs_write(struct svc_rqst *rqstp, struct svc_fh *fhp, struct file *file,
+ 	if (!EX_ISSYNC(exp))
+ 		stable = 0;
+ 
 +	if (stable && !use_wgather)
 +		flags |= RWF_SYNC;
- 
++
  	/* Write the data. */
  	oldfs = get_fs(); set_fs(KERNEL_DS);
 -	host_err = vfs_writev(file, (struct iovec __user *)vec, vlen, &pos, 0);

@@ -29,9 +29,9 @@ commit abe48b108247e9b90b4c6739662a2e5c765ed114
  #include <asm/stackprotector.h>
  #include <asm/perf_event.h>
 @@ -1489,20 +1488,3 @@ inline bool __static_cpu_has_safe(u16 bi
- 	return boot_cpu_has(bit);
+ 	fpu__init_cpu();
  }
- EXPORT_SYMBOL_GPL(__static_cpu_has_safe);
+ #endif
 -
 -static void bsp_resume(void)
 -{
@@ -98,14 +98,15 @@ commit abe48b108247e9b90b4c6739662a2e5c765ed114
  static void init_intel(struct cpuinfo_x86 *c)
  {
  	unsigned int l2 = 0;
-@@ -509,7 +479,6 @@ static void init_intel(struct cpuinfo_x8
+@@ -509,8 +479,6 @@ static void init_intel(struct cpuinfo_x8
  	if (cpu_has(c, X86_FEATURE_VMX))
  		detect_vmx_virtcap(c);
  
 -	init_intel_energy_perf(c);
+-
+ 	probe_xeon_phi_r3mwait(c);
  }
  
- #ifdef CONFIG_X86_32
 @@ -764,7 +733,6 @@ static const struct cpu_dev intel_cpu_de
  	.c_detect_tlb	= intel_detect_tlb,
  	.c_early_init   = early_init_intel,

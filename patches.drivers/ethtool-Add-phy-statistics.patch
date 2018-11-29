@@ -58,8 +58,8 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  #define ETHTOOL_STUNABLE	0x00000049 /* Set tunable configuration */
 +#define ETHTOOL_GPHYSTATS	0x0000004a /* get PHY-specific statistics */
  
- #define ETHTOOL_PERQUEUE	0x0000004b /* Set per queue options */
- 
+ /* compatibility with older code */
+ #define SPARC_ETH_GSET		ETHTOOL_GSET
 --- a/net/core/ethtool.c
 +++ b/net/core/ethtool.c
 @@ -192,6 +192,23 @@ static int ethtool_set_features(struct n
@@ -182,6 +182,6 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +	case ETHTOOL_GPHYSTATS:
 +		rc = ethtool_get_phy_stats(dev, useraddr);
 +		break;
- 	case ETHTOOL_PERQUEUE:
- 		rc = ethtool_set_per_queue(dev, useraddr);
- 		break;
+ 	default:
+ 		rc = -EOPNOTSUPP;
+ 	}

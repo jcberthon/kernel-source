@@ -45,19 +45,15 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 
 --- a/arch/arm64/include/asm/cpufeature.h
 +++ b/arch/arm64/include/asm/cpufeature.h
-@@ -34,9 +34,10 @@
- #define ARM64_HAS_NO_HW_PREFETCH		9
- #define ARM64_HAS_NO_BCAST_TLBI			10
- #define ARM64_HAS_UAO				11
--#define ARM64_HAS_32BIT_EL0			12
-+#define ARM64_ALT_PAN_NOT_UAO			12
-+#define ARM64_HAS_32BIT_EL0			13
+@@ -34,7 +34,7 @@
+ #define ARM64_WORKAROUND_834220			7
+ #define ARM64_HAS_NO_HW_PREFETCH		8
+ #define ARM64_HAS_UAO				9
+-/* #define ARM64_ALT_PAN_NOT_UAO		10 */
++#define ARM64_ALT_PAN_NOT_UAO			10
+ #define ARM64_HAS_VIRT_HOST_EXTN		11
  
--#define ARM64_NCAPS				13
-+#define ARM64_NCAPS				14
- 
- #ifndef __ASSEMBLY__
- 
+ #define ARM64_NCAPS				12
 --- a/arch/arm64/include/asm/uaccess.h
 +++ b/arch/arm64/include/asm/uaccess.h
 @@ -154,7 +154,7 @@ static inline void set_fs(mm_segment_t f
@@ -120,8 +116,8 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +	},
 +#endif /* CONFIG_ARM64_PAN */
  	{
- 		.desc = "32-bit EL0 Support",
- 		.capability = ARM64_HAS_32BIT_EL0,
+ 		.desc = "Virtualization Host Extensions",
+ 		.capability = ARM64_HAS_VIRT_HOST_EXTN,
 @@ -981,3 +991,9 @@ void __init setup_cpu_features(void)
  		pr_warn("L1_CACHE_BYTES smaller than the Cache Writeback Granule (%d < %d)\n",
  			L1_CACHE_BYTES, cls);

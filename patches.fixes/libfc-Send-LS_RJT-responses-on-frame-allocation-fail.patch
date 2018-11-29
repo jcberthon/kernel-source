@@ -35,13 +35,13 @@ index ec608ef..3edcc27 100644
  	fc_flogi_fill(lport, fp);
  	flp = fc_frame_payload_get(fp, sizeof(*flp));
 @@ -918,7 +922,7 @@ static void fc_rport_recv_flogi_req(struct fc_lport *lport,
- 		fc_rport_enter_plogi(rdata);
- 	else
- 		fc_rport_state_enter(rdata, RPORT_ST_PLOGI_WAIT);
+ 		else
+ 			fc_rport_state_enter(rdata, RPORT_ST_PLOGI_WAIT);
+ 	}
 -out:
 +
  	mutex_unlock(&rdata->rp_mutex);
- 	kref_put(&rdata->kref, lport->tt.rport_destroy);
+ 	kref_put(&rdata->kref, fc_rport_destroy);
  	fc_frame_free(rx_fp);
 @@ -1481,8 +1485,12 @@ static void fc_rport_recv_adisc_req(struct fc_rport_priv *rdata,
  	}
@@ -51,7 +51,7 @@ index ec608ef..3edcc27 100644
 +	if (!fp) {
 +		rjt_data.reason = ELS_RJT_UNAB;
 +		rjt_data.explan = ELS_EXPL_INSUF_RES;
-+		lport->tt.seq_els_rsp_send(in_fp, ELS_LS_RJT, &rjt_data);
++		fc_seq_els_rsp_send(in_fp, ELS_LS_RJT, &rjt_data);
  		goto drop;
 +	}
  	fc_adisc_fill(lport, fp);

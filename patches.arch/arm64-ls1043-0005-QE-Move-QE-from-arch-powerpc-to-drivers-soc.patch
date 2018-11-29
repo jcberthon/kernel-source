@@ -5597,7 +5597,7 @@ index fef0a98..3fdfb36 100644
 --- a/drivers/net/ethernet/freescale/ucc_geth.c
 +++ b/drivers/net/ethernet/freescale/ucc_geth.c
 @@ -40,10 +40,10 @@
- #include <linux/uaccess.h>
+ #include <asm/uaccess.h>
  #include <asm/irq.h>
  #include <asm/io.h>
 -#include <asm/immap_qe.h>
@@ -5636,8 +5636,8 @@ index 8441426..fb2b393 100644
 --- a/drivers/soc/Kconfig
 +++ b/drivers/soc/Kconfig
 @@ -2,6 +2,7 @@ menu "SOC (System On Chip) specific Drivers"
+ menu "SOC (System On Chip) specific Drivers"
  
- source "drivers/soc/bcm/Kconfig"
  source "drivers/soc/brcmstb/Kconfig"
 +source "drivers/soc/fsl/qe/Kconfig"
  source "drivers/soc/mediatek/Kconfig"
@@ -5648,7 +5648,7 @@ index f3f955c..9b1032a 100644
 --- a/drivers/soc/Makefile
 +++ b/drivers/soc/Makefile
 @@ -5,6 +5,7 @@
- obj-y				+= bcm/
+ 
  obj-$(CONFIG_SOC_BRCMSTB)	+= brcmstb/
  obj-$(CONFIG_MACH_DOVE)		+= dove/
 +obj-y				+= fsl/

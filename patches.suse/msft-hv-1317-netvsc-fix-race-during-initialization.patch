@@ -22,11 +22,11 @@ diff --git a/drivers/net/hyperv/netvsc.c b/drivers/net/hyperv/netvsc.c
 --- a/drivers/net/hyperv/netvsc.c
 +++ b/drivers/net/hyperv/netvsc.c
 @@ -1231,6 +1231,8 @@ void netvsc_channel_cb(void *context)
- 	hv_begin_read(&channel->inbound);
+ 		return;
  
  	net_device = net_device_to_netvsc_device(ndev);
 +	if (unlikely(!net_device))
 +		return;
- 	napi_schedule(&net_device->chan_table[q_idx].napi);
- }
- 
+ 	if (unlikely(net_device->destroy) &&
+ 	    netvsc_channel_idle(net_device, q_idx))
+ 		return;

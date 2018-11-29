@@ -80,7 +80,7 @@ index 7ac8a5f8b1e1..4d79596cf3eb 100644
 --- a/arch/arm64/include/asm/cpufeature.h
 +++ b/arch/arm64/include/asm/cpufeature.h
 @@ -212,6 +212,12 @@ static inline bool system_supports_mixed_endian_el0(void)
- 	return id_aa64mmfr0_mixed_endian_el0(read_sanitised_ftr_reg(SYS_ID_AA64MMFR0_EL1));
+ 	return id_aa64mmfr0_mixed_endian_el0(read_system_reg(SYS_ID_AA64MMFR0_EL1));
  }
  
 +static inline bool system_uses_ttbr0_pan(void)

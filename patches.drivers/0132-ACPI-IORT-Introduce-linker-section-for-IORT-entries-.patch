@@ -79,9 +79,9 @@ index df6209a..df196b2 100644
  	ACPI_PROBE_TABLE(irqchip)					\
  	ACPI_PROBE_TABLE(clksrc)					\
 +	ACPI_PROBE_TABLE(iort)                                          \
- 	EARLYCON_TABLE()						\
- 	EARLYCON_OF_TABLES()
+ 	EARLYCON_TABLE()
  
+ #define INIT_TEXT							\
 diff --git a/include/linux/acpi_iort.h b/include/linux/acpi_iort.h
 index 0e32dac..d16fdda 100644
 --- a/include/linux/acpi_iort.h

@@ -2,7 +2,8 @@ From: Matthias Brugger <mbrugger@suse.com>
 Date: Thu, 3 Nov 2016 20:23:11 +0000
 Subject: arm64: fix includes for smp.h
 References: fate#322150
-Patch-mainline: Never, fixes local compile issue
+Git-commit: 57c82954e77fa12c1023e87210d2ede77aaa0058 (partial)
+Patch-mainline: v4.10-rc1
 
 Mainline commit 
 57c82954e77f ("arm64: make cpu number a percpu variable")

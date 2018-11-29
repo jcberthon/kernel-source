@@ -298,7 +298,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +	unsigned long evtype = hwc->config_base & ARMV8_PMU_EVTYPE_EVENT;
  
  	/* Always place a cycle counter into the cycle counter. */
- 	if (evtype == ARMV8_PMUV3_PERFCTR_CPU_CYCLES) {
+ 	if (evtype == ARMV8_PMUV3_PERFCTR_CLOCK_CYCLES) {
 @@ -906,11 +871,11 @@ static int armv8pmu_set_event_filter(str
  	    attr->exclude_kernel != attr->exclude_hv)
  		return -EINVAL;
@@ -355,4 +355,4 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +				ARMV8_PMU_EVTYPE_EVENT);
  }
  
- static int armv8_vulcan_map_event(struct perf_event *event)
+ static void armv8pmu_read_num_pmnc_events(void *info)

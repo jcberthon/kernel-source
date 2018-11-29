@@ -124,7 +124,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 @@ -574,10 +568,13 @@ void __init smp_prepare_cpus(unsigned in
  {
  	int err;
- 	unsigned int cpu, ncores = num_possible_cpus();
+ 	unsigned int cpu;
 +	unsigned int this_cpu;
  
  	init_cpu_topology();
@@ -135,12 +135,12 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	numa_store_cpu_info(this_cpu);
  
  	/*
- 	 * are we trying to boot more cores than exist?
+ 	 * If UP is mandated by "nosmp" (which implies "maxcpus=0"), don't set
 @@ -612,6 +609,7 @@ void __init smp_prepare_cpus(unsigned in
  			continue;
  
  		set_cpu_present(cpu, true);
 +		numa_store_cpu_info(cpu);
- 		max_cpus--;
  	}
  }
+ 

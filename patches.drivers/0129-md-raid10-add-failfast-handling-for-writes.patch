@@ -83,7 +83,7 @@ index 016c930..71b3806 100644
 @@ -1390,6 +1410,9 @@ retry_write:
  			mbio->bi_bdev = rdev->bdev;
  			mbio->bi_end_io	= raid10_end_write_request;
- 			bio_set_op_attrs(mbio, op, do_sync | do_fua | do_sec);
+ 			bio_set_op_attrs(mbio, op, do_sync | do_fua);
 +			if (test_bit(FailFast, &conf->mirrors[d].rdev->flags) &&
 +			    enough(conf, d))
 +				mbio->bi_opf |= MD_FAILFAST;

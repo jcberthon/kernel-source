@@ -305,8 +305,8 @@ index 319214a..794c31a 100644
  }
  
 @@ -963,12 +958,12 @@ static void fc_rport_recv_flogi_req(struct fc_lport *lport,
- 			fc_rport_state_enter(rdata, RPORT_ST_PLOGI_WAIT);
  	}
+ out:
  	mutex_unlock(&rdata->rp_mutex);
 -	kref_put(&rdata->kref, lport->tt.rport_destroy);
 +	kref_put(&rdata->kref, fc_rport_destroy);

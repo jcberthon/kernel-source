@@ -26,17 +26,17 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/arch/arm/include/asm/virt.h
 +++ b/arch/arm/include/asm/virt.h
 @@ -74,6 +74,11 @@ static inline bool is_hyp_mode_mismatche
- {
  	return !!(__boot_cpu_mode & BOOT_CPU_MODE_MISMATCH);
  }
-+
+ 
 +static inline bool is_kernel_in_hyp_mode(void)
 +{
 +	return false;
 +}
- #endif
- 
- #endif /* __ASSEMBLY__ */
++
+ /* The section containing the hypervisor text */
+ extern char __hyp_text_start[];
+ extern char __hyp_text_end[];
 --- a/arch/arm64/include/asm/virt.h
 +++ b/arch/arm64/include/asm/virt.h
 @@ -23,6 +23,8 @@

@@ -29,9 +29,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	return -EINVAL;
  }
  
--static phys_cpuid_t map_madt_entry(int type, u32 acpi_id, bool ignore_disabled)
+-static phys_cpuid_t map_madt_entry(int type, u32 acpi_id)
 +static phys_cpuid_t map_madt_entry(struct acpi_table_madt *madt,
-+		int type, u32 acpi_id, bool ignore_disabled)
++				   int type, u32 acpi_id)
  {
  	unsigned long madt_end, entry;
  	phys_cpuid_t phys_id = PHYS_CPUID_INVALID;	/* CPU hardware ID */
@@ -64,16 +64,15 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	return rv;
 +}
 +
- static phys_cpuid_t map_mat_entry(acpi_handle handle, int type, u32 acpi_id,
- 				  bool ignore_disabled)
+ static phys_cpuid_t map_mat_entry(acpi_handle handle, int type, u32 acpi_id)
  {
-@@ -195,7 +213,8 @@ static phys_cpuid_t __acpi_get_phys_id(a
+ 	struct acpi_buffer buffer = { ACPI_ALLOCATE_BUFFER, NULL };
+@@ -195,7 +213,7 @@ static phys_cpuid_t __acpi_get_phys_id(a
  
- 	phys_id = map_mat_entry(handle, type, acpi_id, ignore_disabled);
+ 	phys_id = map_mat_entry(handle, type, acpi_id);
  	if (invalid_phys_cpuid(phys_id))
--		phys_id = map_madt_entry(type, acpi_id, ignore_disabled);
-+		phys_id = map_madt_entry(get_madt_table(), type, acpi_id,
-+				ignore_disabled);
+-		phys_id = map_madt_entry(type, acpi_id);
++		phys_id = map_madt_entry(get_madt_table(), type, acpi_id);
  
  	return phys_id;
  }

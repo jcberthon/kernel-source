@@ -134,9 +134,9 @@ Changes since v2:
  	struct nvdimm_bus_descriptor nd_desc;
  	struct acpi_table_header acpi_header;
 -	struct acpi_nfit_header *nfit;
- 	struct mutex spa_map_mutex;
  	struct mutex init_mutex;
- 	struct list_head spa_maps;
+ 	struct list_head memdevs;
+ 	struct list_head flushes;
 @@ -222,6 +221,6 @@ static inline struct acpi_nfit_desc *to_
  }
  

@@ -31,5 +31,5 @@ index 99fb242..2325693 100644
 
 +	drm_gem_object_unreference_unlocked(ast_fb->obj);
  	drm_framebuffer_cleanup(fb);
- 	kfree(ast_fb);
+ 	kfree(fb);
  }

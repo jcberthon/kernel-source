@@ -874,11 +874,11 @@ index cb511f8..a6a0492 100644
 +	efi_status_t (*locate_handle)(int, efi_guid_t *, void *,
 +				      unsigned long *, efi_handle_t *);
  	void *locate_device_path;
- 	efi_status_t (*install_configuration_table)(efi_guid_t *, void *);
+ 	void *install_configuration_table;
  	void *load_image;
 @@ -635,6 +636,10 @@ void efi_native_runtime_setup(void);
- #define EFI_SHIM_LOCK_GUID \
-     EFI_GUID(  0x605dab50, 0xe046, 0x4300, 0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23 )
+ 	EFI_GUID(0xdcfa911d, 0x26eb, 0x469f, \
+ 		 0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
  
 +#define EFI_CONSOLE_OUT_DEVICE_GUID \
 +	EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4, \

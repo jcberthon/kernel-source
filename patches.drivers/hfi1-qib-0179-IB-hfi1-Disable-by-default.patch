@@ -27,9 +27,9 @@ index bac1860..f6ea088 100644
 --- a/drivers/infiniband/hw/hfi1/Kconfig
 +++ b/drivers/infiniband/hw/hfi1/Kconfig
 @@ -4,7 +4,6 @@ config INFINIBAND_HFI1
+ 	depends on X86_64 && INFINIBAND_RDMAVT
  	select MMU_NOTIFIER
  	select CRC32
- 	select I2C_ALGOBIT
 -	default m
  	---help---
  	This is a low-level driver for Intel OPA Gen1 adapter.

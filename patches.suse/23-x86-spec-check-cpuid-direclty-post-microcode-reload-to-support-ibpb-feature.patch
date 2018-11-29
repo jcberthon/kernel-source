@@ -17,7 +17,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
 
 --- a/arch/x86/kernel/cpu/spec_ctrl.c
 +++ b/arch/x86/kernel/cpu/spec_ctrl.c
-@@ -44,19 +44,18 @@ EXPORT_SYMBOL_GPL(x86_enable_ibrs);
+@@ -44,20 +44,19 @@ EXPORT_SYMBOL_GPL(x86_enable_ibrs);
   */
  void x86_spec_check(void)
  {
@@ -30,11 +30,13 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
 +		ibpb_state = 1;
  
 -			setup_force_cpu_cap(X86_FEATURE_SPEC_CTRL);
+-			setup_force_cpu_cap(X86_FEATURE_MSR_SPEC_CTRL);
 -		}
 -	} else if (boot_cpu_data.x86_vendor == X86_VENDOR_AMD) {
 -		if (boot_cpu_has(X86_FEATURE_SPEC_CTRL))
 -			ibrs_state = 1;
 +		setup_force_cpu_cap(X86_FEATURE_SPEC_CTRL);
++		setup_force_cpu_cap(X86_FEATURE_MSR_SPEC_CTRL);
 +	}
  
 -		if (boot_cpu_has(X86_FEATURE_AMD_IBPB)) {

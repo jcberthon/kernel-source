@@ -238,8 +238,8 @@ index 1518730..da7f59f 100644
  
  	mutex_lock(&acpi_desc->init_mutex);
 @@ -2402,8 +2524,6 @@ int acpi_nfit_init(struct acpi_nfit_desc *acpi_desc, void *data, acpi_size sz)
+ 	if (rc)
  		goto out_unlock;
- 	}
  
 -	acpi_nfit_init_dsms(acpi_desc);
 -

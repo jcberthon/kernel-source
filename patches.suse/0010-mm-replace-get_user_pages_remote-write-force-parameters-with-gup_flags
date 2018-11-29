@@ -17,20 +17,19 @@ Reviewed-by: Jan Kara <jack@suse.cz>
 Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 Acked-by: Joerg Roedel <jroedel@suse.de>
 ---
- drivers/gpu/drm/etnaviv/etnaviv_gem.c   |  7 +++++--
- drivers/gpu/drm/i915/i915_gem_userptr.c |  6 +++++-
- drivers/infiniband/core/umem_odp.c      |  7 +++++--
- fs/exec.c                               |  9 +++++++--
- include/linux/mm.h                      |  2 +-
- kernel/events/uprobes.c                 |  6 ++++--
- mm/gup.c                                | 22 +++++++---------------
- mm/memory.c                             |  6 +++++-
- security/tomoyo/domain.c                |  2 +-
- 9 files changed, 40 insertions(+), 27 deletions(-)
+ drivers/gpu/drm/i915/i915_gem_userptr.c |    6 +++++-
+ drivers/infiniband/core/umem_odp.c      |    7 +++++--
+ fs/exec.c                               |    9 +++++++--
+ include/linux/mm.h                      |    2 +-
+ kernel/events/uprobes.c                 |    6 ++++--
+ mm/gup.c                                |   22 +++++++---------------
+ mm/memory.c                             |    6 +++++-
+ security/tomoyo/domain.c                |    2 +-
+ 8 files changed, 35 insertions(+), 25 deletions(-)
 
 --- a/drivers/gpu/drm/i915/i915_gem_userptr.c
 +++ b/drivers/gpu/drm/i915/i915_gem_userptr.c
-@@ -581,13 +581,17 @@ __i915_gem_userptr_get_pages_worker(stru
+@@ -581,6 +581,10 @@ __i915_gem_userptr_get_pages_worker(stru
  		pvec = drm_malloc_ab(npages, sizeof(struct page *));
  	if (pvec != NULL) {
  		struct mm_struct *mm = obj->userptr.mm->mm;
@@ -39,16 +38,17 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 +		if (!obj->userptr.read_only)
 +			flags |= FOLL_WRITE;
  
- 		down_read(&mm->mmap_sem);
- 		while (pinned < npages) {
- 			ret = get_user_pages_remote(work->task, mm,
- 					obj->userptr.ptr + pinned * PAGE_SIZE,
- 					npages - pinned,
--					!obj->userptr.read_only, 0,
-+					flags,
- 					pvec + pinned, NULL);
- 			if (ret < 0)
- 				break;
+ 		ret = -EFAULT;
+ 		if (atomic_inc_not_zero(&mm->mm_users)) {
+@@ -590,7 +594,7 @@ __i915_gem_userptr_get_pages_worker(stru
+ 					(work->task, mm,
+ 					 obj->userptr.ptr + pinned * PAGE_SIZE,
+ 					 npages - pinned,
+-					 !obj->userptr.read_only, 0,
++					 flags,
+ 					 pvec + pinned, NULL);
+ 				if (ret < 0)
+ 					break;
 --- a/drivers/infiniband/core/umem_odp.c
 +++ b/drivers/infiniband/core/umem_odp.c
 @@ -527,6 +527,7 @@ int ib_umem_odp_map_dma_pages(struct ib_
@@ -143,7 +143,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
 --- a/mm/gup.c
 +++ b/mm/gup.c
-@@ -837,9 +837,7 @@ EXPORT_SYMBOL(get_user_pages_unlocked);
+@@ -832,9 +832,7 @@ EXPORT_SYMBOL(get_user_pages_unlocked);
   * @mm:		mm_struct of target mm
   * @start:	starting user address
   * @nr_pages:	number of pages from start to pin
@@ -154,7 +154,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
   * @pages:	array that receives pointers to the pages pinned.
   *		Should be at least nr_pages long. Or NULL, if caller
   *		only intends to ensure the pages are faulted in.
-@@ -868,9 +866,9 @@ EXPORT_SYMBOL(get_user_pages_unlocked);
+@@ -863,9 +861,9 @@ EXPORT_SYMBOL(get_user_pages_unlocked);
   * or similar operation cannot guarantee anything stronger anyway because
   * locks can't be held over the syscall boundary.
   *
@@ -167,7 +167,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
   *
   * get_user_pages is typically used for fewer-copy IO operations, to get a
   * handle on the memory by some means other than accesses via the user virtual
-@@ -887,18 +885,12 @@ EXPORT_SYMBOL(get_user_pages_unlocked);
+@@ -882,18 +880,12 @@ EXPORT_SYMBOL(get_user_pages_unlocked);
   */
  long get_user_pages_remote(struct task_struct *tsk, struct mm_struct *mm,
  		unsigned long start, unsigned long nr_pages,
@@ -191,7 +191,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
 --- a/mm/memory.c
 +++ b/mm/memory.c
-@@ -3709,6 +3709,10 @@ static int __access_remote_vm(struct tas
+@@ -3708,6 +3708,10 @@ static int __access_remote_vm(struct tas
  {
  	struct vm_area_struct *vma;
  	void *old_buf = buf;
@@ -202,7 +202,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
  	down_read(&mm->mmap_sem);
  	/* ignore errors, just check how much was successfully transferred */
-@@ -3718,7 +3722,7 @@ static int __access_remote_vm(struct tas
+@@ -3717,7 +3721,7 @@ static int __access_remote_vm(struct tas
  		struct page *page = NULL;
  
  		ret = get_user_pages_remote(tsk, mm, addr, 1,

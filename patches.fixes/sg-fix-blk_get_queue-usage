@@ -13,7 +13,6 @@ blk_queue_get().
 
 Signed-off-by: Bodo Stroesser <bstroesser@ts.fujitsu.com>
 Acked-by: Shirish Pargaonkar <spargaonkar@suse.com>
-
 ---
 diff --git a/drivers/scsi/st.c b/drivers/scsi/st.c
 index ff44b3c..dc4826c 100644

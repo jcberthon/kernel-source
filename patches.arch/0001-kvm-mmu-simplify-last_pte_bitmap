@@ -100,36 +100,36 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
  static void paging64_init_context_common(struct kvm_vcpu *vcpu,
 @@ -3975,7 +3977,7 @@ static void paging64_init_context_common
+ 
  	reset_rsvds_bits_mask(vcpu, context);
  	update_permission_bitmask(vcpu, context, false);
- 	update_pkru_bitmask(vcpu, context, false);
 -	update_last_pte_bitmap(vcpu, context);
 +	update_last_nonleaf_level(vcpu, context);
  
  	MMU_WARN_ON(!is_pae(vcpu));
  	context->page_fault = paging64_page_fault;
 @@ -4003,7 +4005,7 @@ static void paging32_init_context(struct
+ 
  	reset_rsvds_bits_mask(vcpu, context);
  	update_permission_bitmask(vcpu, context, false);
- 	update_pkru_bitmask(vcpu, context, false);
 -	update_last_pte_bitmap(vcpu, context);
 +	update_last_nonleaf_level(vcpu, context);
  
  	context->page_fault = paging32_page_fault;
  	context->gva_to_gpa = paging32_gva_to_gpa;
 @@ -4062,7 +4064,7 @@ static void init_kvm_tdp_mmu(struct kvm_
+ 	}
  
  	update_permission_bitmask(vcpu, context, false);
- 	update_pkru_bitmask(vcpu, context, false);
 -	update_last_pte_bitmap(vcpu, context);
 +	update_last_nonleaf_level(vcpu, context);
  	reset_tdp_shadow_zero_bits_mask(vcpu, context);
  }
  
 @@ -4168,7 +4170,7 @@ static void init_kvm_nested_mmu(struct k
+ 	}
  
  	update_permission_bitmask(vcpu, g_context, false);
- 	update_pkru_bitmask(vcpu, g_context, false);
 -	update_last_pte_bitmap(vcpu, g_context);
 +	update_last_nonleaf_level(vcpu, g_context);
  }
