@@ -64,7 +64,7 @@ index d03de10adb59..4eb1673984ff 100644
  	bno = NULLFSBLOCK;
  	mp = ip->i_mount;
 @@ -1336,6 +1317,7 @@ xfs_bmap_read_extents(
- 						 ip->i_mount);
+ 						 XFS_ERRLEVEL_LOW, mp);
  				goto error0;
  			}
 +			trace_xfs_read_extent(ip, i, state, _THIS_IP_);
@@ -103,30 +103,24 @@ diff --git a/fs/xfs/libxfs/xfs_inode_fork.c b/fs/xfs/libxfs/xfs_inode_fork.c
 index 22b1fbefd436..5027fe2a3660 100644
 --- a/fs/xfs/libxfs/xfs_inode_fork.c
 +++ b/fs/xfs/libxfs/xfs_inode_fork.c
-@@ -311,11 +311,12 @@ xfs_iformat_extents(
- 	xfs_dinode_t	*dip,
- 	int		whichfork)
+@@ -311,6 +311,7 @@ xfs_iformat_extents(
  {
--	xfs_bmbt_rec_t	*dp;
-+	xfs_bmbt_rec_t  *dp;
- 	xfs_ifork_t	*ifp;
- 	int		nex;
- 	int		size;
- 	int		i;
-+	int		state = xfs_bmap_fork_to_state(whichfork);
- 
- 	ifp = XFS_IFORK_PTR(ip, whichfork);
- 	nex = XFS_DFORK_NEXTENTS(dip, whichfork);
+ 	struct xfs_mount	*mp = ip->i_mount;
+ 	struct xfs_ifork	*ifp = XFS_IFORK_PTR(ip, whichfork);
++	int			state = xfs_bmap_fork_to_state(whichfork);
+ 	int			nex = XFS_DFORK_NEXTENTS(dip, whichfork);
+ 	int			size = nex * sizeof(xfs_bmbt_rec_t);
+ 	xfs_bmbt_rec_t		*dp;
 @@ -350,8 +351,8 @@ xfs_iformat_extents(
- 			xfs_bmbt_rec_host_t *ep = xfs_iext_get_ext(ifp, i);
- 			ep->l0 = get_unaligned_be64(&dp->l0);
- 			ep->l1 = get_unaligned_be64(&dp->l1);
+ 						 XFS_ERRLEVEL_LOW, mp);
+ 				return -EFSCORRUPTED;
+ 			}
 +			trace_xfs_read_extent(ip, i, state, _THIS_IP_);
  		}
 -		XFS_BMAP_TRACE_EXLIST(ip, nex, whichfork);
- 		if (whichfork != XFS_DATA_FORK ||
- 			XFS_EXTFMT_INODE(ip) == XFS_EXTFMT_NOSTATE)
- 				if (unlikely(xfs_check_nostate_extents(
+ 	}
+ 	ifp->if_flags |= XFS_IFEXTENTS;
+ 	return 0;
 @@ -756,6 +757,7 @@ xfs_iextents_copy(
  	xfs_bmbt_rec_t		*dp,
  	int			whichfork)

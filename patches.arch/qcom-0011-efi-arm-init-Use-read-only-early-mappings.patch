@@ -38,7 +38,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  		pr_warn("Unable to map EFI system table.\n");
  		return -ENOMEM;
 @@ -148,8 +148,8 @@ static int __init uefi_init(void)
- 	efi.runtime_version = efi.systab->hdr.revision;
+ 			efi.systab->hdr.revision & 0xffff);
  
  	/* Show what we know for posterity */
 -	c16 = early_memremap(efi_to_phys(efi.systab->fw_vendor),

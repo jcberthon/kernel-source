@@ -36,7 +36,7 @@ Acked-by: Cho, Yu-Chen <acho@suse.com>
 +cxgb4-objs := cxgb4_main.o l2t.o t4_hw.o sge.o clip_tbl.o cxgb4_ethtool.o cxgb4_uld.o
  cxgb4-$(CONFIG_CHELSIO_T4_DCB) +=  cxgb4_dcb.o
  cxgb4-$(CONFIG_CHELSIO_T4_FCOE) +=  cxgb4_fcoe.o
- cxgb4-$(CONFIG_CHELSIO_T4_UWIRE) +=  cxgb4_ppm.o
+ cxgb4-$(CONFIG_DEBUG_FS) += cxgb4_debugfs.o
 --- a/drivers/net/ethernet/chelsio/cxgb4/cxgb4.h
 +++ b/drivers/net/ethernet/chelsio/cxgb4/cxgb4.h
 @@ -53,6 +53,8 @@
@@ -307,7 +307,7 @@ Acked-by: Cho, Yu-Chen <acho@suse.com>
  #undef FW_PARAM_DEV
  
 @@ -4334,16 +4349,6 @@ static inline bool is_x_10g_port(const s
- 	       (lc->supported & FW_PORT_CAP_SPEED_40G) != 0;
+ 	return high_speeds != 0;
  }
  
 -static inline void init_rspq(struct adapter *adap, struct sge_rspq *q,

@@ -40,7 +40,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
 
 --- a/arch/x86/include/asm/topology.h
 +++ b/arch/x86/include/asm/topology.h
-@@ -124,11 +124,20 @@ extern const struct cpumask *cpu_coregro
+@@ -124,6 +124,15 @@ extern const struct cpumask *cpu_coregro
  #ifdef ENABLE_TOPO_DEFINES
  #define topology_core_cpumask(cpu)		(per_cpu(cpu_core_map, cpu))
  #define topology_sibling_cpumask(cpu)		(per_cpu(cpu_sibling_map, cpu))
@@ -51,12 +51,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
 +{
 +	return __max_smt_threads;
 +}
-+
- bool topology_is_primary_thread(unsigned int cpu);
- bool topology_smt_supported(void);
- #else
- static inline bool topology_is_primary_thread(unsigned int cpu) { return true; }
- static inline bool topology_smt_supported(void) { return false; }
++#else
 +static inline int topology_max_smt_threads(void) { return 1; }
  #endif
  
@@ -84,7 +79,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  
 @@ -428,6 +431,10 @@ void set_cpu_sibling_map(int cpu)
  		if (match_die(c, o) && !topology_same_node(c, o))
- 			x86_has_numa_in_package = true;
+ 			primarily_use_numa_for_topology();
  	}
 +
 +	threads = cpumask_weight(topology_sibling_cpumask(cpu));

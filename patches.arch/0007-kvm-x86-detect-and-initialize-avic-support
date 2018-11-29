@@ -22,24 +22,24 @@ Signed-off-by: Suravee Suthikulpanit <suravee.suthikulpanit@amd.com>
 Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
 Acked-by: Joerg Roedel <jroedel@suse.de>
 ---
- arch/x86/include/asm/kvm_host.h |   4 +
- arch/x86/include/asm/svm.h      |   3 +
- arch/x86/kvm/svm.c              | 225 +++++++++++++++++++++++++++++++++++++++-
+ arch/x86/include/asm/kvm_host.h |    4 
+ arch/x86/include/asm/svm.h      |    3 
+ arch/x86/kvm/svm.c              |  225 +++++++++++++++++++++++++++++++++++++++-
  3 files changed, 231 insertions(+), 1 deletion(-)
 
 --- a/arch/x86/include/asm/kvm_host.h
 +++ b/arch/x86/include/asm/kvm_host.h
-@@ -696,6 +696,10 @@ struct kvm_arch {
- 
+@@ -719,6 +719,10 @@ struct kvm_arch {
  	bool irqchip_split;
  	u8 nr_reserved_ioapic_pins;
-+
+ 
 +	/* Struct members for AVIC */
 +	struct page *avic_logical_id_table_page;
 +	struct page *avic_physical_id_table_page;
++
+ 	bool disabled_lapic_found;
  };
  
- struct kvm_vm_stat {
 --- a/arch/x86/include/asm/svm.h
 +++ b/arch/x86/include/asm/svm.h
 @@ -116,6 +116,9 @@ struct __attribute__ ((__packed__)) vmcb
@@ -64,7 +64,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  #include <linux/kvm_host.h>
  
  #include "irq.h"
-@@ -78,6 +81,14 @@ MODULE_DEVICE_TABLE(x86cpu, svm_cpu_id);
+@@ -79,6 +82,14 @@ MODULE_DEVICE_TABLE(x86cpu, svm_cpu_id);
  #define TSC_RATIO_MIN		0x0000000000000001ULL
  #define TSC_RATIO_MAX		0x000000ffffffffffULL
  
@@ -79,7 +79,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  static bool erratum_383_found __read_mostly;
  
  static const u32 host_save_user_msrs[] = {
-@@ -160,8 +171,19 @@ struct vcpu_svm {
+@@ -163,8 +174,19 @@ struct vcpu_svm {
  
  	/* cached guest cpuid flags for faster access */
  	bool nrips_enabled	: 1;
@@ -99,7 +99,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  static DEFINE_PER_CPU(u64, current_tsc_ratio);
  #define TSC_RATIO_DEFAULT	0x0100000000ULL
  
-@@ -203,6 +225,10 @@ module_param(npt, int, S_IRUGO);
+@@ -206,6 +228,10 @@ module_param(npt, int, S_IRUGO);
  static int nested = true;
  module_param(nested, int, S_IRUGO);
  
@@ -110,7 +110,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  static void svm_set_cr0(struct kvm_vcpu *vcpu, unsigned long cr0);
  static void svm_flush_tlb(struct kvm_vcpu *vcpu);
  static void svm_complete_interrupts(struct vcpu_svm *svm);
-@@ -226,12 +252,18 @@ enum {
+@@ -229,12 +255,18 @@ enum {
  	VMCB_SEG,        /* CS, DS, SS, ES, CPL */
  	VMCB_CR2,        /* CR2 only */
  	VMCB_LBR,        /* DBGCTL, BR_FROM, BR_TO, LAST_EX_FROM, LAST_EX_TO */
@@ -129,7 +129,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  static inline void mark_all_dirty(struct vmcb *vmcb)
  {
  	vmcb->control.clean = 0;
-@@ -253,6 +285,12 @@ static inline struct vcpu_svm *to_svm(st
+@@ -256,6 +288,12 @@ static inline struct vcpu_svm *to_svm(st
  	return container_of(vcpu, struct vcpu_svm, vcpu);
  }
  
@@ -142,7 +142,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  static void recalc_intercepts(struct vcpu_svm *svm)
  {
  	struct vmcb_control_area *c, *h;
-@@ -921,6 +959,12 @@ static __init int svm_hardware_setup(voi
+@@ -924,6 +962,12 @@ static __init int svm_hardware_setup(voi
  	} else
  		kvm_disable_tdp();
  
@@ -155,7 +155,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	return 0;
  
  err:
-@@ -998,6 +1042,22 @@ static void svm_adjust_tsc_offset_guest(
+@@ -1001,6 +1045,22 @@ static void svm_adjust_tsc_offset_guest(
  	mark_dirty(svm->vmcb, VMCB_INTERCEPTS);
  }
  
@@ -178,7 +178,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  static void init_vmcb(struct vcpu_svm *svm)
  {
  	struct vmcb_control_area *control = &svm->vmcb->control;
-@@ -1108,9 +1168,131 @@ static void init_vmcb(struct vcpu_svm *s
+@@ -1111,9 +1171,131 @@ static void init_vmcb(struct vcpu_svm *s
  		set_intercept(svm, INTERCEPT_PAUSE);
  	}
  
@@ -310,7 +310,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  }
  
  static void svm_vcpu_reset(struct kvm_vcpu *vcpu, bool init_event)
-@@ -1129,6 +1311,9 @@ static void svm_vcpu_reset(struct kvm_vc
+@@ -1132,6 +1314,9 @@ static void svm_vcpu_reset(struct kvm_vc
  
  	kvm_cpuid(vcpu, &eax, &dummy, &dummy, &dummy);
  	kvm_register_write(vcpu, VCPU_REGS_RDX, eax);
@@ -320,7 +320,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  }
  
  static struct kvm_vcpu *svm_create_vcpu(struct kvm *kvm, unsigned int id)
-@@ -1167,6 +1352,12 @@ static struct kvm_vcpu *svm_create_vcpu(
+@@ -1170,6 +1355,12 @@ static struct kvm_vcpu *svm_create_vcpu(
  	if (!hsave_page)
  		goto free_page3;
  
@@ -333,7 +333,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	svm->nested.hsave = page_address(hsave_page);
  
  	svm->msrpm = page_address(msrpm_pages);
-@@ -1185,6 +1376,8 @@ static struct kvm_vcpu *svm_create_vcpu(
+@@ -1188,6 +1379,8 @@ static struct kvm_vcpu *svm_create_vcpu(
  
  	return &svm->vcpu;
  
@@ -342,7 +342,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  free_page3:
  	__free_pages(nested_msrpm_pages, MSRPM_ALLOC_ORDER);
  free_page2:
-@@ -3169,6 +3362,10 @@ static int svm_set_msr(struct kvm_vcpu *
+@@ -3204,6 +3397,10 @@ static int svm_set_msr(struct kvm_vcpu *
  	case MSR_VM_IGNNE:
  		vcpu_unimpl(vcpu, "unimplemented wrmsr: 0x%x data 0x%llx\n", ecx, data);
  		break;
@@ -353,7 +353,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	default:
  		return kvm_set_msr_common(vcpu, msr);
  	}
-@@ -3332,10 +3529,14 @@ static void dump_vmcb(struct kvm_vcpu *v
+@@ -3367,10 +3564,14 @@ static void dump_vmcb(struct kvm_vcpu *v
  	pr_err("%-20s%08x\n", "exit_int_info_err:", control->exit_int_info_err);
  	pr_err("%-20s%lld\n", "nested_ctl:", control->nested_ctl);
  	pr_err("%-20s%016llx\n", "nested_cr3:", control->nested_cr3);
@@ -368,7 +368,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	pr_err("VMCB State Save Area:\n");
  	pr_err("%-5s s: %04x a: %04x l: %08x b: %016llx\n",
  	       "es:",
-@@ -3563,11 +3764,28 @@ static void svm_set_virtual_x2apic_mode(
+@@ -3598,11 +3799,28 @@ static void svm_set_virtual_x2apic_mode(
  
  static bool svm_get_enable_apicv(void)
  {
@@ -397,8 +397,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 +	mark_dirty(vmcb, VMCB_INTR);
  }
  
- static void svm_load_eoi_exitmap(struct kvm_vcpu *vcpu)
-@@ -4279,6 +4497,9 @@ static struct kvm_x86_ops svm_x86_ops =
+ static void svm_load_eoi_exitmap(struct kvm_vcpu *vcpu, u64 *eoi_exit_bitmap)
+@@ -4336,6 +4554,9 @@ static struct kvm_x86_ops svm_x86_ops =
  	.vcpu_free = svm_free_vcpu,
  	.vcpu_reset = svm_vcpu_reset,
  
@@ -408,7 +408,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	.prepare_guest_switch = svm_prepare_guest_switch,
  	.vcpu_load = svm_vcpu_load,
  	.vcpu_put = svm_vcpu_put,
-@@ -4336,6 +4557,8 @@ static struct kvm_x86_ops svm_x86_ops =
+@@ -4396,6 +4617,8 @@ static struct kvm_x86_ops svm_x86_ops =
  	.refresh_apicv_exec_ctrl = svm_refresh_apicv_exec_ctrl,
  	.load_eoi_exitmap = svm_load_eoi_exitmap,
  	.sync_pir_to_irr = svm_sync_pir_to_irr,

@@ -113,7 +113,7 @@ index e501415..c777abe 100644
 +		}
 +
  		ctx = per_cpu_ptr(q->queue_ctx, i);
- 		hctx = q->mq_ops->map_queue(q, i);
+ 		hctx = blk_mq_map_queue(q, i);
  
 @@ -1795,7 +1810,11 @@ static void blk_mq_map_swqueue(struct request_queue *q,
  		 * disable it and free the request entries.

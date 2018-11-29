@@ -34,8 +34,8 @@ index ef57220..00ad0e0 100644
 --- a/arch/arm64/include/asm/efi.h
 +++ b/arch/arm64/include/asm/efi.h
 @@ -10,28 +10,21 @@ extern void efi_init(void);
- #define efi_init()
- #endif
+ 
+ #define efi_set_mapping_permissions	efi_create_mapping
  
 -#define efi_call_virt(f, ...)						\
 +#define arch_efi_call_virt_setup()					\

@@ -66,7 +66,7 @@ index 4c790e751a46..14cc3e62669e 100644
 +		xfs_rw_ilock(ip, iolock);
 +	}
  
- 	ret = xfs_file_aio_write_checks(iocb, from, &iolock, eventsent);
+ 	ret = xfs_file_aio_write_checks(iocb, from, &iolock);
  	if (ret)
 @@ -799,9 +822,17 @@ xfs_file_dio_aio_write(
  	end = iocb->ki_pos + count - 1;

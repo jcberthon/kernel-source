@@ -127,9 +127,9 @@ Signed-off-by: Coly Li <colyli@suse.de>
  	unsigned long flags;
  	const int op = bio_op(bio);
 -	const int rw = bio_data_dir(bio);
- 	const unsigned long do_sync = (bio->bi_rw & REQ_SYNC);
- 	const unsigned long do_flush_fua = (bio->bi_rw & (REQ_FLUSH | REQ_FUA));
- 	struct md_rdev *blocked_rdev;
+ 	const unsigned long do_sync = (bio->bi_opf & REQ_SYNC);
+ 	const unsigned long do_flush_fua = (bio->bi_opf &
+ 						(REQ_PREFLUSH | REQ_FUA));
 @@ -1100,15 +1190,15 @@ static void raid1_make_request(struct md
  
  	md_write_start(mddev, bio); /* wait on superblock update early */

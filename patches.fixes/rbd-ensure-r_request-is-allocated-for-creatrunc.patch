@@ -14,11 +14,9 @@ to avoid a r_request NULL pointer dereference in encode_request().
 Signed-off-by: David Disseldorp <ddiss@suse.de>
 Acked-by: Luis Henriques <lhenriques@suse.com>
 ---
- drivers/block/rbd.c | 15 +++++++++------
+ drivers/block/rbd.c |   15 +++++++++------
  1 file changed, 9 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 1c92df9e2f81..fd124bc7b4c4 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
 @@ -3088,8 +3088,7 @@ out:
@@ -31,7 +29,7 @@ index 1c92df9e2f81..fd124bc7b4c4 100644
   */
  static int
  rbd_img_obj_creatrunc_submit(struct rbd_obj_request *obj_request)
-@@ -3130,8 +3129,13 @@ rbd_img_obj_creatrunc_submit(struct rbd_obj_request *obj_request)
+@@ -3130,10 +3129,15 @@ rbd_img_obj_creatrunc_submit(struct rbd_
  	osd_req->r_callback = rbd_osd_req_callback;
  	osd_req->r_priv = creatrunc_req;
  	osd_req->r_base_oloc.pool = rbd_dev->layout.pool_id;
@@ -40,14 +38,16 @@ index 1c92df9e2f81..fd124bc7b4c4 100644
 +	ret = ceph_oid_aprintf(&osd_req->r_base_oid, GFP_NOIO, "%s",
 +			       creatrunc_req->object_name);
 +	if (ret)
-+		goto fail_creatrunc_request;
-+
-+	ret = ceph_osdc_alloc_messages(osd_req, GFP_KERNEL);
-+	if (ret)
  		goto fail_creatrunc_request;
  
++	ret = ceph_osdc_alloc_messages(osd_req, GFP_KERNEL);
++	if (ret)
++		goto fail_creatrunc_request;
++
  	creatrunc_req->osd_req = osd_req;
-@@ -3143,8 +3147,7 @@ rbd_img_obj_creatrunc_submit(struct rbd_obj_request *obj_request)
+ 	rbd_obj_request_get(obj_request);
+ 	creatrunc_req->obj_request = obj_request;
+@@ -3143,8 +3147,7 @@ rbd_img_obj_creatrunc_submit(struct rbd_
  	osd_req_op_extent_init(creatrunc_req->osd_req, 1, CEPH_OSD_OP_TRUNCATE,
  				object_size, 0, 0, 0);
  
@@ -57,6 +57,3 @@ index 1c92df9e2f81..fd124bc7b4c4 100644
  
  	rbd_obj_request_submit(creatrunc_req);
  
--- 
-2.12.3
-

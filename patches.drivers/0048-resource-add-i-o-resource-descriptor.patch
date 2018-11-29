@@ -113,7 +113,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  			res->start = conflict->end + 1;
 @@ -1073,6 +1075,7 @@ struct resource * __request_region(struc
  	res->end = start + n - 1;
- 	res->flags = resource_type(parent);
+ 	res->flags = resource_type(parent) | resource_ext_type(parent);
  	res->flags |= IORESOURCE_BUSY | flags;
 +	res->desc = IORES_DESC_NONE;
  

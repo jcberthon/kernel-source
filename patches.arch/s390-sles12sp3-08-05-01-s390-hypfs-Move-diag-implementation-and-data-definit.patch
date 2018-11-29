@@ -587,7 +587,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 +++ b/arch/s390/include/asm/diag.h
 @@ -105,4 +105,131 @@ struct diag26c_mac_resp {
  
- int diag26c(void *req, void *resp, enum diag26c_sc subcode);
+ extern int diag210(struct diag210 *addr);
  
 +/* bit is set in flags, when physical cpu info is included in diag 204 data */
 +#define DIAG204_LPAR_PHYS_FLG 0x80

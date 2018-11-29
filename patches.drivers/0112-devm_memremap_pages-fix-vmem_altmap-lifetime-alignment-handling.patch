@@ -66,7 +66,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 @@ -272,7 +275,7 @@ void *devm_memremap_pages(struct device
  {
  	int is_ram = region_intersects(res->start, resource_size(res),
- 				       IORESOURCE_SYSTEM_RAM, IORES_DESC_NONE);
+ 			"System RAM");
 -	resource_size_t key, align_start, align_size;
 +	resource_size_t key, align_start, align_size, align_end;
  	struct dev_pagemap *pgmap;
@@ -92,4 +92,4 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 -	align_size = ALIGN(resource_size(res), SECTION_SIZE);
  	mem_hotplug_begin();
  	error = arch_add_memory(nid, align_start, align_size, true);
- 	if (!error)
+ 	mem_hotplug_done();

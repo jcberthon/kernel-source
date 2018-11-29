@@ -7,7 +7,7 @@ Patch-mainline: v4.10-rc1
 
 When an ELS response handler receives a -FC_EX_CLOSED, the rdata->rp_mutex is
 already held which can lead to a deadlock condition like the following stack
-trace:
+Trace: 
 
 [<ffffffffa04d8f18>] fc_rport_plogi_resp+0x28/0x200 [libfc]
 [<ffffffffa04cfa1a>] fc_invoke_resp+0x6a/0xe0 [libfc]
@@ -68,7 +68,7 @@ index 72eb587..e94a56e 100644
  
 @@ -1122,10 +1126,13 @@ static void fc_rport_prli_resp(struct fc_seq *sp, struct fc_frame *fp,
  	u8 op;
- 	enum fc_els_spp_resp resp_code;
+ 	u8 resp_code = 0;
  
 -	mutex_lock(&rdata->rp_mutex);
 -

@@ -75,7 +75,7 @@ index bb2b762..846e2ed 100644
 -			mbio->bi_bdev = rdev->bdev;
 +			mbio->bi_bdev = (void*)rdev;
  			mbio->bi_end_io	= raid10_end_write_request;
- 			bio_set_op_attrs(mbio, op, do_sync | do_fua | do_sec);
+ 			bio_set_op_attrs(mbio, op, do_sync | do_fua);
  			mbio->bi_private = r10_bio;
 @@ -1399,7 +1409,7 @@ retry_write:
  			mbio->bi_iter.bi_sector	= (r10_bio->devs[i].addr +
@@ -84,7 +84,7 @@ index bb2b762..846e2ed 100644
 -			mbio->bi_bdev = rdev->bdev;
 +			mbio->bi_bdev = (void*)rdev;
  			mbio->bi_end_io	= raid10_end_write_request;
- 			bio_set_op_attrs(mbio, op, do_sync | do_fua | do_sec);
+ 			bio_set_op_attrs(mbio, op, do_sync | do_fua);
  			mbio->bi_private = r10_bio;
 -- 
 1.8.5.6

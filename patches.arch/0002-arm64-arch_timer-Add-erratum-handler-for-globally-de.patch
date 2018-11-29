@@ -25,9 +25,9 @@ index 5cd964e..48bd730 100644
  enum arch_timer_erratum_match_type {
  	ate_match_dt,
 +	ate_match_global_cap_id,
+ 	ate_match_local_cap_id,
+ 	ate_match_acpi_oem_info,
  };
- 
- struct arch_timer_erratum_workaround {
 diff --git a/drivers/clocksource/arm_arch_timer.c b/drivers/clocksource/arm_arch_timer.c
 index 6a0f0e1..a0b1108 100644
 --- a/drivers/clocksource/arm_arch_timer.c
@@ -43,9 +43,9 @@ index 6a0f0e1..a0b1108 100644
 +	return cpus_have_cap((uintptr_t)wa->id);
 +}
 +
- static const struct arch_timer_erratum_workaround *
- arch_timer_iterate_errata(enum arch_timer_erratum_match_type type,
- 			  ate_match_fn_t match_fn,
+ static
+ bool arch_timer_check_local_cap_erratum(const struct arch_timer_erratum_workaround *wa,
+ 					const void *arg)
 @@ -252,6 +259,9 @@ static void arch_timer_check_ool_workaround(enum arch_timer_erratum_match_type t
  	case ate_match_dt:
  		match_fn = arch_timer_check_dt_erratum;
@@ -53,9 +53,9 @@ index 6a0f0e1..a0b1108 100644
 +	case ate_match_global_cap_id:
 +		match_fn = arch_timer_check_global_cap_erratum;
 +		break;
- 	}
- 
- 	wa = arch_timer_iterate_errata(type, match_fn, arg);
+ 	case ate_match_local_cap_id:
+ 		match_fn = arch_timer_check_local_cap_erratum;
+ 		local = true;
 @@ -1029,6 +1039,7 @@ static int __init arch_timer_of_init(struct device_node *np)
  
  	/* Check for globally applicable workarounds */
@@ -64,16 +64,14 @@ index 6a0f0e1..a0b1108 100644
  
  	/*
  	 * If we cannot rely on firmware initializing the timer registers then
-@@ -1185,6 +1196,9 @@ static int __init arch_timer_acpi_init(struct acpi_table_header *table)
- 	/* Always-on capability */
- 	arch_timer_c3stop = !(gtdt->non_secure_el1_flags & ACPI_GTDT_ALWAYS_ON);
+@@ -1185,6 +1196,7 @@ static int __init arch_timer_acpi_init(struct acpi_table_header *table)
+ 	arch_timer_c3stop = acpi_gtdt_c3stop(arch_timer_uses_ppi);
  
-+	/* Check for globally applicable workarounds */
+ 	/* Check for globally applicable workarounds */
 +	arch_timer_check_ool_workaround(ate_match_global_cap_id, NULL);
-+
- 	arch_timer_init();
- 	return 0;
- }
+ 	arch_timer_check_ool_workaround(ate_match_acpi_oem_info, table);
+ 
+ 	ret = arch_timer_register();
 -- 
 2.10.2
 

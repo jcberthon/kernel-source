@@ -69,9 +69,9 @@ index fb4c72d..d83954c 100644
 +	return -ENOMEM;
 +}
 +
- static void __init gic_of_setup_kvm_info(struct device_node *node)
+ int __init
+ gic_of_init(struct device_node *node, struct device_node *parent)
  {
- 	int ret;
 @@ -1277,15 +1312,9 @@ gic_of_init(struct device_node *node, struct device_node *parent)
  
  	gic = &gic_data[gic_cnt];

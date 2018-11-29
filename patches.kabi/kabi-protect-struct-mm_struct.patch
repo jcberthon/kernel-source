@@ -36,5 +36,5 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  #endif
 +#endif
  	struct uprobes_state uprobes_state;
- #ifdef CONFIG_X86_INTEL_MPX
- 	/* address of the bounds directory */
+ #ifdef CONFIG_HUGETLB_PAGE
+ 	atomic_long_t hugetlb_usage;

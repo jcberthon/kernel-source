@@ -7,8 +7,6 @@ Subject: [PATCH 225/447] KVM: arm/arm64: Provide functionality to pause and
 Git-commit: b13216cf6010ef482e69875e00711de7f9573c80 (Partial)
 Patch-mainline: v4.7-rc1
 References: fate#320512
-[Yousaf]: Sill using wait_queue since following patch is missing:
-8577370fb0cb KVM: Use simple waitqueue for vcpu->wq
 
 For some rare corner cases in our VGIC emulation later we have to stop
 the guest to make sure the VGIC state is consistent.
@@ -70,10 +68,10 @@ index fb66cac..bec0905 100644
 +
 +static void kvm_arm_resume_vcpu(struct kvm_vcpu *vcpu)
 +{
-+	wait_queue_head_t *wq = kvm_arch_vcpu_wq(vcpu);
++	struct swait_queue_head *wq = kvm_arch_vcpu_wq(vcpu);
 +
 +	vcpu->arch.pause = false;
-+	wake_up_interruptible(wq);
++	swake_up(wq);
  }
  
 -static void kvm_arm_resume_guest(struct kvm *kvm)
@@ -83,10 +81,10 @@ index fb66cac..bec0905 100644
  	struct kvm_vcpu *vcpu;
  
 -	kvm_for_each_vcpu(i, vcpu, kvm) {
--		wait_queue_head_t *wq = kvm_arch_vcpu_wq(vcpu);
+-		struct swait_queue_head *wq = kvm_arch_vcpu_wq(vcpu);
 -
 -		vcpu->arch.pause = false;
--		wake_up_interruptible(wq);
+-		swake_up(wq);
 -	}
 +	kvm_for_each_vcpu(i, vcpu, kvm)
 +		kvm_arm_resume_vcpu(vcpu);
@@ -114,7 +112,7 @@ index 475eb1f..eb19b48 100644
 +void kvm_arm_resume_guest(struct kvm *kvm);
  
  u64 __kvm_call_hyp(void *hypfn, ...);
- void force_vm_exit(const cpumask_t *mask);
+ #define kvm_call_hyp(f, ...) __kvm_call_hyp(kvm_ksym_ref(f), ##__VA_ARGS__)
 -- 
 2.11.0
 

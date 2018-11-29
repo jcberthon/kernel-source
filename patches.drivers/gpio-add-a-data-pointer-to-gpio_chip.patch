@@ -81,7 +81,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/include/linux/gpio/driver.h
 +++ b/include/linux/gpio/driver.h
 @@ -23,6 +23,7 @@ struct seq_file;
-  * @dev: optional device providing the GPIOs
+  * @parent: optional parent device providing the GPIOs
   * @cdev: class device used by sysfs interface (may be NULL)
   * @owner: helps prevent removal of modules exporting active GPIOs
 + * @data: per-instance data assigned by the driver
@@ -89,7 +89,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
   * @request: optional hook for chip-specific activation, such as
   *	enabling module power and clock; may sleep
 @@ -92,6 +93,7 @@ struct gpio_chip {
- 	struct device		*dev;
+ 	struct device		*parent;
  	struct device		*cdev;
  	struct module		*owner;
 +	void			*data;

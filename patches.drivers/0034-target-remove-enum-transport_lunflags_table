@@ -193,7 +193,7 @@ Acked-by: Lee Duncan <lduncan@suse.com>
 +	return core_dev_add_initiator_node_lun_acl(se_tpg, lacl, lun, lun_access_ro);
  }
  
- static void target_fabric_mappedlun_unlink(
+ static int target_fabric_mappedlun_unlink(
 @@ -172,8 +171,7 @@ static ssize_t target_fabric_mappedlun_w
  	rcu_read_lock();
  	deve = target_nacl_find_deve(se_nacl, lacl->mapped_lun);
@@ -396,6 +396,6 @@ Acked-by: Lee Duncan <lduncan@suse.com>
  	u32			lun_link_magic;
 -	u32			lun_access;
 +	bool			lun_access_ro;
- #ifndef __GENKSYMS__
  	bool			lun_shutdown;
- #endif
+ 	u32			lun_index;
+ 

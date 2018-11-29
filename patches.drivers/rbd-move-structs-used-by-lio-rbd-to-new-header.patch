@@ -51,17 +51,14 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  #define RBD_MINORS_PER_MAJOR		256
  #define RBD_SINGLE_MAJOR_PART_SHIFT	4
  
-@@ -127,35 +117,6 @@ static int atomic_dec_return_safe(atomic
+@@ -127,31 +117,6 @@ static int atomic_dec_return_safe(atomic
  #define RBD_FEATURES_SUPPORTED	(RBD_FEATURES_ALL)
  
  /*
 - * An RBD device name will be "rbd#", where the "rbd" comes from
 - * RBD_DRV_NAME above, and # is a unique integer identifier.
-- * MAX_INT_FORMAT_WIDTH is used in ensuring DEV_NAME_LEN is big
-- * enough to hold all possible device names.
 - */
 -#define DEV_NAME_LEN		32
--#define MAX_INT_FORMAT_WIDTH	((5 * sizeof (int)) / 2 + 1)
 -
 -/*
 - * block device image metadata (in-memory version)
@@ -70,10 +67,9 @@ Acked-by: David Disseldorp <ddiss@suse.de>
 -	/* These six fields never change for a given rbd image */
 -	char *object_prefix;
 -	__u8 obj_order;
--	__u8 crypt_type;
--	__u8 comp_type;
 -	u64 stripe_unit;
 -	u64 stripe_count;
+-	s64 data_pool_id;
 -	u64 features;		/* Might be changeable someday? */
 -
 -	/* The remaining fields need to be updated occasionally */
@@ -154,7 +150,7 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  #define for_each_obj_request(ireq, oreq) \
  	list_for_each_entry(oreq, &(ireq)->obj_requests, links)
  #define for_each_obj_request_from(ireq, oreq) \
-@@ -337,61 +250,6 @@ struct rbd_img_request {
+@@ -337,64 +250,6 @@ struct rbd_img_request {
  #define for_each_obj_request_safe(ireq, oreq, n) \
  	list_for_each_entry_safe_reverse(oreq, n, &(ireq)->obj_requests, links)
  
@@ -185,13 +181,16 @@ Acked-by: David Disseldorp <ddiss@suse.de>
 -	unsigned long		flags;		/* possibly lock protected */
 -	struct rbd_spec		*spec;
 -	struct rbd_options	*opts;
+-	char			*config_info;	/* add{,_single_major} string */
 -
--	char			*header_name;
+-	struct ceph_object_id	header_oid;
+-	struct ceph_object_locator header_oloc;
 -
--	struct ceph_file_layout	layout;
+-	struct ceph_file_layout	layout;		/* used for all rbd requests */
 -
--	struct ceph_osd_event   *watch_event;
--	struct rbd_obj_request	*watch_request;
+-	struct ceph_osd_linger_request *watch_handle;
+-
+-	struct workqueue_struct *task_wq;
 -
 -	struct rbd_spec		*parent_spec;
 -	u64			parent_overlap;
@@ -227,7 +226,7 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  static ssize_t rbd_remove(struct bus_type *bus, const char *buf,
 --- /dev/null
 +++ b/include/linux/ceph/librbd.h
-@@ -0,0 +1,174 @@
+@@ -0,0 +1,173 @@
 +#ifndef _LIBRBD_H
 +#define _LIBRBD_H
 +
@@ -248,11 +247,8 @@ Acked-by: David Disseldorp <ddiss@suse.de>
 +/*
 + * An RBD device name will be "rbd#", where the "rbd" comes from
 + * RBD_DRV_NAME above, and # is a unique integer identifier.
-+ * MAX_INT_FORMAT_WIDTH is used in ensuring DEV_NAME_LEN is big
-+ * enough to hold all possible device names.
 + */
 +#define DEV_NAME_LEN		32
-+#define MAX_INT_FORMAT_WIDTH	((5 * sizeof (int)) / 2 + 1)
 +
 +/*
 + * block device image metadata (in-memory version)
@@ -261,10 +257,9 @@ Acked-by: David Disseldorp <ddiss@suse.de>
 +	/* These six fields never change for a given rbd image */
 +	char *object_prefix;
 +	__u8 obj_order;
-+	__u8 crypt_type;
-+	__u8 comp_type;
 +	u64 stripe_unit;
 +	u64 stripe_count;
++	s64 data_pool_id;
 +	u64 features;		/* Might be changeable someday? */
 +
 +	/* The remaining fields need to be updated occasionally */
@@ -355,13 +350,16 @@ Acked-by: David Disseldorp <ddiss@suse.de>
 +	unsigned long		flags;		/* possibly lock protected */
 +	struct rbd_spec		*spec;
 +	struct rbd_options	*opts;
++	char			*config_info;	/* add{,_single_major} string */
 +
-+	char			*header_name;
++	struct ceph_object_id	header_oid;
++	struct ceph_object_locator header_oloc;
 +
-+	struct ceph_file_layout	layout;
++	struct ceph_file_layout	layout;		/* used for all rbd requests */
 +
-+	struct ceph_osd_event   *watch_event;
-+	struct rbd_obj_request	*watch_request;
++	struct ceph_osd_linger_request *watch_handle;
++
++	struct workqueue_struct *task_wq;
 +
 +	struct rbd_spec		*parent_spec;
 +	u64			parent_overlap;

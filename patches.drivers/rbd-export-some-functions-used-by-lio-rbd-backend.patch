@@ -88,8 +88,8 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  	struct rbd_obj_request *obj_request;
  	struct rbd_obj_request *next_obj_request;
 @@ -3265,6 +3267,7 @@ static int rbd_img_request_submit(struct
- 
- 	return 0;
+ 	rbd_img_request_put(img_request);
+ 	return ret;
  }
 +EXPORT_SYMBOL(rbd_img_request_submit);
  

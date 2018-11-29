@@ -1,14 +1,10 @@
-From: nevdull@us.ibm.com
-Subject: [PATCH] powerpc/mm: Use mm->task_size for boundary checking
-
-References: bsc#1027457, fate#322470
+From: "Aneesh Kumar K.V" <aneesh.kumar@linux.vnet.ibm.com>
+Date: Fri, 14 Apr 2017 00:48:21 +0530
+Subject: powerpc/mm/radix: Use mm->task_size for boundary checking instead of
+ addr_limit
 Patch-mainline: v4.12-rc1
-Backport of the two fixes below provided by IBM
-
- powerpc/mm/radix: Use mm->task_size for boundary checking instead of addr_limit
- powerpc/mmap: Any hint > 128TB searches the full VA space
-Git-commit: be77e999e3937322b7e15274b8fc7da309a040a0
-Git-commit: 321f7d29e5163d7f1c9c0b705acc45bd1be34aa6
+Git-commit: be77e999e3937322b7e15274b8fc7da309a040a0 (partial)
+References: bsc#1027457, fate#322470
 
 We don't init addr_limit correctly for 32 bit applications. So default to using
 mm->task_size for boundary condition checking. We use addr_limit to only control
@@ -24,42 +20,11 @@ TASK_SIZE checks to use mm_context addr_limit).
 Fixes: fbfef9027c2a ("powerpc/mm: Switch some TASK_SIZE checks to use mm_context addr_limit")
 Signed-off-by: Aneesh Kumar K.V <aneesh.kumar@linux.vnet.ibm.com>
 Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
---
- arch/powerpc/mm/slice.c        |   14 +++++++-------
- arch/powerpc/mm/subpage-prot.c |    4 ++--
- 2 files changed, 9 insertions(+), 9 deletions(-)
-
-As part of the new large address space support, processes start out life with a
-128TB virtual address space. However when calling mmap() a process can pass a
-hint address, and if that hint is > 128TB the kernel will use the full 512TB
-address space to try and satisfy the mmap() request.
-
-Currently we have a check that the hint is > 128TB and < 512TB (TASK_SIZE),
-which was added as an optimisation to avoid updating addr_limit unnecessarily
-and also to avoid calling slice_flush_segments() on all CPUs more than
-necessary.
-
-However this has the user-visible side effect that an mmap() hint above 512TB
-does not search the full address space unless a preceding mmap() used a hint
-value > 128TB && < 512TB.
-
-So fix it to treat any hint above 128TB as a hint to search the full address
-space, instead of checking the hint against TASK_SIZE, we instead check if the
-addr_limit is already == TASK_SIZE.
-
-This also brings the ABI in-line with what is proposed on x86. ie, that a hint
-address above 128TB up to and including (2^64)-1 is an indication to search the
-full address space.
-
-Fixes: f4ea6dcb08ea2c (powerpc/mm: Enable mappings above 128TB)
-Signed-off-by: Aneesh Kumar K.V <aneesh.kumar@linux.vnet.ibm.com>
-Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
---
- arch/powerpc/mm/slice.c        |   14 +++++++-------
- arch/powerpc/mm/subpage-prot.c |    4 ++--
- 2 files changed, 9 insertions(+), 9 deletions(-)
-
 Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/mm/slice.c        |   14 +++++++-------
+ arch/powerpc/mm/subpage-prot.c |    4 ++--
+ 2 files changed, 9 insertions(+), 9 deletions(-)
 
 --- a/arch/powerpc/mm/slice.c
 +++ b/arch/powerpc/mm/slice.c

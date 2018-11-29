@@ -149,9 +149,9 @@ index 0defbd02f62d..17a956e4bbd3 100644
  kmem_zone_t *xfs_ifork_zone;
  
 @@ -249,6 +252,7 @@ xfs_iformat_local(
+ 	int		whichfork,
+ 	int		size)
  {
- 	xfs_ifork_t	*ifp;
- 	int		real_size;
 +	int		error;
  
  	/*
@@ -169,9 +169,9 @@ index 0defbd02f62d..17a956e4bbd3 100644
 +			return error;
 +	}
 +
- 	ifp = XFS_IFORK_PTR(ip, whichfork);
- 	real_size = 0;
- 	if (size == 0)
+ 	xfs_init_local_fork(ip, whichfork, XFS_DFORK_PTR(dip, whichfork), size);
+ 	return 0;
+ }
 @@ -789,7 +802,7 @@ xfs_iextents_copy(
   * In these cases, the format always takes precedence, because the
   * format indicates the current state of the fork.

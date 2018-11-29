@@ -256,8 +256,8 @@ index f225afc..3274c16 100644
  #include <asm/kasan.h>
 +#include <asm/kernel-pgtable.h>
  #include <asm/memory.h>
- #include <asm/numa.h>
  #include <asm/sections.h>
+ #include <asm/setup.h>
 @@ -47,7 +49,13 @@
  
  #include "mm.h"

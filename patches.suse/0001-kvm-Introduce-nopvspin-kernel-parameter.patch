@@ -153,8 +153,8 @@ Signed-off-by: Davidlohr Bueso <dbueso@suse.de>
  #include <asm/misc.h>
 +#include <asm/qspinlock.h>
  #include <asm/spec-ctrl.h>
- #include <asm/spec_ctrl.h>
- 
+ #include <asm/intel-family.h>
+ #include <asm/cpu_device_id.h>
 @@ -1247,6 +1248,7 @@ void __init native_smp_prepare_boot_cpu(
  	/* already set me in cpu_online_mask in boot_cpu_init() */
  	cpumask_set_cpu(me, cpu_callout_mask);

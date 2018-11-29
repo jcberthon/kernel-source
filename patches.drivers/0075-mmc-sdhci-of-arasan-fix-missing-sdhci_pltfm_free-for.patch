@@ -49,9 +49,9 @@ index d58ea21..a77e8c3 100644
  
  	ret = clk_prepare_enable(clk_xin);
 @@ -472,13 +474,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- err_add_host:
- 	if (!IS_ERR(sdhci_arasan->phy))
- 		phy_exit(sdhci_arasan->phy);
+ 
+ 	return 0;
+ 
 -err_pltfm_free:
 -	sdhci_pltfm_free(pdev);
  clk_disable_all:

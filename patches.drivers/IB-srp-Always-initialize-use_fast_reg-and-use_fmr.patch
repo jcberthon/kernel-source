@@ -30,8 +30,8 @@ index 286e631..227f119 100644
 --- a/drivers/infiniband/ulp/srp/ib_srp.c
 +++ b/drivers/infiniband/ulp/srp/ib_srp.c
 @@ -3548,7 +3548,7 @@ static void srp_add_one(struct ib_device *device)
+ 	int mr_page_shift, p;
  	u64 max_pages_per_mr;
- 	unsigned int flags = 0;
  
 -	srp_dev = kmalloc(sizeof *srp_dev, GFP_KERNEL);
 +	srp_dev = kzalloc(sizeof(*srp_dev), GFP_KERNEL);

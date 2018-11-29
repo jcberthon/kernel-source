@@ -143,12 +143,11 @@ diff --git a/include/uapi/rdma/Kbuild b/include/uapi/rdma/Kbuild
 index a2c535a4e8f4..a1090ebc0b34 100644
 --- a/include/uapi/rdma/Kbuild
 +++ b/include/uapi/rdma/Kbuild
-@@ -8,5 +8,6 @@ header-y += rdma_user_cm.h
+@@ -8,4 +8,5 @@ header-y += rdma_user_cm.h
  header-y += hfi/
  header-y += rdma_user_rxe.h
  header-y += cxgb3-abi.h
 +header-y += cxgb4-abi.h
- header-y += mlx4-abi.h
  header-y += mlx5-abi.h
 diff --git a/include/uapi/rdma/cxgb4-abi.h b/include/uapi/rdma/cxgb4-abi.h
 new file mode 100644

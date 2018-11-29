@@ -29,9 +29,9 @@ index 16ebab0..3eac4ff 100644
  # define dprintk(x)
  #endif
 @@ -2196,3 +2198,4 @@ extern int update_interval;
+ extern int update_interval;
  extern int check_interval;
  extern int aac_check_reset;
- extern int aac_export_fixed;
 +#endif
 -- 
 1.8.5.6

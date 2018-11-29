@@ -22,7 +22,7 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
 @@ -1835,13 +1835,12 @@ static void rbd_osd_creatrunc_callback(s
- 	obj_request_done_set(obj_request);
+ 		obj_request_done_set(obj_request);
  }
  
 -static void rbd_osd_req_callback(struct ceph_osd_request *osd_req,

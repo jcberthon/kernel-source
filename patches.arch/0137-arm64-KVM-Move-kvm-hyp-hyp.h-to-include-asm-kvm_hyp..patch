@@ -217,8 +217,8 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 --- a/arch/arm64/kvm/hyp/debug-sr.c
 +++ b/arch/arm64/kvm/hyp/debug-sr.c
 @@ -20,9 +20,7 @@
+ #include <linux/kvm_host.h>
  
- #include <asm/debug-monitors.h>
  #include <asm/kvm_asm.h>
 -#include <asm/kvm_mmu.h>
 -

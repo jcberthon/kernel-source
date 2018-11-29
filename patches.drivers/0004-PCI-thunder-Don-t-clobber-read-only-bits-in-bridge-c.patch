@@ -65,13 +65,13 @@ index 4c0c9510d3f8..af722eb0ca75 100644
  static int thunder_pem_bridge_write(struct pci_bus *bus, unsigned int devfn,
  				    int where, int size, u32 val)
  {
- 	struct pci_config_window *cfg = bus->sysdata;
- 	struct thunder_pem_pci *pem_pci = (struct thunder_pem_pci *)cfg->priv;
+ 	struct gen_pci *pci = bus->sysdata;
+ 	struct thunder_pem_pci *pem_pci;
  	u64 write_val, read_val;
 +	u64 where_aligned = where & ~3ull;
  	u32 mask = 0;
  
- 
+ 	pem_pci = container_of(pci, struct thunder_pem_pci, gen_pci);
 @@ -195,8 +217,7 @@ static int thunder_pem_bridge_write(struct pci_bus *bus, unsigned int devfn,
  	 */
  	switch (size) {

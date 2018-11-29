@@ -294,8 +294,8 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 -		.addr = (void __pmem *) ERR_PTR(-EIO),
 +		.addr = ERR_PTR(-EIO),
  	};
- 
- 	if (rw == READ)
+ 	unsigned blkbits = inode->i_blkbits;
+ 	sector_t file_blks = (i_size_read(inode) + (1 << blkbits) - 1)
 --- a/include/linux/blkdev.h
 +++ b/include/linux/blkdev.h
 @@ -1650,7 +1650,7 @@ static inline bool integrity_req_gap_fro

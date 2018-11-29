@@ -128,8 +128,8 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  		dst->alloc_hint.expected_object_size =
  		    cpu_to_le64(src->alloc_hint.expected_object_size);
 @@ -1626,6 +1633,12 @@ static void setup_request_data(struct ce
- 			ceph_osdc_msg_data_add(req->r_request,
- 					       &op->writesame.request_data);
+ 			ceph_osdc_msg_data_add(req->r_reply,
+ 					       &op->cls.response_data);
  			break;
 +		case CEPH_OSD_OP_NOTIFY:
 +			ceph_osdc_msg_data_add(msg,

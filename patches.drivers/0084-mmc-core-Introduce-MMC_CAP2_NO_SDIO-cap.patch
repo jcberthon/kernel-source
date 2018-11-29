@@ -45,7 +45,7 @@ index 7856fda..897316d 100644
 +
  	if (!mmc_attach_sd(host))
  		return 0;
- 
+ 	if (!mmc_attach_mmc(host))
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
 index 9db74ca..6449b67 100644
 --- a/include/linux/mmc/host.h
@@ -55,8 +55,8 @@ index 9db74ca..6449b67 100644
  #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
  #define MMC_CAP2_NO_WRITE_PROTECT (1 << 18)	/* No physical write protect pin, assume that card is always read-write */
 +#define MMC_CAP2_NO_SDIO	(1 << 19)	/* Do not send SDIO commands during initialization */
- #define MMC_CAP2_HS400_ES	(1 << 20)	/* Host supports enhanced strobe */
- #define MMC_CAP2_NO_MMC		(1 << 22)	/* Do not send (e)MMC commands during initialization */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
  
 -- 
 2.11.0

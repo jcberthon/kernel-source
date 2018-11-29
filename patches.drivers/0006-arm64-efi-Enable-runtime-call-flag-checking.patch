@@ -36,13 +36,13 @@ index 00ad0e06..e2338b8c 100644
 --- a/arch/arm64/include/asm/efi.h
 +++ b/arch/arm64/include/asm/efi.h
 @@ -3,6 +3,7 @@
- 
  #include <asm/io.h>
+ #include <asm/mmu_context.h>
  #include <asm/neon.h>
 +#include <asm/ptrace.h>
+ #include <asm/tlbflush.h>
  
  #ifdef CONFIG_EFI
- extern void efi_init(void);
 @@ -29,6 +30,8 @@ extern void efi_init(void);
  	kernel_neon_end();						\
  })

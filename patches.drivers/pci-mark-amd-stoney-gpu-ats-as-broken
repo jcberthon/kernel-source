@@ -24,9 +24,9 @@ Acked-by: Alex Deucher <alexander.deucher@amd.com>
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
 @@ -4547,3 +4547,18 @@ static void quirk_intel_qat_vf_cap(struc
- 	}
  }
- DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_INTEL, 0x443, quirk_intel_qat_vf_cap);
+ DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_INTEL, 0x1502, quirk_intel_no_flr);
+ DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_INTEL, 0x1503, quirk_intel_no_flr);
 +
 +#ifdef CONFIG_PCI_ATS
 +/*

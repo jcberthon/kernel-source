@@ -126,7 +126,7 @@ Acked-by: David Chang <dchang@suse.com>
 +
  	rc = efx_ef10_filter_insert(efx, &spec, true);
  	if (rc < 0) {
- 		netif_cond_dbg(efx, drv, efx->net_dev,
+ 		netif_printk(efx, drv, rc == -EPERM ? KERN_DEBUG : KERN_WARNING,
 @@ -4126,8 +4134,7 @@ static int efx_ef10_filter_insert_def(st
  			efx_filter_init_rx(&spec, EFX_FILTER_PRI_AUTO,
  					   filter_flags, 0);

@@ -23,9 +23,9 @@ index 1b81f73..7e7ae78 100644
 --- a/drivers/scsi/lpfc/lpfc_init.c
 +++ b/drivers/scsi/lpfc/lpfc_init.c
 @@ -37,6 +37,7 @@
+ #include <linux/miscdevice.h>
  #include <linux/percpu.h>
  #include <linux/msi.h>
- #include <linux/irq.h>
 +#include <linux/bitops.h>
  
  #include <scsi/scsi.h>

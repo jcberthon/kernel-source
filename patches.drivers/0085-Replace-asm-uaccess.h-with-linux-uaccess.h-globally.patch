@@ -1354,8 +1354,8 @@ Signed-off-by: Coly Li <colyli@suse.de>
 -#include <asm/uaccess.h>
 +#include <linux/uaccess.h>
  #include <asm/kvm.h>
- #include <asm/kvm_asm.h>
  #include <asm/kvm_emulate.h>
+ #include <asm/kvm_coproc.h>
 --- a/arch/arm/lib/getuser.S
 +++ b/arch/arm/lib/getuser.S
 @@ -21,7 +21,7 @@
@@ -1453,8 +1453,8 @@ Signed-off-by: Coly Li <colyli@suse.de>
 -#include <asm/uaccess.h>
 +#include <linux/uaccess.h>
  #include <asm/kvm.h>
- #include <asm/kvm_asm.h>
  #include <asm/kvm_emulate.h>
+ #include <asm/kvm_coproc.h>
 --- a/arch/avr32/kernel/avr32_ksyms.c
 +++ b/arch/avr32/kernel/avr32_ksyms.c
 @@ -12,7 +12,7 @@
@@ -3394,8 +3394,8 @@ Signed-off-by: Coly Li <colyli@suse.de>
 --- a/arch/powerpc/kernel/rtasd.c
 +++ b/arch/powerpc/kernel/rtasd.c
 @@ -23,7 +23,7 @@
+ #include <linux/workqueue.h>
  #include <linux/slab.h>
- #include <linux/topology.h>
  
 -#include <asm/uaccess.h>
 +#include <linux/uaccess.h>
@@ -3614,8 +3614,8 @@ Signed-off-by: Coly Li <colyli@suse.de>
 --- a/arch/powerpc/lib/code-patching.c
 +++ b/arch/powerpc/lib/code-patching.c
 @@ -15,7 +15,7 @@
- #include <asm/setup.h>
- #include <asm/sections.h>
+ #include <linux/mm.h>
+ #include <asm/page.h>
  #include <asm/code-patching.h>
 -#include <asm/uaccess.h>
 +#include <linux/uaccess.h>
@@ -6541,12 +6541,12 @@ Signed-off-by: Coly Li <colyli@suse.de>
 @@ -282,7 +282,7 @@
  #include <linux/blkdev.h>
  #include <linux/times.h>
- #include <linux/delay.h>
+ 
 -#include <asm/uaccess.h>
 +#include <linux/uaccess.h>
- #include <linux/sched.h>
  
  /* used to tell the module to turn on full debugging messages */
+ static bool debug;
 --- a/drivers/char/agp/compat_ioctl.c
 +++ b/drivers/char/agp/compat_ioctl.c
 @@ -31,7 +31,7 @@
@@ -6941,8 +6941,8 @@ Signed-off-by: Coly Li <colyli@suse.de>
 -#include <asm/uaccess.h>
 +#include <linux/uaccess.h>
  #include <linux/err.h>
+ #include <linux/property.h>
  
- #include "i2c-core.h"
 --- a/drivers/ide/hpt366.c
 +++ b/drivers/ide/hpt366.c
 @@ -130,7 +130,7 @@
@@ -7011,9 +7011,9 @@ Signed-off-by: Coly Li <colyli@suse.de>
  #include <linux/stat.h>
 --- a/drivers/infiniband/core/ucm.c
 +++ b/drivers/infiniband/core/ucm.c
-@@ -46,7 +46,7 @@
- #include <linux/mutex.h>
- #include <linux/slab.h>
+@@ -48,7 +48,7 @@
+ 
+ #include <linux/nospec.h>
  
 -#include <asm/uaccess.h>
 +#include <linux/uaccess.h>
@@ -8240,7 +8240,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
 +#include <linux/uaccess.h>
  #include <asm/irq.h>
  #include <asm/io.h>
- #include <asm/immap_qe.h>
+ #include <soc/fsl/qe/immap_qe.h>
 --- a/drivers/net/ethernet/freescale/ucc_geth_ethtool.c
 +++ b/drivers/net/ethernet/freescale/ucc_geth_ethtool.c
 @@ -32,7 +32,7 @@
@@ -9855,9 +9855,9 @@ Signed-off-by: Coly Li <colyli@suse.de>
  #include <linux/slab.h>
 -#include <asm/uaccess.h>
 +#include <linux/uaccess.h>
- #include <asm/unaligned.h>
  #include <linux/fs.h>
  #include <linux/compat.h>
+ #include <linux/blkdev.h>
 --- a/drivers/scsi/osst.c
 +++ b/drivers/scsi/osst.c
 @@ -52,7 +52,7 @@ static const char * osst_version = "0.99
@@ -10661,72 +10661,6 @@ Signed-off-by: Coly Li <colyli@suse.de>
  
  #include <linux/dlm.h>
  #include "config.h"
---- a/fs/dmapi/dmapi_config.c
-+++ b/fs/dmapi/dmapi_config.c
-@@ -30,7 +30,7 @@
-  * http://oss.sgi.com/projects/GenInfo/SGIGPLNoticeExplan/
-  */
- 
--#include <asm/uaccess.h>
-+#include <linux/uaccess.h>
- #include "dmapi.h"
- #include "dmapi_kern.h"
- #include "dmapi_private.h"
---- a/fs/dmapi/dmapi_event.c
-+++ b/fs/dmapi/dmapi_event.c
-@@ -29,7 +29,7 @@
-  *
-  * http://oss.sgi.com/projects/GenInfo/SGIGPLNoticeExplan/
-  */
--#include <asm/uaccess.h>
-+#include <linux/uaccess.h>
- #include "dmapi.h"
- #include "dmapi_kern.h"
- #include "dmapi_private.h"
---- a/fs/dmapi/dmapi_register.c
-+++ b/fs/dmapi/dmapi_register.c
-@@ -36,7 +36,7 @@
- #include <linux/module.h>
- #include <linux/mount.h>
- #include <linux/namei.h>
--#include <asm/uaccess.h>
-+#include <linux/uaccess.h>
- #include <linux/fs.h>
- #include <linux/file.h>
- #include <linux/seq_file.h>
---- a/fs/dmapi/dmapi_right.c
-+++ b/fs/dmapi/dmapi_right.c
-@@ -29,7 +29,7 @@
-  *
-  * http://oss.sgi.com/projects/GenInfo/SGIGPLNoticeExplan/
-  */
--#include <asm/uaccess.h>
-+#include <linux/uaccess.h>
- #include "dmapi.h"
- #include "dmapi_kern.h"
- #include "dmapi_private.h"
---- a/fs/dmapi/dmapi_session.c
-+++ b/fs/dmapi/dmapi_session.c
-@@ -32,7 +32,7 @@
- 
- #include <linux/init.h>
- #include <linux/proc_fs.h>
--#include <asm/uaccess.h>
-+#include <linux/uaccess.h>
- #ifdef CONFIG_PROC_FS
- #include <linux/module.h>
- #endif
---- a/fs/dmapi/dmapi_sysent.c
-+++ b/fs/dmapi/dmapi_sysent.c
-@@ -44,7 +44,7 @@
- #include <linux/module.h>
- #include <linux/seq_file.h>
- 
--#include <asm/uaccess.h>
-+#include <linux/uaccess.h>
- 
- #include "dmapi.h"
- #include "dmapi_kern.h"
 --- a/fs/efs/efs.h
 +++ b/fs/efs/efs.h
 @@ -14,7 +14,7 @@
@@ -11616,7 +11550,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
 +#include <linux/uaccess.h>
  #include <linux/gfp.h>
  #include <linux/bitops.h>
- #include <linux/swap.h>
+ #include <linux/hardirq.h> /* for in_interrupt() */
 --- a/include/linux/poll.h
 +++ b/include/linux/poll.h
 @@ -8,7 +8,7 @@
@@ -11840,8 +11774,8 @@ Signed-off-by: Coly Li <colyli@suse.de>
 --- a/kernel/printk/printk.c
 +++ b/kernel/printk/printk.c
 @@ -50,7 +50,7 @@
- #include <linux/kthread.h>
- #include <linux/sched/rt.h>
+ #include <linux/ctype.h>
+ #include <linux/uio.h>
  
 -#include <asm/uaccess.h>
 +#include <linux/uaccess.h>
@@ -12011,8 +11945,8 @@ Signed-off-by: Coly Li <colyli@suse.de>
 -#include <asm/uaccess.h>
 +#include <linux/uaccess.h>
  
- #ifndef ARCH_HAS_SORT_EXTABLE
- /*
+ #ifndef ARCH_HAS_RELATIVE_EXTABLE
+ #define ex_to_insn(x)	((x)->insn)
 --- a/lib/kstrtox.c
 +++ b/lib/kstrtox.c
 @@ -17,7 +17,7 @@
@@ -12511,7 +12445,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
 --- a/net/core/utils.c
 +++ b/net/core/utils.c
 @@ -35,7 +35,7 @@
- #endif
+ #include <net/net_ratelimit.h>
  
  #include <asm/byteorder.h>
 -#include <asm/uaccess.h>

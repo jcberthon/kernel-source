@@ -34,7 +34,7 @@ index 1ad96b9..31ef263 100644
 +#define ID_AA64MMFR2_CNP_SHIFT		0
  
  /* id_aa64dfr0 */
- #define ID_AA64DFR0_PMSVER_SHIFT	32
+ #define ID_AA64DFR0_CTX_CMPS_SHIFT	28
 diff --git a/arch/arm64/kernel/cpufeature.c b/arch/arm64/kernel/cpufeature.c
 index 509100a..f1bae24 100644
 --- a/arch/arm64/kernel/cpufeature.c

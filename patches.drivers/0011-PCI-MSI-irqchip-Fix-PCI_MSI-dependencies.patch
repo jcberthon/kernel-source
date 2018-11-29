@@ -100,9 +100,9 @@ index 1e2ada353370..08071d021dea 100644
 -	select PCI_MSI_IRQ_DOMAIN
 +	depends on PCI
 +	depends on PCI_MSI
- 	select ACPI_IORT if ACPI
  
  config ARM_NVIC
+ 	bool
 @@ -101,7 +102,6 @@ config HISILICON_IRQ_MBIGEN
  	bool
  	select ARM_GIC_V3
@@ -190,8 +190,8 @@ index ccdf3bd240a3..5c398b410dd8 100644
  	select PCIEPORTBUS
  	help
 @@ -107,7 +113,6 @@ config PCI_XGENE
- 	depends on ARM64
- 	depends on OF || (ACPI && PCI_QUIRKS)
+ 	depends on ARCH_XGENE
+ 	depends on OF
  	select PCIEPORTBUS
 -	select PCI_MSI_IRQ_DOMAIN if PCI_MSI
  	help

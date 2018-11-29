@@ -29,8 +29,8 @@ Acked-by: Guoqing Jiang <gqjiang@suse.com>
 --- a/drivers/md/md-cluster.c
 +++ b/drivers/md/md-cluster.c
 @@ -69,6 +69,7 @@ struct md_cluster_info {
+ 	int slot_number;
  	struct completion completion;
- 	struct mutex recv_mutex;
  	struct dlm_lock_resource *bitmap_lockres;
 +	struct dlm_lock_resource **other_bitmap_lockres;
  	struct dlm_lock_resource *resync_lockres;

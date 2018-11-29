@@ -184,8 +184,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	struct memblock_region *reg;
  
 @@ -390,31 +384,8 @@ static void __init map_mem(void)
- 		if (start >= end)
- 			break;
+ 		if (memblock_is_nomap(reg))
+ 			continue;
  
 -		__map_memblock(start, end);
 -	}
@@ -215,7 +215,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 -#endif
  }
  
- #ifdef CONFIG_DEBUG_RODATA
+ /* Hardcode rodata=true to fix compilation errors */
 @@ -434,16 +405,72 @@ void fixup_init(void)
  			PAGE_KERNEL);
  }
@@ -289,6 +289,6 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	 */
 +	memblock_free(__pa(swapper_pg_dir) + PAGE_SIZE,
 +		      SWAPPER_DIR_SIZE - PAGE_SIZE);
+
+ 	bootmem_init();
  }
- 
- /*

@@ -31,8 +31,8 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 +			       "%scast mismatch filter insert failed rc=%d\n",
 +			       multicast ? "Multi" : "Uni", rc);
  	} else if (multicast) {
- 		table->mcdef_id = efx_ef10_filter_get_unsafe_id(efx, rc);
- 		if (!nic_data->workaround_26807) {
+ 		EFX_WARN_ON_PARANOID(vlan->mcdef != EFX_EF10_FILTER_ID_INVALID);
+ 		vlan->mcdef = efx_ef10_filter_get_unsafe_id(efx, rc);
 --- a/drivers/net/ethernet/sfc/mcdi.c
 +++ b/drivers/net/ethernet/sfc/mcdi.c
 @@ -835,11 +835,9 @@ static int _efx_mcdi_rpc(struct efx_nic

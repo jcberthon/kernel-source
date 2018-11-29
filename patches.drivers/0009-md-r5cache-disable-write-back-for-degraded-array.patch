@@ -108,7 +108,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
 +
  int r5l_init_log(struct r5conf *conf, struct md_rdev *rdev)
  {
- 	struct r5l_log *log;
+ 	struct request_queue *q = bdev_get_queue(rdev->bdev);
 @@ -2146,6 +2190,7 @@ int r5l_init_log(struct r5conf *conf, st
  	spin_lock_init(&log->no_space_stripes_lock);
  

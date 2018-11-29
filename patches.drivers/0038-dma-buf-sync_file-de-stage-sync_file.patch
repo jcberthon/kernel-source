@@ -14,20 +14,18 @@ Reviewed-by: Daniel Vetter <daniel.vetter@ffwll.ch>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Signed-off-by: Patrik Jakobsson <pjakobsson@suse.de>
 ---
- drivers/Kconfig                     |   2 +
- drivers/dma-buf/Kconfig             |  11 +
- drivers/dma-buf/Makefile            |   1 +
- drivers/dma-buf/sync_file.c         | 394 ++++++++++++++++++++++++++++++++++++
- drivers/staging/android/Kconfig     |   1 +
- drivers/staging/android/Makefile    |   2 +-
- drivers/staging/android/sync_file.c | 394 ------------------------------------
- 7 files changed, 410 insertions(+), 395 deletions(-)
+ drivers/Kconfig                     |    2 
+ drivers/dma-buf/Kconfig             |   11 
+ drivers/dma-buf/Makefile            |    1 
+ drivers/dma-buf/sync_file.c         |  403 ++++++++++++++++++++++++++++++++++++
+ drivers/staging/android/Kconfig     |    1 
+ drivers/staging/android/Makefile    |    2 
+ drivers/staging/android/sync_file.c |  394 -----------------------------------
+ 7 files changed, 419 insertions(+), 395 deletions(-)
  create mode 100644 drivers/dma-buf/Kconfig
  create mode 100644 drivers/dma-buf/sync_file.c
  delete mode 100644 drivers/staging/android/sync_file.c
 
-diff --git a/drivers/Kconfig b/drivers/Kconfig
-index d2ac339de85f..430f761b0d8d 100644
 --- a/drivers/Kconfig
 +++ b/drivers/Kconfig
 @@ -114,6 +114,8 @@ source "drivers/rtc/Kconfig"
@@ -39,9 +37,6 @@ index d2ac339de85f..430f761b0d8d 100644
  source "drivers/dca/Kconfig"
  
  source "drivers/auxdisplay/Kconfig"
-diff --git a/drivers/dma-buf/Kconfig b/drivers/dma-buf/Kconfig
-new file mode 100644
-index 000000000000..9824bc4addf8
 --- /dev/null
 +++ b/drivers/dma-buf/Kconfig
 @@ -0,0 +1,11 @@
@@ -56,19 +51,14 @@ index 000000000000..9824bc4addf8
 +	  This option enables the fence framework synchronization to export
 +	  sync_files to userspace that can represent one or more fences.
 +endmenu
-diff --git a/drivers/dma-buf/Makefile b/drivers/dma-buf/Makefile
-index 57a675f90cd0..4a424eca75ed 100644
 --- a/drivers/dma-buf/Makefile
 +++ b/drivers/dma-buf/Makefile
 @@ -1 +1,2 @@
  obj-y := dma-buf.o fence.o reservation.o seqno-fence.o
 +obj-$(CONFIG_SYNC_FILE)		+= sync_file.o
-diff --git a/drivers/dma-buf/sync_file.c b/drivers/dma-buf/sync_file.c
-new file mode 100644
-index 000000000000..8ce93a1a5d16
 --- /dev/null
 +++ b/drivers/dma-buf/sync_file.c
-@@ -0,0 +1,394 @@
+@@ -0,0 +1,401 @@
 +/*
 + * drivers/dma-buf/sync_file.c
 + *
@@ -96,6 +86,13 @@ index 000000000000..8ce93a1a5d16
 +#include <linux/anon_inodes.h>
 +#include <linux/sync_file.h>
 +#include <uapi/linux/sync_file.h>
++
++#define u64_to_user_ptr(x) (		\
++{					\
++       typecheck(u64, x);		\
++       (void __user *)(uintptr_t)x;	\
++}					\
++)
 +
 +static const struct file_operations sync_file_fops;
 +
@@ -463,8 +460,6 @@ index 000000000000..8ce93a1a5d16
 +	.compat_ioctl = sync_file_ioctl,
 +};
 +
-diff --git a/drivers/staging/android/Kconfig b/drivers/staging/android/Kconfig
-index bd90d2002afb..2756988aea80 100644
 --- a/drivers/staging/android/Kconfig
 +++ b/drivers/staging/android/Kconfig
 @@ -52,6 +52,7 @@ config SW_SYNC
@@ -475,8 +470,6 @@ index bd90d2002afb..2756988aea80 100644
  	---help---
  	  A sync object driver that uses a 32bit counter to coordinate
  	  synchronization.  Useful when there is no hardware primitive backing
-diff --git a/drivers/staging/android/Makefile b/drivers/staging/android/Makefile
-index c6faae61cf7e..c7b6c99cc5ce 100644
 --- a/drivers/staging/android/Makefile
 +++ b/drivers/staging/android/Makefile
 @@ -6,5 +6,5 @@ obj-$(CONFIG_ASHMEM)			+= ashmem.o
@@ -486,9 +479,6 @@ index c6faae61cf7e..c7b6c99cc5ce 100644
 -obj-$(CONFIG_SYNC)			+= sync_file.o sync.o sync_debug.o
 +obj-$(CONFIG_SYNC)			+= sync.o sync_debug.o
  obj-$(CONFIG_SW_SYNC)			+= sw_sync.o
-diff --git a/drivers/staging/android/sync_file.c b/drivers/staging/android/sync_file.c
-deleted file mode 100644
-index 8ce93a1a5d16..000000000000
 --- a/drivers/staging/android/sync_file.c
 +++ /dev/null
 @@ -1,394 +0,0 @@
@@ -886,5 +876,3 @@ index 8ce93a1a5d16..000000000000
 -	.compat_ioctl = sync_file_ioctl,
 -};
 -
--- 
-2.12.0

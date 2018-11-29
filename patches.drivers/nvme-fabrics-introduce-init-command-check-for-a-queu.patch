@@ -61,7 +61,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  #endif /* _NVME_FABRICS_H */
 --- a/drivers/nvme/host/rdma.c
 +++ b/drivers/nvme/host/rdma.c
-@@ -1439,31 +1439,11 @@ nvme_rdma_timeout(struct request *rq, bo
+@@ -1439,29 +1439,11 @@ nvme_rdma_timeout(struct request *rq, bo
  /*
   * We cannot accept any other command until the Connect command has completed.
   */
@@ -82,11 +82,9 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 -			 * fail it fast to allow upper layers a chance to
 -			 * failover.
 -			 */
--			if (queue->ctrl->ctrl.state == NVME_CTRL_RECONNECTING ||
--			    queue->ctrl->ctrl.state == NVME_CTRL_DELETING) {
--				nvme_req(rq)->status = NVME_SC_ABORT_REQ;
+-			if (queue->ctrl->ctrl.state == NVME_CTRL_RECONNECTING)
 -				return -EIO;
--			} else
+-			else
 -				return -EAGAIN;
 -		}
 -	}

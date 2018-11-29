@@ -55,7 +55,7 @@ index b6a3cef..d4ceaf5 100644
 +++ b/arch/arm/include/asm/virt.h
 @@ -79,6 +79,10 @@ static inline bool is_kernel_in_hyp_mode(void)
  {
- 	return false;
+ 	return !!(__boot_cpu_mode & BOOT_CPU_MODE_MISMATCH);
  }
 +
 +/* The section containing the hypervisor text */

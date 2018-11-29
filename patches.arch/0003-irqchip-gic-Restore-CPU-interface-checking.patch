@@ -36,19 +36,19 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  			"GICv3 system registers enabled, broken firmware!\n");
  }
 @@ -509,6 +509,7 @@ static int gic_cpu_init(struct gic_chip_
- 		if (WARN_ON(cpu >= NR_GIC_CPU_IF))
- 			return -EINVAL;
- 
+ 		 * Get what the GIC says our CPU mask is.
+ 		 */
+ 		BUG_ON(cpu >= NR_GIC_CPU_IF);
 +		gic_check_cpu_features();
  		cpu_mask = gic_get_cpumask(gic);
  		gic_cpu_map[cpu] = cpu_mask;
  
 @@ -1059,8 +1060,6 @@ static const struct irq_domain_ops gic_i
- static void gic_init_chip(struct gic_chip_data *gic, struct device *dev,
- 			 const char *name, bool use_eoimode1)
- {
+ 
+ 	BUG_ON(gic_nr >= CONFIG_ARM_GIC_MAX_NR);
+ 
 -	gic_check_cpu_features();
 -
+ 	gic = &gic_data[gic_nr];
+ 
  	/* Initialize irq_chip */
- 	gic->chip = gic_chip;
- 	gic->chip.name = name;

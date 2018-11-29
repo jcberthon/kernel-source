@@ -40,7 +40,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 
 --- a/drivers/infiniband/core/verbs.c
 +++ b/drivers/infiniband/core/verbs.c
-@@ -1572,6 +1572,46 @@ int ib_check_mr_status(struct ib_mr *mr,
+@@ -1558,6 +1558,46 @@ int ib_check_mr_status(struct ib_mr *mr,
  }
  EXPORT_SYMBOL(ib_check_mr_status);
  
@@ -106,9 +106,9 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  
  enum ib_signature_prot_cap {
 @@ -1883,6 +1885,14 @@ struct ib_device {
- 	int			   (*check_mr_status)(struct ib_mr *mr, u32 check_mask,
- 						      struct ib_mr_status *mr_status);
  	void			   (*disassociate_ucontext)(struct ib_ucontext *ibcontext);
+ 	void			   (*drain_rq)(struct ib_qp *qp);
+ 	void			   (*drain_sq)(struct ib_qp *qp);
 +	int			   (*set_vf_link_state)(struct ib_device *device, int vf, u8 port,
 +							int state);
 +	int			   (*get_vf_config)(struct ib_device *device, int vf, u8 port,
@@ -120,7 +120,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  
  	struct ib_dma_mapping_ops   *dma_ops;
  
-@@ -2329,6 +2339,15 @@ int ib_query_gid(struct ib_device *devic
+@@ -2326,6 +2336,15 @@ int ib_query_gid(struct ib_device *devic
  		 u8 port_num, int index, union ib_gid *gid,
  		 struct ib_gid_attr *attr);
  

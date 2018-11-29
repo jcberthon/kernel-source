@@ -55,9 +55,9 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 --- a/mm/mprotect.c
 +++ b/mm/mprotect.c
 @@ -164,7 +164,7 @@ static inline unsigned long change_pmd_r
- 
  		next = pmd_addr_end(addr, end);
- 		if (!pmd_trans_huge(*pmd) && pmd_none_or_clear_bad(pmd))
+ 		if (!pmd_trans_huge(*pmd) && !pmd_devmap(*pmd)
+ 				&& pmd_none_or_clear_bad(pmd))
 -			continue;
 +			goto next;
  

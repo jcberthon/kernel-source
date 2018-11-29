@@ -63,7 +63,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 -
  		bit = find_first_bit((unsigned long *)&pebs_status,
  					x86_pmu.max_pebs_events);
- 		if (WARN(bit >= x86_pmu.max_pebs_events,
+ 		if (bit >= x86_pmu.max_pebs_events)
 @@ -1284,8 +1284,11 @@ static void intel_pmu_drain_pebs_nhm(str
  			continue;
  

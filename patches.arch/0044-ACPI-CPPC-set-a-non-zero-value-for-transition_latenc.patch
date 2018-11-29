@@ -98,7 +98,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 --- a/drivers/cpufreq/cppc_cpufreq.c
 +++ b/drivers/cpufreq/cppc_cpufreq.c
 @@ -98,6 +98,7 @@ static int cppc_cpufreq_cpu_init(struct
- 	policy->max = cpu->perf_caps.highest_perf;
+ 	policy->max = cppc_dmi_max_khz;
  	policy->cpuinfo.min_freq = policy->min;
  	policy->cpuinfo.max_freq = policy->max;
 +	policy->cpuinfo.transition_latency = cppc_get_transition_latency(cpu_num);

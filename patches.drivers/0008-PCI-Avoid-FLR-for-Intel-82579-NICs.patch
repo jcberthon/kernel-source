@@ -56,10 +56,11 @@ diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
 index 46a143b9949b..10472e8fc0e0 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
-@@ -4592,6 +4592,14 @@ static void quirk_intel_qat_vf_cap(struct pci_dev *pdev)
+@@ -4592,3 +4592,11 @@ static void quirk_intel_qat_vf_cap(struct pci_dev *pdev)
+ 	}
  }
  DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_INTEL, 0x443, quirk_intel_qat_vf_cap);
- 
++
 +/* FLR may cause some 82579 devices to hang. */
 +static void quirk_intel_no_flr(struct pci_dev *dev)
 +{
@@ -67,18 +68,14 @@ index 46a143b9949b..10472e8fc0e0 100644
 +}
 +DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_INTEL, 0x1502, quirk_intel_no_flr);
 +DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_INTEL, 0x1503, quirk_intel_no_flr);
-+
- #ifdef CONFIG_PCI_ATS
- /*
-  * Some devices have a broken ATS implementation causing IOMMU stalls.
 diff --git a/include/linux/pci.h b/include/linux/pci.h
 index 50d638da3f85..efc76910bd34 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
 @@ -185,6 +185,8 @@ enum pci_dev_flags {
+ 	PCI_DEV_FLAGS_VPD_REF_F0 = (__force pci_dev_flags_t) (1 << 8),
+ 	/* a non-root bridge where translation occurs, stop alias search here */
  	PCI_DEV_FLAGS_BRIDGE_XLATE_ROOT = (__force pci_dev_flags_t) (1 << 9),
- 	/* Use Relaxed Ordering for TLPs directed at this device */
- 	PCI_DEV_FLAGS_RELAXED_ORDERING = (__force pci_dev_flags_t) (1 << 10),
 +	/* Do not use FLR even if device advertises PCI_AF_CAP */
 +	PCI_DEV_FLAGS_NO_FLR_RESET = (__force pci_dev_flags_t) (1 << 11),
  };

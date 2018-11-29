@@ -17,25 +17,25 @@ Reviewed-by: Keith Busch <keith.busch@intel.com>
 Signed-off-by: Jens Axboe <axboe@fb.com>
 Acked-by: Hannes Reinecke <hare@suse.de>
 ---
- block/blk-flush.c                 |    6 ++---
- block/blk-mq-tag.c                |    5 +---
- block/blk-mq.c                    |   40 ++++++++++----------------------------
- block/blk-mq.h                    |    6 +++++
- block/blk.h                       |   11 ++--------
- drivers/block/loop.c              |    1 
- drivers/block/mtip32xx/mtip32xx.c |    1 
- drivers/block/null_blk.c          |    1 
- drivers/block/rbd.c               |    1 
- drivers/block/virtio_blk.c        |    1 
- drivers/block/xen-blkfront.c      |    1 
- drivers/md/dm-rq.c                |    1 
- drivers/mtd/ubi/block.c           |    1 
- drivers/nvme/host/pci.c           |    2 -
- drivers/nvme/host/rdma.c          |    2 -
- drivers/nvme/target/loop.c        |    2 -
- drivers/scsi/scsi_lib.c           |    1 
- include/linux/blk-mq.h            |    7 ------
- 18 files changed, 25 insertions(+), 65 deletions(-)
+ block/blk-flush.c                 |    6 +++---
+ block/blk-mq-tag.c                |    5 ++---
+ block/blk-mq.c                    |   36 +++++++++---------------------------
+ block/blk-mq.h                    |    6 ++++++
+ block/blk.h                       |   11 +++--------
+ drivers/block/loop.c              |    1 -
+ drivers/block/mtip32xx/mtip32xx.c |    1 -
+ drivers/block/null_blk.c          |    1 -
+ drivers/block/rbd.c               |    1 -
+ drivers/block/virtio_blk.c        |    1 -
+ drivers/block/xen-blkfront.c      |    1 -
+ drivers/md/dm-rq.c                |    1 -
+ drivers/mtd/ubi/block.c           |    1 -
+ drivers/nvme/host/pci.c           |    2 --
+ drivers/nvme/host/rdma.c          |    2 --
+ drivers/nvme/target/loop.c        |    2 --
+ drivers/scsi/scsi_lib.c           |    1 -
+ include/linux/blk-mq.h            |    7 -------
+ 18 files changed, 23 insertions(+), 63 deletions(-)
 
 --- a/block/blk-flush.c
 +++ b/block/blk-flush.c
@@ -68,7 +68,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	 * After populating an empty queue, kick it to avoid stall.  Read
 --- a/block/blk-mq-tag.c
 +++ b/block/blk-mq-tag.c
-@@ -301,8 +301,7 @@ static int bt_get(struct blk_mq_alloc_da
+@@ -141,8 +141,7 @@ static int bt_get(struct blk_mq_alloc_da
  		io_schedule();
  
  		data->ctx = blk_mq_get_ctx(data->q);
@@ -78,7 +78,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  		if (data->flags & BLK_MQ_REQ_RESERVED) {
  			bt = &data->hctx->tags->breserved_tags;
  		} else {
-@@ -726,7 +725,7 @@ u32 blk_mq_unique_tag(struct request *rq
+@@ -453,7 +452,7 @@ u32 blk_mq_unique_tag(struct request *rq
  	int hwq = 0;
  
  	if (q->mq_ops) {
@@ -89,25 +89,16 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
 --- a/block/blk-mq.c
 +++ b/block/blk-mq.c
-@@ -245,7 +245,7 @@ struct request *blk_mq_alloc_request(str
+@@ -224,7 +224,7 @@ struct request *blk_mq_alloc_request(str
  		return ERR_PTR(ret);
  
  	ctx = blk_mq_get_ctx(q);
 -	hctx = q->mq_ops->map_queue(q, ctx->cpu);
 +	hctx = blk_mq_map_queue(q, ctx->cpu);
  	blk_mq_set_alloc_data(&alloc_data, q, flags, ctx, hctx);
- 
  	rq = __blk_mq_alloc_request(&alloc_data, rw, 0);
-@@ -254,7 +254,7 @@ struct request *blk_mq_alloc_request(str
- 		blk_mq_put_ctx(ctx);
- 
- 		ctx = blk_mq_get_ctx(q);
--		hctx = q->mq_ops->map_queue(q, ctx->cpu);
-+		hctx = blk_mq_map_queue(q, ctx->cpu);
- 		blk_mq_set_alloc_data(&alloc_data, q, flags, ctx, hctx);
- 		rq =  __blk_mq_alloc_request(&alloc_data, rw, 0);
- 		ctx = alloc_data.ctx;
-@@ -338,11 +338,7 @@ EXPORT_SYMBOL_GPL(blk_mq_free_hctx_reque
+ 	blk_mq_put_ctx(ctx);
+@@ -319,11 +319,7 @@ EXPORT_SYMBOL_GPL(blk_mq_free_hctx_reque
  
  void blk_mq_free_request(struct request *rq)
  {
@@ -120,7 +111,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  }
  EXPORT_SYMBOL_GPL(blk_mq_free_request);
  
-@@ -1072,9 +1068,7 @@ void blk_mq_insert_request(struct reques
+@@ -1056,9 +1052,7 @@ void blk_mq_insert_request(struct reques
  {
  	struct blk_mq_ctx *ctx = rq->mq_ctx;
  	struct request_queue *q = rq->q;
@@ -131,7 +122,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
  	spin_lock(&ctx->lock);
  	__blk_mq_insert_request(hctx, rq, at_head);
-@@ -1091,12 +1085,10 @@ static void blk_mq_insert_requests(struc
+@@ -1075,12 +1069,10 @@ static void blk_mq_insert_requests(struc
  				     bool from_schedule)
  
  {
@@ -145,7 +136,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	/*
  	 * preemption doesn't flush plug list, so it's possible ctx->cpu is
  	 * offline now
-@@ -1230,7 +1222,7 @@ static struct request *blk_mq_map_reques
+@@ -1214,7 +1206,7 @@ static struct request *blk_mq_map_reques
  
  	blk_queue_enter_live(q);
  	ctx = blk_mq_get_ctx(q);
@@ -154,16 +145,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
  	if (rw_is_sync(bio_op(bio), bio->bi_opf))
  		op_flags |= REQ_SYNC;
-@@ -1244,7 +1236,7 @@ static struct request *blk_mq_map_reques
- 		trace_block_sleeprq(q, bio, op);
- 
- 		ctx = blk_mq_get_ctx(q);
--		hctx = q->mq_ops->map_queue(q, ctx->cpu);
-+		hctx = blk_mq_map_queue(q, ctx->cpu);
- 		blk_mq_set_alloc_data(&alloc_data, q, 0, ctx, hctx);
- 		rq = __blk_mq_alloc_request(&alloc_data, op, op_flags);
- 		ctx = alloc_data.ctx;
-@@ -1261,8 +1253,7 @@ static int blk_mq_direct_issue_request(s
+@@ -1233,8 +1225,7 @@ static int blk_mq_direct_issue_request(s
  {
  	int ret;
  	struct request_queue *q = rq->q;
@@ -173,7 +155,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	struct blk_mq_queue_data bd = {
  		.rq = rq,
  		.list = NULL,
-@@ -1466,15 +1457,6 @@ run_queue:
+@@ -1438,15 +1429,6 @@ run_queue:
  	return cookie;
  }
  
@@ -189,7 +171,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  static void blk_mq_free_rq_map(struct blk_mq_tag_set *set,
  		struct blk_mq_tags *tags, unsigned int hctx_idx)
  {
-@@ -1808,7 +1790,7 @@ static void blk_mq_init_cpu_queues(struc
+@@ -1756,7 +1738,7 @@ static void blk_mq_init_cpu_queues(struc
  		if (!cpu_online(i))
  			continue;
  
@@ -198,8 +180,8 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
  		/*
  		 * Set local node, IFF we have more than one hw queue. If
-@@ -1861,7 +1843,7 @@ static void blk_mq_map_swqueue(struct re
- 		}
+@@ -1794,7 +1776,7 @@ static void blk_mq_map_swqueue(struct re
+ 			continue;
  
  		ctx = per_cpu_ptr(q->queue_ctx, i);
 -		hctx = q->mq_ops->map_queue(q, i);
@@ -207,7 +189,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
  		cpumask_set_cpu(i, hctx->cpumask);
  		ctx->index_hw = hctx->nr_ctx;
-@@ -2326,7 +2308,7 @@ int blk_mq_alloc_tag_set(struct blk_mq_t
+@@ -2256,7 +2238,7 @@ int blk_mq_alloc_tag_set(struct blk_mq_t
  	if (set->queue_depth < set->reserved_tags + BLK_MQ_TAG_MIN)
  		return -EINVAL;
  
@@ -218,7 +200,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	if (set->queue_depth > BLK_MQ_MAX_DEPTH) {
 --- a/block/blk-mq.h
 +++ b/block/blk-mq.h
-@@ -52,6 +52,12 @@ extern int blk_mq_update_queue_map(unsig
+@@ -50,6 +50,12 @@ extern int blk_mq_update_queue_map(unsig
  				   const struct cpumask *online_mask);
  extern int blk_mq_hw_queue_to_node(unsigned int *map, unsigned int);
  
@@ -253,7 +235,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  static inline void __blk_get_queue(struct request_queue *q)
 --- a/drivers/block/loop.c
 +++ b/drivers/block/loop.c
-@@ -1775,7 +1775,6 @@ static int loop_init_request(void *data,
+@@ -1744,7 +1744,6 @@ static int loop_init_request(void *data,
  
  static struct blk_mq_ops loop_mq_ops = {
  	.queue_rq       = loop_queue_rq,
@@ -263,7 +245,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
 --- a/drivers/block/mtip32xx/mtip32xx.c
 +++ b/drivers/block/mtip32xx/mtip32xx.c
-@@ -3891,7 +3891,6 @@ exit_handler:
+@@ -3895,7 +3895,6 @@ exit_handler:
  
  static struct blk_mq_ops mtip_mq_ops = {
  	.queue_rq	= mtip_queue_rq,
@@ -283,7 +265,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  };
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -3886,7 +3886,6 @@ static int rbd_init_request(void *data,
+@@ -3621,7 +3621,6 @@ static int rbd_init_request(void *data,
  
  static struct blk_mq_ops rbd_mq_ops = {
  	.queue_rq	= rbd_queue_rq,
@@ -313,7 +295,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  static int xlvbd_init_blk_queue(struct gendisk *gd, u16 sector_size,
 --- a/drivers/md/dm-rq.c
 +++ b/drivers/md/dm-rq.c
-@@ -941,7 +941,6 @@ static int dm_mq_queue_rq(struct blk_mq_
+@@ -938,7 +938,6 @@ static int dm_mq_queue_rq(struct blk_mq_
  
  static struct blk_mq_ops dm_mq_ops = {
  	.queue_rq = dm_mq_queue_rq,
@@ -333,25 +315,25 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  int ubiblock_create(struct ubi_volume_info *vi)
 --- a/drivers/nvme/host/pci.c
 +++ b/drivers/nvme/host/pci.c
-@@ -1292,7 +1292,6 @@ static int nvme_create_queue(struct nvme
+@@ -1133,7 +1133,6 @@ static int nvme_create_queue(struct nvme
  static struct blk_mq_ops nvme_mq_admin_ops = {
  	.queue_rq	= nvme_queue_rq,
- 	.complete	= nvme_pci_complete_rq,
+ 	.complete	= nvme_complete_rq,
 -	.map_queue	= blk_mq_map_queue,
  	.init_hctx	= nvme_admin_init_hctx,
  	.exit_hctx      = nvme_admin_exit_hctx,
  	.init_request	= nvme_admin_init_request,
-@@ -1302,7 +1301,6 @@ static struct blk_mq_ops nvme_mq_admin_o
+@@ -1143,7 +1142,6 @@ static struct blk_mq_ops nvme_mq_admin_o
  static struct blk_mq_ops nvme_mq_ops = {
  	.queue_rq	= nvme_queue_rq,
- 	.complete	= nvme_pci_complete_rq,
+ 	.complete	= nvme_complete_rq,
 -	.map_queue	= blk_mq_map_queue,
  	.init_hctx	= nvme_init_hctx,
  	.init_request	= nvme_init_request,
  	.timeout	= nvme_timeout,
 --- a/drivers/nvme/host/rdma.c
 +++ b/drivers/nvme/host/rdma.c
-@@ -1537,7 +1537,6 @@ static void nvme_rdma_complete_rq(struct
+@@ -1481,7 +1481,6 @@ static void nvme_rdma_complete_rq(struct
  static struct blk_mq_ops nvme_rdma_mq_ops = {
  	.queue_rq	= nvme_rdma_queue_rq,
  	.complete	= nvme_rdma_complete_rq,
@@ -359,7 +341,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	.init_request	= nvme_rdma_init_request,
  	.exit_request	= nvme_rdma_exit_request,
  	.reinit_request	= nvme_rdma_reinit_request,
-@@ -1549,7 +1548,6 @@ static struct blk_mq_ops nvme_rdma_mq_op
+@@ -1493,7 +1492,6 @@ static struct blk_mq_ops nvme_rdma_mq_op
  static struct blk_mq_ops nvme_rdma_admin_mq_ops = {
  	.queue_rq	= nvme_rdma_queue_rq,
  	.complete	= nvme_rdma_complete_rq,
@@ -369,7 +351,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	.reinit_request	= nvme_rdma_reinit_request,
 --- a/drivers/nvme/target/loop.c
 +++ b/drivers/nvme/target/loop.c
-@@ -288,7 +288,6 @@ static int nvme_loop_init_admin_hctx(str
+@@ -273,7 +273,6 @@ static int nvme_loop_init_admin_hctx(str
  static struct blk_mq_ops nvme_loop_mq_ops = {
  	.queue_rq	= nvme_loop_queue_rq,
  	.complete	= nvme_loop_complete_rq,
@@ -377,7 +359,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	.init_request	= nvme_loop_init_request,
  	.init_hctx	= nvme_loop_init_hctx,
  	.timeout	= nvme_loop_timeout,
-@@ -297,7 +296,6 @@ static struct blk_mq_ops nvme_loop_mq_op
+@@ -282,7 +281,6 @@ static struct blk_mq_ops nvme_loop_mq_op
  static struct blk_mq_ops nvme_loop_admin_mq_ops = {
  	.queue_rq	= nvme_loop_queue_rq,
  	.complete	= nvme_loop_complete_rq,
@@ -387,7 +369,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	.timeout	= nvme_loop_timeout,
 --- a/drivers/scsi/scsi_lib.c
 +++ b/drivers/scsi/scsi_lib.c
-@@ -2087,7 +2087,6 @@ struct request_queue *scsi_alloc_queue(s
+@@ -2078,7 +2078,6 @@ struct request_queue *scsi_alloc_queue(s
  }
  
  static struct blk_mq_ops scsi_mq_ops = {
@@ -397,7 +379,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	.timeout	= scsi_timeout,
 --- a/include/linux/blk-mq.h
 +++ b/include/linux/blk-mq.h
-@@ -91,7 +91,6 @@ struct blk_mq_queue_data {
+@@ -86,7 +86,6 @@ struct blk_mq_queue_data {
  };
  
  typedef int (queue_rq_fn)(struct blk_mq_hw_ctx *, const struct blk_mq_queue_data *);
@@ -405,7 +387,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  typedef enum blk_eh_timer_return (timeout_fn)(struct request *, bool);
  typedef int (init_hctx_fn)(struct blk_mq_hw_ctx *, void *, unsigned int);
  typedef void (exit_hctx_fn)(struct blk_mq_hw_ctx *, unsigned int);
-@@ -114,11 +113,6 @@ struct blk_mq_ops {
+@@ -109,11 +108,6 @@ struct blk_mq_ops {
  	queue_rq_fn		*queue_rq;
  
  	/*
@@ -417,7 +399,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	 * Called on request timeout
  	 */
  	timeout_fn		*timeout;
-@@ -223,7 +217,6 @@ static inline u16 blk_mq_unique_tag_to_t
+@@ -219,7 +213,6 @@ static inline u16 blk_mq_unique_tag_to_t
  	return unique_tag & BLK_MQ_UNIQUE_TAG_MASK;
  }
  

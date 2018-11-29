@@ -41,7 +41,7 @@ Signed-off-by: Jan Kara <jack@suse.cz>
  	return buffer_mapped(bh) && !buffer_unwritten(bh);
 @@ -169,6 +157,9 @@ static ssize_t dax_io(struct inode *inod
  	struct blk_dax_ctl dax = {
- 		.addr = ERR_PTR(-EIO),
+ 		.addr = (void __pmem *) ERR_PTR(-EIO),
  	};
 +	unsigned blkbits = inode->i_blkbits;
 +	sector_t file_blks = (i_size_read(inode) + (1 << blkbits) - 1)

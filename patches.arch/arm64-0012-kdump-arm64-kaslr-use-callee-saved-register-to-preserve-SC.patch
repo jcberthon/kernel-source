@@ -26,7 +26,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 @@ -734,7 +734,7 @@ ENTRY(__early_cpu_boot_status)
   */
  	.section	".idmap.text", "ax"
- ENTRY(__enable_mmu)
+ __enable_mmu:
 -	mrs	x18, sctlr_el1			// preserve old SCTLR_EL1 value
 +	mrs	x22, sctlr_el1			// preserve old SCTLR_EL1 value
  	mrs	x1, ID_AA64MMFR0_EL1

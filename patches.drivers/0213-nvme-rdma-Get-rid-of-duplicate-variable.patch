@@ -39,7 +39,7 @@ index 93c0876..e37aa93 100644
  
  	ib_dereg_mr(req->mr);
 @@ -302,7 +301,7 @@ static int nvme_rdma_reinit_request(void *data, struct request *rq)
- 		goto out;
+ 		req->mr = NULL;
  	}
  
 -	req->need_inval = false;
@@ -81,8 +81,8 @@ index 93c0876..e37aa93 100644
 -		req->need_inval = false;
 +		req->mr->need_inval = false;
  
- 	req->req.result = cqe->result;
- 	blk_mq_complete_request(rq, le16_to_cpu(cqe->status) >> 1);
+ 	blk_mq_complete_request(rq, status);
+ 
 @@ -1420,7 +1419,7 @@ static int nvme_rdma_queue_rq(struct blk_mq_hw_ctx *hctx,
  	if (rq->cmd_type == REQ_TYPE_FS && req_op(rq) == REQ_OP_FLUSH)
  		flush = true;

@@ -32,9 +32,9 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 
 --- a/drivers/acpi/acpi_processor.c
 +++ b/drivers/acpi/acpi_processor.c
-@@ -667,8 +667,25 @@ bool __init acpi_processor_validate_proc
- 	return false;
- }
+@@ -667,7 +667,24 @@ bool __init acpi_processor_validate_proc
+ 	},
+ };
  
 +static int acpi_processor_container_attach(struct acpi_device *dev,
 +					   const struct acpi_device_id *id)
@@ -54,7 +54,6 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +
  void __init acpi_processor_init(void)
  {
- 	acpi_processor_check_duplicates();
  	acpi_scan_add_handler_with_hotplug(&processor_handler, "processor");
 +	acpi_scan_add_handler(&processor_container_handler);
  }

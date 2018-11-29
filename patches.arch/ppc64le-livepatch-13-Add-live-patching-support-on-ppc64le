@@ -45,22 +45,20 @@ Acked-by: Torsten Duwe <duwe@suse.de>
 
 --- a/arch/powerpc/Kconfig
 +++ b/arch/powerpc/Kconfig
-@@ -162,6 +162,8 @@ config PPC
+@@ -162,6 +162,7 @@ config PPC
  	select ARCH_HAS_DMA_SET_COHERENT_MASK
  	select HAVE_ARCH_SECCOMP_FILTER
  	select ARCH_SUPPORTS_DEFERRED_STRUCT_PAGE_INIT
 +	select HAVE_LIVEPATCH if HAVE_DYNAMIC_FTRACE_WITH_REGS
-+	select HAVE_KGRAFT if HAVE_DYNAMIC_FTRACE_WITH_REGS
  
  config GENERIC_CSUM
  	def_bool CPU_LITTLE_ENDIAN
-@@ -1113,3 +1114,6 @@ config PPC_LIB_RHEAP
+@@ -1113,3 +1114,5 @@ config PPC_LIB_RHEAP
  	bool
  
  source "arch/powerpc/kvm/Kconfig"
 +
 +source "kernel/livepatch/Kconfig"
-+source "kernel/Kconfig.kgraft"
 --- a/arch/powerpc/kernel/asm-offsets.c
 +++ b/arch/powerpc/kernel/asm-offsets.c
 @@ -86,6 +86,10 @@ int main(void)

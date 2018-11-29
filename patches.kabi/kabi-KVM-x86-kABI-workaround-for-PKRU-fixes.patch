@@ -106,9 +106,9 @@ Signed-off-by: Takashi Iwai <tiwai@suse.de>
 +	.get_pkru = svm_get_pkru,
 +	.set_pkru = svm_set_pkru,
 +
- 	.fpu_activate = svm_fpu_activate,
- 	.fpu_deactivate = svm_fpu_deactivate,
+ 	.tlb_flush = svm_flush_tlb,
  
+ 	.run = svm_vcpu_run,
 --- a/arch/x86/kvm/vmx.c
 +++ b/arch/x86/kvm/vmx.c
 @@ -601,6 +601,7 @@ struct vcpu_vmx {
@@ -146,7 +146,7 @@ Signed-off-by: Takashi Iwai <tiwai@suse.de>
 +		__write_pkru(vmx->guest_pkru);
  
  	atomic_switch_perf_msrs(vmx);
- 	debugctlmsr = get_debugctlmsr();
+ 
 @@ -8775,8 +8786,8 @@ static void __noclone vmx_vcpu_run(struc
  	 */
  	if (static_cpu_has(X86_FEATURE_PKU) &&
@@ -165,8 +165,9 @@ Signed-off-by: Takashi Iwai <tiwai@suse.de>
 +	.get_pkru = vmx_get_pkru,
 +	.set_pkru = vmx_set_pkru,
 +
- 	.fpu_activate = vmx_fpu_activate,
- 	.fpu_deactivate = vmx_fpu_deactivate,
+ 	.tlb_flush = vmx_flush_tlb,
+ 
+ 	.run = vmx_vcpu_run,
  
 --- a/arch/x86/kvm/x86.c
 +++ b/arch/x86/kvm/x86.c

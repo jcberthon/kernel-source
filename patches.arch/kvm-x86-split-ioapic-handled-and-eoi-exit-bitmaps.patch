@@ -39,16 +39,16 @@ Acked-by: Bruce Rogers <brogers@suse.com>
 --- a/arch/x86/include/asm/kvm_host.h
 +++ b/arch/x86/include/asm/kvm_host.h
 @@ -415,7 +415,7 @@ struct kvm_vcpu_arch {
+ 	u64 efer;
  	u64 apic_base;
  	struct kvm_lapic *apic;    /* kernel irqchip context */
- 	bool apicv_active;
 -	u64 eoi_exit_bitmap[4];
 +	DECLARE_BITMAP(ioapic_handled_vectors, 256);
  	unsigned long apic_attention;
  	int32_t apic_arb_prio;
  	int mp_state;
 @@ -862,7 +862,7 @@ struct kvm_x86_ops {
- 	void (*refresh_apicv_exec_ctrl)(struct kvm_vcpu *vcpu);
+ 	int (*cpu_uses_apicv)(struct kvm_vcpu *vcpu);
  	void (*hwapic_irr_update)(struct kvm_vcpu *vcpu, int max_irr);
  	void (*hwapic_isr_update)(struct kvm *kvm, int isr);
 -	void (*load_eoi_exitmap)(struct kvm_vcpu *vcpu);
@@ -66,7 +66,7 @@ Acked-by: Bruce Rogers <brogers@suse.com>
 +void kvm_ioapic_scan_entry(struct kvm_vcpu *vcpu, ulong *ioapic_handled_vectors)
  {
  	struct kvm_ioapic *ioapic = vcpu->kvm->arch.vioapic;
- 	struct dest_map *dest_map = &ioapic->rtc_status.dest_map;
+ 	union kvm_ioapic_redirect_entry *e;
 @@ -259,7 +259,7 @@ void kvm_ioapic_scan_entry(struct kvm_vc
  			             e->fields.dest_id, e->fields.dest_mode) ||
  			    kvm_apic_pending_eoi(vcpu, e->fields.vector))
@@ -79,7 +79,7 @@ Acked-by: Bruce Rogers <brogers@suse.com>
 --- a/arch/x86/kvm/ioapic.h
 +++ b/arch/x86/kvm/ioapic.h
 @@ -134,7 +134,8 @@ int kvm_irq_delivery_to_apic(struct kvm
- 			     struct dest_map *dest_map);
+ 		struct kvm_lapic_irq *irq, unsigned long *dest_map);
  int kvm_get_ioapic(struct kvm *kvm, struct kvm_ioapic_state *state);
  int kvm_set_ioapic(struct kvm *kvm, struct kvm_ioapic_state *state);
 -void kvm_ioapic_scan_entry(struct kvm_vcpu *vcpu, u64 *eoi_exit_bitmap);
@@ -125,7 +125,7 @@ Acked-by: Bruce Rogers <brogers@suse.com>
 --- a/arch/x86/kvm/svm.c
 +++ b/arch/x86/kvm/svm.c
 @@ -4387,7 +4387,7 @@ static void svm_refresh_apicv_exec_ctrl(
- 	mark_dirty(vmcb, VMCB_INTR);
+ 	return 0;
  }
  
 -static void svm_load_eoi_exitmap(struct kvm_vcpu *vcpu)
@@ -143,12 +143,12 @@ Acked-by: Bruce Rogers <brogers@suse.com>
 +static void vmx_load_eoi_exitmap(struct kvm_vcpu *vcpu, u64 *eoi_exit_bitmap)
  {
 -	u64 *eoi_exit_bitmap = vcpu->arch.eoi_exit_bitmap;
- 	if (!kvm_vcpu_apicv_active(vcpu))
+ 	if (!vmx_cpu_uses_apicv(vcpu))
  		return;
  
 --- a/arch/x86/kvm/x86.c
 +++ b/arch/x86/kvm/x86.c
-@@ -6390,16 +6390,17 @@ static void vcpu_scan_ioapic(struct kvm_
+@@ -6390,15 +6390,16 @@ static void vcpu_scan_ioapic(struct kvm_
  	if (!kvm_apic_hw_enabled(vcpu->arch.apic))
  		return;
  
@@ -159,8 +159,7 @@ Acked-by: Bruce Rogers <brogers@suse.com>
 -		kvm_scan_ioapic_routes(vcpu, vcpu->arch.eoi_exit_bitmap);
 +		kvm_scan_ioapic_routes(vcpu, vcpu->arch.ioapic_handled_vectors);
  	else {
- 		if (vcpu->arch.apicv_active)
- 			kvm_x86_ops->sync_pir_to_irr(vcpu);
+ 		kvm_x86_ops->sync_pir_to_irr(vcpu);
 -		kvm_ioapic_scan_entry(vcpu, vcpu->arch.eoi_exit_bitmap);
 +		kvm_ioapic_scan_entry(vcpu, vcpu->arch.ioapic_handled_vectors);
  	}

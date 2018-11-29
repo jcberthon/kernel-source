@@ -168,8 +168,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  #include <asm/cputype.h>
 +#include <asm/efi.h>
  #include <asm/elf.h>
+ #include <asm/early_ioremap.h>
  #include <asm/fixmap.h>
- #include <asm/procinfo.h>
 @@ -965,6 +967,7 @@ void __init setup_arch(char **cmdline_p)
  	early_paging_init(mdesc);
  #endif
@@ -180,10 +180,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
 --- a/drivers/firmware/efi/Makefile
 +++ b/drivers/firmware/efi/Makefile
-@@ -22,5 +22,6 @@ obj-$(CONFIG_EFI_STUB)			+= libstub/
+@@ -22,4 +22,5 @@ obj-$(CONFIG_EFI_STUB)			+= libstub/
  obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
  
  arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
 +obj-$(CONFIG_ARM)			+= $(arm-obj-y)
  obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
- obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o

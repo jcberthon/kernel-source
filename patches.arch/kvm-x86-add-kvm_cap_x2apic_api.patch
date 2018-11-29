@@ -43,8 +43,8 @@ Acked-by: Bruce Rogers <brogers@suse.com>
 --- a/Documentation/virtual/kvm/api.txt
 +++ b/Documentation/virtual/kvm/api.txt
 @@ -1500,6 +1500,11 @@ The per-VM KVM_CAP_MSI_DEVID capability
- provide the device ID. If this capability is not set, userland cannot
- rely on the kernel to allow the KVM_MSI_VALID_DEVID flag being set.
+ 	__u32 pad;
+ };
  
 +On x86, address_hi is ignored unless the KVM_X2APIC_API_USE_32BIT_IDS
 +feature of KVM_CAP_X2APIC_API capability is enabled.  If it is enabled,
@@ -84,8 +84,8 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  4.59 KVM_IOEVENTFD
  
 @@ -2201,6 +2221,10 @@ The per-VM KVM_CAP_MSI_DEVID capability
- the device ID. If this capability is not set, userland cannot rely on
- the kernel to allow the KVM_MSI_VALID_DEVID flag being set.
+ 
+ No flags are defined so far. The corresponding field must be 0.
  
 +On x86, address_hi is ignored unless the KVM_CAP_X2APIC_API capability is
 +enabled.  If it is enabled, address_hi bits 31-8 provide bits 31-8 of the
@@ -121,7 +121,7 @@ Acked-by: Bruce Rogers <brogers@suse.com>
 --- a/arch/x86/include/asm/kvm_host.h
 +++ b/arch/x86/include/asm/kvm_host.h
 @@ -738,6 +738,8 @@ struct kvm_arch {
- 	struct hlist_node hnode;
+ 	struct page *avic_physical_id_table_page;
  
  	bool disabled_lapic_found;
 +
@@ -309,13 +309,13 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  #define KVM_CAP_VCPU_ATTRIBUTES 126
  #define KVM_CAP_MAX_VCPU_ID 128
 +#define KVM_CAP_X2APIC_API 129
- #define KVM_CAP_MSI_DEVID 131
- #define KVM_CAP_X86_GUEST_MWAIT 143
- #define KVM_CAP_ARM_USER_IRQ (0x1000 | 137) /* Will only be fixed in 4.12 */
-@@ -1296,5 +1297,6 @@ struct kvm_assigned_msix_entry {
- #define KVM_ARM_DEV_EL1_VTIMER		(1 << 0)
- #define KVM_ARM_DEV_EL1_PTIMER		(1 << 1)
- #define KVM_ARM_DEV_PMU			(1 << 2)
-+#define KVM_X2APIC_API_USE_32BIT_IDS            (1ULL << 0)
+ #define KVM_CAP_S390_BPB 152
  
+ #ifdef KVM_CAP_IRQ_ROUTING
+@@ -1296,4 +1297,6 @@ struct kvm_assigned_msix_entry {
+ 	__u16 padding[3];
+ };
+ 
++#define KVM_X2APIC_API_USE_32BIT_IDS            (1ULL << 0)
++
  #endif /* __LINUX_KVM_H */

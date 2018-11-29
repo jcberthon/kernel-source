@@ -15,29 +15,29 @@ Reviewed-by: Hannes Reinecke <hare@suse.com>
 Signed-off-by: Jens Axboe <axboe@fb.com>
 Acked-by: Hannes Reinecke <hare@suse.de>
 ---
- fs/buffer.c                 | 19 ++++++++++---------
- fs/ext4/inode.c             |  6 +++---
- fs/ext4/namei.c             |  3 ++-
- fs/ext4/super.c             |  2 +-
- fs/gfs2/bmap.c              |  2 +-
- fs/gfs2/meta_io.c           |  4 ++--
- fs/gfs2/quota.c             |  2 +-
- fs/isofs/compress.c         |  2 +-
- fs/jbd2/journal.c           |  2 +-
- fs/jbd2/recovery.c          |  4 ++--
- fs/ocfs2/aops.c             |  2 +-
- fs/ocfs2/super.c            |  2 +-
- fs/reiserfs/journal.c       |  8 ++++----
- fs/reiserfs/stree.c         |  4 ++--
- fs/reiserfs/super.c         |  2 +-
- fs/squashfs/block.c         |  4 ++--
- fs/squashfs3/inode.c        |  4 ++--
- fs/udf/dir.c                |  2 +-
- fs/udf/directory.c          |  2 +-
- fs/udf/inode.c              |  2 +-
- fs/ufs/balloc.c             |  2 +-
- include/linux/buffer_head.h |  2 +-
- 22 files changed, 42 insertions(+), 40 deletions(-)
+
+ fs/buffer.c                 |   19 ++++++++++---------
+ fs/ext4/inode.c             |    6 +++---
+ fs/ext4/namei.c             |    3 ++-
+ fs/ext4/super.c             |    2 +-
+ fs/gfs2/bmap.c              |    2 +-
+ fs/gfs2/meta_io.c           |    4 ++--
+ fs/gfs2/quota.c             |    2 +-
+ fs/isofs/compress.c         |    2 +-
+ fs/jbd2/journal.c           |    2 +-
+ fs/jbd2/recovery.c          |    4 ++--
+ fs/ocfs2/aops.c             |    2 +-
+ fs/ocfs2/super.c            |    2 +-
+ fs/reiserfs/journal.c       |    8 ++++----
+ fs/reiserfs/stree.c         |    4 ++--
+ fs/reiserfs/super.c         |    2 +-
+ fs/squashfs/block.c         |    4 ++--
+ fs/udf/dir.c                |    2 +-
+ fs/udf/directory.c          |    2 +-
+ fs/udf/inode.c              |    2 +-
+ fs/ufs/balloc.c             |    2 +-
+ include/linux/buffer_head.h |    2 +-
+ 21 files changed, 40 insertions(+), 38 deletions(-)
 
 diff --git a/fs/buffer.c b/fs/buffer.c
 index bc13eeb..47d67ba 100644
@@ -397,28 +397,6 @@ index 0cea9b9..59375be 100644
  	}
  
  	for (i = 0; i < b; i++) {
-diff --git a/fs/squashfs3/inode.c b/fs/squashfs3/inode.c
-index 0369a43..1ee9493 100644
---- a/fs/squashfs3/inode.c
-+++ b/fs/squashfs3/inode.c
-@@ -208,7 +208,7 @@ SQSH_EXTERN unsigned int squashfs3_read_data(struct super_block *s, char *buffer
- 				goto block_release;
- 			bytes += msblk->devblksize;
- 		}
--		ll_rw_block(READ, b, bh);
-+		ll_rw_block(REQ_OP_READ, 0, b, bh);
- 	} else {
- 		if (index < 0 || (index + 2) > sblk->bytes_used)
- 			goto read_failure;
-@@ -234,7 +234,7 @@ SQSH_EXTERN unsigned int squashfs3_read_data(struct super_block *s, char *buffer
- 				goto block_release;
- 			bytes += msblk->devblksize;
- 		}
--		ll_rw_block(READ, b - 1, bh + 1);
-+		ll_rw_block(REQ_OP_READ, 0, b - 1, bh + 1);
- 	}
- 
- 	if (compressed) {
 diff --git a/fs/udf/dir.c b/fs/udf/dir.c
 index 541d9c6..91b9f02 100644
 --- a/fs/udf/dir.c

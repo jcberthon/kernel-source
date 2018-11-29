@@ -71,9 +71,9 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 -	return 0;
 -}
 -
- static inline bool
- __nvme_rdma_options_match(struct nvme_rdma_ctrl *ctrl,
- 	struct nvmf_ctrl_options *opts)
+ static struct nvme_ctrl *nvme_rdma_create_ctrl(struct device *dev,
+ 		struct nvmf_ctrl_options *opts)
+ {
 @@ -1965,6 +1945,7 @@ static struct nvme_ctrl *nvme_rdma_creat
  	struct nvme_rdma_ctrl *ctrl;
  	int ret;
@@ -125,9 +125,9 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 -		ctrl->addr_in.sin_port = cpu_to_be16(NVME_RDMA_IP_PORT);
 -	}
 -
- 	if (!opts->duplicate_connect && nvme_rdma_existing_controller(opts)) {
- 		ret = -EALREADY;
- 		goto out_free_ctrl;
+ 	ret = nvme_init_ctrl(&ctrl->ctrl, dev, &nvme_rdma_ctrl_ops,
+ 				0 /* no quirks, we're perfect! */);
+ 	if (ret)
 @@ -2068,7 +2043,7 @@ static struct nvme_ctrl *nvme_rdma_creat
  	changed = nvme_change_ctrl_state(&ctrl->ctrl, NVME_CTRL_LIVE);
  	WARN_ON_ONCE(!changed);

@@ -24,26 +24,13 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  fs/xfs/xfs_itable.c            |  2 +-
  8 files changed, 27 insertions(+), 38 deletions(-)
 
-diff --git a/fs/xfs/dmapi/xfs_dm.c b/fs/xfs/dmapi/xfs_dm.c
-index 8d7c44854fbf..2bbad3eebe8f 100644
---- a/fs/xfs/dmapi/xfs_dm.c
-+++ b/fs/xfs/dmapi/xfs_dm.c
-@@ -321,7 +321,7 @@ xfs_ip_to_stat(
- 
- 	switch (dic->di_format) {
- 	case XFS_DINODE_FMT_DEV:
--		buf->dt_rdev = ip->i_df.if_u2.if_rdev;
-+		buf->dt_rdev = sysv_encode_dev(VFS_I(ip)->i_rdev);
- 		buf->dt_blksize = BLKDEV_IOSIZE;
- 		buf->dt_blocks = 0;
- 		break;
 diff --git a/fs/xfs/libxfs/xfs_inode_fork.c b/fs/xfs/libxfs/xfs_inode_fork.c
 index 86a2b1664846..4e0e14a5e224 100644
 --- a/fs/xfs/libxfs/xfs_inode_fork.c
 +++ b/fs/xfs/libxfs/xfs_inode_fork.c
 @@ -69,22 +69,27 @@ xfs_validate_extents(
- #define xfs_validate_extents(ifp, nrecs, fmt)
- #endif /* DEBUG */
+ STATIC int xfs_iformat_extents(xfs_inode_t *, xfs_dinode_t *, int);
+ STATIC int xfs_iformat_btree(xfs_inode_t *, xfs_dinode_t *, int);
  
 +static inline dev_t xfs_to_linux_dev_t(xfs_dev_t dev)
 +{

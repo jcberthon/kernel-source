@@ -42,7 +42,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
 +++ b/drivers/md/md.h
 @@ -712,4 +712,11 @@ static inline int mddev_is_clustered(str
  {
- 	return mddev->cluster_info && mddev->bitmap_info.nodes > 1;
+ 	mddev->flags &= ~unsupported_flags;
  }
 +
 +static inline void mddev_check_writesame(struct mddev *mddev, struct bio *bio)
@@ -55,7 +55,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
 --- a/drivers/md/multipath.c
 +++ b/drivers/md/multipath.c
 @@ -138,6 +138,7 @@ static void multipath_make_request(struc
- 	mp_bh->bio.bi_rw |= REQ_FAILFAST_TRANSPORT;
+ 	mp_bh->bio.bi_opf |= REQ_FAILFAST_TRANSPORT;
  	mp_bh->bio.bi_end_io = multipath_end_request;
  	mp_bh->bio.bi_private = mp_bh;
 +	mddev_check_writesame(mddev, &mp_bh->bio);

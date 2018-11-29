@@ -43,7 +43,7 @@ Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
  #include "../string.h"
  #include "eboot.h"
 @@ -1435,6 +1436,63 @@ free_mem_map:
- 	return status;
+ 	return EFI_SUCCESS;
  }
  
 +#ifdef CONFIG_HIBERNATE_VERIFICATION

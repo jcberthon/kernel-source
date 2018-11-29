@@ -42,7 +42,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 
 --- a/drivers/tty/serial/amba-pl011.c
 +++ b/drivers/tty/serial/amba-pl011.c
-@@ -2452,9 +2452,15 @@ static int sbsa_uart_probe(struct platfo
+@@ -2452,11 +2452,17 @@ static int sbsa_uart_probe(struct platfo
  	if (!uap)
  		return -ENOMEM;
  
@@ -53,8 +53,10 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	}
 +	uap->port.irq	= ret;
 +
+ 	uap->reg_offset = vendor_sbsa.reg_offset;
  	uap->vendor	= &vendor_sbsa;
  	uap->fifosize	= 32;
+ 	uap->port.iotype = vendor_sbsa.access_32b ? UPIO_MEM32 : UPIO_MEM;
 -	uap->port.irq	= platform_get_irq(pdev, 0);
  	uap->port.ops	= &sbsa_uart_pops;
  	uap->fixed_baud = baudrate;

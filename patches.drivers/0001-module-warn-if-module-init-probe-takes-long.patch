@@ -135,4 +135,4 @@ index 85eb9718ed08..c9273eb5dce9 100644
 +	return err;
  
   bug_cleanup:
- 	/* module_bug_cleanup needs module_mutex protection */
+ 	destroy_params(mod->kp, mod->num_kp);

@@ -72,7 +72,7 @@ index bebc126..a01dab1 100644
 -
 -#endif	/* CONFIG_HOTPLUG_CPU */
 -
- static void setup_feature_capabilities(void)
+ static void __init setup_feature_capabilities(void)
  {
  	update_cpu_capabilities(arm64_features, "detected feature:");
 -- 

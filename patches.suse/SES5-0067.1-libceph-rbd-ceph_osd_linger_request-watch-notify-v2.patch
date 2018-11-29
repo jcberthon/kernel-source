@@ -43,6 +43,20 @@ Acked-by: David Disseldorp <ddiss@suse.de>
 
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
+@@ -127,11 +127,11 @@ struct rbd_device {
+ 	struct rbd_options	*opts;
+ 
+ 	struct ceph_object_id	header_oid;
++	struct ceph_object_locator header_oloc;
+ 
+ 	struct ceph_file_layout	layout;
+ 
+-	struct ceph_osd_event   *watch_event;
+-	struct rbd_obj_request	*watch_request;
++	struct ceph_osd_linger_request *watch_handle;
+ 
+ 	struct rbd_spec		*parent_spec;
+ 	u64			parent_overlap;
 @@ -1515,12 +1515,6 @@ static int rbd_obj_request_wait(struct r
  	return __rbd_obj_request_wait(obj_request, 0);
  }
@@ -69,20 +83,17 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  static void rbd_osd_read_callback(struct rbd_obj_request *obj_request)
  {
  	struct rbd_img_request *img_request = NULL;
-@@ -1894,12 +1882,10 @@ static void rbd_osd_req_callback(struct
+@@ -1894,10 +1882,6 @@ static void rbd_osd_req_callback(struct
  	case CEPH_OSD_OP_CALL:
  		rbd_osd_call_callback(obj_request);
  		break;
 -	case CEPH_OSD_OP_NOTIFY_ACK:
 -	case CEPH_OSD_OP_WATCH:
- 	case CEPH_OSD_OP_SETXATTR:
- 	case CEPH_OSD_OP_CMPXATTR:
- 	case CEPH_OSD_OP_GETXATTR:
 -		rbd_osd_trivial_callback(obj_request);
-+		obj_request_done_set(obj_request);
- 		break;
- 	case CEPH_OSD_OP_CREATE:
- 		rbd_assert(osd_req->r_num_ops == 2);
+-		break;
+ 	default:
+ 		rbd_warn(NULL, "%s: unsupported op %hu",
+ 			obj_request->object_name, (unsigned short) opcode);
 @@ -3412,45 +3398,18 @@ out_err:
  	obj_request_done_set(obj_request);
  }
@@ -318,22 +329,6 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  };
  
  
---- a/include/linux/ceph/librbd.h
-+++ b/include/linux/ceph/librbd.h
-@@ -127,11 +127,11 @@ struct rbd_device {
- 	struct rbd_options	*opts;
- 
- 	struct ceph_object_id	header_oid;
-+	struct ceph_object_locator header_oloc;
- 
- 	struct ceph_file_layout	layout;
- 
--	struct ceph_osd_event   *watch_event;
--	struct rbd_obj_request	*watch_request;
-+	struct ceph_osd_linger_request *watch_handle;
- 
- 	struct rbd_spec		*parent_spec;
- 	u64			parent_overlap;
 --- a/include/linux/ceph/osd_client.h
 +++ b/include/linux/ceph/osd_client.h
 @@ -34,7 +34,7 @@ struct ceph_osd {
@@ -918,8 +913,8 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  {
  	return pi->flags & CEPH_POOL_FLAG_FULL;
 @@ -1546,6 +1579,10 @@ static void setup_request_data(struct ce
- 			ceph_osdc_msg_data_add(req->r_reply,
- 					       &op->xattr.response_data);
+ 						  op->xattr.value_len);
+ 			ceph_osdc_msg_data_add(msg, &op->xattr.osd_data);
  			break;
 +		case CEPH_OSD_OP_NOTIFY_ACK:
 +			ceph_osdc_msg_data_add(msg,

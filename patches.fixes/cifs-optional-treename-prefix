@@ -1,8 +1,8 @@
 From: Sachin Prabhu <sprabhu@redhat.com>
 Subject: cifs_get_root shouldn't use path with tree name
 Patch-mainline: v4.10-rc1
-References: bsc#963655, bsc#979681
 Git-commit: 374402a2a1dfbbee8ab1a5a32ec4887bf8c15d52
+References: bsc#963655, bsc#979681
 
 When a server returns the optional flag SMB_SHARE_IS_IN_DFS in response
 to a tree connect, cifs_build_path_to_root() will return a pathname

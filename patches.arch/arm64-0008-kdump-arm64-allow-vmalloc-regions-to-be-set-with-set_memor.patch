@@ -31,9 +31,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  #include <asm/pgtable.h>
  #include <asm/tlbflush.h>
 @@ -61,6 +62,7 @@ static int change_memory_common(unsigned
- 	unsigned long start = addr;
- 	unsigned long size = PAGE_SIZE*numpages;
  	unsigned long end = start + size;
+ 	int ret;
+ 	struct page_change_data data;
 +	struct vm_struct *area;
  
  	if (!PAGE_ALIGNED(addr)) {

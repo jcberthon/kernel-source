@@ -32,11 +32,10 @@ diff --git a/drivers/perf/Makefile b/drivers/perf/Makefile
 index 7068f0ef..b2374b5c 100644
 --- a/drivers/perf/Makefile
 +++ b/drivers/perf/Makefile
-@@ -1,3 +1,3 @@
+@@ -1,2 +1,2 @@
 -obj-$(CONFIG_ARM_PMU) += arm_pmu.o
 +obj-$(CONFIG_ARM_PMU) += arm_pmu.o arm_pmu_platform.o
  obj-$(CONFIG_XGENE_PMU) += xgene_pmu.o
- obj-$(CONFIG_ARCH_THUNDER) += uncore/
 diff --git a/drivers/perf/arm_pmu.c b/drivers/perf/arm_pmu.c
 index 67d1107d..acb9a7de 100644
 --- a/drivers/perf/arm_pmu.c

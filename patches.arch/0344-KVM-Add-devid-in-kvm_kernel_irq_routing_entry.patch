@@ -42,8 +42,8 @@ index 6e05c2f..97c18f7 100644
 +			u32 devid;
 +		} msi;
  		struct kvm_s390_adapter_int adapter;
+ 		struct kvm_hv_sint hv_sint;
  	};
- 	struct hlist_node link;
 -- 
 2.11.0
 

@@ -82,9 +82,9 @@ index f22808d70fb3..684b95f6e8c9 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -78,6 +78,8 @@
- #include <asm/qspinlock.h>
+ #include <asm/realmode.h>
+ #include <asm/misc.h>
  #include <asm/spec-ctrl.h>
- #include <asm/spec_ctrl.h>
 +#include <asm/intel-family.h>
 +#include <asm/cpu_device_id.h>
  

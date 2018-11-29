@@ -108,16 +108,16 @@ index f2831b8..beacd37 100644
  	uap->port.ops = &amba_pl011_pops;
  
 @@ -2589,9 +2591,9 @@ static int sbsa_uart_probe(struct platform_device *pdev)
- 	uap->port.irq	= ret;
+ 		return -ENOMEM;
  
  	uap->reg_offset = vendor_sbsa.reg_offset;
 -	uap->access_32b = vendor_sbsa.access_32b;
  	uap->vendor	= &vendor_sbsa;
  	uap->fifosize	= 32;
 +	uap->port.iotype = vendor_sbsa.access_32b ? UPIO_MEM32 : UPIO_MEM;
+ 	uap->port.irq	= platform_get_irq(pdev, 0);
  	uap->port.ops	= &sbsa_uart_pops;
  	uap->fixed_baud = baudrate;
- 
 -- 
 2.11.0
 

@@ -122,7 +122,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 --- a/drivers/net/ethernet/intel/fm10k/fm10k_netdev.c
 +++ b/drivers/net/ethernet/intel/fm10k/fm10k_netdev.c
 @@ -1188,6 +1188,14 @@ int fm10k_setup_tc(struct net_device *de
- 	return 0;
+ 	return err;
  }
  
 +static int __fm10k_setup_tc(struct net_device *dev, u32 handle, u8 tc)

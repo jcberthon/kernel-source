@@ -43,7 +43,7 @@ diff --git a/arch/powerpc/include/asm/feature-fixups.h b/arch/powerpc/include/as
 index 7068bafbb2d6..b807c8a69dca 100644
 --- a/arch/powerpc/include/asm/feature-fixups.h
 +++ b/arch/powerpc/include/asm/feature-fixups.h
-@@ -192,10 +192,19 @@ label##3:					       	\
+@@ -192,13 +192,22 @@ label##3:					       	\
  	FTR_ENTRY_OFFSET 951b-952b;			\
  	.popsection;
  
@@ -58,6 +58,9 @@ index 7068bafbb2d6..b807c8a69dca 100644
  
  #ifndef __ASSEMBLY__
  
+ extern long stf_barrier_fallback;
+ extern long __start___stf_entry_barrier_fixup, __stop___stf_entry_barrier_fixup;
+ extern long __start___stf_exit_barrier_fixup, __stop___stf_exit_barrier_fixup;
  extern long __start___rfi_flush_fixup, __stop___rfi_flush_fixup;
 +extern long __start___barrier_nospec_fixup, __stop___barrier_nospec_fixup;
  

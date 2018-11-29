@@ -92,9 +92,10 @@ Acked-by: Bruce Rogers <brogers@suse.com>
  #define KVM_CAP_ARM_PMU_V3 125
  #define KVM_CAP_VCPU_ATTRIBUTES 126
 +#define KVM_CAP_MAX_VCPU_ID 128
- #define KVM_CAP_MSI_DEVID 131
- #define KVM_CAP_X86_GUEST_MWAIT 143
- #define KVM_CAP_ARM_USER_IRQ (0x1000 | 137) /* Will only be fixed in 4.12 */
+ #define KVM_CAP_S390_BPB 152
+ 
+ #ifdef KVM_CAP_IRQ_ROUTING
+ 
 --- a/virt/kvm/kvm_main.c
 +++ b/virt/kvm/kvm_main.c
 @@ -2339,7 +2339,7 @@ static int kvm_vm_ioctl_create_vcpu(stru

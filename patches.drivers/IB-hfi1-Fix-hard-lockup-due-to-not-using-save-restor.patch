@@ -28,8 +28,8 @@ Acked-by: David Chang <dchang@suse.com>
  drivers/staging/rdma/hfi1/qp.c |    5 +++--
  1 file changed, 3 insertions(+), 2 deletions(-)
 
---- a/drivers/staging/rdma/hfi1/qp.c
-+++ b/drivers/staging/rdma/hfi1/qp.c
+--- a/drivers/infiniband/hw/hfi1/qp.c
++++ b/drivers/infiniband/hw/hfi1/qp.c
 @@ -512,6 +512,7 @@ static void iowait_wakeup(struct iowait
  static void iowait_sdma_drained(struct iowait *wait)
  {

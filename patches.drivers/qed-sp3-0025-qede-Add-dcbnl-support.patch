@@ -411,7 +411,7 @@ index 6d9031c..1f3ee97 100644
 +
  	INIT_DELAYED_WORK(&edev->sp_task, qede_sp_task);
  	mutex_init(&edev->qede_lock);
- 	edev->rx_copybreak = QEDE_RX_HDR_SIZE;
+ 
 -- 
 1.8.5.6
 

@@ -147,8 +147,8 @@ Signed-off-by: Takashi Iwai <tiwai@suse.de>
  
  static const struct hda_fixup alc269_fixups[] = {
 @@ -6286,6 +6290,12 @@ static const struct hda_fixup alc269_fix
- 			{ }
- 		},
+ 		.chained = true,
+ 		.chain_id = ALC269_FIXUP_HEADSET_MIC
  	},
 +	[ALC295_FIXUP_HP_X360] = {
 +		.type = HDA_FIXUP_FUNC,

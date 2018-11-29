@@ -261,8 +261,8 @@ index 8d66266..c73d18b 100644
 --- a/kernel/Makefile
 +++ b/kernel/Makefile
 @@ -54,6 +54,7 @@ obj-$(CONFIG_MODULE_SIG_UEFI) += modsign_uefi.o
+ obj-$(CONFIG_MODULE_SIG) += module_signing.o
  obj-$(CONFIG_KALLSYMS) += kallsyms.o
- obj-$(CONFIG_STACK_UNWIND) += unwind.o
  obj-$(CONFIG_BSD_PROCESS_ACCT) += acct.o
 +obj-$(CONFIG_CRASH_CORE) += crash_core.o
  obj-$(CONFIG_KEXEC_CORE) += kexec_core.o

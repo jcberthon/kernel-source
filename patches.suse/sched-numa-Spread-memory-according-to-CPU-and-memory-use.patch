@@ -2,9 +2,7 @@ From 54d3eefce0306de16bccdfe271f703bc2754df28 Mon Sep 17 00:00:00 2001
 From: Rik van Riel <riel@redhat.com>
 Date: Mon, 25 Jan 2016 17:07:39 -0500
 Subject: [PATCH] sched/numa: Spread memory according to CPU and memory use
-
 References: Automatic NUMA Balancing (fate#315482)
-
 References: Fix deferred memory initialisation after suspend (bnc#984629)
 Patch-mainline: v4.6
 Git-commit: 4142c3ebb685bb338b7d96090d8f90ff49065ff6

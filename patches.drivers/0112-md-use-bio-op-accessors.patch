@@ -198,7 +198,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  					break;
  				}
 @@ -2018,7 +2016,7 @@ static void sync_request_write(struct md
- 		if (test_bit(Faulty, &conf->mirrors[i].rdev->flags))
+ 		      !test_bit(MD_RECOVERY_SYNC, &mddev->recovery))))
  			continue;
  
 -		wbio->bi_rw = WRITE;
@@ -207,14 +207,14 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  		atomic_inc(&r1_bio->remaining);
  		md_sync_acct(conf->mirrors[i].rdev->bdev, bio_sectors(wbio));
 @@ -2076,7 +2074,7 @@ static void fix_read_error(struct r1conf
- 				atomic_inc(&rdev->nr_pending);
- 				rcu_read_unlock();
- 				if (sync_page_io(rdev, sect, s<<9,
--						 conf->tmppage, READ, false))
-+						 conf->tmppage, REQ_OP_READ, 0, false))
- 					success = 1;
- 				rdev_dec_pending(rdev, mddev);
- 				if (success)
+ 			    is_badblock(rdev, sect, s,
+ 					&first_bad, &bad_sectors) == 0 &&
+ 			    sync_page_io(rdev, sect, s<<9,
+-					 conf->tmppage, READ, false))
++					 conf->tmppage, REQ_OP_READ, 0, false))
+ 				success = 1;
+ 			else {
+ 				d++;
 @@ -2201,7 +2199,7 @@ static int narrow_write_error(struct r1b
  			wbio = bio_clone_mddev(r1_bio->master_bio, GFP_NOIO, mddev);
  		}
@@ -415,9 +415,9 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  					       bvec[idx].bv_page,
 -					       READ, false);
 +					       REQ_OP_READ, 0, false);
- 			rdev_dec_pending(rdev, mddev);
- 			rcu_read_lock();
  			if (success)
+ 				break;
+ 		failed:
 --- a/drivers/md/raid5-cache.c
 +++ b/drivers/md/raid5-cache.c
 @@ -261,7 +261,7 @@ static struct bio *r5l_bio_alloc(struct

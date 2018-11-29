@@ -29,7 +29,7 @@ index e83dcb33a3d2..b4b395a054ac 100644
 +	struct ib_qp_init_attr		attr = {};
  	struct ib_uverbs_ex_create_qp_resp resp;
  	int				ret;
- 	struct ib_rwq_ind_table *ind_tbl = NULL;
+ 
 -- 
 1.8.5.6
 

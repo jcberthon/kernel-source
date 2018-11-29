@@ -200,8 +200,8 @@ Acked-by: David Chang <dchang@suse.com>
  	struct efx_filter_spec spec;
  	u8 baddr[ETH_ALEN];
 @@ -4104,9 +4119,8 @@ static int efx_ef10_filter_insert_def(st
- 			       "%scast mismatch filter insert failed rc=%d\n",
- 			       multicast ? "Multi" : "Uni", rc);
+ 			     "%scast mismatch filter insert failed rc=%d\n",
+ 			     multicast ? "Multi" : "Uni", rc);
  	} else if (multicast) {
 -		EFX_WARN_ON_PARANOID(table->mcdef_id !=
 -				     EFX_EF10_FILTER_ID_INVALID);

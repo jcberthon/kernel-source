@@ -433,7 +433,7 @@ index a42cf3f7aff0..eeccb796eb0b 100644
  		xfs_aops_discard_page(page);
  		ClearPageUptodate(page);
  		unlock_page(page);
-@@ -1187,13 +1177,33 @@ redirty:
+@@ -1187,17 +1177,37 @@ redirty:
  	return 0;
  }
  
@@ -462,6 +462,10 @@ index a42cf3f7aff0..eeccb796eb0b 100644
 +	int			ret;
 +
  	xfs_iflags_clear(XFS_I(mapping->host), XFS_ITRUNCATED);
+ 	if (dax_mapping(mapping))
+ 		return dax_writeback_mapping_range(mapping,
+ 				xfs_find_bdev_for_inode(mapping->host), wbc);
+ 
 -	return generic_writepages(mapping, wbc);
 +	ret = write_cache_pages(mapping, wbc, xfs_do_writepage, &wpc);
 +	return xfs_writepage_submit(&wpc, wbc, ret);

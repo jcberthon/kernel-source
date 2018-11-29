@@ -28,7 +28,7 @@ index a40764adf59a..e7968473e8dd 100644
 --- a/arch/arm64/include/asm/assembler.h
 +++ b/arch/arm64/include/asm/assembler.h
 @@ -332,4 +332,17 @@ alternative_else_nop_endif
- #endif
+ 	.long	\sym\()_hi32
  	.endm
  
 +/*

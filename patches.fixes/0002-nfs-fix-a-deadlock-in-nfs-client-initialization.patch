@@ -45,13 +45,13 @@ Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
 --- a/fs/nfs/client.c
 +++ b/fs/nfs/client.c
 @@ -300,6 +300,7 @@ static struct nfs_client *nfs_match_clie
- 	if (test_bit(NFS_CS_NO_SHARE, &data->init_flags))
- 		return NULL;
+ 	const struct sockaddr *sap = data->addr;
+ 	struct nfs_net *nn = net_generic(data->net, nfs_net_id);
  
 +again:
  	list_for_each_entry(clp, &nn->nfs_client_list, cl_share_link) {
  	        const struct sockaddr *clap = (struct sockaddr *)&clp->cl_addr;
- 		if (test_bit(NFS_CS_NO_SHARE,&clp->cl_flags))
+ 		/* Don't match clients that failed to initialise properly */
 @@ -310,6 +311,16 @@ static struct nfs_client *nfs_match_clie
  		if (clp->cl_cons_state < 0)
  			continue;
@@ -107,10 +107,10 @@ Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
  
 @@ -521,7 +528,7 @@ int nfs40_walk_client_list(struct nfs_cl
  
- 		if (pos->cl_xprt_id != new->cl_xprt_id)
+ 		if (!nfs4_match_client_owner_id(pos, new))
  			continue;
 -
-+	found:
++found:
  		atomic_inc(&pos->cl_count);
  		spin_unlock(&nn->nfs_client_lock);
  

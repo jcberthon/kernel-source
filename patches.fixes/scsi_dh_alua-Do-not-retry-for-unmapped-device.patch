@@ -18,7 +18,7 @@ Reviewed-by: Martin Wilck <mwilck@suse.com>
 +++ b/drivers/scsi/device_handler/scsi_dh_alua.c
 @@ -526,7 +526,7 @@ static int alua_rtpg(struct scsi_device
  	struct alua_port_group *tmp_pg;
- 	int len, k, off, valid_states = 0, bufflen = ALUA_RTPG_SIZE;
+ 	int len, k, off, bufflen = ALUA_RTPG_SIZE;
  	unsigned char *desc, *buff;
 -	unsigned err, retval;
 +	unsigned err = SCSI_DH_OK, retval;

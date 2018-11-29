@@ -424,7 +424,7 @@ index ea765fb..76ca09b 100644
 +
  int iser_assign_reg_ops(struct iser_device *device)
  {
- 	struct ib_device_attr *dev_attr = &device->dev_attr;
+ 	struct ib_device *ib_dev = device->ib_device;
 @@ -414,12 +419,14 @@ iser_set_prot_checks(struct scsi_cmnd *sc, u8 *mask)
  }
  

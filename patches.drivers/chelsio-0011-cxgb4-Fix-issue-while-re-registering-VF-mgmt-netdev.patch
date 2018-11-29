@@ -54,7 +54,7 @@ Acked-by: Cho, Yu-Chen <acho@suse.com>
  {
  	struct port_info *pi = netdev_priv(dev);
 @@ -3151,11 +3160,12 @@ static const struct net_device_ops cxgb4
- #endif
+ 	.ndo_set_tx_maxrate   = cxgb_set_tx_maxrate,
  };
  
 -static const struct net_device_ops cxgb4_mgmt_netdev_ops = {

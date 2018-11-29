@@ -6,7 +6,13 @@ References: bnc#990245
 Patch-mainline: v4.10-rc1
 Git-commit: 5d5a51d205ba841b88d758deb6ff537fb754adbc
 
-Acked-by: Hannes Reinecke <hare@suse.de>
+Any multicase address is set on all interfaces, the base interface
+and any VLAN interfaces on top of this. So we might receive frames
+which are not destined for us.
+
+Signed-off-by: Hannes Reinecke <hare@suse.de>
+Reviewed-by: Bart Van Assche <bart.vanassche@sandisk.com>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 ---
  drivers/scsi/fcoe/fcoe_ctlr.c | 12 +++++++++++-
  1 file changed, 11 insertions(+), 1 deletion(-)

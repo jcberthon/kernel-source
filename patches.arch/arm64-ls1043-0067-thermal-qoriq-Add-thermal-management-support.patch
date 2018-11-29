@@ -18,14 +18,12 @@ Signed-off-by: Zhang Rui <rui.zhang@intel.com>
 Signed-off-by: Alexander Graf <agraf@suse.de>
 
 ---
- drivers/thermal/Kconfig         |  10 ++
- drivers/thermal/Makefile        |   1 +
- drivers/thermal/qoriq_thermal.c | 328 ++++++++++++++++++++++++++++++++++++++++
+ drivers/thermal/Kconfig         |   10 +
+ drivers/thermal/Makefile        |    1 
+ drivers/thermal/qoriq_thermal.c |  328 ++++++++++++++++++++++++++++++++++++++++
  3 files changed, 339 insertions(+)
  create mode 100644 drivers/thermal/qoriq_thermal.c
 
-diff --git a/drivers/thermal/Kconfig b/drivers/thermal/Kconfig
-index cfac974..94f90050 100644
 --- a/drivers/thermal/Kconfig
 +++ b/drivers/thermal/Kconfig
 @@ -194,6 +194,16 @@ config IMX_THERMAL
@@ -43,13 +41,11 @@ index cfac974..94f90050 100644
 +	  passive trip is crossed.
 +
  config SPEAR_THERMAL
- 	bool "SPEAr thermal sensor driver"
+ 	tristate "SPEAr thermal sensor driver"
  	depends on PLAT_SPEAR || COMPILE_TEST
-diff --git a/drivers/thermal/Makefile b/drivers/thermal/Makefile
-index 1ca34aa..4b69d51 100644
 --- a/drivers/thermal/Makefile
 +++ b/drivers/thermal/Makefile
-@@ -36,6 +36,7 @@ obj-$(CONFIG_DOVE_THERMAL)  	+= dove_thermal.o
+@@ -36,6 +36,7 @@ obj-$(CONFIG_DOVE_THERMAL)  	+= dove_the
  obj-$(CONFIG_DB8500_THERMAL)	+= db8500_thermal.o
  obj-$(CONFIG_ARMADA_THERMAL)	+= armada_thermal.o
  obj-$(CONFIG_IMX_THERMAL)	+= imx_thermal.o
@@ -57,9 +53,6 @@ index 1ca34aa..4b69d51 100644
  obj-$(CONFIG_DB8500_CPUFREQ_COOLING)	+= db8500_cpufreq_cooling.o
  obj-$(CONFIG_INTEL_POWERCLAMP)	+= intel_powerclamp.o
  obj-$(CONFIG_X86_PKG_TEMP_THERMAL)	+= x86_pkg_temp_thermal.o
-diff --git a/drivers/thermal/qoriq_thermal.c b/drivers/thermal/qoriq_thermal.c
-new file mode 100644
-index 0000000..644ba52
 --- /dev/null
 +++ b/drivers/thermal/qoriq_thermal.c
 @@ -0,0 +1,328 @@
@@ -391,6 +384,3 @@ index 0000000..644ba52
 +MODULE_AUTHOR("Jia Hongtao <hongtao.jia@nxp.com>");
 +MODULE_DESCRIPTION("QorIQ Thermal Monitoring Unit driver");
 +MODULE_LICENSE("GPL v2");
--- 
-1.8.5.6
-

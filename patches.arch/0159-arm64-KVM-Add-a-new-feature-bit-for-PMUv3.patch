@@ -91,9 +91,9 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 --- a/include/uapi/linux/kvm.h
 +++ b/include/uapi/linux/kvm.h
 @@ -831,6 +831,7 @@ struct kvm_ppc_smmu_info {
- #define KVM_CAP_GUEST_DEBUG_HW_WPS 120
  #define KVM_CAP_SPLIT_IRQCHIP 121
  #define KVM_CAP_IOEVENTFD_ANY_LENGTH 122
+ #define KVM_CAP_HYPERV_SYNIC 123
 +#define KVM_CAP_ARM_PMU_V3 125
  #define KVM_CAP_S390_BPB 152
  

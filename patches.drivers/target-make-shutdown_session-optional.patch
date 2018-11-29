@@ -202,7 +202,7 @@ index f966766..fd5c3de 100644
 -{
 -	struct ft_sess *sess = se_sess->fabric_sess_ptr;
 -
--	TFC_SESS_DBG(sess->tport->lport, "port_id %x\n", sess->port_id);
+-	pr_debug("port_id %x\n", sess->port_id);
 -	return 1;
 -}
 -

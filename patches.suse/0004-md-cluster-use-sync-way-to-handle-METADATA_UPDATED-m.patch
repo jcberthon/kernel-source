@@ -307,7 +307,7 @@ Signed-off-by: Shaohua Li <shli@fb.com>
 --- a/drivers/md/md.c
 +++ b/drivers/md/md.c
 @@ -8393,7 +8393,6 @@ void md_check_recovery(struct mddev *mdd
- 		(mddev->flags & MD_UPDATE_SB_FLAGS & ~ (1<<MD_CHANGE_PENDING)) ||
+ 		(mddev->sb_flags & ~ (1<<MD_SB_CHANGE_PENDING)) ||
  		test_bit(MD_RECOVERY_NEEDED, &mddev->recovery) ||
  		test_bit(MD_RECOVERY_DONE, &mddev->recovery) ||
 -		test_bit(MD_RELOAD_SB, &mddev->flags) ||

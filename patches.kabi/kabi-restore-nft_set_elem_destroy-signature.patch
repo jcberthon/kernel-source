@@ -12,18 +12,16 @@ name.
 
 Signed-off-by: Michal Kubecek <mkubecek@suse.cz>
 ---
- include/net/netfilter/nf_tables.h |  5 +++--
- net/netfilter/nf_tables_api.c     | 17 ++++++++++++-----
- net/netfilter/nft_dynset.c        |  2 +-
- net/netfilter/nft_hash.c          |  4 ++--
- net/netfilter/nft_rbtree.c        |  2 +-
- 5 files changed, 19 insertions(+), 11 deletions(-)
+ include/net/netfilter/nf_tables.h |    5 +++--
+ net/netfilter/nf_tables_api.c     |   17 ++++++++++++-----
+ net/netfilter/nft_dynset.c        |    2 +-
+ net/netfilter/nft_hash.c          |    6 +++---
+ net/netfilter/nft_rbtree.c        |    2 +-
+ 5 files changed, 20 insertions(+), 12 deletions(-)
 
-diff --git a/include/net/netfilter/nf_tables.h b/include/net/netfilter/nf_tables.h
-index f1c9a85806a1..4242ba2a8fd9 100644
 --- a/include/net/netfilter/nf_tables.h
 +++ b/include/net/netfilter/nf_tables.h
-@@ -515,8 +515,9 @@ void *nft_set_elem_init(const struct nft_set *set,
+@@ -515,8 +515,9 @@ void *nft_set_elem_init(const struct nft
  			const struct nft_set_ext_tmpl *tmpl,
  			const u32 *key, const u32 *data,
  			u64 timeout, gfp_t gfp);
@@ -35,11 +33,9 @@ index f1c9a85806a1..4242ba2a8fd9 100644
  
  /**
   *	struct nft_set_gc_batch_head - nf_tables set garbage collection batch
-diff --git a/net/netfilter/nf_tables_api.c b/net/netfilter/nf_tables_api.c
-index 9ef892870375..1ceb9b8b601c 100644
 --- a/net/netfilter/nf_tables_api.c
 +++ b/net/netfilter/nf_tables_api.c
-@@ -3349,8 +3349,8 @@ void *nft_set_elem_init(const struct nft_set *set,
+@@ -3352,8 +3352,8 @@ void *nft_set_elem_init(const struct nft
  	return elem;
  }
  
@@ -50,7 +46,7 @@ index 9ef892870375..1ceb9b8b601c 100644
  {
  	struct nft_set_ext *ext = nft_set_elem_ext(set, elem);
  
-@@ -3362,6 +3362,13 @@ void nft_set_elem_destroy(const struct nft_set *set, void *elem,
+@@ -3365,6 +3365,13 @@ void nft_set_elem_destroy(const struct n
  
  	kfree(elem);
  }
@@ -64,7 +60,7 @@ index 9ef892870375..1ceb9b8b601c 100644
  EXPORT_SYMBOL_GPL(nft_set_elem_destroy);
  
  static int nft_add_set_elem(struct nft_ctx *ctx, struct nft_set *set,
-@@ -3657,7 +3664,7 @@ void nft_set_gc_batch_release(struct rcu_head *rcu)
+@@ -3661,7 +3668,7 @@ void nft_set_gc_batch_release(struct rcu
  
  	gcb = container_of(rcu, struct nft_set_gc_batch, head.rcu);
  	for (i = 0; i < gcb->head.cnt; i++)
@@ -73,7 +69,7 @@ index 9ef892870375..1ceb9b8b601c 100644
  	kfree(gcb);
  }
  EXPORT_SYMBOL_GPL(nft_set_gc_batch_release);
-@@ -3876,7 +3883,7 @@ static void nf_tables_commit_release(struct nft_trans *trans)
+@@ -3880,7 +3887,7 @@ static void nf_tables_commit_release(str
  		break;
  	case NFT_MSG_DELSETELEM:
  		nft_set_elem_destroy(nft_trans_elem_set(trans),
@@ -82,7 +78,7 @@ index 9ef892870375..1ceb9b8b601c 100644
  		break;
  	}
  	kfree(trans);
-@@ -4013,7 +4020,7 @@ static void nf_tables_abort_release(struct nft_trans *trans)
+@@ -4017,7 +4024,7 @@ static void nf_tables_abort_release(stru
  		break;
  	case NFT_MSG_NEWSETELEM:
  		nft_set_elem_destroy(nft_trans_elem_set(trans),
@@ -91,11 +87,9 @@ index 9ef892870375..1ceb9b8b601c 100644
  		break;
  	}
  	kfree(trans);
-diff --git a/net/netfilter/nft_dynset.c b/net/netfilter/nft_dynset.c
-index ff2bb86ec0ae..c09f541239dc 100644
 --- a/net/netfilter/nft_dynset.c
 +++ b/net/netfilter/nft_dynset.c
-@@ -54,7 +54,7 @@ static void *nft_dynset_new(struct nft_set *set, const struct nft_expr *expr,
+@@ -54,7 +54,7 @@ static void *nft_dynset_new(struct nft_s
  	return elem;
  
  err2:
@@ -104,11 +98,18 @@ index ff2bb86ec0ae..c09f541239dc 100644
  err1:
  	if (set->size)
  		atomic_dec(&set->nelems);
-diff --git a/net/netfilter/nft_hash.c b/net/netfilter/nft_hash.c
-index a5c290fce8c4..3f9d45d3d9b7 100644
 --- a/net/netfilter/nft_hash.c
 +++ b/net/netfilter/nft_hash.c
-@@ -120,7 +120,7 @@ out:
+@@ -120,7 +120,7 @@ static bool nft_hash_update(struct nft_s
+ 
+ 	/* Another cpu may race to insert the element with the same key */
+ 	if (prev) {
+-		nft_set_elem_destroy(set, he, true);
++		nft_set_elem_destroy(set, he);
+ 		he = prev;
+ 	}
+ 
+@@ -129,7 +129,7 @@ out:
  	return true;
  
  err2:
@@ -117,7 +118,7 @@ index a5c290fce8c4..3f9d45d3d9b7 100644
  err1:
  	return false;
  }
-@@ -322,7 +322,7 @@ static int nft_hash_init(const struct nft_set *set,
+@@ -331,7 +331,7 @@ static int nft_hash_init(const struct nf
  
  static void nft_hash_elem_destroy(void *ptr, void *arg)
  {
@@ -126,11 +127,9 @@ index a5c290fce8c4..3f9d45d3d9b7 100644
  }
  
  static void nft_hash_destroy(const struct nft_set *set)
-diff --git a/net/netfilter/nft_rbtree.c b/net/netfilter/nft_rbtree.c
-index 0f58c912c99a..1c30f41cff5b 100644
 --- a/net/netfilter/nft_rbtree.c
 +++ b/net/netfilter/nft_rbtree.c
-@@ -226,7 +226,7 @@ static void nft_rbtree_destroy(const struct nft_set *set)
+@@ -226,7 +226,7 @@ static void nft_rbtree_destroy(const str
  	while ((node = priv->root.rb_node) != NULL) {
  		rb_erase(node, &priv->root);
  		rbe = rb_entry(node, struct nft_rbtree_elem, node);
@@ -139,6 +138,3 @@ index 0f58c912c99a..1c30f41cff5b 100644
  	}
  }
  
--- 
-2.16.2
-

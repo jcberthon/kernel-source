@@ -67,7 +67,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 --- a/Documentation/arm64/silicon-errata.txt
 +++ b/Documentation/arm64/silicon-errata.txt
 @@ -62,4 +62,5 @@ stable kernels.
- | Cavium         | ThunderX Core   | #26026          | CAVIUM_ERRATUM_26026    |
+ | Cavium         | ThunderX Core   | #27456          | CAVIUM_ERRATUM_27456    |
  |                |                 |                 |                         |
  | Freescale/NXP  | LS2080A/LS1043A | A-008585        | FSL_ERRATUM_A008585     |
 +| Qualcomm Tech. | Falkor v1       | E1003           | QCOM_FALKOR_ERRATUM_1003|
@@ -102,17 +102,17 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 --- a/arch/arm64/include/asm/assembler.h
 +++ b/arch/arm64/include/asm/assembler.h
 @@ -23,7 +23,9 @@
- #ifndef __ASM_ASSEMBLER_H
  #define __ASM_ASSEMBLER_H
  
+ #include <asm/asm-offsets.h>
 +#include <asm/cpufeature.h>
  #include <asm/cputype.h>
 +#include <asm/mmu_context.h>
+ #include <asm/page.h>
+ #include <asm/pgtable-hwdef.h>
  #include <asm/ptrace.h>
- #include <asm/thread_info.h>
- 
-@@ -291,4 +293,26 @@ lr	.req	x30		// link register
- 	.long	\sym\()_hi32
+@@ -291,6 +293,28 @@ lr	.req	x30		// link register
+ 	mrs	\rd, sp_el0
  	.endm
  
 +/*
@@ -137,19 +137,20 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +#endif
 +	.endm
 +
- #endif	/* __ASM_ASSEMBLER_H */
+ /*
+  * Errata workaround post TTBR0_EL1 update.
+  */
 --- a/arch/arm64/include/asm/cpucaps.h
 +++ b/arch/arm64/include/asm/cpucaps.h
-@@ -36,8 +36,9 @@
+@@ -36,7 +36,9 @@
+ #define ARM64_HYP_OFFSET_LOW			14
  /* #define ARM64_MISMATCHED_CACHE_LINE_SIZE	15 */
  #define ARM64_WORKAROUND_REPEAT_TLBI		16
- #define ARM64_WORKAROUND_858921			17
--#define ARM64_HAS_NO_BCAST_TLBI                 18 /* Out of tree */
++/* #define ARM64_WORKAROUND_858921			17 */
 +#define ARM64_WORKAROUND_QCOM_FALKOR_E1003	18
-+#define ARM64_HAS_NO_BCAST_TLBI                 19 /* Out of tree */
  
--#define ARM64_NCAPS				19
-+#define ARM64_NCAPS				20
+-#define ARM64_NCAPS				17
++#define ARM64_NCAPS				19
  
  #endif /* __ASM_CPUCAPS_H */
 --- a/arch/arm64/include/asm/mmu_context.h

@@ -131,7 +131,7 @@ index c630932..fbcd2e9 100644
  	u64 max_pages_per_mr;
 +	unsigned int flags = 0;
  
- 	srp_dev = kmalloc(sizeof *srp_dev, GFP_KERNEL);
+ 	srp_dev = kzalloc(sizeof(*srp_dev), GFP_KERNEL);
  	if (!srp_dev)
 @@ -3559,6 +3563,10 @@ static void srp_add_one(struct ib_device *device)
  		srp_dev->use_fmr = !srp_dev->use_fast_reg && srp_dev->has_fmr;

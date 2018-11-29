@@ -126,8 +126,8 @@ index 9ba096af440f..cf779a5d87f6 100644
  		}
 -#endif				/* ACPI_DEBUG_OUTPUT */
  		break;
- 
- 	case ACPI_SRAT_TYPE_GICC_AFFINITY:
+ 	default:
+ 		pr_warn("Found unsupported SRAT entry (type = 0x%x)\n",
 -- 
 2.11.0
 

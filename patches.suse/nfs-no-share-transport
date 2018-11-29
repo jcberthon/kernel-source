@@ -51,13 +51,14 @@ Acked-by: NeilBrown <neilb@suse.de>
 
 --- a/fs/nfs/client.c
 +++ b/fs/nfs/client.c
-@@ -296,8 +296,13 @@ static struct nfs_client *nfs_match_clie
+@@ -296,9 +296,14 @@ static struct nfs_client *nfs_match_clie
  	const struct sockaddr *sap = data->addr;
  	struct nfs_net *nn = net_generic(data->net, nfs_net_id);
  
 +	if (test_bit(NFS_CS_NO_SHARE, &data->init_flags))
 +		return NULL;
 +
+ again:
  	list_for_each_entry(clp, &nn->nfs_client_list, cl_share_link) {
  	        const struct sockaddr *clap = (struct sockaddr *)&clp->cl_addr;
 +		if (test_bit(NFS_CS_NO_SHARE,&clp->cl_flags))

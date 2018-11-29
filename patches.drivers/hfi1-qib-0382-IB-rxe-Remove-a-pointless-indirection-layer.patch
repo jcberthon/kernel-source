@@ -145,7 +145,7 @@ Acked-by: Thomas Bogendoerfer <tbogendoerfer@suse.de>
  	int err = 0;
  	struct rxe_av *av = rxe_get_av(pkt);
 @@ -473,8 +473,7 @@ static void rxe_skb_tx_dtor(struct sk_bu
- 	rxe_drop_ref(qp);
+ 		rxe_run_task(&qp->req.task, 1);
  }
  
 -static int send(struct rxe_dev *rxe, struct rxe_pkt_info *pkt,

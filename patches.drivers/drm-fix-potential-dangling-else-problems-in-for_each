@@ -87,8 +87,8 @@ Acked-by: Takashi Iwai <tiwai@suse.de>
 -		if ((plane_mask) & (1 << drm_plane_index(plane)))
 +		for_each_if ((plane_mask) & (1 << drm_plane_index(plane)))
  
- /**
-  * drm_for_each_encoder_mask - iterate over encoders specified by bitmask
+
+ #define obj_to_crtc(x) container_of(x, struct drm_crtc, base)
 @@ -1566,7 +1566,7 @@ static inline struct drm_property *drm_p
  /* Plane list iterator for legacy (overlay only) planes. */
  #define drm_for_each_legacy_plane(plane, dev) \

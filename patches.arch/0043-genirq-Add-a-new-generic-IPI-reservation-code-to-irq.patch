@@ -67,12 +67,11 @@ diff --git a/kernel/irq/Makefile b/kernel/irq/Makefile
 index 7c3f0102696c..1d3ee3169202 100644
 --- a/kernel/irq/Makefile
 +++ b/kernel/irq/Makefile
-@@ -8,4 +8,5 @@ obj-$(CONFIG_GENERIC_PENDING_IRQ) += migration.o
+@@ -8,3 +8,4 @@ obj-$(CONFIG_GENERIC_PENDING_IRQ) += migration.o
  obj-$(CONFIG_GENERIC_IRQ_MIGRATION) += cpuhotplug.o
  obj-$(CONFIG_PM_SLEEP) += pm.o
  obj-$(CONFIG_GENERIC_MSI_IRQ) += msi.o
 +obj-$(CONFIG_GENERIC_IRQ_IPI) += ipi.o
- obj-$(CONFIG_SMP) += affinity.o
 diff --git a/kernel/irq/ipi.c b/kernel/irq/ipi.c
 new file mode 100644
 index 000000000000..340af273429c

@@ -48,7 +48,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 +}
 +
  static int pmem_do_bvec(struct pmem_device *pmem, struct page *page,
- 			unsigned int len, unsigned int off, int rw,
+ 			unsigned int len, unsigned int off, bool is_write,
  			sector_t sector)
  {
  	int rc = 0;

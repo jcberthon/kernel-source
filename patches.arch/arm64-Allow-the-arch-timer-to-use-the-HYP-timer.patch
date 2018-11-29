@@ -33,7 +33,7 @@ index c64d543..ffe9d1c 100644
  static bool arch_timer_c3stop;
  static bool arch_timer_mem_use_virtual;
  
-@@ -263,14 +263,20 @@ static void __arch_timer_setup(unsigned type,
+@@ -263,16 +263,22 @@ static void __arch_timer_setup(unsigned type,
  		clk->name = "arch_sys_timer";
  		clk->rating = 450;
  		clk->cpumask = cpumask_of(smp_processor_id());
@@ -43,6 +43,7 @@ index c64d543..ffe9d1c 100644
 +		switch (arch_timer_uses_ppi) {
 +		case VIRT_PPI:
  			clk->set_state_shutdown = arch_timer_shutdown_virt;
+ 			clk->set_state_oneshot_stopped = arch_timer_shutdown_virt;
  			clk->set_next_event = arch_timer_set_next_event_virt;
 -		} else {
 -			clk->irq = arch_timer_ppi[PHYS_SECURE_PPI];
@@ -51,6 +52,7 @@ index c64d543..ffe9d1c 100644
 +		case PHYS_NONSECURE_PPI:
 +		case HYP_PPI:
  			clk->set_state_shutdown = arch_timer_shutdown_phys;
+ 			clk->set_state_oneshot_stopped = arch_timer_shutdown_phys;
  			clk->set_next_event = arch_timer_set_next_event_phys;
 +			break;
 +		default:

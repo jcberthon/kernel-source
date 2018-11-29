@@ -80,8 +80,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
  #ifdef CONFIG_FIX_EARLYCON_MEM
 @@ -209,8 +210,7 @@ static int __init param_setup_earlycon(c
- }
- early_param("earlycon", param_setup_earlycon);
+ 
+ #ifdef CONFIG_OF_EARLY_FLATTREE
  
 -int __init of_setup_earlycon(unsigned long addr,
 -			     const struct earlycon_id *match,

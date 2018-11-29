@@ -19,7 +19,7 @@ index 015ff8072b97..d2b5b230ae82 100644
 --- a/arch/x86/kvm/vmx.c
 +++ b/arch/x86/kvm/vmx.c
 @@ -8653,6 +8653,11 @@ static void __noclone vmx_vcpu_run(struct kvm_vcpu *vcpu)
- 		__write_pkru(vmx->guest_pkru);
+ 		__write_pkru(vcpu->arch.pkru);
  
  	atomic_switch_perf_msrs(vmx);
 +

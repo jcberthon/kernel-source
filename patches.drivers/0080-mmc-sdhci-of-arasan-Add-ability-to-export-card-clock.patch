@@ -108,9 +108,9 @@ index 4fda2ec..9b62dc9 100644
 +};
 +
 +/**
-  * sdhci_arasan_update_clockmultiplier - Set corecfg_clockmultiplier
+  * sdhci_arasan_update_baseclkfreq - Set corecfg_baseclkfreq
   *
-  * The corecfg_clockmultiplier is supposed to contain clock multiplier
+  * The corecfg_baseclkfreq is supposed to contain the MHz of clk_xin.  This
 @@ -388,6 +421,83 @@ static void sdhci_arasan_update_baseclkfreq(struct sdhci_host *host)
  	sdhci_arasan_syscon_write(host, &soc_ctl_map->baseclkfreq, mhz);
  }

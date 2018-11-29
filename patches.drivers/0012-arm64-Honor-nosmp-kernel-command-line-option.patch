@@ -35,7 +35,7 @@ index b730b6f7c0f4..71aadd35acd5 100644
 --- a/arch/arm64/kernel/smp.c
 +++ b/arch/arm64/kernel/smp.c
 @@ -591,6 +591,13 @@ void __init smp_prepare_cpus(unsigned int max_cpus)
- 	numa_store_cpu_info(this_cpu);
+ 	smp_store_cpu_info(smp_processor_id());
  
  	/*
 +	 * If UP is mandated by "nosmp" (which implies "maxcpus=0"), don't set

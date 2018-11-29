@@ -155,7 +155,7 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
 -		mbio->bi_bdev = (void*)conf->mirrors[i].rdev;
 +		mbio->bi_bdev = conf->mirrors[i].rdev->bdev;
  		mbio->bi_end_io	= raid1_end_write_request;
- 		bio_set_op_attrs(mbio, op, do_flush_fua | do_sync | do_sec);
+ 		bio_set_op_attrs(mbio, op, do_flush_fua | do_sync);
  		mbio->bi_private = r1_bio;
  
  		atomic_inc(&r1_bio->remaining);
@@ -238,7 +238,7 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
 -			mbio->bi_bdev = (void*)rdev;
 +			mbio->bi_bdev = rdev->bdev;
  			mbio->bi_end_io	= raid10_end_write_request;
- 			bio_set_op_attrs(mbio, op, do_sync | do_fua | do_sec);
+ 			bio_set_op_attrs(mbio, op, do_sync | do_fua);
  			mbio->bi_private = r10_bio;
  
 +			if (conf->mddev->gendisk)
@@ -258,7 +258,7 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
 -			mbio->bi_bdev = (void*)rdev;
 +			mbio->bi_bdev = rdev->bdev;
  			mbio->bi_end_io	= raid10_end_write_request;
- 			bio_set_op_attrs(mbio, op, do_sync | do_fua | do_sec);
+ 			bio_set_op_attrs(mbio, op, do_sync | do_fua);
  			mbio->bi_private = r10_bio;
  
 +			if (conf->mddev->gendisk)

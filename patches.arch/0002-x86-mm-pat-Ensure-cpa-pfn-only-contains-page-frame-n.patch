@@ -126,14 +126,13 @@ Acked-by: Lee, Chun-Yi <jlee@suse.com>
  		pr_err("Failed to map kernel text 1:1\n");
  		return 1;
  	}
-@@ -269,13 +271,15 @@ void __init efi_cleanup_page_tables(unsi
- 
+@@ -269,12 +271,14 @@ void __init efi_cleanup_page_tables(unsi
  static void __init __map_region(efi_memory_desc_t *md, u64 va)
  {
+ 	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
 -	unsigned long pf = 0;
 +	unsigned long flags = 0;
 +	unsigned long pfn;
- 	pgd_t *pgd = efi_pgd;
  
  	if (!(md->attribute & EFI_MEMORY_WB))
 -		pf |= _PAGE_PCD;

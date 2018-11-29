@@ -25,7 +25,7 @@ index 98a888f..67608db 100644
 --- a/arch/arm64/include/asm/kvm_host.h
 +++ b/arch/arm64/include/asm/kvm_host.h
 @@ -333,6 +333,8 @@ void kvm_arm_halt_vcpu(struct kvm_vcpu *vcpu);
- void kvm_arm_resume_vcpu(struct kvm_vcpu *vcpu);
+ struct kvm_vcpu * __percpu *kvm_get_running_vcpus(void);
  
  u64 __kvm_call_hyp(void *hypfn, ...);
 +#define kvm_call_hyp(f, ...) __kvm_call_hyp(kvm_ksym_ref(f), ##__VA_ARGS__)
@@ -41,7 +41,7 @@ index 98a888f..67608db 100644
 -
  static inline void __cpu_init_stage2(void)
  {
- 	u32 parange = kvm_call_hyp(__init_stage2_translation);
+ 	kvm_call_hyp(__init_stage2_translation);
 -- 
 2.11.0
 

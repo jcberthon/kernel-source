@@ -47,7 +47,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	u64 apic_base;
  	struct kvm_lapic *apic;    /* kernel irqchip context */
 +	bool apicv_active;
- 	u64 eoi_exit_bitmap[4];
+ 	DECLARE_BITMAP(ioapic_handled_vectors, 256);
  	unsigned long apic_attention;
  	int32_t apic_arb_prio;
 @@ -845,7 +846,8 @@ struct kvm_x86_ops {
@@ -59,7 +59,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 +	void (*refresh_apicv_exec_ctrl)(struct kvm_vcpu *vcpu);
  	void (*hwapic_irr_update)(struct kvm_vcpu *vcpu, int max_irr);
  	void (*hwapic_isr_update)(struct kvm *kvm, int isr);
- 	void (*load_eoi_exitmap)(struct kvm_vcpu *vcpu);
+ 	void (*load_eoi_exitmap)(struct kvm_vcpu *vcpu, u64 *eoi_exit_bitmap);
 @@ -1101,6 +1103,8 @@ gpa_t kvm_mmu_gva_to_gpa_write(struct kv
  gpa_t kvm_mmu_gva_to_gpa_system(struct kvm_vcpu *vcpu, gva_t gva,
  				struct x86_exception *exception);
@@ -198,7 +198,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 -	return 0;
  }
  
- static void svm_load_eoi_exitmap(struct kvm_vcpu *vcpu)
+ static void svm_load_eoi_exitmap(struct kvm_vcpu *vcpu, u64 *eoi_exit_bitmap)
 @@ -4368,7 +4372,8 @@ static struct kvm_x86_ops svm_x86_ops =
  	.enable_irq_window = enable_irq_window,
  	.update_cr8_intercept = update_cr8_intercept,
@@ -341,9 +341,9 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
  	if (!cpu_need_tpr_shadow(vcpu))
 @@ -8333,7 +8325,7 @@ static void vmx_hwapic_irr_update(struct
- static void vmx_load_eoi_exitmap(struct kvm_vcpu *vcpu)
+ 
+ static void vmx_load_eoi_exitmap(struct kvm_vcpu *vcpu, u64 *eoi_exit_bitmap)
  {
- 	u64 *eoi_exit_bitmap = vcpu->arch.eoi_exit_bitmap;
 -	if (!vmx_cpu_uses_apicv(vcpu))
 +	if (!kvm_vcpu_apicv_active(vcpu))
  		return;
@@ -397,14 +397,14 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	else
 @@ -6372,7 +6383,8 @@ static void vcpu_scan_ioapic(struct kvm_
  	if (irqchip_split(vcpu->kvm))
- 		kvm_scan_ioapic_routes(vcpu, vcpu->arch.eoi_exit_bitmap);
+ 		kvm_scan_ioapic_routes(vcpu, vcpu->arch.ioapic_handled_vectors);
  	else {
 -		kvm_x86_ops->sync_pir_to_irr(vcpu);
 +		if (vcpu->arch.apicv_active)
 +			kvm_x86_ops->sync_pir_to_irr(vcpu);
- 		kvm_ioapic_scan_entry(vcpu, vcpu->arch.eoi_exit_bitmap);
+ 		kvm_ioapic_scan_entry(vcpu, vcpu->arch.ioapic_handled_vectors);
  	}
- 	kvm_x86_ops->load_eoi_exitmap(vcpu);
+ 	kvm_x86_ops->load_eoi_exitmap(vcpu,
 @@ -6518,7 +6530,7 @@ static int vcpu_enter_guest(struct kvm_v
  		 * Update architecture specific hints for APIC
  		 * virtual interrupt delivery.

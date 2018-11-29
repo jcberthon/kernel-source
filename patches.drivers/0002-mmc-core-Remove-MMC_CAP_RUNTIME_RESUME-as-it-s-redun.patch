@@ -11,28 +11,34 @@ References: fate#321995
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 ---
- drivers/mmc/host/dw_mmc-rockchip.c |    8 ++++----
+ drivers/mmc/host/dw_mmc-rockchip.c |    8 --------
  drivers/mmc/host/mtk-sd.c          |    1 -
  include/linux/mmc/host.h           |    1 -
- 3 files changed, 4 insertions(+), 6 deletions(-)
+ 3 files changed, 10 deletions(-)
 
 --- a/drivers/mmc/host/dw_mmc-rockchip.c
 +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -296,10 +296,10 @@ static int dw_mci_rockchip_init(struct d
+@@ -239,20 +239,12 @@ static int dw_mci_rockchip_init(struct d
+ 	return 0;
+ }
  
- /* Common capabilities of RK3288 SoC */
- static unsigned long dw_mci_rk3288_dwmmc_caps[4] = {
--	MMC_CAP_RUNTIME_RESUME | MMC_CAP_CMD23, /* emmc */
--	MMC_CAP_RUNTIME_RESUME | MMC_CAP_CMD23, /* sdmmc */
--	MMC_CAP_RUNTIME_RESUME | MMC_CAP_CMD23, /* sdio0 */
--	MMC_CAP_RUNTIME_RESUME | MMC_CAP_CMD23, /* sdio1 */
-+	MMC_CAP_CMD23, /* emmc */
-+	MMC_CAP_CMD23, /* sdmmc */
-+	MMC_CAP_CMD23, /* sdio0 */
-+	MMC_CAP_CMD23, /* sdio1 */
- };
+-/* Common capabilities of RK3288 SoC */
+-static unsigned long dw_mci_rk3288_dwmmc_caps[4] = {
+-	MMC_CAP_RUNTIME_RESUME, /* emmc */
+-	MMC_CAP_RUNTIME_RESUME, /* sdmmc */
+-	MMC_CAP_RUNTIME_RESUME, /* sdio0 */
+-	MMC_CAP_RUNTIME_RESUME, /* sdio1 */
+-};
  static const struct dw_mci_drv_data rk2928_drv_data = {
+ 	.prepare_command        = dw_mci_rockchip_prepare_command,
  	.init			= dw_mci_rockchip_init,
+ };
+ 
+ static const struct dw_mci_drv_data rk3288_drv_data = {
+-	.caps			= dw_mci_rk3288_dwmmc_caps,
+ 	.prepare_command        = dw_mci_rockchip_prepare_command,
+ 	.set_ios		= dw_mci_rk3288_set_ios,
+ 	.execute_tuning		= dw_mci_rk3288_execute_tuning,
 --- a/drivers/mmc/host/mtk-sd.c
 +++ b/drivers/mmc/host/mtk-sd.c
 @@ -1543,7 +1543,6 @@ static int msdc_drv_probe(struct platfor
@@ -45,7 +51,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  	mmc->max_seg_size = BDMA_DESC_BUFLEN;
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
-@@ -265,7 +265,6 @@ struct mmc_host {
+@@ -259,7 +259,6 @@ struct mmc_host {
  #define MMC_CAP_UHS_SDR50	(1 << 17)	/* Host supports UHS SDR50 mode */
  #define MMC_CAP_UHS_SDR104	(1 << 18)	/* Host supports UHS SDR104 mode */
  #define MMC_CAP_UHS_DDR50	(1 << 19)	/* Host supports UHS DDR50 mode */

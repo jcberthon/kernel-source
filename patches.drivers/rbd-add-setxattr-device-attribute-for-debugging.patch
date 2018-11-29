@@ -61,15 +61,15 @@ Signed-off-by: David Disseldorp <ddiss@suse.de>
  static DEVICE_ATTR(features, S_IRUGO, rbd_features_show, NULL);
  static DEVICE_ATTR(major, S_IRUGO, rbd_major_show, NULL);
 @@ -4157,6 +4189,7 @@ static DEVICE_ATTR(image_id, S_IRUGO, rb
- static DEVICE_ATTR(refresh, S_IWUSR, NULL, rbd_image_refresh);
  static DEVICE_ATTR(current_snap, S_IRUGO, rbd_snap_show, NULL);
+ static DEVICE_ATTR(snap_id, S_IRUGO, rbd_snap_id_show, NULL);
  static DEVICE_ATTR(parent, S_IRUGO, rbd_parent_show, NULL);
 +static DEVICE_ATTR(setxattr, S_IWUSR, NULL, rbd_setxattr_set);
  
  static struct attribute *rbd_attrs[] = {
  	&dev_attr_size.attr,
 @@ -4171,6 +4204,7 @@ static struct attribute *rbd_attrs[] = {
- 	&dev_attr_current_snap.attr,
+ 	&dev_attr_snap_id.attr,
  	&dev_attr_parent.attr,
  	&dev_attr_refresh.attr,
 +	&dev_attr_setxattr.attr,

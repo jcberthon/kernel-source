@@ -112,7 +112,7 @@ Acked-by: David Disseldorp <ddiss@suse.de>
  		snapc = img_request->snapc;
  	}
 @@ -2086,7 +2108,7 @@ static struct ceph_osd_request *rbd_osd_
- 		return NULL;	/* ENOMEM */
+ 		goto fail;
  
  	if (op_type == OBJ_OP_WRITE || op_type == OBJ_OP_DISCARD ||
 -	    op_type == OBJ_OP_CMP_AND_WRITE)

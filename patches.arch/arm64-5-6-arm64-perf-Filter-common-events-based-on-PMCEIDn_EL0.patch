@@ -83,7 +83,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  
  PMU_FORMAT_ATTR(event, "config:0-9");
 @@ -894,22 +924,31 @@ static int armv8_thunder_map_event(struc
- 				ARMV8_EVTYPE_EVENT);
+ 				ARMV8_PMU_EVTYPE_EVENT);
  }
  
 -static void armv8pmu_read_num_pmnc_events(void *info)

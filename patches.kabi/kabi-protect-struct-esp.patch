@@ -1,0 +1,30 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: kABI: protect struct esp
+Patch-mainline: never, kabi
+References: kabi
+
+In 4.4.164, commit 8c00d5d73231196555032000d25be65a149938a7 (scsi:
+esp_scsi: Track residual for PIO transfers), upstream commit
+fd47d919d0c336e7c22862b51ee94927ffea227a added an u32 to struct esp.
+It made the kABI checker to complain.
+
+Given this is only an esp's internal header, just hide the change from
+the kABI checker.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/scsi/esp_scsi.h |    2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/drivers/scsi/esp_scsi.h
++++ b/drivers/scsi/esp_scsi.h
+@@ -541,7 +541,9 @@ struct esp {
+ 	void			*dma;
+ 	int			dmarev;
+ 
++#ifndef __GENKSYMS__
+ 	u32			send_cmd_residual;
++#endif
+ };
+ 
+ /* A front-end driver for the ESP chip should do the following in

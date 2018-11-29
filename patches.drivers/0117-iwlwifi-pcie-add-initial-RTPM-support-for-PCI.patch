@@ -157,7 +157,7 @@ Acked-by: Takashi Iwai <tiwai@suse.de>
 +#ifdef CONFIG_IWLWIFI_PCIE_RTPM
 +	pm_runtime_put_sync(trans->dev);
 +#endif /* CONFIG_IWLWIFI_PCIE_RTPM */
- 	/* re-take ownership to prevent other users from stealing the deivce */
+ 	/* re-take ownership to prevent other users from stealing the device */
  	iwl_pcie_prepare_card_hw(trans);
  }
 @@ -1353,6 +1359,9 @@ static int _iwl_trans_pcie_start_hw(stru

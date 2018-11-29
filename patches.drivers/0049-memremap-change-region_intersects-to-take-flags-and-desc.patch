@@ -113,7 +113,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  	int is_ram = region_intersects(res->start, resource_size(res),
 -			"System RAM");
 +				       IORESOURCE_SYSTEM_RAM, IORES_DESC_NONE);
- 	resource_size_t key, align_start, align_size;
+ 	resource_size_t key, align_start, align_size, align_end;
  	struct dev_pagemap *pgmap;
  	struct page_map *page_map;
 --- a/kernel/resource.c

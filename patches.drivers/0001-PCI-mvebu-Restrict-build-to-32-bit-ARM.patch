@@ -29,4 +29,4 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	depends on ARM
  	depends on OF
  
- config PCIE_XILINX_NWL
+ config PCIE_DW

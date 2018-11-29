@@ -31,58 +31,59 @@ Cc: Dan Williams <dan.j.williams@gmail.com>
 Signed-off-by: Michal Hocko <mhocko@suse.com>
 
 ---
+
  arch/ia64/mm/init.c            |    2 +-
  arch/powerpc/mm/mem.c          |    2 +-
  arch/s390/mm/init.c            |    2 +-
  arch/sh/mm/init.c              |    2 +-
  arch/x86/mm/init_32.c          |    2 +-
  arch/x86/mm/init_64.c          |    2 +-
- drivers/base/memory.c          |   22 ++++++++--------------
+ drivers/base/memory.c          |   23 +++++++++--------------
  include/linux/memory_hotplug.h |    2 +-
  mm/memory_hotplug.c            |   10 +++++++---
- 9 files changed, 22 insertions(+), 24 deletions(-)
+ 9 files changed, 23 insertions(+), 24 deletions(-)
 
 --- a/arch/ia64/mm/init.c
 +++ b/arch/ia64/mm/init.c
 @@ -651,7 +651,7 @@ int arch_add_memory(int nid, u64 start,
- 	unsigned long nr_pages = size >> PAGE_SHIFT;
- 	int ret;
  
--	ret = __add_pages(nid, start_pfn, nr_pages);
-+	ret = __add_pages(nid, start_pfn, nr_pages, !for_device);
+ 	zone = pgdat->node_zones +
+ 		zone_for_memory(nid, start, size, ZONE_NORMAL, for_device);
+-	ret = __add_pages(nid, zone, start_pfn, nr_pages);
++	ret = __add_pages(nid, zone, start_pfn, nr_pages, !for_device);
  
  	if (ret)
  		printk("%s: Problem encountered in __add_pages() as ret=%d\n",
 --- a/arch/powerpc/mm/mem.c
 +++ b/arch/powerpc/mm/mem.c
 @@ -122,7 +122,7 @@ int arch_add_memory(int nid, u64 start,
- 	if (create_section_mapping(start, start + size))
- 		return -EINVAL;
+ 	zone = pgdata->node_zones +
+ 		zone_for_memory(nid, start, size, 0, for_device);
  
--	return __add_pages(nid, start_pfn, nr_pages);
-+	return __add_pages(nid, start_pfn, nr_pages, !for_device);
+-	return __add_pages(nid, zone, start_pfn, nr_pages);
++	return __add_pages(nid, zone, start_pfn, nr_pages, !for_device);
  }
  
  #ifdef CONFIG_MEMORY_HOTREMOVE
 --- a/arch/s390/mm/init.c
 +++ b/arch/s390/mm/init.c
 @@ -156,7 +156,7 @@ int arch_add_memory(int nid, u64 start,
- 	if (rc)
- 		return rc;
- 
--	rc = __add_pages(nid, start_pfn, size_pages);
-+	rc = __add_pages(nid, start_pfn, size_pages, !for_device);
- 	if (rc)
- 		vmem_remove_mapping(start, size);
- 	return rc;
+ 			continue;
+ 		nr_pages = (start_pfn + size_pages > zone_end_pfn) ?
+ 			   zone_end_pfn - start_pfn : size_pages;
+-		rc = __add_pages(nid, zone, start_pfn, nr_pages);
++		rc = __add_pages(nid, zone, start_pfn, nr_pages, !for_device);
+ 		if (rc)
+ 			break;
+ 		start_pfn += nr_pages;
 --- a/arch/sh/mm/init.c
 +++ b/arch/sh/mm/init.c
 @@ -492,7 +492,7 @@ int arch_add_memory(int nid, u64 start,
- 	int ret;
- 
- 	/* We only have ZONE_NORMAL, so this is easy.. */
--	ret = __add_pages(nid, start_pfn, nr_pages);
-+	ret = __add_pages(nid, start_pfn, nr_pages, !for_device);
+ 	ret = __add_pages(nid, pgdat->node_zones +
+ 			zone_for_memory(nid, start, size, ZONE_NORMAL,
+ 			for_device),
+-			start_pfn, nr_pages);
++			start_pfn, nr_pages, !for_device);
  	if (unlikely(ret))
  		printk("%s: Failed, __add_pages() == %d\n", __func__, ret);
  
@@ -92,8 +93,8 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  	unsigned long start_pfn = start >> PAGE_SHIFT;
  	unsigned long nr_pages = size >> PAGE_SHIFT;
  
--	return __add_pages(nid, start_pfn, nr_pages);
-+	return __add_pages(nid, start_pfn, nr_pages, !for_device);
+-	return __add_pages(nid, zone, start_pfn, nr_pages);
++	return __add_pages(nid, zone, start_pfn, nr_pages, !for_device);
  }
  
  #ifdef CONFIG_MEMORY_HOTREMOVE
@@ -103,8 +104,8 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  
  	init_memory_mapping(start, start + size);
  
--	ret = __add_pages(nid, start_pfn, nr_pages);
-+	ret = __add_pages(nid, start_pfn, nr_pages, !for_device);
+-	ret = __add_pages(nid, zone, start_pfn, nr_pages);
++	ret = __add_pages(nid, zone, start_pfn, nr_pages, !for_device);
  	WARN_ON_ONCE(ret);
  
  	/* update max_pfn, max_low_pfn and high_memory */
@@ -150,17 +151,25 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
 +	 */
  	mem = find_memory_block(section);
 +	if (!mem)
-+		return 0;
++		goto out_unlock;
 +
  	unregister_mem_sect_under_nodes(mem, __section_nr(section));
  
  	mem->section_count--;
+@@ -724,6 +724,7 @@ static int remove_memory_block(unsigned
+ 	else
+ 		put_device(&mem->dev);
+ 
++out_unlock:
+ 	mutex_unlock(&mem_sysfs_mutex);
+ 	return 0;
+ }
 --- a/include/linux/memory_hotplug.h
 +++ b/include/linux/memory_hotplug.h
 @@ -109,7 +109,7 @@ extern int __remove_pages(struct zone *z
  
- /* reasonably generic interface to expand the physical pages */
- extern int __add_pages(int nid, unsigned long start_pfn,
+ /* reasonably generic interface to expand the physical pages in a zone  */
+ extern int __add_pages(int nid, struct zone *zone, unsigned long start_pfn,
 -	unsigned long nr_pages);
 +	unsigned long nr_pages, bool want_memblock);
  
@@ -168,19 +177,18 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  extern int memory_add_physaddr_to_nid(u64 start);
 --- a/mm/memory_hotplug.c
 +++ b/mm/memory_hotplug.c
-@@ -286,7 +286,8 @@ void register_page_bootmem_info_node(str
+@@ -286,7 +286,7 @@ void register_page_bootmem_info_node(str
  }
- #endif /* CONFIG_HAVE_BOOTMEM_INFO_NODE */
  
--static int __meminit __add_section(int nid, unsigned long phys_start_pfn)
-+static int __meminit __add_section(int nid, unsigned long phys_start_pfn,
-+		bool want_memblock)
+ static int __meminit __add_section(int nid, struct zone *zone,
+-					unsigned long phys_start_pfn)
++		unsigned long phys_start_pfn, bool want_memblock)
  {
  	int ret;
- 	int i;
+ 
 @@ -316,6 +317,9 @@ static int __meminit __add_section(int n
- 		SetPageReserved(page);
- 	}
+ 	if (ret < 0)
+ 		return ret;
  
 +	if (!want_memblock)
 +		return 0;
@@ -191,18 +199,18 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
 @@ -326,7 +330,7 @@ static int __meminit __add_section(int n
   * add the new pages.
   */
- int __ref __add_pages(int nid, unsigned long phys_start_pfn,
+ int __ref __add_pages(int nid, struct zone *zone, unsigned long phys_start_pfn,
 -			unsigned long nr_pages)
 +			unsigned long nr_pages, bool want_memblock)
  {
  	unsigned long i;
  	int err = 0;
 @@ -337,7 +341,7 @@ int __ref __add_pages(int nid, unsigned
- 	end_sec = pfn_to_section_nr(phys_start_pfn + nr_pages - 1);
+ 	}
  
  	for (i = start_sec; i <= end_sec; i++) {
--		err = __add_section(nid, section_nr_to_pfn(i));
-+		err = __add_section(nid, section_nr_to_pfn(i), want_memblock);
+-		err = __add_section(nid, zone, section_nr_to_pfn(i));
++		err = __add_section(nid, zone, section_nr_to_pfn(i), want_memblock);
  
  		/*
  		 * EEXIST is finally dealt with by ioresource collision

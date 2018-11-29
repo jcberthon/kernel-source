@@ -19,14 +19,17 @@ diff --git a/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts b/arch/arm64/boot/
 index 6f47dd2bb1db..e2c3801dd6ae 100644
 --- a/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts
 +++ b/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts
-@@ -28,3 +28,7 @@
- &uart1 {
- 	status = "okay";
+@@ -28,6 +28,10 @@
+ 		};
+ 	};
  };
 +
 +&hdmi {
 +	hpd-gpios = <&gpio 46 GPIO_ACTIVE_HIGH>;
 +};
+ 
+ /* uart0 communicates with the BT module */
+ &uart0 {
 -- 
 1.8.5.6
 

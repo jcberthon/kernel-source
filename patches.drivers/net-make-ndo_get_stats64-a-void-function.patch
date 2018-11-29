@@ -108,7 +108,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  static void bond_slave_arr_handler(struct work_struct *work);
  static bool bond_time_in_interval(struct bonding *bond, unsigned long last_act,
  				  int mod);
-@@ -3352,8 +3352,8 @@ static void bond_fold_stats(struct rtnl_
+@@ -3343,8 +3343,8 @@ static void bond_fold_stats(struct rtnl_
  	}
  }
  
@@ -119,7 +119,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  {
  	struct bonding *bond = netdev_priv(bond_dev);
  	struct rtnl_link_stats64 temp;
-@@ -3377,8 +3377,6 @@ static struct rtnl_link_stats64 *bond_ge
+@@ -3368,8 +3368,6 @@ static struct rtnl_link_stats64 *bond_ge
  
  	memcpy(&bond->bond_stats, stats, sizeof(*stats));
  	spin_unlock(&bond->stats_lock);
@@ -217,7 +217,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  			struct net_device *ndev,
  			struct rtnl_link_stats64 *storage)
  {
-@@ -1483,8 +1483,6 @@ static struct rtnl_link_stats64 *xgene_e
+@@ -1484,8 +1484,6 @@ static struct rtnl_link_stats64 *xgene_e
  		}
  	}
  	memcpy(storage, stats, sizeof(struct rtnl_link_stats64));
@@ -297,7 +297,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  /* All ethtool functions called with rtnl_lock */
 --- a/drivers/net/ethernet/broadcom/bnxt/bnxt.c
 +++ b/drivers/net/ethernet/broadcom/bnxt/bnxt.c
-@@ -5897,14 +5897,14 @@ static int bnxt_ioctl(struct net_device
+@@ -5909,7 +5909,7 @@ static int bnxt_ioctl(struct net_device
  	return -EOPNOTSUPP;
  }
  
@@ -306,7 +306,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  bnxt_get_stats64(struct net_device *dev, struct rtnl_link_stats64 *stats)
  {
  	u32 i;
- 	struct bnxt *bp = netdev_priv(dev);
+@@ -5918,7 +5918,7 @@ bnxt_get_stats64(struct net_device *dev,
+ 	memset(stats, 0, sizeof(struct rtnl_link_stats64));
  
  	if (!bp->bnapi)
 -		return stats;
@@ -314,7 +315,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
  	/* TODO check if we need to synchronize with bnxt_close path */
  	for (i = 0; i < bp->cp_nr_rings; i++) {
-@@ -5951,8 +5951,6 @@ bnxt_get_stats64(struct net_device *dev,
+@@ -5965,8 +5965,6 @@ bnxt_get_stats64(struct net_device *dev,
  		stats->tx_fifo_errors = le64_to_cpu(tx->tx_fifo_underruns);
  		stats->tx_errors = le64_to_cpu(tx->tx_err);
  	}
@@ -325,7 +326,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  static bool bnxt_mc_list_updated(struct bnxt *bp, u32 *rx_mask)
 --- a/drivers/net/ethernet/broadcom/tg3.c
 +++ b/drivers/net/ethernet/broadcom/tg3.c
-@@ -14156,8 +14156,8 @@ static const struct ethtool_ops tg3_etht
+@@ -14165,8 +14165,8 @@ static const struct ethtool_ops tg3_etht
  	.set_link_ksettings	= tg3_set_link_ksettings,
  };
  
@@ -336,7 +337,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  {
  	struct tg3 *tp = netdev_priv(dev);
  
-@@ -14165,13 +14165,11 @@ static struct rtnl_link_stats64 *tg3_get
+@@ -14174,13 +14174,11 @@ static struct rtnl_link_stats64 *tg3_get
  	if (!tp->hw_stats || !tg3_flag(tp, INIT_COMPLETE)) {
  		*stats = tp->net_stats_prev;
  		spin_unlock_bh(&tp->lock);
@@ -594,7 +595,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  {
  	struct e1000_adapter *adapter = netdev_priv(netdev);
  
-@@ -5969,7 +5969,6 @@ struct rtnl_link_stats64 *e1000e_get_sta
+@@ -5970,7 +5970,6 @@ struct rtnl_link_stats64 *e1000e_get_sta
  	/* Tx Dropped needs to be maintained elsewhere */
  
  	spin_unlock(&adapter->stats64_lock);
@@ -788,7 +789,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  /* Rx descriptors helper methods */
 --- a/drivers/net/ethernet/marvell/mvpp2.c
 +++ b/drivers/net/ethernet/marvell/mvpp2.c
-@@ -5743,7 +5743,7 @@ error:
+@@ -5745,7 +5745,7 @@ error:
  	return err;
  }
  
@@ -797,7 +798,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  mvpp2_get_stats64(struct net_device *dev, struct rtnl_link_stats64 *stats)
  {
  	struct mvpp2_port *port = netdev_priv(dev);
-@@ -5775,8 +5775,6 @@ mvpp2_get_stats64(struct net_device *dev
+@@ -5777,8 +5777,6 @@ mvpp2_get_stats64(struct net_device *dev
  	stats->rx_errors	= dev->stats.rx_errors;
  	stats->rx_dropped	= dev->stats.rx_dropped;
  	stats->tx_dropped	= dev->stats.tx_dropped;
@@ -1099,7 +1100,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  /* Set or clear the multicast filter for this adaptor.
 --- a/drivers/net/ethernet/realtek/r8169.c
 +++ b/drivers/net/ethernet/realtek/r8169.c
-@@ -7729,7 +7729,7 @@ err_pm_runtime_put:
+@@ -7730,7 +7730,7 @@ err_pm_runtime_put:
  	goto out;
  }
  
@@ -1108,7 +1109,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  rtl8169_get_stats64(struct net_device *dev, struct rtnl_link_stats64 *stats)
  {
  	struct rtl8169_private *tp = netdev_priv(dev);
-@@ -7777,8 +7777,6 @@ rtl8169_get_stats64(struct net_device *d
+@@ -7778,8 +7778,6 @@ rtl8169_get_stats64(struct net_device *d
  		le32_to_cpu(tp->tc_offset.tx_multi_collision);
  	stats->tx_aborted_errors = le16_to_cpu(counters->tx_aborted) -
  		le16_to_cpu(tp->tc_offset.tx_aborted);
@@ -1300,8 +1301,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  static int fjes_change_mtu(struct net_device *netdev, int new_mtu)
 --- a/drivers/net/hyperv/netvsc_drv.c
 +++ b/drivers/net/hyperv/netvsc_drv.c
-@@ -1019,8 +1019,8 @@ static void netvsc_get_vf_stats(struct n
- 	}
+@@ -910,8 +910,8 @@ out:
+ 	return ret;
  }
  
 -static struct rtnl_link_stats64 *netvsc_get_stats64(struct net_device *net,
@@ -1310,11 +1311,11 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +			       struct rtnl_link_stats64 *t)
  {
  	struct net_device_context *ndev_ctx = netdev_priv(net);
- 	struct netvsc_device *nvdev = rcu_dereference_rtnl(ndev_ctx->nvdev);
-@@ -1067,8 +1067,6 @@ static struct rtnl_link_stats64 *netvsc_
- 		t->rx_packets	+= packets;
- 		t->multicast	+= multicast;
- 	}
+ 	int cpu;
+@@ -949,8 +949,6 @@ static struct rtnl_link_stats64 *netvsc_
+ 
+ 	t->rx_dropped	= net->stats.rx_dropped;
+ 	t->rx_errors	= net->stats.rx_errors;
 -
 -	return t;
  }
@@ -1466,7 +1467,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  /* Netdevice register callback */
 --- a/drivers/net/team/team.c
 +++ b/drivers/net/team/team.c
-@@ -1812,7 +1812,7 @@ unwind:
+@@ -1818,7 +1818,7 @@ unwind:
  	return err;
  }
  
@@ -1475,7 +1476,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  team_get_stats64(struct net_device *dev, struct rtnl_link_stats64 *stats)
  {
  	struct team *team = netdev_priv(dev);
-@@ -1847,7 +1847,6 @@ team_get_stats64(struct net_device *dev,
+@@ -1853,7 +1853,6 @@ team_get_stats64(struct net_device *dev,
  	}
  	stats->rx_dropped	= rx_dropped;
  	stats->tx_dropped	= tx_dropped;
@@ -1549,7 +1550,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  static int
 --- a/drivers/net/vmxnet3/vmxnet3_int.h
 +++ b/drivers/net/vmxnet3/vmxnet3_int.h
-@@ -422,8 +422,8 @@ vmxnet3_create_queues(struct vmxnet3_ada
+@@ -466,8 +466,8 @@ vmxnet3_create_queues(struct vmxnet3_ada
  
  void vmxnet3_set_ethtool_ops(struct net_device *netdev);
  
@@ -1583,7 +1584,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  #if IS_ENABLED(CONFIG_IPV6)
 --- a/drivers/net/xen-netfront.c
 +++ b/drivers/net/xen-netfront.c
-@@ -1078,8 +1078,8 @@ static int xennet_change_mtu(struct net_
+@@ -1087,8 +1087,8 @@ static int xennet_change_mtu(struct net_
  	return 0;
  }
  
@@ -1594,7 +1595,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  {
  	struct netfront_info *np = netdev_priv(dev);
  	int cpu;
-@@ -1110,8 +1110,6 @@ static struct rtnl_link_stats64 *xennet_
+@@ -1119,8 +1119,6 @@ static struct rtnl_link_stats64 *xennet_
  
  	tot->rx_errors  = dev->stats.rx_errors;
  	tot->tx_dropped = dev->stats.tx_dropped;

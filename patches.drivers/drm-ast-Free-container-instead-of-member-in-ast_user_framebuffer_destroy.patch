@@ -17,8 +17,8 @@ index 541a610..fc2c5e1 100644
 --- a/drivers/gpu/drm/ast/ast_main.c
 +++ b/drivers/gpu/drm/ast/ast_main.c
 @@ -299,7 +299,7 @@ static void ast_user_framebuffer_destroy(struct drm_framebuffer *fb)
- 		drm_gem_object_unreference_unlocked(ast_fb->obj);
  
+ 	drm_gem_object_unreference_unlocked(ast_fb->obj);
  	drm_framebuffer_cleanup(fb);
 -	kfree(fb);
 +	kfree(ast_fb);

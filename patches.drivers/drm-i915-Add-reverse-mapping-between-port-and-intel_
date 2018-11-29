@@ -58,7 +58,7 @@ Signed-off-by: Takashi Iwai <tiwai@suse.de>
  	/* HSW, BDW SKL need this fix */
  	if (!IS_SKYLAKE(dev_priv) &&
 @@ -663,26 +662,22 @@ static int i915_audio_component_sync_aud
- 	i915_audio_component_get_power(dev);
+ 
  	mutex_lock(&dev_priv->av_mutex);
  	/* 1. get the pipe */
 -	for_each_intel_encoder(drm_dev, intel_encoder) {
@@ -116,13 +116,12 @@ Signed-off-by: Takashi Iwai <tiwai@suse.de>
  	}
  
  	/* 3. set the N/CTS/M */
-@@ -715,9 +708,10 @@ static int i915_audio_component_sync_aud
+@@ -715,8 +708,9 @@ static int i915_audio_component_sync_aud
  	tmp = audio_config_setup_n_reg(n, tmp);
  	I915_WRITE(HSW_AUD_CFG(pipe), tmp);
  
 + unlock:
  	mutex_unlock(&dev_priv->av_mutex);
- 	i915_audio_component_put_power(dev);
 -	return 0;
 +	return err;
  }

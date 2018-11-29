@@ -122,20 +122,21 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  	if (devm_init_badblocks(dev, &pmem->bb))
  		return -ENOMEM;
 -	nvdimm_namespace_add_poison(ndns, &pmem->bb, pmem->data_offset);
+-
 +	bb_res.start = nsio->res.start + pmem->data_offset;
 +	bb_res.end = nsio->res.end;
 +	if (is_nd_pfn(dev)) {
 +		struct nd_pfn *nd_pfn = to_nd_pfn(dev);
 +		struct nd_pfn_sb *pfn_sb = nd_pfn->pfn_sb;
- 
++
 +		bb_res.start += __le32_to_cpu(pfn_sb->start_pad);
 +		bb_res.end -= __le32_to_cpu(pfn_sb->end_trunc);
 +	}
 +	nvdimm_badblocks_populate(to_nd_region(dev->parent), &pmem->bb,
 +			&bb_res);
+ 	disk->bb = &pmem->bb;
  	add_disk(disk);
  	revalidate_disk(disk);
- 
 @@ -552,7 +563,7 @@ static int nd_pmem_probe(struct device *
  	ndns->rw_bytes = pmem_rw_bytes;
  	if (devm_init_badblocks(dev, &pmem->bb))

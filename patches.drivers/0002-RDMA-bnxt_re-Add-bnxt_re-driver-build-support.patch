@@ -50,21 +50,18 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 +++ b/drivers/infiniband/Kconfig
 @@ -89,4 +89,6 @@ source "drivers/infiniband/sw/rxe/Kconfi
  
- source "drivers/infiniband/hw/hfi1/Kconfig"
+ source "drivers/infiniband/hw/qedr/Kconfig"
  
 +source "drivers/infiniband/hw/bnxt_re/Kconfig"
 +
  endif # INFINIBAND
 --- a/drivers/infiniband/hw/Makefile
 +++ b/drivers/infiniband/hw/Makefile
-@@ -8,5 +8,7 @@ obj-$(CONFIG_MLX5_INFINIBAND)		+= mlx5/
- obj-$(CONFIG_INFINIBAND_NES)		+= nes/
- obj-$(CONFIG_INFINIBAND_OCRDMA)		+= ocrdma/
- obj-$(CONFIG_INFINIBAND_USNIC)		+= usnic/
-+obj-$(CONFIG_INFINIBAND_BNXT_RE)	+= bnxt_re/
-+
+@@ -8,3 +8,4 @@ obj-$(CONFIG_MLX5_INFINIBAND)		+= mlx5/
  obj-$(CONFIG_INFINIBAND_HFI1)		+= hfi1/
  obj-$(CONFIG_INFINIBAND_HNS)		+= hns/
+ obj-$(CONFIG_INFINIBAND_QEDR)		+= qedr/
++obj-$(CONFIG_INFINIBAND_BNXT_RE)	+= bnxt_re/
 --- /dev/null
 +++ b/drivers/infiniband/hw/bnxt_re/Kconfig
 @@ -0,0 +1,9 @@

@@ -1,7 +1,7 @@
 From f3be61b795c2eb5a5a34644a50d22044b8cd1a68 Mon Sep 17 00:00:00 2001
 From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 28 Jul 2016 08:51:50 +0200
-Subject: [PATCH 12/22] libfc: don't fail sequence abort for completed
+Subject: [PATCH 12/22] libfc: don't fail sequence abort for completed exchanges
 References: bnc#990245
 Patch-mainline: v4.10-rc1
 Git-commit: d11b44eff113e2a848577ce58af6488f161b6f7d

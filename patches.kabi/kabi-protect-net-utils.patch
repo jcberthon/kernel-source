@@ -23,4 +23,4 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 +#endif
  
  #include <asm/byteorder.h>
- #include <asm/uaccess.h>
+ #include <linux/uaccess.h>

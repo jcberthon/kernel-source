@@ -65,7 +65,7 @@ index 8330729f..fb8fe82f 100644
  	cpumask_t	active_irqs;
 @@ -170,6 +176,8 @@ struct arm_pmu {
  	struct pmu_hw_events	__percpu *hw_events;
- 	struct hlist_node	node;
+ 	struct notifier_block	hotplug_nb;
  	struct notifier_block	cpu_pm_nb;
 +	/* the attr_groups array must be NULL-terminated */
 +	const struct attribute_group *attr_groups[ARMPMU_NR_ATTR_GROUPS + 1];

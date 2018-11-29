@@ -108,7 +108,7 @@ index 7d31d8c..13c4565 100644
 +				goto free_entry;
 +			break;
  		}
- 		r = setup_routing_entry(new, e, ue);
+ 		r = setup_routing_entry(kvm, new, e, ue);
 -		if (r) {
 -			kfree(e);
 -			goto out;

@@ -35,7 +35,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
  
  	nvmeq->cq_vector = 0;
  	nvme_init_queue(nvmeq, 0);
- 	result = queue_request_irq(dev, nvmeq, nvmeq->irqname);
+ 	result = queue_request_irq(nvmeq);
  	if (result) {
  		nvmeq->cq_vector = -1;
 -		goto free_nvmeq;
@@ -63,7 +63,7 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
  
  	/*
 @@ -1467,13 +1461,9 @@ static int nvme_setup_io_queues(struct n
- 	result = queue_request_irq(dev, adminq, adminq->irqname);
+ 	result = queue_request_irq(adminq);
  	if (result) {
  		adminq->cq_vector = -1;
 -		goto free_queues;
@@ -76,4 +76,4 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 -	return result;
  }
  
- static void nvme_pci_post_scan(struct nvme_ctrl *ctrl)
+ static void nvme_del_queue_end(struct request *req, int error)

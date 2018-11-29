@@ -212,7 +212,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	for_each_efi_memory_desc(md) {
  		u64 start = md->phys_addr;
  		u64 size = md->num_pages << EFI_PAGE_SHIFT;
- 
+ 		bool already_reserved;
 @@ -171,10 +170,9 @@ void __init efi_reserve_boot_services(vo
  
  void __init efi_free_boot_services(void)
@@ -238,8 +238,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  			continue;
  		if (md->virt_addr == 0)
 @@ -213,7 +213,7 @@ static __init void reserve_regions(void)
- 	memblock_dump_all();
- 	memblock_remove(0, (phys_addr_t)ULLONG_MAX);
+ 	if (efi_enabled(EFI_DBG))
+ 		pr_info("Processing EFI memory map:\n");
  
 -	for_each_efi_memory_desc(&memmap, md) {
 +	for_each_efi_memory_desc_in_map(&memmap, md) {

@@ -6,6 +6,9 @@ Git-commit: 4971531af319f8bdd9a81a87eecfb6b19f2f8c8e
 Patch-mainline: v4.9-rc1
 References: fate#320512
 
+[we don't have commit edce21216a88 so we need to use reserve_ebda_region
+ instead of reserve_bios_regions -jeffm]
+
 Both efi_find_mirror() and efi_fake_memmap() really want to know
 whether the EFI memory map is available, not just whether the machine
 was booted using EFI. efi_fake_memmap() even has a check for
@@ -36,7 +39,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	memblock_x86_fill();
  
 -	if (efi_enabled(EFI_BOOT)) {
-+	reserve_bios_regions();
++	reserve_ebda_region();
 +
 +	if (efi_enabled(EFI_MEMMAP)) {
  		efi_fake_memmap();

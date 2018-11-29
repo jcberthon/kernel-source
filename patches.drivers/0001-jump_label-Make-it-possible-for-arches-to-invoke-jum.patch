@@ -18,16 +18,14 @@ Signed-off-by: Aneesh Kumar K.V <aneesh.kumar@linux.vnet.ibm.com>
 Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
 Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 ---
- kernel/jump_label.c | 3 +++
+ kernel/jump_label.c |    3 +++
  1 file changed, 3 insertions(+)
 
-diff --git a/kernel/jump_label.c b/kernel/jump_label.c
-index 453ec4232852..2617221024a4 100644
 --- a/kernel/jump_label.c
 +++ b/kernel/jump_label.c
-@@ -242,6 +242,9 @@ void __init jump_label_init(void)
- 	struct static_key *key = NULL;
- 	struct jump_entry *iter;
+@@ -295,6 +295,9 @@ void __init jump_label_init(void)
+ 	BUILD_BUG_ON((int)ATOMIC_INIT(0) != 0);
+ 	BUILD_BUG_ON((int)ATOMIC_INIT(1) != 1);
  
 +	if (static_key_initialized)
 +		return;
@@ -35,6 +33,3 @@ index 453ec4232852..2617221024a4 100644
  	jump_label_lock();
  	jump_label_sort_entries(iter_start, iter_stop);
  
--- 
-2.11.0
-

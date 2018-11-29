@@ -151,7 +151,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	 * If we have an outstanding_extents count still set then we're
  	 * within our reservation, otherwise we need to adjust our inode
 @@ -8728,9 +8718,7 @@ static ssize_t btrfs_direct_IO(struct ki
- 						   offset, count);
+ 		ret = btrfs_delalloc_reserve_space(inode, offset, count);
  		if (ret)
  			goto out;
 -		dio_data.outstanding_extents = div64_u64(count +

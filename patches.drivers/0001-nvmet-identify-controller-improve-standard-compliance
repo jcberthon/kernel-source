@@ -29,9 +29,9 @@ Signed-off-by: Martin Wilck <mwilck@suse.com>
  	id->ssvid = 0;
  
 -	memset(id->sn, ' ', sizeof(id->sn));
--	snprintf(id->sn, sizeof(id->sn), "%llx", ctrl->serial);
-+	bin2hex(id->sn, &ctrl->serial, min(sizeof(ctrl->serial),
-+					   sizeof(id->sn) / 2));
+-	snprintf(id->sn, sizeof(id->sn), "%llx", ctrl->subsys->serial);
++	bin2hex(id->sn, &ctrl->subsys->serial,
++			min(sizeof(ctrl->subsys->serial), sizeof(id->sn) / 2));
  
 -	memset(id->mn, ' ', sizeof(id->mn));
 -	strncpy((char *)id->mn, "Linux", sizeof(id->mn));

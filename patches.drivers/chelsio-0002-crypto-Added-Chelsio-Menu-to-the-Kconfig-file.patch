@@ -24,8 +24,8 @@ Acked-by: Cho, Yu-Chen <acho@suse.com>
 --- a/drivers/crypto/Kconfig
 +++ b/drivers/crypto/Kconfig
 @@ -498,4 +498,6 @@ config CRYPTO_DEV_SUN4I_SS
- 	  To compile this driver as a module, choose M here: the module
- 	  will be called sun4i-ss.
+ 	  This driver interfaces with the hardware crypto accelerator.
+ 	  Supporting cbc/ecb chainmode, and aes/des/des3_ede cipher mode.
  
 +source "drivers/crypto/chelsio/Kconfig"
 +
@@ -33,9 +33,9 @@ Acked-by: Cho, Yu-Chen <acho@suse.com>
 --- a/drivers/crypto/Makefile
 +++ b/drivers/crypto/Makefile
 @@ -29,3 +29,4 @@ obj-$(CONFIG_CRYPTO_DEV_QAT) += qat/
- obj-$(CONFIG_CRYPTO_DEV_QCE) += qce/
  obj-$(CONFIG_CRYPTO_DEV_VMX) += vmx/
  obj-$(CONFIG_CRYPTO_DEV_SUN4I_SS) += sunxi-ss/
+ obj-$(CONFIG_CRYPTO_DEV_ROCKCHIP) += rockchip/
 +obj-$(CONFIG_CRYPTO_DEV_CHELSIO) += chelsio/
 --- /dev/null
 +++ b/drivers/crypto/chelsio/Kconfig

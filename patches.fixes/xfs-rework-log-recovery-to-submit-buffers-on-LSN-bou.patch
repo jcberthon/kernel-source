@@ -197,7 +197,7 @@ index 143db4f6a9c0..82bf239d93b5 100644
 +	struct list_head	*buffer_list)
  {
  	int			error;
- 
+ 	__le32			crc;
 @@ -4213,7 +4248,8 @@ xlog_recover_process(
  	if (error)
  		return error;
@@ -211,7 +211,7 @@ index 143db4f6a9c0..82bf239d93b5 100644
 @@ -4272,9 +4308,11 @@ xlog_do_recovery_pass(
  	char			*offset;
  	xfs_buf_t		*hbp, *dbp;
- 	int			error = 0, h_size;
+ 	int			error = 0, h_size, h_len;
 +	int			error2 = 0;
  	int			bblks, split_bblks;
  	int			hblks, split_hblks, wrapped_hblks;
@@ -219,7 +219,7 @@ index 143db4f6a9c0..82bf239d93b5 100644
 +	LIST_HEAD		(buffer_list);
  
  	ASSERT(head_blk != tail_blk);
- 
+ 	rhead_blk = 0;
 @@ -4435,7 +4473,7 @@ xlog_do_recovery_pass(
  			}
  
@@ -228,7 +228,7 @@ index 143db4f6a9c0..82bf239d93b5 100644
 +						     pass, &buffer_list);
  			if (error)
  				goto bread_err2;
- 			blk_no += bblks;
+ 
 @@ -4463,7 +4501,8 @@ xlog_do_recovery_pass(
  		if (error)
  			goto bread_err2;
@@ -238,12 +238,11 @@ index 143db4f6a9c0..82bf239d93b5 100644
 +					     &buffer_list);
  		if (error)
  			goto bread_err2;
- 		blk_no += bblks + hblks;
-@@ -4473,7 +4512,15 @@ xlog_do_recovery_pass(
+ 
+@@ -4473,11 +4512,18 @@ xlog_do_recovery_pass(
  	xlog_put_bp(dbp);
   bread_err1:
  	xlog_put_bp(hbp);
--	return error;
 +
 +	/*
 +	 * Submit buffers that have been added from the last record processed,
@@ -251,7 +250,11 @@ index 143db4f6a9c0..82bf239d93b5 100644
 +	 */
 +	if (!list_empty(&buffer_list))
 +		error2 = xfs_buf_delwri_submit(&buffer_list);
-+
+ 
+ 	if (error && first_bad)
+ 		*first_bad = rhead_blk;
+ 
+-	return error;
 +	return error ? error : error2;
  }
  

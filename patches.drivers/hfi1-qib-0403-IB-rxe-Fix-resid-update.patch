@@ -23,7 +23,7 @@ index 7bf20ced2078..d404a8aba7af 100644
 --- a/drivers/infiniband/sw/rxe/rxe_resp.c
 +++ b/drivers/infiniband/sw/rxe/rxe_resp.c
 @@ -479,7 +479,7 @@ static enum resp_states check_rkey(struct rxe_qp *qp,
- 				goto err;
+ 				goto err2;
  			}
  
 -			resid = mtu;

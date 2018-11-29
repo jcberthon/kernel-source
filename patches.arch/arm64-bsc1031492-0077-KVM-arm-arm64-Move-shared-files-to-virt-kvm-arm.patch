@@ -72,7 +72,7 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
  obj-y += $(KVM)/arm/vgic/vgic.o
 --- a/arch/arm/kvm/arm.c
 +++ /dev/null
-@@ -1,1483 +0,0 @@
+@@ -1,1476 +0,0 @@
 -/*
 - * Copyright (C) 2012 - Virtual Open Systems and Columbia University
 - * Author: Christoffer Dall <c.dall@virtualopensystems.com>
@@ -1498,13 +1498,6 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 -{
 -	int err;
 -	int ret, cpu;
--
--#ifdef CONFIG_ARM64
--	if (cpus_have_cap(ARM64_HAS_NO_BCAST_TLBI)) {
--		kvm_err("Missing broadcast TLBI support.\n");
--		return -ENODEV;
--	}
--#endif
 -
 -	if (!is_hyp_mode_available()) {
 -		kvm_err("HYP mode not available\n");
@@ -4477,7 +4470,7 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
  kvm-$(CONFIG_KVM_ARM_HOST) += hyp.o hyp-init.o handle_exit.o
 --- /dev/null
 +++ b/virt/kvm/arm/arm.c
-@@ -0,0 +1,1483 @@
+@@ -0,0 +1,1476 @@
 +/*
 + * Copyright (C) 2012 - Virtual Open Systems and Columbia University
 + * Author: Christoffer Dall <c.dall@virtualopensystems.com>
@@ -5903,13 +5896,6 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 +{
 +	int err;
 +	int ret, cpu;
-+
-+#ifdef CONFIG_ARM64
-+	if (cpus_have_cap(ARM64_HAS_NO_BCAST_TLBI)) {
-+		kvm_err("Missing broadcast TLBI support.\n");
-+		return -ENODEV;
-+	}
-+#endif
 +
 +	if (!is_hyp_mode_available()) {
 +		kvm_err("HYP mode not available\n");

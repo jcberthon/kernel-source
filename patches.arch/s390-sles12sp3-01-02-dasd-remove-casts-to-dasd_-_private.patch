@@ -454,29 +454,14 @@ Acked-by: John Jolly <jjolly@suse.com>
  	private->conf_len = 0;
  	for (i = 0; i < 8; i++) {
 @@ -1074,7 +1063,7 @@ static int dasd_eckd_read_conf(struct da
- 	struct channel_path_desc *chp_desc;
- 	struct subchannel_id sch_id;
+ 	struct dasd_uid *uid;
+ 	char print_path_uid[60], print_device_uid[60];
  
 -	private = (struct dasd_eckd_private *) device->private;
 +	private = device->private;
+ 	path_data = &device->path_data;
  	opm = ccw_device_get_path_mask(device->cdev);
- 	ccw_device_get_schid(device->cdev, &sch_id);
  	conf_data_saved = 0;
-@@ -1210,13 +1199,12 @@ static int dasd_eckd_read_conf(struct da
- 
- static u32 get_fcx_max_data(struct dasd_device *device)
- {
--	struct dasd_eckd_private *private;
-+	struct dasd_eckd_private *private = device->private;
- 	int fcx_in_css, fcx_in_gneq, fcx_in_features;
- 	int tpm, mdc;
- 
- 	if (dasd_nofcx)
- 		return 0;
--	private = (struct dasd_eckd_private *) device->private;
- 	/* is transport mode supported? */
- 	fcx_in_css = css_general_characteristics.fcx;
- 	fcx_in_gneq = private->gneq->reserved2[7] & 0x04;
 @@ -1237,11 +1225,10 @@ static u32 get_fcx_max_data(struct dasd_
  
  static int verify_fcx_max_data(struct dasd_device *device, __u8 lpm)
@@ -490,18 +475,23 @@ Acked-by: John Jolly <jjolly@suse.com>
  	if (private->fcx_max_data) {
  		mdc = ccw_device_get_mdc(device->cdev, lpm);
  		if ((mdc < 0)) {
-@@ -1267,12 +1254,9 @@ static int verify_fcx_max_data(struct da
+@@ -1267,15 +1254,10 @@ static int verify_fcx_max_data(struct da
  static int rebuild_device_uid(struct dasd_device *device,
  			      struct path_verification_work_data *data)
  {
 -	struct dasd_eckd_private *private;
-+	struct dasd_eckd_private *private = device->private;
- 	__u8 lpm, opm = dasd_path_get_opm(device);
+-	struct dasd_path *path_data;
+-	__u8 lpm, opm;
 -	int rc;
++	struct dasd_eckd_private *private = device->private;
++	struct dasd_path *path_data = &device->path_data;
++	__u8 lpm, opm = path_data->opm;
++	int rc = -ENODEV;
 -
 -	rc = -ENODEV;
 -	private = (struct dasd_eckd_private *) device->private;
-+	int rc = -ENODEV;
+-	path_data = &device->path_data;
+-	opm = device->path_data.opm;
  
  	for (lpm = 0x80; lpm; lpm >>= 1) {
  		if (!(lpm & opm))
@@ -521,7 +511,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	memset(&private->features, 0, sizeof(struct dasd_rssd_features));
  	cqr = dasd_smalloc_request(DASD_ECKD_MAGIC, 1 /* PSF */	+ 1 /* RSSD */,
  				   (sizeof(struct dasd_psf_prssd_data) +
-@@ -1656,11 +1639,9 @@ dasd_eckd_psf_ssc(struct dasd_device *de
+@@ -1513,11 +1639,9 @@ dasd_eckd_psf_ssc(struct dasd_device *de
  static int dasd_eckd_validate_server(struct dasd_device *device,
  				     unsigned long flags)
  {
@@ -535,6 +525,23 @@ Acked-by: John Jolly <jjolly@suse.com>
  	if (private->uid.type == UA_BASE_PAV_ALIAS ||
  	    private->uid.type == UA_HYPER_PAV_ALIAS)
  		return 0;
+@@ -1515,14 +1199,13 @@ static int dasd_eckd_read_conf(struct da
+ 
+ static u32 get_fcx_max_data(struct dasd_device *device)
+ {
+-	int tpm, mdc;
++	struct dasd_eckd_private *private = device->private;
+ 	int fcx_in_css, fcx_in_gneq, fcx_in_features;
+-	struct dasd_eckd_private *private;
++	int tpm, mdc;
+ 
+ 	if (dasd_nofcx)
+ 		return 0;
+ 	/* is transport mode supported? */
+-	private = (struct dasd_eckd_private *) device->private;
+ 	fcx_in_css = css_general_characteristics.fcx;
+ 	fcx_in_gneq = private->gneq->reserved2[7] & 0x04;
+ 	fcx_in_features = private->features.feature[40] & 0x80;
 @@ -1718,7 +1699,7 @@ static void dasd_eckd_kick_validate_serv
  static int
  dasd_eckd_check_characteristics(struct dasd_device *device)
@@ -667,10 +674,20 @@ Acked-by: John Jolly <jjolly@suse.com>
  
  	if (fdata->start_unit >=
  	    (private->real_cyl * private->rdc_data.trk_per_cyl)) {
-@@ -2670,7 +2639,6 @@ static int dasd_eckd_format_process_data
+@@ -2670,16 +2639,14 @@ static int dasd_eckd_format_process_data
+ 					 struct format_data_t *fdata,
+ 					 int enable_pav)
+ {
++	struct dasd_eckd_private *private = base->private;
+ 	struct dasd_ccw_req *cqr, *n;
+-	struct dasd_eckd_private *private;
+ 	struct list_head format_queue;
+ 	struct dasd_device *device;
+ 	int old_start, old_stop, format_step;
  	int step, retry;
  	int rc;
  
+-	private = (struct dasd_eckd_private *) base->private;
 -
  	rc = dasd_eckd_format_sanity_checks(base, fdata);
  	if (rc)
@@ -828,7 +845,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  				   (sizeof(struct dasd_psf_prssd_data) +
  				    sizeof(struct dasd_rssd_messages)),
 @@ -5537,14 +5495,13 @@ static int dasd_eckd_cuir_remove_path(st
- static int dasd_eckd_cuir_quiesce(struct dasd_device *device, __u8 lpum,
+ 				  struct subchannel_id sch_id,
  				  struct dasd_cuir_message *cuir)
  {
 +	struct dasd_eckd_private *private = device->private;
@@ -844,7 +861,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	list_for_each_entry_safe(dev, n, &private->lcu->active_devices,
  				 alias_list) {
 @@ -5599,13 +5556,12 @@ out_err:
- static int dasd_eckd_cuir_resume(struct dasd_device *device, __u8 lpum,
+ 				 struct subchannel_id sch_id,
  				 struct dasd_cuir_message *cuir)
  {
 +	struct dasd_eckd_private *private = device->private;
@@ -959,6 +976,6 @@ Acked-by: John Jolly <jjolly@suse.com>
  	struct dasd_discipline *base_discipline;
 -	char *private;
 +	void *private;
- 	struct dasd_path path[8];
- 	__u8 opm;
+ 	struct dasd_path path_data;
  
+ 	/* Device state and target state. */

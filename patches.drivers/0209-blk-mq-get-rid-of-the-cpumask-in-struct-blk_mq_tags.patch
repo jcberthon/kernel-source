@@ -36,8 +36,8 @@ index 1602813..2eae3d5 100644
  
 @@ -680,7 +675,6 @@ void blk_mq_free_tags(struct blk_mq_tags *tags)
  {
- 	bt_free(&tags->bitmap_tags);
- 	bt_free(&tags->breserved_tags);
+ 	sbitmap_queue_free(&tags->bitmap_tags);
+ 	sbitmap_queue_free(&tags->breserved_tags);
 -	free_cpumask_var(tags->cpumask);
  	kfree(tags);
  }
@@ -47,9 +47,9 @@ index d468a79..5569641 100644
 --- a/block/blk-mq-tag.h
 +++ b/block/blk-mq-tag.h
 @@ -44,7 +44,6 @@ struct blk_mq_tags {
- 	struct list_head page_list;
  
- 	int alloc_policy;
+ 	struct request **rqs;
+ 	struct list_head page_list;
 -	cpumask_var_t cpumask;
  };
  

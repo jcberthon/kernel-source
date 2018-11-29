@@ -26,11 +26,14 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 
 --- a/arch/x86/include/asm/pgtable_types.h
 +++ b/arch/x86/include/asm/pgtable_types.h
-@@ -31,6 +31,7 @@
+@@ -31,7 +31,9 @@
  #define _PAGE_BIT_SPLITTING	_PAGE_BIT_SOFTW2 /* only valid on a PSE pmd */
  #define _PAGE_BIT_HIDDEN	_PAGE_BIT_SOFTW3 /* hidden by kmemcheck */
  #define _PAGE_BIT_SOFT_DIRTY	_PAGE_BIT_SOFTW3 /* software dirty tracking */
+-#define _PAGE_BIT_NX           63       /* No execute: only valid after cpuid check */
++#define _PAGE_BIT_SOFTW4	58	/* available for programmer */
 +#define _PAGE_BIT_DEVMAP	_PAGE_BIT_SOFTW4
++#define _PAGE_BIT_NX		63	/* No execute: only valid after cpuid check */
  
  /* If _PAGE_BIT_PRESENT is clear, we use these: */
  /* - if the user mapped it with PROT_NONE; pte_present gives true */

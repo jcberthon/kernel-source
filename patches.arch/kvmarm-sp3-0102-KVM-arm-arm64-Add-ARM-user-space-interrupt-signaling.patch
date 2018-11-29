@@ -37,10 +37,10 @@ Conflicts: Documentation/virtual/kvm/api.txt
 
 --- a/Documentation/virtual/kvm/api.txt
 +++ b/Documentation/virtual/kvm/api.txt
-@@ -3720,3 +3720,44 @@ available, means that that the kernel ha
- H_RANDOM hypercall backed by a hardware random-number generator.
- If present, the kernel H_RANDOM handler can be enabled for guest use
- with the KVM_CAP_PPC_ENABLE_HCALL capability.
+@@ -3720,6 +3720,48 @@ available, means that that the kernel ha
+ will disable the use of APIC hardware virtualization even if supported
+ by the CPU, as it's incompatible with SynIC auto-EOI behavior.
+ 
 +
 +8.5 KVM_CAP_ARM_USER_IRQ
 +
@@ -82,6 +82,10 @@ Conflicts: Documentation/virtual/kvm/api.txt
 +Future versions of kvm may implement additional events. These will get
 +indicated by returning a higher number from KVM_CHECK_EXTENSION and will be
 +listed above.
++
+ 8.8 KVM_CAP_X86_GUEST_MWAIT
+ 
+ Architectures: x86
 --- a/arch/arm/include/uapi/asm/kvm.h
 +++ b/arch/arm/include/uapi/asm/kvm.h
 @@ -114,6 +114,8 @@ struct kvm_debug_exit_arch {
@@ -107,16 +111,16 @@ Conflicts: Documentation/virtual/kvm/api.txt
 --- a/include/uapi/linux/kvm.h
 +++ b/include/uapi/linux/kvm.h
 @@ -834,6 +834,7 @@ struct kvm_ppc_smmu_info {
- #define KVM_CAP_ARM_PMU_V3 125
- #define KVM_CAP_VCPU_ATTRIBUTES 126
+ #define KVM_CAP_MAX_VCPU_ID 128
+ #define KVM_CAP_X2APIC_API 129
  #define KVM_CAP_MSI_DEVID 131
 +#define KVM_CAP_ARM_USER_IRQ (0x1000 | 137) /* Will only be fixed in 4.12 */
+ #define KVM_CAP_X86_GUEST_MWAIT 143
  #define KVM_CAP_S390_BPB 152
  
- #ifdef KVM_CAP_IRQ_ROUTING
 @@ -1280,4 +1281,11 @@ struct kvm_assigned_msix_entry {
- 	__u16 padding[3];
- };
+ #define KVM_X2APIC_API_USE_32BIT_IDS            (1ULL << 0)
+ #define KVM_X2APIC_API_DISABLE_BROADCAST_QUIRK  (1ULL << 1)
  
 +/* Available with KVM_CAP_ARM_USER_IRQ */
 +

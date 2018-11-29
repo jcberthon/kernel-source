@@ -22,7 +22,7 @@ Acked-by: John Jolly <jjolly@suse.de>
 +++ b/drivers/infiniband/hw/cxgb4/cm.c
 @@ -3172,6 +3172,12 @@ static int create_server6(struct c4iw_de
  	struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)
- 				    &ep->com.local_addr;
+ 				    &ep->com.mapped_local_addr;
  
 +	if (ipv6_addr_type(&sin6->sin6_addr) != IPV6_ADDR_ANY) {
 +		err = cxgb4_clip_get(ep->com.dev->rdev.lldi.ports[0],

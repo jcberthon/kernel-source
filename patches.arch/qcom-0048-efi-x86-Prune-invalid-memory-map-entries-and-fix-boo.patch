@@ -135,7 +135,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +
  	if (efi_enabled(EFI_DBG))
  		efi_print_memmap();
- 
+ }
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
 @@ -130,6 +130,7 @@ typedef	struct {

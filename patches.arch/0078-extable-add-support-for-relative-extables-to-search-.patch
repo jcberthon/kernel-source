@@ -29,7 +29,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +++ b/lib/extable.c
 @@ -14,7 +14,37 @@
  #include <linux/sort.h>
- #include <linux/uaccess.h>
+ #include <asm/uaccess.h>
  
 +#ifndef ARCH_HAS_RELATIVE_EXTABLE
 +#define ex_to_insn(x)	((x)->insn)

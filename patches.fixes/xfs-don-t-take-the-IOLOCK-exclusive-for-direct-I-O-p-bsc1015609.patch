@@ -41,7 +41,7 @@ index 09a250d..7f88a75 100644
  
  	XFS_STATS_INC(mp, xs_read_calls);
  
-@@ -346,16 +348,6 @@ xfs_file_read_iter(
+@@ -346,49 +348,21 @@ xfs_file_read_iter(
  	if (XFS_FORCED_SHUTDOWN(mp))
  		return -EIO;
  
@@ -56,11 +56,6 @@ index 09a250d..7f88a75 100644
 -	 * serialisation.
 -	 */
  	xfs_rw_ilock(ip, XFS_IOLOCK_SHARED);
- 
- 	if (DM_EVENT_ENABLED(ip, DM_EVENT_READ) && !(ioflags & XFS_IO_INVIS)) {
-@@ -376,37 +368,19 @@ xfs_file_read_iter(
- 	}
- 
  	if ((ioflags & XFS_IO_ISDIRECT) && inode->i_mapping->nrpages) {
 -		xfs_rw_iunlock(ip, XFS_IOLOCK_SHARED);
 -		xfs_rw_ilock(ip, XFS_IOLOCK_EXCL);
@@ -114,12 +109,13 @@ index 09a250d..7f88a75 100644
  	xfs_rw_iunlock(ip, XFS_IOLOCK_SHARED);
  	return ret;
  }
-@@ -800,34 +775,23 @@ xfs_file_dio_aio_write(
- 	if (!IS_DAX(inode) && ((pos | count) & target->bt_logical_sectormask))
+@@ -800,35 +775,23 @@ xfs_file_dio_aio_write(
+ 	    ((iocb->ki_pos | count) & target->bt_logical_sectormask))
  		return -EINVAL;
  
 -	/* "unaligned" here means not aligned to a filesystem block */
--	if ((pos & mp->m_blockmask) || ((pos + count) & mp->m_blockmask))
+-	if ((iocb->ki_pos & mp->m_blockmask) ||
+-	    ((iocb->ki_pos + count) & mp->m_blockmask))
 -		unaligned_io = 1;
 -
  	/*
@@ -135,8 +131,8 @@ index 09a250d..7f88a75 100644
 +	 * inode size as appropriate.
  	 */
 -	if (unaligned_io || mapping->nrpages)
-+	if ((pos & mp->m_blockmask) ||
-+		((pos + count) & mp->m_blockmask)) {
++	if ((iocb->ki_pos & mp->m_blockmask) ||
++	    ((iocb->ki_pos + count) & mp->m_blockmask)) {
 +		unaligned_io = 1;
  		iolock = XFS_IOLOCK_EXCL;
 -	else
@@ -157,12 +153,12 @@ index 09a250d..7f88a75 100644
  
 +	xfs_rw_ilock(ip, iolock);
 +
- 	ret = xfs_file_aio_write_checks(iocb, from, &iolock, eventsent);
+ 	ret = xfs_file_aio_write_checks(iocb, from, &iolock);
  	if (ret)
  		goto out;
 @@ -835,26 +799,26 @@ xfs_file_dio_aio_write(
- 	pos = iocb->ki_pos;
- 	end = pos + count - 1;
+ 	count = iov_iter_count(from);
+ 	end = iocb->ki_pos + count - 1;
  
 -	/*
 -	 * See xfs_file_read_iter() for why we do a full-file flush here.

@@ -302,8 +302,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 --- a/arch/x86/mm/gup.c
 +++ b/arch/x86/mm/gup.c
 @@ -10,6 +10,7 @@
- #include <linux/highmem.h>
  #include <linux/swap.h>
+ #include <linux/memremap.h>
  
 +#include <asm/mmu_context.h>
  #include <asm/pgtable.h>

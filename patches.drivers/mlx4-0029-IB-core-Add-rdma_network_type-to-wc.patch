@@ -306,8 +306,8 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 --- a/include/rdma/ib_verbs.h
 +++ b/include/rdma/ib_verbs.h
 @@ -50,6 +50,8 @@
- #include <linux/workqueue.h>
  #include <linux/socket.h>
+ #include <linux/irq_poll.h>
  #include <uapi/linux/if_ether.h>
 +#include <net/ipv6.h>
 +#include <net/ip.h>

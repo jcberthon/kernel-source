@@ -51,7 +51,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 --- a/drivers/infiniband/hw/cxgb3/iwch_provider.c
 +++ b/drivers/infiniband/hw/cxgb3/iwch_provider.c
 @@ -745,7 +745,8 @@ static struct ib_mr *iwch_get_dma_mr(str
- 	return ibmr;
+ 	return ERR_PTR(err);
  }
  
 -static struct ib_mw *iwch_alloc_mw(struct ib_pd *pd, enum ib_mw_type type)
@@ -101,9 +101,9 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 -struct ib_mw *mlx4_ib_alloc_mw(struct ib_pd *pd, enum ib_mw_type type);
 +struct ib_mw *mlx4_ib_alloc_mw(struct ib_pd *pd, enum ib_mw_type type,
 +			       struct ib_udata *udata);
- int mlx4_ib_bind_mw(struct ib_qp *qp, struct ib_mw *mw,
- 		    struct ib_mw_bind *mw_bind);
  int mlx4_ib_dealloc_mw(struct ib_mw *mw);
+ struct ib_mr *mlx4_ib_alloc_mr(struct ib_pd *pd,
+ 			       enum ib_mr_type mr_type,
 --- a/drivers/infiniband/hw/mlx4/mr.c
 +++ b/drivers/infiniband/hw/mlx4/mr.c
 @@ -32,6 +32,7 @@
@@ -139,12 +139,12 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 --- a/include/rdma/ib_verbs.h
 +++ b/include/rdma/ib_verbs.h
 @@ -1824,7 +1824,8 @@ struct ib_device {
- 						    int mr_access_flags,
- 						    u64 *iova_start);
+ 						struct scatterlist *sg,
+ 						int sg_nents);
  	struct ib_mw *             (*alloc_mw)(struct ib_pd *pd,
 -					       enum ib_mw_type type);
 +					       enum ib_mw_type type,
 +					       struct ib_udata *udata);
- 	int                        (*bind_mw)(struct ib_qp *qp,
- 					      struct ib_mw *mw,
- 					      struct ib_mw_bind *mw_bind);
+ 	int                        (*dealloc_mw)(struct ib_mw *mw);
+ 	struct ib_fmr *	           (*alloc_fmr)(struct ib_pd *pd,
+ 						int mr_access_flags,

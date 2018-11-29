@@ -28,8 +28,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/include/linux/arm-smccc.h
 +++ b/include/linux/arm-smccc.h
 @@ -17,14 +17,16 @@
- #include <linux/linkage.h>
- #include <linux/types.h>
+ #ifndef __LINUX_ARM_SMCCC_H
+ #define __LINUX_ARM_SMCCC_H
  
 +#include <uapi/linux/const.h>
 +

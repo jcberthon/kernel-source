@@ -170,18 +170,14 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  /*
 --- a/arch/arm64/include/asm/cpufeature.h
 +++ b/arch/arm64/include/asm/cpufeature.h
-@@ -33,9 +33,10 @@
- #define ARM64_WORKAROUND_CAVIUM_27456		8
- #define ARM64_HAS_NO_HW_PREFETCH		9
- #define ARM64_HAS_NO_BCAST_TLBI			10
--#define ARM64_HAS_32BIT_EL0			11
-+#define ARM64_HAS_UAO				11
-+#define ARM64_HAS_32BIT_EL0			12
- 
--#define ARM64_NCAPS				12
-+#define ARM64_NCAPS				13
- 
- #ifndef __ASSEMBLY__
+@@ -33,7 +33,7 @@
+ #define ARM64_WORKAROUND_CAVIUM_23154		6
+ #define ARM64_WORKAROUND_834220			7
+ #define ARM64_HAS_NO_HW_PREFETCH		8
+-/* #define ARM64_HAS_UAO			9 */
++#define ARM64_HAS_UAO				9
+ /* #define ARM64_ALT_PAN_NOT_UAO		10 */
+ #define ARM64_HAS_VIRT_HOST_EXTN		11
  
 --- a/arch/arm64/include/asm/processor.h
 +++ b/arch/arm64/include/asm/processor.h
@@ -210,7 +206,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 --- a/arch/arm64/include/asm/thread_info.h
 +++ b/arch/arm64/include/asm/thread_info.h
 @@ -79,6 +79,12 @@ static inline struct thread_info *curren
- 		(current_stack_pointer & ~(THREAD_SIZE - 1));
+ 	return (struct thread_info *)sp_el0;
  }
  
 +/* Access struct thread_info of another thread */
@@ -345,8 +341,8 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 +	},
 +#endif /* CONFIG_ARM64_UAO */
  	{
- 		.desc = "32-bit EL0 Support",
- 		.capability = ARM64_HAS_32BIT_EL0,
+ 		.desc = "Virtualization Host Extensions",
+ 		.capability = ARM64_HAS_VIRT_HOST_EXTN,
 --- a/arch/arm64/kernel/process.c
 +++ b/arch/arm64/kernel/process.c
 @@ -46,6 +46,7 @@

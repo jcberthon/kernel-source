@@ -98,11 +98,10 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  	init_hrtick();
  
  	/* Move init over to a non-isolated CPU */
-@@ -7685,7 +7673,33 @@ void __init sched_init_smp(void)
- 	init_sched_dl_class();
+@@ -7685,7 +7673,32 @@ void __init sched_init_smp(void)
  
- 	sched_init_smt();
-+
+ 	init_sched_rt_class();
+ 	init_sched_dl_class();
 +	sched_smp_initialized = true;
  }
 +

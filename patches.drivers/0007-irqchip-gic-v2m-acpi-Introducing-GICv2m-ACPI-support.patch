@@ -198,9 +198,9 @@ index 819b7fc..b9c02a5a 100644
 +	if (IS_ENABLED(CONFIG_ARM_GIC_V2M))
 +		gicv2m_init(NULL, gic_data[0].domain);
 +
- 	gic_acpi_setup_kvm_info();
- 
  	return 0;
+ }
+ IRQCHIP_ACPI_DECLARE(gic_v2, ACPI_MADT_TYPE_GENERIC_DISTRIBUTOR,
 diff --git a/include/linux/irqchip/arm-gic.h b/include/linux/irqchip/arm-gic.h
 index d0a29db..9c94026 100644
 --- a/include/linux/irqchip/arm-gic.h

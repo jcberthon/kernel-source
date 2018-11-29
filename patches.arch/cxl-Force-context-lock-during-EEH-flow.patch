@@ -68,8 +68,8 @@ index c8d002054fe4..2fed664a40a7 100644
  
  err_put1:
 @@ -1486,6 +1487,13 @@ static pci_ers_result_t cxl_pci_error_detected(struct pci_dev *pdev,
- 			 (result == PCI_ERS_RESULT_NEED_RESET))
- 			result = PCI_ERS_RESULT_NONE;
+ 		cxl_ops->afu_deactivate_mode(afu, afu->current_mode);
+ 		pci_deconfigure_afu(afu);
  	}
 +
 +	/* should take the context lock here */

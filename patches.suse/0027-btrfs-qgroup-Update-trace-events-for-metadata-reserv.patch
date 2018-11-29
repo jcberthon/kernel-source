@@ -138,4 +138,4 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 +		show_qgroup_rsv_type(__entry->type), __entry->diff)
  );
  
- TRACE_EVENT(btrfs_inode_mod_outstanding_extents,
+ DECLARE_EVENT_CLASS(btrfs__prelim_ref,

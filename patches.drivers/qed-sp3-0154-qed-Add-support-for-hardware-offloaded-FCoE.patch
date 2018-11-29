@@ -49,16 +49,14 @@ diff --git a/drivers/net/ethernet/qlogic/Kconfig b/drivers/net/ethernet/qlogic/K
 index 5e5c976..7ce1b92 100644
 --- a/drivers/net/ethernet/qlogic/Kconfig
 +++ b/drivers/net/ethernet/qlogic/Kconfig
-@@ -144,6 +144,9 @@ config QED_RDMA
+@@ -144,4 +144,7 @@ config QED_RDMA
  config QED_ISCSI
  	bool
  
 +config QED_FCOE
 +	bool
 +
- config INFINIBAND_QEDR
- 	tristate "QLogic qede RoCE sources [debug]"
- 	depends on QEDE && 64BIT
+ endif # NET_VENDOR_QLOGIC
 diff --git a/drivers/net/ethernet/qlogic/qed/Makefile b/drivers/net/ethernet/qlogic/qed/Makefile
 index 1a7300f..974929d 100644
 --- a/drivers/net/ethernet/qlogic/qed/Makefile

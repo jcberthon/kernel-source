@@ -45,7 +45,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  #endif	/* _LINUX_RMAP_H */
 --- a/mm/madvise.c
 +++ b/mm/madvise.c
-@@ -370,6 +370,7 @@ static int madvise_free_pte_range(pmd_t
+@@ -368,6 +368,7 @@ static int madvise_free_pte_range(pmd_t
  			set_pte_at(mm, addr, pte, ptent);
  			tlb_remove_tlb_entry(tlb, pte, addr);
  		}
@@ -55,7 +55,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  	if (nr_swap) {
 --- a/mm/rmap.c
 +++ b/mm/rmap.c
-@@ -1277,11 +1277,6 @@ void page_remove_rmap(struct page *page)
+@@ -1313,11 +1313,6 @@ void page_remove_rmap(struct page *page)
  	 */
  }
  
@@ -67,17 +67,17 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  /*
   * @arg: enum ttu_flags will be passed to this argument
   */
-@@ -1293,8 +1288,7 @@ static int try_to_unmap_one(struct page
- 	pte_t pteval;
- 	spinlock_t *ptl;
- 	int ret = SWAP_AGAIN;
+@@ -1332,8 +1327,7 @@ static int try_to_unmap_one(struct page
+ 	unsigned long sh_address;
+ 	bool pmd_sharing_possible = false;
+ 	unsigned long spmd_start, spmd_end;
 -	struct rmap_private *rp = arg;
 -	enum ttu_flags flags = rp->flags;
 +	enum ttu_flags flags = (enum ttu_flags)arg;
  
  	/* munlock has nothing to gain from examining un-locked vmas */
  	if ((flags & TTU_MUNLOCK) && !(vma->vm_flags & VM_LOCKED))
-@@ -1387,11 +1381,20 @@ static int try_to_unmap_one(struct page
+@@ -1476,11 +1470,20 @@ static int try_to_unmap_one(struct page
  		 */
  		VM_BUG_ON_PAGE(!PageSwapCache(page) && PageSwapBacked(page), page);
  
@@ -100,7 +100,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  		}
  
  		if (swap_duplicate(entry) < 0) {
-@@ -1463,18 +1466,15 @@ static int page_not_mapped(struct page *
+@@ -1555,18 +1558,15 @@ static int page_not_mapped(struct page *
   * SWAP_AGAIN	- we missed a mapping, try again later
   * SWAP_FAIL	- the page is unswappable
   * SWAP_MLOCK	- page is mlocked.
@@ -121,7 +121,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  		.done = page_not_mapped,
  		.anon_lock = page_lock_anon_vma_read,
  	};
-@@ -1494,11 +1494,8 @@ int try_to_unmap(struct page *page, enum
+@@ -1586,11 +1586,8 @@ int try_to_unmap(struct page *page, enum
  
  	ret = rmap_walk(page, &rwc);
  
@@ -134,7 +134,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  	return ret;
  }
  
-@@ -1520,14 +1517,10 @@ int try_to_unmap(struct page *page, enum
+@@ -1612,14 +1609,10 @@ int try_to_unmap(struct page *page, enum
  int try_to_munlock(struct page *page)
  {
  	int ret;
@@ -152,7 +152,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  
 --- a/mm/vmscan.c
 +++ b/mm/vmscan.c
-@@ -859,7 +859,8 @@ static void page_check_dirty_writeback(s
+@@ -870,7 +870,8 @@ static void page_check_dirty_writeback(s
  	 * Anonymous pages are not handled by flushers and must be written
  	 * from reclaim context. Do not stall reclaim based on them
  	 */
@@ -162,7 +162,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  		*dirty = false;
  		*writeback = false;
  		return;
-@@ -932,7 +933,8 @@ static unsigned long shrink_page_list(st
+@@ -943,7 +944,8 @@ static unsigned long shrink_page_list(st
  			goto keep_locked;
  
  		/* Double the slab pressure for mapped and swapcache pages */
@@ -172,7 +172,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  			sc->nr_scanned++;
  
  		may_enter_fs = (sc->gfp_mask & __GFP_FS) ||
-@@ -1048,8 +1050,10 @@ static unsigned long shrink_page_list(st
+@@ -1059,8 +1061,10 @@ static unsigned long shrink_page_list(st
  		/*
  		 * Anonymous process memory has backing store?
  		 * Try to allocate it some swap space here.
@@ -184,7 +184,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  			if (!(sc->gfp_mask & __GFP_IO))
  				goto keep_locked;
  			if (!add_to_swap(page, page_list))
-@@ -1064,17 +1068,18 @@ static unsigned long shrink_page_list(st
+@@ -1075,17 +1079,18 @@ static unsigned long shrink_page_list(st
  		 * The page is mapped into the page tables of one or more
  		 * processes. Try to unmap it here.
  		 */
@@ -206,7 +206,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  			case SWAP_SUCCESS:
  				; /* try to free the page below */
  			}
-@@ -1181,10 +1186,18 @@ static unsigned long shrink_page_list(st
+@@ -1192,10 +1197,18 @@ static unsigned long shrink_page_list(st
  			}
  		}
  
@@ -228,7 +228,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  		/*
  		 * At this point, we have no other references and there is
  		 * no way to pick any more up (removed from LRU, removed
-@@ -1194,9 +1207,6 @@ lazyfree:
+@@ -1205,9 +1218,6 @@ lazyfree:
  		 */
  		__clear_page_locked(page);
  free_it:

@@ -189,13 +189,14 @@ diff --git a/drivers/infiniband/Kconfig b/drivers/infiniband/Kconfig
 index 726a4ca..dbed6ad 100644
 --- a/drivers/infiniband/Kconfig
 +++ b/drivers/infiniband/Kconfig
-@@ -85,5 +85,6 @@ source "drivers/infiniband/ulp/iser/Kconfig"
+@@ -85,6 +85,7 @@ source "drivers/infiniband/ulp/iser/Kconfig"
  source "drivers/infiniband/ulp/isert/Kconfig"
  
  source "drivers/infiniband/sw/rdmavt/Kconfig"
 +source "drivers/infiniband/sw/rxe/Kconfig"
  
- endif # INFINIBAND
+ source "drivers/infiniband/hw/hfi1/Kconfig"
+ 
 diff --git a/drivers/infiniband/sw/Makefile b/drivers/infiniband/sw/Makefile
 index 988b6a0..8b095b2 100644
 --- a/drivers/infiniband/sw/Makefile

@@ -151,9 +151,9 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  
  	/* allocate and init request */
 @@ -1153,10 +1154,11 @@ static struct request *__get_request(str
+ 
  	blk_rq_init(q, rq);
  	blk_rq_set_rl(rq, rl);
- 	blk_rq_set_prio(rq, ioc);
 -	req_set_op_attrs(rq, op, op_flags | REQ_ALLOCED);
 +	req_set_op_attrs(rq, op, op_flags);
 +	rq->rq_flags = rq_flags;
@@ -1164,21 +1164,20 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  			__blk_end_request_all(req, -EIO);
  		}
  		return;
---- a/drivers/nvme/host/core.c
-+++ b/drivers/nvme/host/core.c
-@@ -339,10 +339,10 @@ int nvme_setup_cmd(struct nvme_ns *ns, struct request *req,
- {
- 	int ret = BLK_MQ_RQ_QUEUE_OK;
+--- a/drivers/nvme/host/pci.c
++++ b/drivers/nvme/host/pci.c
+@@ -339,9 +339,9 @@ int nvme_setup_cmd(struct nvme_ns *ns, struct request *req,
+ 	iod->nents = 0;
+ 	iod->length = size;
  
--	if (!(req->cmd_flags & REQ_DONTPREP)) {
-+	if (!(req->rq_flags & RQF_DONTPREP)) {
- 		nvme_req(req)->retries = 0;
- 		nvme_req(req)->flags = 0;
--		req->cmd_flags |= REQ_DONTPREP;
-+		req->rq_flags |= RQF_DONTPREP;
+-	if (!(rq->cmd_flags & REQ_DONTPREP)) {
++	if (!(rq->rq_flags & RQF_DONTPREP)) {
+ 		rq->retries = 0;
+-		rq->cmd_flags |= REQ_DONTPREP;
++		rq->rq_flags |= RQF_DONTPREP;
  	}
- 
- 	if (req->cmd_type == REQ_TYPE_DRV_PRIV)
+ 	return 0;
+ }
 --- a/drivers/scsi/device_handler/scsi_dh_alua.c
 +++ b/drivers/scsi/device_handler/scsi_dh_alua.c
 @@ -154,7 +154,8 @@ static int submit_rtpg(struct scsi_devic
@@ -1438,7 +1437,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
 -	if (!(req->cmd_flags & REQ_DONTPREP)) {
 +	if (!(req->rq_flags & RQF_DONTPREP)) {
  		ret = prep_to_mq(scsi_mq_prep_fn(req));
- 		if (ret != BLK_MQ_RQ_QUEUE_OK)
+ 		if (ret)
  			goto out_dec_host_busy;
 -		req->cmd_flags |= REQ_DONTPREP;
 +		req->rq_flags |= RQF_DONTPREP;

@@ -1,6 +1,6 @@
 From: Egbert Eich <eich@suse.de>
 Subject: Set depth on low mem Radeon cards to 16 instead of 8.
-Patch-mainline: Never
+Patch-mainline: Never, jeffm: why not?
 Date: Thu Feb 23 09:24:39 CET 2012
 References: bnc #746883
 
@@ -26,8 +26,8 @@ References: bnc #746883
 --- a/drivers/gpu/drm/radeon/radeon_fb.c
 +++ b/drivers/gpu/drm/radeon/radeon_fb.c
 @@ -343,9 +343,12 @@ int radeon_fbdev_init(struct radeon_devi
- 	int bpp_sel = 32;
- 	int ret;
+ 	if (list_empty(&rdev->ddev->mode_config.connector_list))
+ 		return 0;
  
 -	/* select 8 bpp console on RN50 or 16MB cards */
 -	if (ASIC_IS_RN50(rdev) || rdev->mc.real_vram_size <= (32*1024*1024))

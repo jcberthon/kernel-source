@@ -84,8 +84,8 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
 
 --- a/drivers/acpi/acpi_processor.c
 +++ b/drivers/acpi/acpi_processor.c
-@@ -574,7 +574,86 @@ static struct acpi_scan_handler processo
- 	},
+@@ -574,8 +574,87 @@ static struct acpi_scan_handler processo
+ 	.attach = acpi_processor_container_attach,
  };
  
 +/* The number of the unique processor IDs */
@@ -170,4 +170,5 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  {
 +	acpi_processor_check_duplicates();
  	acpi_scan_add_handler_with_hotplug(&processor_handler, "processor");
+ 	acpi_scan_add_handler(&processor_container_handler);
  }

@@ -64,24 +64,16 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  
 --- a/arch/x86/include/asm/topology.h
 +++ b/arch/x86/include/asm/topology.h
-@@ -68,7 +68,6 @@ static inline int early_cpu_to_node(int
+@@ -125,7 +124,9 @@ extern const struct cpumask *cpu_coregro
+ {
+ 	return __max_smt_threads;
  }
- 
- #endif /* !CONFIG_DEBUG_PER_CPU_MAPS */
--
- /* Mappings between node number and cpus on that node. */
- extern cpumask_var_t node_to_cpumask_map[MAX_NUMNODES];
- 
-@@ -125,6 +124,9 @@ extern const struct cpumask *cpu_coregro
- #ifdef ENABLE_TOPO_DEFINES
- #define topology_core_cpumask(cpu)		(per_cpu(cpu_core_map, cpu))
- #define topology_sibling_cpumask(cpu)		(per_cpu(cpu_sibling_map, cpu))
 +bool topology_is_primary_thread(unsigned int cpu);
-+#else
+ #else
 +static inline bool topology_is_primary_thread(unsigned int cpu) { return true; }
+ static inline int topology_max_smt_threads(void) { return 1; }
  #endif
  
- static inline void arch_fix_phys_package_id(int num, u32 slot)
 --- a/arch/x86/kernel/apic/apic.c
 +++ b/arch/x86/kernel/apic/apic.c
 @@ -2018,6 +2018,21 @@ static int cpuid_to_apicid[] = {

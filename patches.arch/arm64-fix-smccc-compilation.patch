@@ -1,8 +1,10 @@
 From: Matthias Brugger <mbrugger@suse.com>
 Date: Tue, 20 Mar 2018 13:56:21 +0000
 Subject: arm64: fix smccc compilation
-Patch-mainline: Never, fixes local compilation issue
+Git-commit: 82bcd087029f6056506ea929f11af02622230901 (partial)
+Patch-mainline: v4.11-rc1
 References: bsc#1068032
+Backport-note: Only contains fixing arm-smccc.h -jeffm
 
 ARM_SMCC_CALL_VAL is a assembly macro. Fix compilation of
 arm-smccc.h by setting ifdefs as in mainline.
@@ -31,12 +33,12 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>---
 -#include <linux/linkage.h>
 -#include <linux/types.h>
 -
- #include <uapi/linux/const.h>
- 
  /*
+  * This file provides common defines for ARM SMC Calling Convention as
+  * specified in
 @@ -80,6 +77,11 @@
- 			   ARM_SMCCC_SMC_32,				\
- 			   0, 0x8000)
+ #define ARM_SMCCC_OWNER_TRUSTED_OS	50
+ #define ARM_SMCCC_OWNER_TRUSTED_OS_END	63
  
 +#ifndef __ASSEMBLY__
 +
@@ -47,8 +49,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>---
   * struct arm_smccc_res - Result from SMC/HVC call
   * @a0-a3 result values from registers 0 to 3
 @@ -262,4 +264,5 @@ asmlinkage void arm_smccc_hvc(unsigned l
-  */
- #define arm_smccc_1_1_hvc(...)	__arm_smccc_1_1(SMCCC_HVC_INST, __VA_ARGS__)
+ 			unsigned long a5, unsigned long a6, unsigned long a7,
+ 			struct arm_smccc_res *res);
  
 +#endif /*__ASSEMBLY__*/
  #endif /*__LINUX_ARM_SMCCC_H*/

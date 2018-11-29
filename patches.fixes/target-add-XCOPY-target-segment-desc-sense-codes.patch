@@ -22,12 +22,11 @@ diff --git a/drivers/target/target_core_transport.c b/drivers/target/target_core
 index 955326e..c8a39bb 100644
 --- a/drivers/target/target_core_transport.c
 +++ b/drivers/target/target_core_transport.c
-@@ -1728,8 +1728,12 @@ void transport_generic_request_failure(struct se_cmd *cmd,
+@@ -1728,7 +1728,11 @@ void transport_generic_request_failure(struct se_cmd *cmd,
  	case TCM_LOGICAL_BLOCK_GUARD_CHECK_FAILED:
  	case TCM_LOGICAL_BLOCK_APP_TAG_CHECK_FAILED:
  	case TCM_LOGICAL_BLOCK_REF_TAG_CHECK_FAILED:
 -	case TCM_COPY_TARGET_DEVICE_NOT_REACHABLE:
- 	case TCM_MISCOMPARE_VERIFY:
 +	case TCM_COPY_TARGET_DEVICE_NOT_REACHABLE:
 +	case TCM_TOO_MANY_TARGET_DESCS:
 +	case TCM_UNSUPPORTED_TARGET_DESC_TYPE_CODE:

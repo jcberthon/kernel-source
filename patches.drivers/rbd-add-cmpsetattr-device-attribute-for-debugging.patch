@@ -50,7 +50,7 @@ Signed-off-by: David Disseldorp <ddiss@suse.de>
  static DEVICE_ATTR(features, S_IRUGO, rbd_features_show, NULL);
  static DEVICE_ATTR(major, S_IRUGO, rbd_major_show, NULL);
 @@ -4248,6 +4278,7 @@ static DEVICE_ATTR(refresh, S_IWUSR, NUL
- static DEVICE_ATTR(current_snap, S_IRUGO, rbd_snap_show, NULL);
+ static DEVICE_ATTR(snap_id, S_IRUGO, rbd_snap_id_show, NULL);
  static DEVICE_ATTR(parent, S_IRUGO, rbd_parent_show, NULL);
  static DEVICE_ATTR(setxattr, S_IWUSR, NULL, rbd_setxattr_set);
 +static DEVICE_ATTR(cmpsetxattr, S_IWUSR, NULL, rbd_cmpsetxattr_set);

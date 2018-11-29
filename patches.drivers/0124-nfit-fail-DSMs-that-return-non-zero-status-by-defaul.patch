@@ -95,9 +95,9 @@ index 2c2c600..8b4aad3 100644
  		 */
 -		if (ars_status->status == NFIT_ARS_STATUS_INTR) {
 +		if (status == NFIT_ARS_STATUS_INTR) {
- 			if (ars_status->out_length >= 40 && (ars_status->flags
- 						& NFIT_ARS_F_OVERFLOW))
+ 			if (ars_status->flags & NFIT_ARS_F_OVERFLOW)
  				return -ENOSPC;
+ 			return 0;
 @@ -153,12 +149,12 @@ static int xlat_status(void *buf, unsigned int cmd)
  		}
  

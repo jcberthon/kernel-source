@@ -16,8 +16,8 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
 --- a/include/linux/ceph/ceph_debug.h
 +++ b/include/linux/ceph/ceph_debug.h
 @@ -5,6 +5,8 @@
+ 
  #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
- #endif
  
 +#include <linux/string.h>
 +

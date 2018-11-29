@@ -29,9 +29,9 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 --- a/arch/x86/entry/syscalls/syscall_32.tbl
 +++ b/arch/x86/entry/syscalls/syscall_32.tbl
 @@ -383,3 +383,8 @@
- 374	i386	userfaultfd		sys_userfaultfd
- 375	i386	membarrier		sys_membarrier
  376	i386	mlock2			sys_mlock2
+ 378	i386	preadv2			sys_preadv2			compat_sys_preadv2
+ 379	i386	pwritev2		sys_pwritev2			compat_sys_pwritev2
 +380	i386	pkey_mprotect		sys_pkey_mprotect
 +381	i386	pkey_alloc		sys_pkey_alloc
 +382	i386	pkey_free		sys_pkey_free
@@ -40,9 +40,9 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 --- a/arch/x86/entry/syscalls/syscall_64.tbl
 +++ b/arch/x86/entry/syscalls/syscall_64.tbl
 @@ -332,6 +332,11 @@
- 323	common	userfaultfd		sys_userfaultfd
- 324	common	membarrier		sys_membarrier
  325	common	mlock2			sys_mlock2
+ 327	64	preadv2			sys_preadv2
+ 328	64	pwritev2		sys_pwritev2
 +329	common	pkey_mprotect		sys_pkey_mprotect
 +330	common	pkey_alloc		sys_pkey_alloc
 +331	common	pkey_free		sys_pkey_free

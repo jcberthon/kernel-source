@@ -33,7 +33,7 @@ index fe50611..c6328a9 100644
 +		goto out;
  	}
  
- 	req->need_inval = false;
+ 	req->mr->need_inval = false;
 -- 
 1.8.5.6
 

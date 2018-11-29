@@ -9,14 +9,12 @@ Signed-off-by: Michael Trimarchi <michael@amarulasolutions.com>
 Signed-off-by: Mark Brown <broonie@kernel.org>
 Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 ---
- sound/soc/rockchip/rockchip_i2s.c | 9 +++++++--
+ sound/soc/rockchip/rockchip_i2s.c |    9 +++++++--
  1 file changed, 7 insertions(+), 2 deletions(-)
 
-diff --git a/sound/soc/rockchip/rockchip_i2s.c b/sound/soc/rockchip/rockchip_i2s.c
-index 8b0a588ed622..6561c4cc2edd 100644
 --- a/sound/soc/rockchip/rockchip_i2s.c
 +++ b/sound/soc/rockchip/rockchip_i2s.c
-@@ -242,6 +242,9 @@ static int rockchip_i2s_hw_params(struct snd_pcm_substream *substream,
+@@ -242,6 +242,9 @@ static int rockchip_i2s_hw_params(struct
  	case SNDRV_PCM_FORMAT_S24_LE:
  		val |= I2S_TXCR_VDW(24);
  		break;
@@ -26,7 +24,7 @@ index 8b0a588ed622..6561c4cc2edd 100644
  	default:
  		return -EINVAL;
  	}
-@@ -360,7 +363,8 @@ static struct snd_soc_dai_driver rockchip_i2s_dai = {
+@@ -360,7 +363,8 @@ static struct snd_soc_dai_driver rockchi
  		.formats = (SNDRV_PCM_FMTBIT_S8 |
  			    SNDRV_PCM_FMTBIT_S16_LE |
  			    SNDRV_PCM_FMTBIT_S20_3LE |
@@ -36,7 +34,7 @@ index 8b0a588ed622..6561c4cc2edd 100644
  	},
  	.capture = {
  		.stream_name = "Capture",
-@@ -370,7 +374,8 @@ static struct snd_soc_dai_driver rockchip_i2s_dai = {
+@@ -370,7 +374,8 @@ static struct snd_soc_dai_driver rockchi
  		.formats = (SNDRV_PCM_FMTBIT_S8 |
  			    SNDRV_PCM_FMTBIT_S16_LE |
  			    SNDRV_PCM_FMTBIT_S20_3LE |
@@ -46,6 +44,3 @@ index 8b0a588ed622..6561c4cc2edd 100644
  	},
  	.ops = &rockchip_i2s_dai_ops,
  	.symmetric_rates = 1,
--- 
-2.11.0
-

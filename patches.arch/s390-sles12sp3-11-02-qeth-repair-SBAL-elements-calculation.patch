@@ -47,6 +47,6 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  		tcp_hdr(skb)->doff * 4;
 -	int tcpd_len = skb->len - (tcpd - (unsigned long)skb->data);
 +	int tcpd_len = skb_headlen(skb) - (tcpd - (unsigned long)skb->data);
- 	int elements = PFN_UP(tcpd + tcpd_len) - PFN_DOWN(tcpd);
+ 	int elements = PFN_UP(tcpd + tcpd_len - 1) - PFN_DOWN(tcpd);
  
  	elements += qeth_get_elements_for_frags(skb);

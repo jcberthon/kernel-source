@@ -45,8 +45,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  static bool arch_timer_mem_use_virtual;
 +static bool arch_counter_suspend_stop;
  
- /*
-  * Architected system timer support.
+ static bool evtstrm_enable = IS_ENABLED(CONFIG_ARM_ARCH_TIMER_EVTSTREAM);
+ 
 @@ -534,7 +535,7 @@ static struct clocksource clocksource_co
  	.rating	= 400,
  	.read	= arch_counter_read,
@@ -73,6 +73,6 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	arch_counter_suspend_stop = of_property_read_bool(np,
 +							 "arm,no-tick-in-suspend");
 +
- 	arch_timer_init();
+ 	return arch_timer_init();
  }
- CLOCKSOURCE_OF_DECLARE(armv7_arch_timer, "arm,armv7-timer", arch_timer_of_init);
+ CLOCKSOURCE_OF_DECLARE_RET(armv7_arch_timer, "arm,armv7-timer", arch_timer_of_init);

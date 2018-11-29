@@ -27,7 +27,7 @@ index 58e65cd..685913e 100644
  	size_t count = iov_iter_count(iter);
  
  	if (!count)
-@@ -1899,15 +1897,15 @@ generic_file_read_iter(struct kiocb *iocb, struct iov_iter *iter)
+@@ -1899,15 +1897,16 @@ generic_file_read_iter(struct kiocb *iocb, struct iov_iter *iter)
  		loff_t size;
  
  		size = i_size_read(inode);
@@ -37,7 +37,9 @@ index 58e65cd..685913e 100644
 +					iocb->ki_pos + count - 1);
  		if (!retval) {
  			struct iov_iter data = *iter;
- 			retval = mapping->a_ops->direct_IO(iocb, &data);
+-			retval = mapping->a_ops->direct_IO(iocb, &data, pos);
++			retval = mapping->a_ops->direct_IO(iocb, &data,
++					iocb->ki_pos);
  		}
  
  		if (retval > 0) {

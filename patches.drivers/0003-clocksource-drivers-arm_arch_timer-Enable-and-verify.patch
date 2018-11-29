@@ -94,8 +94,8 @@ index f75c09a6b14e..8c89c53944c8 100644
  		best_frame = of_node_get(frame);
  	}
 @@ -1208,24 +1226,26 @@ static void __init arch_timer_mem_init(struct device_node *np)
- 							 "arch_mem_timer");
- 	if (IS_ERR(base)) {
+ 	base = arch_counter_base = of_iomap(best_frame, 0);
+ 	if (!base) {
  		pr_err("arch_timer: Can't map frame's registers\n");
 -		of_node_put(best_frame);
 -		return;

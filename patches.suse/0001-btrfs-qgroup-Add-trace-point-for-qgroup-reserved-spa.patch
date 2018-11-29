@@ -192,15 +192,15 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 --- a/include/trace/events/btrfs.h
 +++ b/include/trace/events/btrfs.h
 @@ -25,6 +25,7 @@ struct btrfs_work;
+ struct btrfs_work;
  struct __btrfs_workqueue;
  struct btrfs_qgroup_extent_record;
- struct prelim_ref;
 +struct btrfs_qgroup;
  
  #define show_ref_type(type)						\
  	__print_symbolic(type,						\
 @@ -1543,6 +1544,49 @@ DEFINE_EVENT(btrfs__prelim_ref, btrfs_pr
- 	TP_ARGS(fs_info, oldref, newref, tree_size)
+ 		  __entry->cur_new_count)
  );
  
 +TRACE_EVENT(qgroup_update_reserve,

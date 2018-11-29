@@ -128,8 +128,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  			.stage = X86_ICPT_PRE_EXCEPT, }
  #define POST_EX(exit) { .exit_code = (exit), \
 @@ -5451,9 +5417,6 @@ static struct kvm_x86_ops svm_x86_ops =
+ 
  	.get_pkru = svm_get_pkru,
- 	.set_pkru = svm_set_pkru,
  
 -	.fpu_activate = svm_fpu_activate,
 -	.fpu_deactivate = svm_fpu_deactivate,
@@ -338,8 +338,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	vmx_set_cr4(vcpu, vmcs12->host_cr4);
  
 @@ -11025,9 +10946,6 @@ static struct kvm_x86_ops vmx_x86_ops =
+ 
  	.get_pkru = vmx_get_pkru,
- 	.set_pkru = vmx_set_pkru,
  
 -	.fpu_activate = vmx_fpu_activate,
 -	.fpu_deactivate = vmx_fpu_deactivate,

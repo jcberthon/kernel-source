@@ -48,7 +48,7 @@ Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 +					 bf_get(lpfc_wcqe_c_xb, wcqe));
  		default:
  out_err:
- 			lpfc_printf_vlog(vport, KERN_ERR, LOG_NVME_IOERR,
+ 			lpfc_printf_vlog(vport, KERN_INFO, LOG_NVME_IOERR,
 @@ -920,12 +931,18 @@ out_err:
  #endif
  	freqpriv = nCmd->private;

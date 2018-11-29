@@ -21,9 +21,9 @@ index 980bd21ec4ec..d0e9868c51b9 100644
 --- a/arch/powerpc/platforms/pseries/setup.c
 +++ b/arch/powerpc/platforms/pseries/setup.c
 @@ -70,6 +70,7 @@
- #include <asm/cacheflush.h>
- #include <asm/cputable.h>
- #include <asm/code-patching.h>
+ #include <asm/eeh.h>
+ #include <asm/reg.h>
+ #include <asm/plpar_wrappers.h>
 +#include <asm/security_features.h>
  
  #include "pseries.h"

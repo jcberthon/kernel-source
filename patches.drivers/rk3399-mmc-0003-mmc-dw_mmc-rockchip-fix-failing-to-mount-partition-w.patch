@@ -18,23 +18,29 @@ Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 ---
- drivers/mmc/host/dw_mmc-rockchip.c |    8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ drivers/mmc/host/dw_mmc-rockchip.c |    9 +++++++++
+ 1 file changed, 9 insertions(+)
 
 --- a/drivers/mmc/host/dw_mmc-rockchip.c
 +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -241,10 +241,10 @@ static int dw_mci_rockchip_init(struct d
+@@ -234,11 +234,20 @@ static int dw_mci_rockchip_init(struct d
+ 	return 0;
+ }
  
- /* Common capabilities of RK3288 SoC */
- static unsigned long dw_mci_rk3288_dwmmc_caps[4] = {
--	MMC_CAP_RUNTIME_RESUME, /* emmc */
--	MMC_CAP_RUNTIME_RESUME, /* sdmmc */
--	MMC_CAP_RUNTIME_RESUME, /* sdio0 */
--	MMC_CAP_RUNTIME_RESUME, /* sdio1 */
-+	MMC_CAP_RUNTIME_RESUME | MMC_CAP_ERASE, /* emmc */
-+	MMC_CAP_RUNTIME_RESUME | MMC_CAP_ERASE, /* sdmmc */
-+	MMC_CAP_RUNTIME_RESUME | MMC_CAP_ERASE, /* sdio0 */
-+	MMC_CAP_RUNTIME_RESUME | MMC_CAP_ERASE, /* sdio1 */
- };
++/* Common capabilities of RK3288 SoC */
++static unsigned long dw_mci_rk3288_dwmmc_caps[4] = {
++	MMC_CAP_ERASE, /* emmc */
++	MMC_CAP_ERASE, /* sdmmc */
++	MMC_CAP_ERASE, /* sdio0 */
++	MMC_CAP_ERASE, /* sdio1 */
++};
++
  static const struct dw_mci_drv_data rk2928_drv_data = {
- 	.prepare_command        = dw_mci_rockchip_prepare_command,
+ 	.init			= dw_mci_rockchip_init,
+ };
+ 
+ static const struct dw_mci_drv_data rk3288_drv_data = {
++	.caps			= dw_mci_rk3288_dwmmc_caps,
+ 	.set_ios		= dw_mci_rk3288_set_ios,
+ 	.execute_tuning		= dw_mci_rk3288_execute_tuning,
+ 	.parse_dt		= dw_mci_rk3288_parse_dt,

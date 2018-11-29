@@ -30,7 +30,7 @@ index 9ef753a..4d5e1bb 100644
 --- a/drivers/scsi/lpfc/lpfc_nvme.c
 +++ b/drivers/scsi/lpfc/lpfc_nvme.c
 @@ -897,7 +897,7 @@
- 					 bf_get(lpfc_wcqe_c_xb, wcqe));
+ 			break;
  		default:
  out_err:
 -			lpfc_printf_vlog(vport, KERN_ERR, LOG_NVME_IOERR,

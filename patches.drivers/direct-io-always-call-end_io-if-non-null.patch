@@ -69,7 +69,7 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 +static int ext4_end_io_dio(struct kiocb *iocb, loff_t offset,
  			    ssize_t size, void *private)
  {
-         ext4_io_end_t *io_end = iocb->private;
+         ext4_io_end_t *io_end = private;
  
 +	if (size <= 0)
 +		return 0;

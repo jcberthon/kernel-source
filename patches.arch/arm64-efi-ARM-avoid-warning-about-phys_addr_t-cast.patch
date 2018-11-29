@@ -29,8 +29,8 @@ Hunk1 moved to arch/arm64/kernel/efi.c
  arch/arm64/kernel/efi.c |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
 @@ -176,7 +176,7 @@ static __init void reserve_regions(void)
  	 * uses its own memory map instead.
  	 */
@@ -38,5 +38,5 @@ Hunk1 moved to arch/arm64/kernel/efi.c
 -	memblock_remove(0, ULLONG_MAX);
 +	memblock_remove(0, (phys_addr_t)ULLONG_MAX);
  
- 	for_each_efi_memory_desc(&memmap, md) {
+ 	for_each_efi_memory_desc(md) {
  		paddr = md->phys_addr;

@@ -46,8 +46,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 --- a/arch/x86/include/asm/pgtable_types.h
 +++ b/arch/x86/include/asm/pgtable_types.h
 @@ -72,6 +72,11 @@
- #define _PAGE_KNL_ERRATUM_MASK 0
  #endif
+ #define __HAVE_ARCH_PTE_SPECIAL
  
 +#define _PAGE_PKEY_MASK (_PAGE_PKEY_BIT0 | \
 +			 _PAGE_PKEY_BIT1 | \

@@ -92,9 +92,9 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
 
 --- a/fs/btrfs/tree-log.c
 +++ b/fs/btrfs/tree-log.c
-@@ -5269,11 +5269,16 @@ static int btrfs_log_all_parents(struct
- 			if (IS_ERR(dir_inode))
- 				continue;
+@@ -5322,11 +5322,16 @@ static int btrfs_log_all_parents(struct
+ 				goto out;
+ 			}
  
 +			if (ctx)
 +				ctx->log_new_dentries = false;
@@ -109,7 +109,7 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
  			iput(dir_inode);
  			if (ret)
  				goto out;
-@@ -5643,11 +5648,9 @@ void btrfs_record_unlink_dir(struct btrf
+@@ -5713,11 +5718,9 @@ void btrfs_record_unlink_dir(struct btrf
  	 * into the file.  When the file is logged we check it and
  	 * don't log the parents if the file is fully on disk.
  	 */

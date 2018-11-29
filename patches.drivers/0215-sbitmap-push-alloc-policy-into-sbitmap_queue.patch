@@ -121,8 +121,8 @@ index 9e860ce..a86ba8e 100644
  	struct list_head page_list;
 -
 -	int alloc_policy;
+ 	cpumask_var_t cpumask;
  };
- 
  
 diff --git a/include/linux/sbitmap.h b/include/linux/sbitmap.h
 index 0160f9c..80453d5 100644

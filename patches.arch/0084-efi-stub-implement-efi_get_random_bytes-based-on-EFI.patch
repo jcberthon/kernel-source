@@ -15,25 +15,23 @@ Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: Catalin Marinas <catalin.marinas@arm.com>
 
-EFI_RNG_PROTOCOL_GUID already added by following patch:
-148d66ef48 Respin patches of hibernation signature checking patches
 Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 ---
- drivers/firmware/efi/libstub/Makefile  |  2 +-
- drivers/firmware/efi/libstub/efistub.h |  3 +++
- drivers/firmware/efi/libstub/random.c  | 35 ++++++++++++++++++++++++++++++++++
- include/linux/efi.h                    |  2 +-
- 4 files changed, 40 insertions(+), 2 deletions(-)
- create mode 100644 drivers/firmware/efi/libstub/random.c
+
+ drivers/firmware/efi/libstub/Makefile  |    2 -
+ drivers/firmware/efi/libstub/efistub.h |    3 ++
+ drivers/firmware/efi/libstub/random.c  |   35 +++++++++++++++++++++++++++++++++
+ include/linux/efi.h                    |    5 +++-
+ 4 files changed, 43 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
 index a70df41..ff040d5 100644
 --- a/drivers/firmware/efi/libstub/Makefile
 +++ b/drivers/firmware/efi/libstub/Makefile
 @@ -34,7 +34,7 @@ $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
- lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o string.o \
  				   $(patsubst %.c,lib-%.o,$(arm-deps))
  
+ lib-$(CONFIG_ARM)		+= arm32-stub.o
 -lib-$(CONFIG_ARM64)		+= arm64-stub.o
 +lib-$(CONFIG_ARM64)		+= arm64-stub.o random.o
  CFLAGS_arm64-stub.o 		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
@@ -105,6 +103,16 @@ index 118d078..2763c5c 100644
  	void *install_multiple_protocol_interfaces;
  	void *uninstall_multiple_protocol_interfaces;
  	void *calculate_crc32;
+@@ -629,6 +634,9 @@ typedef struct {
+ #define EFI_1_10_SYSTEM_TABLE_REVISION  ((1 << 16) | (10))
+ #define EFI_1_02_SYSTEM_TABLE_REVISION  ((1 << 16) | (02))
+ 
++#define EFI_RNG_PROTOCOL_GUID \
++    EFI_GUID(  0x3152bca5, 0xeade, 0x433d, 0x86, 0x2e, 0xc0, 0x1c, 0xdc, 0x29, 0x1f, 0x44 )
++
+ typedef struct {
+ 	efi_table_hdr_t hdr;
+ 	u64 fw_vendor;	/* physical addr of CHAR16 vendor string */
 -- 
 2.11.0
 

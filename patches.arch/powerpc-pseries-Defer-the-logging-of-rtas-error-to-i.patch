@@ -51,15 +51,15 @@ index 95c3567e1f34..41edaba61170 100644
 --- a/arch/powerpc/include/asm/paca.h
 +++ b/arch/powerpc/include/asm/paca.h
 @@ -56,6 +56,9 @@ struct paca_aux_struct {
- 	u64 exrfi[13] __aligned(0x80);
  	void *rfi_flush_fallback_area;
  	u64 l1d_flush_size;
+ #endif
 +#ifdef CONFIG_PPC_PSERIES
 +	u8 *mce_data_buf;		/* buffer to hold per cpu rtas errlog */
 +#endif /* CONFIG_PPC_PSERIES */
  };
- #endif
  
+ extern void copy_mm_to_paca(struct mm_struct *mm);
 diff --git a/arch/powerpc/platforms/pseries/ras.c b/arch/powerpc/platforms/pseries/ras.c
 index 9795e52bab3d..9c8107db9f50 100644
 --- a/arch/powerpc/platforms/pseries/ras.c
@@ -95,7 +95,7 @@ index 9795e52bab3d..9c8107db9f50 100644
  
 +static inline struct rtas_error_log *fwnmi_get_errlog(void)
 +{
-+	return (struct rtas_error_log *)local_paca->aux_ptr->mce_data_buf;
++	return (struct rtas_error_log *)local_paca->mce_data_buf;
 +}
 +
  /*
@@ -129,11 +129,11 @@ index 9795e52bab3d..9c8107db9f50 100644
 -	/* If it isn't an extended log we can use the per cpu 64bit buffer */
  	h = (struct rtas_error_log *)&savep[1];
 +	/* Use the per cpu buffer from paca to store rtas error log */
-+	memset(local_paca->aux_ptr->mce_data_buf, 0, RTAS_ERROR_LOG_MAX);
++	memset(local_paca->mce_data_buf, 0, RTAS_ERROR_LOG_MAX);
  	if (!rtas_error_extended(h)) {
 -		memcpy(this_cpu_ptr(&mce_data_buf), h, sizeof(__u64));
 -		errhdr = (struct rtas_error_log *)this_cpu_ptr(&mce_data_buf);
-+		memcpy(local_paca->aux_ptr->mce_data_buf, h, sizeof(__u64));
++		memcpy(local_paca->mce_data_buf, h, sizeof(__u64));
  	} else {
  		int len, error_log_length;
  
@@ -142,11 +142,11 @@ index 9795e52bab3d..9c8107db9f50 100644
 -		memset(global_mce_data_buf, 0, RTAS_ERROR_LOG_MAX);
 -		memcpy(global_mce_data_buf, h, len);
 -		errhdr = (struct rtas_error_log *)global_mce_data_buf;
-+		memcpy(local_paca->aux_ptr->mce_data_buf, h, len);
++		memcpy(local_paca->mce_data_buf, h, len);
  	}
  
 -	return errhdr;
-+	return (struct rtas_error_log *)local_paca->aux_ptr->mce_data_buf;
++	return (struct rtas_error_log *)local_paca->mce_data_buf;
  }
  
  /* Call this when done with the data returned by FWNMI_get_errinfo.
@@ -213,7 +213,7 @@ index 49c82268bb30..d934335ffe11 100644
 +	mce_data_buf = __va(memblock_alloc_base(RTAS_ERROR_LOG_MAX * nr_cpus,
 +					RTAS_ERROR_LOG_MAX, ppc64_rma_size));
 +	for_each_possible_cpu(i) {
-+		paca[i].aux_ptr->mce_data_buf = mce_data_buf +
++		paca[i].mce_data_buf = mce_data_buf +
 +						(RTAS_ERROR_LOG_MAX * i);
 +	}
  }

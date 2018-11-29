@@ -35,19 +35,15 @@ diff --git a/include/linux/irqchip/arm-gic-v3.h b/include/linux/irqchip/arm-gic-
 index d7c9249..cb9cb89 100644
 --- a/include/linux/irqchip/arm-gic-v3.h
 +++ b/include/linux/irqchip/arm-gic-v3.h
-@@ -382,8 +382,10 @@
+@@ -382,8 +382,6 @@
  #define ICH_HCR_EN			(1 << 0)
  #define ICH_HCR_UIE			(1 << 1)
  
 -#define ICH_VMCR_CTLR_SHIFT		0
 -#define ICH_VMCR_CTLR_MASK		(0x21f << ICH_VMCR_CTLR_SHIFT)
-+#define ICH_VMCR_CBPR_SHIFT		4
-+#define ICH_VMCR_CBPR_MASK		(1 << ICH_VMCR_CBPR_SHIFT)
-+#define ICH_VMCR_EOIM_SHIFT		9
-+#define ICH_VMCR_EOIM_MASK		(1 << ICH_VMCR_EOIM_SHIFT)
- #define ICH_VMCR_BPR1_SHIFT		18
- #define ICH_VMCR_BPR1_MASK		(7 << ICH_VMCR_BPR1_SHIFT)
- #define ICH_VMCR_BPR0_SHIFT		21
+ #define ICH_VMCR_CBPR_SHIFT		4
+ #define ICH_VMCR_CBPR_MASK		(1 << ICH_VMCR_CBPR_SHIFT)
+ #define ICH_VMCR_EOIM_SHIFT		9
 diff --git a/virt/kvm/arm/vgic/vgic-mmio-v2.c b/virt/kvm/arm/vgic/vgic-mmio-v2.c
 index fa68dd4..a3ad7ff 100644
 --- a/virt/kvm/arm/vgic/vgic-mmio-v2.c

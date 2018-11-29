@@ -61,14 +61,7 @@ Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
  		.min_field_value = 2,
  	},
  #endif /* CONFIG_AS_LSE && CONFIG_ARM64_LSE_ATOMICS */
-@@ -718,38 +721,40 @@ static const struct arm64_cpu_capabiliti
- 		.capability = ARM64_HAS_32BIT_EL0,
- 		.matches = has_cpuid_feature,
- 		.sys_reg = SYS_ID_AA64PFR0_EL1,
-+		.sign = FTR_UNSIGNED,
- 		.field_pos = ID_AA64PFR0_EL0_SHIFT,
- 		.min_field_value = ID_AA64PFR0_EL0_32BIT_64BIT,
- 	},
+@@ -718,32 +721,33 @@ static const struct arm64_cpu_capabiliti
  	{},
  };
  

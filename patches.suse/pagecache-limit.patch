@@ -1,7 +1,7 @@
 From: Markus Guertler <mguertler@novell.com>
 Subject: Introduce (optional) pagecache limit
 References: FATE309111
-Patch-mainline: Never
+Patch-mainline: Never, (why not? -jeffm)
 
 SLE12->SLE12-SP2
 - move the slab shrinking into shrink_all_zones because slab shrinkers
@@ -116,7 +116,7 @@ Acked-by: Michal Hocko <mhocko@suse.cz>
 --- a/include/linux/pagemap.h
 +++ b/include/linux/pagemap.h
 @@ -12,6 +12,7 @@
- #include <asm/uaccess.h>
+ #include <linux/uaccess.h>
  #include <linux/gfp.h>
  #include <linux/bitops.h>
 +#include <linux/swap.h>
@@ -235,8 +235,8 @@ Acked-by: Michal Hocko <mhocko@suse.cz>
 +		__shrink_page_cache(GFP_KERNEL);
 +
  	do {
- 		unsigned long nr_attempted = 0;
  		bool raise_priority = true;
+ 
 @@ -3366,6 +3373,12 @@ static void kswapd_try_to_sleep(pg_data_
  		prepare_to_wait(&pgdat->kswapd_wait, &wait, TASK_INTERRUPTIBLE);
  	}

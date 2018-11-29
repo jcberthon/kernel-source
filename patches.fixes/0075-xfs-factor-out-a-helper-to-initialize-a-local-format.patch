@@ -86,13 +86,13 @@ index 0ff8e6771795..560278e4ad41 100644
  {
 -	xfs_ifork_t	*ifp;
 -	int		real_size;
+ 
  	/*
  	 * If the size is unreasonable, then something
- 	 * is wrong and we just bail out rather than crash in
 @@ -254,22 +280,7 @@ xfs_iformat_local(
+ 				     ip->i_mount, dip);
  		return -EFSCORRUPTED;
  	}
- 
 -	ifp = XFS_IFORK_PTR(ip, whichfork);
 -	real_size = 0;
 -	if (size == 0)

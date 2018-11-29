@@ -73,9 +73,9 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  #include <linux/slab.h>
 +#include <linux/timekeeping.h>
  
- #include "ptp_private.h"
+ #include <linux/nospec.h>
  
-@@ -120,11 +121,13 @@ long ptp_ioctl(struct posix_clock *pc, u
+@@ -123,11 +124,13 @@ long ptp_ioctl(struct posix_clock *pc, u
  	struct ptp_clock_caps caps;
  	struct ptp_clock_request req;
  	struct ptp_sys_offset *sysoff = NULL;
@@ -89,7 +89,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  	int enable, err = 0;
  	unsigned int i, pin_index;
  
-@@ -138,6 +141,7 @@ long ptp_ioctl(struct posix_clock *pc, u
+@@ -141,6 +144,7 @@ long ptp_ioctl(struct posix_clock *pc, u
  		caps.n_per_out = ptp->info->n_per_out;
  		caps.pps = ptp->info->pps;
  		caps.n_pins = ptp->info->n_pins;
@@ -97,7 +97,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  		if (copy_to_user((void __user *)arg, &caps, sizeof(caps)))
  			err = -EFAULT;
  		break;
-@@ -180,6 +184,29 @@ long ptp_ioctl(struct posix_clock *pc, u
+@@ -183,6 +187,29 @@ long ptp_ioctl(struct posix_clock *pc, u
  		err = ops->enable(ops, &req, enable);
  		break;
  

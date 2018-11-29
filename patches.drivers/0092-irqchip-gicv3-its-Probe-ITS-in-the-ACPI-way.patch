@@ -35,9 +35,9 @@ index dde983e..a707f60 100644
 --- a/drivers/irqchip/Kconfig
 +++ b/drivers/irqchip/Kconfig
 @@ -37,6 +37,7 @@ config ARM_GIC_V3
- config ARM_GIC_V3_ITS
  	bool
- 	select PCI_MSI_IRQ_DOMAIN
+ 	depends on PCI
+ 	depends on PCI_MSI
 +	select ACPI_IORT if ACPI
  
  config ARM_NVIC

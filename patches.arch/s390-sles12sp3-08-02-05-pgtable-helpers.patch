@@ -30,12 +30,22 @@ Upstream-Description:
 Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
 Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 ---
- arch/s390/include/asm/pgtable.h |   63 +++++++++++++++++++++++++++++++---------
- 1 file changed, 49 insertions(+), 14 deletions(-)
+ arch/s390/include/asm/pgtable.h |   66 +++++++++++++++++++++++++++++++---------
+ 1 file changed, 52 insertions(+), 14 deletions(-)
 
 --- a/arch/s390/include/asm/pgtable.h
 +++ b/arch/s390/include/asm/pgtable.h
-@@ -1409,20 +1409,6 @@ static inline pmd_t *pmd_offset(pud_t *p
+@@ -270,6 +270,9 @@ static inline int is_module_addr(void *a
+ #define _REGION3_ENTRY		(_REGION_ENTRY_TYPE_R3 | _REGION_ENTRY_LENGTH)
+ #define _REGION3_ENTRY_EMPTY	(_REGION_ENTRY_TYPE_R3 | _REGION_ENTRY_INVALID)
+ 
++#define _REGION3_ENTRY_ORIGIN_LARGE ~0x7fffffffUL /* large page address	     */
++#define _REGION3_ENTRY_ORIGIN  ~0x7ffUL/* region third table origin	     */
++
+ #define _REGION3_ENTRY_RO	0x200	/* page protection bit		    */
+ #define _REGION3_ENTRY_DIRTY	0x2000	/* SW region dirty bit */
+ #define _REGION3_ENTRY_YOUNG	0x1000	/* SW region young bit */
+@@ -1396,20 +1399,6 @@ static inline pmd_t *pmd_offset(pud_t *p
  #define pte_offset_map(pmd, address) pte_offset_kernel(pmd, address)
  #define pte_unmap(pte) do { } while (0)
  
@@ -56,7 +66,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  static inline pmd_t pmd_wrprotect(pmd_t pmd)
  {
  	pmd_val(pmd) &= ~_SEGMENT_ENTRY_WRITE;
-@@ -1459,6 +1445,55 @@ static inline pmd_t pmd_mkdirty(pmd_t pm
+@@ -1446,6 +1435,55 @@ static inline pmd_t pmd_mkdirty(pmd_t pm
  	return pmd;
  }
  

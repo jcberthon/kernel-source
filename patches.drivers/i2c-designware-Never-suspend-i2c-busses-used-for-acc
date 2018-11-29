@@ -134,7 +134,7 @@ Signed-off-by: Takashi Iwai <tiwai@suse.de>
 @@ -331,9 +331,7 @@ static int dw_i2c_plat_resume(struct dev
  	struct dw_i2c_dev *i_dev = platform_get_drvdata(pdev);
  
- 	clk_prepare_enable(i_dev->clk);
+ 	i2c_dw_plat_prepare_clk(i_dev, true);
 -
 -	if (!i_dev->pm_runtime_disabled)
 -		i2c_dw_init(i_dev);

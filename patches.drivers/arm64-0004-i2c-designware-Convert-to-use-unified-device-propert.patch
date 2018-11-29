@@ -100,4 +100,4 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +		return -EINVAL;
  	}
  
- 	r = i2c_dw_probe_lock_support(dev);
+ 	r = i2c_dw_eval_lock_support(dev);

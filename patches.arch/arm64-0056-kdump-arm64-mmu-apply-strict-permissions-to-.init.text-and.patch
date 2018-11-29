@@ -106,7 +106,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	/*
  	 * External debuggers may need to write directly to the text
 @@ -459,9 +460,12 @@ static void __init map_kernel(pgd_t *pgd
- 	pgprot_t text_prot = true ? PAGE_KERNEL_ROX : PAGE_KERNEL_EXEC;
+ 	pgprot_t text_prot = rodata_enabled ? PAGE_KERNEL_ROX : PAGE_KERNEL_EXEC;
  
  	map_kernel_segment(pgd, _text, _etext, text_prot, &vmlinux_text);
 -	map_kernel_segment(pgd, __start_rodata, __init_begin, PAGE_KERNEL, &vmlinux_rodata);

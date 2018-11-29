@@ -50,7 +50,7 @@ index 021695e..19715d8 100644
 -	int len, k, off, valid_states = 0, bufflen = ALUA_RTPG_SIZE;
 +	int len, k, off, bufflen = ALUA_RTPG_SIZE;
  	unsigned char *desc, *buff;
- 	unsigned err = SCSI_DH_OK, retval;
+ 	unsigned err, retval;
  	unsigned int tpg_desc_tbl_off;
 @@ -548,6 +551,22 @@ static int alua_rtpg(struct scsi_device *sdev, struct alua_port_group *pg)
  	retval = submit_rtpg(sdev, buff, bufflen, &sense_hdr, pg->flags);

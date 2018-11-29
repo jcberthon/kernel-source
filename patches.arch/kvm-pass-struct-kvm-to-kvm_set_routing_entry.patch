@@ -101,14 +101,14 @@ index c6202199e505..3bcc9990adf7 100644
  		goto out;
  	if (e->type == KVM_IRQ_ROUTING_IRQCHIP)
 @@ -218,7 +219,7 @@ int kvm_set_irq_routing(struct kvm *kvm,
- 				goto free_entry;
- 			break;
+ 			kfree(e);
+ 			goto out;
  		}
 -		r = setup_routing_entry(new, e, ue);
 +		r = setup_routing_entry(kvm, new, e, ue);
- 		if (r)
- 			goto free_entry;
- 		++ue;
+ 		if (r) {
+ 			kfree(e);
+ 			goto out;
 -- 
 2.12.2
 

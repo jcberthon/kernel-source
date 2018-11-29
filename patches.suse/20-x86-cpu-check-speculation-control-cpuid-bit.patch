@@ -81,7 +81,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  #include <asm/msr.h>
  #include <asm/processor.h>
  #include <asm/spec_ctrl.h>
-@@ -38,3 +39,19 @@ void x86_enable_ibrs(void)
+@@ -38,3 +39,20 @@ void x86_enable_ibrs(void)
  		native_wrmsrl(MSR_IA32_SPEC_CTRL, SPEC_CTRL_IBRS);
  }
  EXPORT_SYMBOL_GPL(x86_enable_ibrs);
@@ -97,6 +97,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
 +			ibpb_state = 1;
 +
 +			setup_force_cpu_cap(X86_FEATURE_SPEC_CTRL);
++			setup_force_cpu_cap(X86_FEATURE_MSR_SPEC_CTRL);
 +		}
 +	}
 +}

@@ -284,7 +284,7 @@ Signed-off-by: Hannes Reinecke <hare@suse.de>
 -	bio.bi_io_vec = vecs;
 +	bio_init(&bio, vecs, nr_pages);
  	bio.bi_bdev = bdev;
- 	bio.bi_iter.bi_sector = pos >> blkbits;
+ 	bio.bi_iter.bi_sector = pos >> 9;
  	bio.bi_private = current;
 --- a/fs/logfs/dev_bdev.c
 +++ b/fs/logfs/dev_bdev.c

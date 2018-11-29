@@ -3,7 +3,7 @@ From: Alexander Graf <agraf@suse.de>
 Date: Mon, 23 Dec 2013 02:01:01 +0100
 Subject: [PATCH 3/4] powerpc: Add hack to make ppc64le work on hosts without
  ILE
-Patch-Mainline: no
+Patch-Mainline: no, <why?>
 
 Some hypervisors don't implement the H_SET_MODE hypercall that we
 need to set the ILE bit in LPCR which allows us to execute interrupts
@@ -189,9 +189,9 @@ index c1f1908..fb5d98c 100644
 +#include <asm/cacheflush.h>
 +#include <asm/cputable.h>
 +#include <asm/code-patching.h>
+ #include <asm/security_features.h>
  
  #include "pseries.h"
- 
 @@ -455,6 +458,40 @@ long pseries_big_endian_exceptions(void)
  	}
  }
