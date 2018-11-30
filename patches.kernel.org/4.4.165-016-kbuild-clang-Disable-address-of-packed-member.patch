@@ -1,0 +1,38 @@
+From: Matthias Kaehlcke <mka@chromium.org>
+Date: Fri, 21 Apr 2017 14:39:30 -0700
+Subject: [PATCH] kbuild: clang: Disable 'address-of-packed-member' warning
+References: bnc#1012382
+Patch-mainline: 4.4.165
+Git-commit: bfb38988c51e440fd7062ddf3157f7d8b1dd5d70
+
+commit bfb38988c51e440fd7062ddf3157f7d8b1dd5d70 upstream.
+
+clang generates plenty of these warnings in different parts of the code,
+to an extent that the warnings are little more than noise. Disable the
+'address-of-packed-member' warning.
+
+Signed-off-by: Matthias Kaehlcke <mka@chromium.org>
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ Makefile | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Makefile b/Makefile
+index 10cbd11f99ee..2e3cadb1bfc3 100644
+--- a/Makefile
++++ b/Makefile
+@@ -711,6 +711,7 @@ KBUILD_CPPFLAGS += $(call cc-option,-Qunused-arguments,)
+ KBUILD_CFLAGS += $(call cc-disable-warning, unused-variable)
+ KBUILD_CFLAGS += $(call cc-disable-warning, format-invalid-specifier)
+ KBUILD_CFLAGS += $(call cc-disable-warning, gnu)
++KBUILD_CFLAGS += $(call cc-disable-warning, address-of-packed-member)
+ # Quiet clang warning: comparison of unsigned expression < 0 is always false
+ KBUILD_CFLAGS += $(call cc-disable-warning, tautological-compare)
+ # CLANG uses a _MergedGlobals as optimization, but this breaks modpost, as the
+-- 
+2.19.2
+

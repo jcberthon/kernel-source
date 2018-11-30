@@ -21,14 +21,12 @@ Reviewed-by: Fenghua Yu <fenghua.yu@intel.com>
 Signed-off-by: Shaohua Li <shli@fb.com>
 Signed-off-by: Hannes Reinecke <hare@suse.de>
 ---
- lib/raid6/test/Makefile | 5 ++++-
+ lib/raid6/test/Makefile |    5 ++++-
  1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/lib/raid6/test/Makefile b/lib/raid6/test/Makefile
-index 29090f3..2c7b60e 100644
 --- a/lib/raid6/test/Makefile
 +++ b/lib/raid6/test/Makefile
-@@ -32,10 +32,13 @@ ifeq ($(ARCH),arm64)
+@@ -32,10 +32,13 @@ ifeq ($(ARCH),aarch64)
  endif
  
  ifeq ($(IS_X86),yes)
@@ -41,8 +39,5 @@ index 29090f3..2c7b60e 100644
 +		    gcc -c -x assembler - >&/dev/null &&        \
 +		    rm ./-.o && echo -DCONFIG_AS_AVX512=1)
  else ifeq ($(HAS_NEON),yes)
-         OBJS   += neon.o neon1.o neon2.o neon4.o neon8.o
+         OBJS   += neon.o neon1.o neon2.o neon4.o neon8.o recov_neon.o recov_neon_inner.o
          CFLAGS += -DCONFIG_KERNEL_MODE_NEON=1
--- 
-1.8.5.6
-

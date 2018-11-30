@@ -33,10 +33,10 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 
 --- a/drivers/firmware/efi/libstub/arm64-stub.c
 +++ b/drivers/firmware/efi/libstub/arm64-stub.c
-@@ -12,11 +12,31 @@
+@@ -20,11 +20,31 @@
+ 
  #include <linux/efi.h>
  #include <asm/efi.h>
- #include <asm/sections.h>
 +#include <asm/sysreg.h>
  
  #include "efistub.h"

@@ -1,13 +1,13 @@
 From d6b94b7aafe161a4ea4bccff3aeecf701187b0d7 Mon Sep 17 00:00:00 2001
 From: Ram Pai <linuxram@us.ibm.com>
 Date: Fri, 12 Jan 2018 19:25:21 +0100
-Subject: [PATCH] powerpc/rfi-flush: Move RFI flush fields out of the
- paca (unbreak kABI)
+Subject: [PATCH] powerpc/rfi-flush: Move RFI flush and STF barrier fields out
+of the paca (unbreak kABI)
 
 References: bsc#1068032, bsc#1075087
 Patch-mainline: no, kabi
 
-In order to avoid breaking kABI on distros that use it, we move the RFI
+In order to avoid breaking kABI on distros that use it, we move the RFI and STF
 related fields out of the paca and into an auxillary structure.
 
 We place the pointer to the auxillary structure in a hole that exists
