@@ -16,18 +16,18 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 
 --- a/fs/btrfs/disk-io.c
 +++ b/fs/btrfs/disk-io.c
-@@ -4361,7 +4361,7 @@ again:
- 		if (ret)
+@@ -4373,7 +4373,7 @@ again:
  			break;
+ 		}
  
 -		clear_extent_dirty(unpin, start, end, GFP_NOFS);
 +		clear_extent_dirty(unpin, start, end);
  		btrfs_error_unpin_extent_range(root, start, end);
+ 		mutex_unlock(&fs_info->unused_bg_unpin_mutex);
  		cond_resched();
- 	}
 --- a/fs/btrfs/extent-tree.c
 +++ b/fs/btrfs/extent-tree.c
-@@ -6502,7 +6502,7 @@ int btrfs_finish_extent_commit(struct bt
+@@ -6504,7 +6504,7 @@ int btrfs_finish_extent_commit(struct bt
  			ret = btrfs_discard_extent(root, start,
  						   end + 1 - start, NULL);
  

@@ -1,0 +1,71 @@
+From d1c484c3148aec08f67fc2e47089250a8b70cfe6 Mon Sep 17 00:00:00 2001
+From: Joel Stanley <joel@jms.id.au>
+Date: Tue, 21 Aug 2018 11:44:28 +0930
+Subject: [PATCH] powerpc/powernv: Don't select the cpufreq governors
+
+References: bsc#1066223
+Patch-mainline: v4.20-rc1
+Git-commit: b0dc0f8618e87f1b2c7f04b977fda16e961bbec1
+
+Deciding wich govenors should be built into the kernel can be left to
+users to configure.
+
+Fixes: 81f359027a3a ("cpufreq: powernv: Select CPUFreq related Kconfig options for powernv")
+Signed-off-by: Joel Stanley <joel@jms.id.au>
+[mpe: Update powernv/ppc64 defconfigs to enable them by default]
+Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/configs/ppc64_defconfig   | 4 ++++
+ arch/powerpc/configs/pseries_defconfig | 3 +++
+ arch/powerpc/platforms/powernv/Kconfig | 5 -----
+ 3 files changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/arch/powerpc/configs/ppc64_defconfig b/arch/powerpc/configs/ppc64_defconfig
+index 2c041b535a64..3963bd2667a5 100644
+--- a/arch/powerpc/configs/ppc64_defconfig
++++ b/arch/powerpc/configs/ppc64_defconfig
+@@ -39,6 +39,10 @@ CONFIG_PPC_IBM_CELL_BLADE=y
+ CONFIG_PPC_CELL_QPACE=y
+ CONFIG_RTAS_FLASH=m
+ CONFIG_IBMEBUS=y
++CONFIG_CPU_FREQ_DEFAULT_GOV_ONDEMAND=y
++CONFIG_CPU_FREQ_GOV_POWERSAVE=y
++CONFIG_CPU_FREQ_GOV_USERSPACE=y
++CONFIG_CPU_FREQ_GOV_CONSERVATIVE=y
+ CONFIG_CPU_FREQ_PMAC64=y
+ CONFIG_CPU_FREQ_DEFAULT_GOV_ONDEMAND=y
+ CONFIG_HZ_100=y
+diff --git a/arch/powerpc/configs/pseries_defconfig b/arch/powerpc/configs/pseries_defconfig
+index 36871a4bfa54..01a0ee90eb94 100644
+--- a/arch/powerpc/configs/pseries_defconfig
++++ b/arch/powerpc/configs/pseries_defconfig
+@@ -46,6 +46,9 @@ CONFIG_DTL=y
+ CONFIG_RTAS_FLASH=m
+ CONFIG_IBMEBUS=y
+ CONFIG_CPU_FREQ_DEFAULT_GOV_ONDEMAND=y
++CONFIG_CPU_FREQ_GOV_POWERSAVE=y
++CONFIG_CPU_FREQ_GOV_USERSPACE=y
++CONFIG_CPU_FREQ_GOV_CONSERVATIVE=y
+ CONFIG_HZ_100=y
+ CONFIG_BINFMT_MISC=m
+ CONFIG_PPC_TRANSACTIONAL_MEM=y
+diff --git a/arch/powerpc/platforms/powernv/Kconfig b/arch/powerpc/platforms/powernv/Kconfig
+index 604190cab522..4ff0a27e33e3 100644
+--- a/arch/powerpc/platforms/powernv/Kconfig
++++ b/arch/powerpc/platforms/powernv/Kconfig
+@@ -12,11 +12,6 @@ config PPC_POWERNV
+ 	select PPC_SCOM
+ 	select ARCH_RANDOM
+ 	select CPU_FREQ
+-	select CPU_FREQ_GOV_PERFORMANCE
+-	select CPU_FREQ_GOV_POWERSAVE
+-	select CPU_FREQ_GOV_USERSPACE
+-	select CPU_FREQ_GOV_ONDEMAND
+-	select CPU_FREQ_GOV_CONSERVATIVE
+ 	select PPC_DOORBELL
+ 	default y
+ 
+-- 
+2.19.2
+
