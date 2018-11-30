@@ -4,7 +4,7 @@ Subject: [PATCH] mm: migration: fix migration of huge PMD shared pages
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-References: bnc#1012382
+References: bnc#1012382, bnc#1086423
 Patch-mainline: 4.4.164
 Git-commit: 017b1660df89f5fb4bfe66c34e35f7d2031100c7
 
