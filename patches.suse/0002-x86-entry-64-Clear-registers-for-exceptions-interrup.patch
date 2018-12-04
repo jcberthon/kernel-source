@@ -32,8 +32,8 @@ Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Jessica Yu <jeyu@suse.de>
 ---
  arch/x86/entry/calling.h  |   19 +++++++++++++++++++
- arch/x86/entry/entry_64.S |   10 +++++++---
- 2 files changed, 26 insertions(+), 3 deletions(-)
+ arch/x86/entry/entry_64.S |    9 +++++++--
+ 2 files changed, 26 insertions(+), 2 deletions(-)
 
 --- a/arch/x86/entry/calling.h
 +++ b/arch/x86/entry/calling.h
@@ -65,7 +65,7 @@ Signed-off-by: Jessica Yu <jeyu@suse.de>
  	movq 6*8(%rsp), %r11
 --- a/arch/x86/entry/entry_64.S
 +++ b/arch/x86/entry/entry_64.S
-@@ -577,6 +577,7 @@ END(irq_entries_start)
+@@ -563,6 +563,7 @@ END(irq_entries_start)
  	ALLOC_PT_GPREGS_ON_STACK
  	SAVE_C_REGS
  	SAVE_EXTRA_REGS
@@ -73,7 +73,7 @@ Signed-off-by: Jessica Yu <jeyu@suse.de>
  
  	testb	$3, CS(%rsp)
  	jz	1f
-@@ -689,7 +690,6 @@ retint_kernel:
+@@ -675,7 +676,6 @@ retint_kernel:
   */
  GLOBAL(restore_regs_and_iret)
  	RESTORE_EXTRA_REGS
@@ -81,7 +81,7 @@ Signed-off-by: Jessica Yu <jeyu@suse.de>
  	RESTORE_C_REGS
  	REMOVE_PT_GPREGS_FROM_STACK 8
  	INTERRUPT_RETURN
-@@ -1083,6 +1083,7 @@ ENTRY(xen_failsafe_callback)
+@@ -1069,6 +1069,7 @@ ENTRY(xen_failsafe_callback)
  	ALLOC_PT_GPREGS_ON_STACK
  	SAVE_C_REGS
  	SAVE_EXTRA_REGS
@@ -89,7 +89,7 @@ Signed-off-by: Jessica Yu <jeyu@suse.de>
  	jmp	error_exit
  END(xen_failsafe_callback)
  
-@@ -1130,6 +1131,7 @@ ENTRY(paranoid_entry)
+@@ -1116,6 +1117,7 @@ ENTRY(paranoid_entry)
  	cld
  	SAVE_C_REGS 8
  	SAVE_EXTRA_REGS 8
@@ -97,7 +97,7 @@ Signed-off-by: Jessica Yu <jeyu@suse.de>
  	movl	$1, %ebx
  	movl	$MSR_GS_BASE, %ecx
  	rdmsr
-@@ -1204,6 +1206,7 @@ ENTRY(error_entry)
+@@ -1190,6 +1192,7 @@ ENTRY(error_entry)
  	cld
  	SAVE_C_REGS 8
  	SAVE_EXTRA_REGS 8
@@ -105,15 +105,7 @@ Signed-off-by: Jessica Yu <jeyu@suse.de>
  	/*
  	 * error_entry() always returns with a kernel gsbase and
  	 * CR3.  We must also have a kernel CR3/gsbase before
-@@ -1211,7 +1214,6 @@ ENTRY(error_entry)
- 	 * the kernel CR3 here.
- 	 */
- 	SWITCH_KERNEL_CR3
--	xorl	%ebx, %ebx
- 	testb	$3, CS+8(%rsp)
- 	jz	.Lerror_kernelspace
- 
-@@ -1392,6 +1394,7 @@ ENTRY(nmi)
+@@ -1377,6 +1380,7 @@ ENTRY(nmi)
  	pushq	%r13		/* pt_regs->r13 */
  	pushq	%r14		/* pt_regs->r14 */
  	pushq	%r15		/* pt_regs->r15 */
@@ -121,7 +113,7 @@ Signed-off-by: Jessica Yu <jeyu@suse.de>
  
  	/*
  	 * At this point we no longer need to worry about stack damage
-@@ -1414,7 +1417,7 @@ ENTRY(nmi)
+@@ -1399,7 +1403,7 @@ ENTRY(nmi)
  	 * switch to user CR3: we might be going back to kernel code
  	 * that had a user CR3 set.
  	 */
@@ -130,7 +122,7 @@ Signed-off-by: Jessica Yu <jeyu@suse.de>
  
  .Lnmi_from_kernel:
  	/*
-@@ -1618,6 +1621,7 @@ end_repeat_nmi:
+@@ -1603,6 +1607,7 @@ end_repeat_nmi:
  	cld
  	SAVE_C_REGS
  	SAVE_EXTRA_REGS
