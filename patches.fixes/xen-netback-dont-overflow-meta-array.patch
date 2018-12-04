@@ -1,0 +1,30 @@
+From: Juergen Gross <jgross@suse.com>
+Patch-mainline: Never, code rework in 4.9
+References: bnc#1099523
+Subject: xen/netback: dont overflow meta array
+
+When filling rx ring slots it isn't enough to verify there are enough
+ring slots available. The grant-op meta array needs to have enough
+free entries available, too.
+
+In case the frontend is draining the rx ring fast enough the meta array
+can overflow in xenvif_rx_action() as one invocation of the function
+could fill up the ring more than once.
+
+Avoid that by leaving xenvif_rx_action() early in case the meta array
+is full. As each call of xenvif_gop_skb() can produce up to 2 meta
+array entries it is safe to do another iteration if at least 2 entries
+are available.
+
+Signed-off-by: Juergen Gross <jgross@suse.com>
+---
+--- a/drivers/net/xen-netback/netback.c
++++ b/drivers/net/xen-netback/netback.c
+@@ -568,6 +568,7 @@ static void xenvif_rx_action(struct xenv
+ 	skb_queue_head_init(&rxq);
+ 
+ 	while (xenvif_rx_ring_slots_available(queue)
++	       && npo.meta_prod < ARRAY_SIZE(queue->meta) - 1
+ 	       && (skb = xenvif_rx_dequeue(queue)) != NULL) {
+ 		queue->last_rx_time = jiffies;
+ 
