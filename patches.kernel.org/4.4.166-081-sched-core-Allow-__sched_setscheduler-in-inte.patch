@@ -1,9 +1,12 @@
 From: "Steven Rostedt (VMware)" <rostedt@goodmis.org>
 Date: Thu, 9 Mar 2017 10:18:42 -0500
-Subject: sched/core: Allow __sched_setscheduler() in interrupts when PI is not used
+Subject: [PATCH] sched/core: Allow __sched_setscheduler() in interrupts when
+ PI is not used
+Patch-mainline: 4.4.166
+References: bnc#1012382 bnc#1022476
 Git-commit: 896bbb2522587e3b8eb2a0d204d43ccc1042a00d
-Patch-mainline: v4.13-rc1
-References: bnc#1022476
+
+commit 896bbb2522587e3b8eb2a0d204d43ccc1042a00d upstream.
 
 When priority inheritance was added back in 2.6.18 to sched_setscheduler(), it
 added a path to taking an rt-mutex wait_lock, which is not IRQ safe. As PI
@@ -38,16 +41,19 @@ Cc: Thomas Gleixner <tglx@linutronix.de>
 Fixes: dbc7f069b93a ("sched: Use replace normalize_task() with __sched_setscheduler()")
 Link: http://lkml.kernel.org/r/20170308124654.10e598f2@gandalf.local.home
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- kernel/sched/core.c |    4 ++--
+ kernel/sched/core.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
+diff --git a/kernel/sched/core.c b/kernel/sched/core.c
+index 4743e1f2a3d1..d0618951014b 100644
 --- a/kernel/sched/core.c
 +++ b/kernel/sched/core.c
-@@ -4065,8 +4065,8 @@ static int __sched_setscheduler(struct t
+@@ -3822,8 +3822,8 @@ static int __sched_setscheduler(struct task_struct *p,
+ 	struct rq *rq;
  	int reset_on_fork;
- 	int queue_flags = DEQUEUE_SAVE | DEQUEUE_MOVE;
  
 -	/* may grab non-irq protected spin_locks */
 -	BUG_ON(in_interrupt());
@@ -56,3 +62,6 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  recheck:
  	/* double check policy once rq lock held */
  	if (policy < 0) {
+-- 
+2.19.2
+

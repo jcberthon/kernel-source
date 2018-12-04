@@ -1,9 +1,11 @@
 From: Mauricio Faria de Oliveira <mauricfo@linux.vnet.ibm.com>
 Date: Mon, 7 Nov 2016 17:53:30 -0200
-Subject: scsi: qla2xxx: do not queue commands when unloading
-References: bsc#1019675,FATE#321701
+Subject: [PATCH] scsi: qla2xxx: do not queue commands when unloading
+Patch-mainline: 4.4.166
+References: FATE#321701 bnc#1012382 bsc#1019675
 Git-commit: 04dfaa53a0b6e66b328a5bc549e3af8f8b6eac02
-Patch-Mainline: v4.9-rc5
+
+commit 04dfaa53a0b6e66b328a5bc549e3af8f8b6eac02 upstream.
 
 When the driver is unloading, in qla2x00_remove_one(), there is a single
 call/point in time to abort ongoing commands, qla2x00_abort_all_cmds(),
@@ -23,16 +25,18 @@ So, fail commands in qla2xxx_queuecommand() if the UNLOADING bit is set.
 Signed-off-by: Mauricio Faria de Oliveira <mauricfo@linux.vnet.ibm.com>
 Acked-by: Himanshu Madhani <himanshu.madhani@cavium.com>
 Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
-Signed-off-by: Hannes Reinecke <hare@suse.de>
+Signed-off-by: Amit Pundir <amit.pundir@linaro.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  drivers/scsi/qla2xxx/qla_os.c | 5 +++++
  1 file changed, 5 insertions(+)
 
 diff --git a/drivers/scsi/qla2xxx/qla_os.c b/drivers/scsi/qla2xxx/qla_os.c
-index f8ebd43..0f4ade1 100644
+index 18b19744398a..ff5df33fc740 100644
 --- a/drivers/scsi/qla2xxx/qla_os.c
 +++ b/drivers/scsi/qla2xxx/qla_os.c
-@@ -715,6 +715,11 @@ qla2xxx_queuecommand(struct Scsi_Host *host, struct scsi_cmnd *cmd)
+@@ -685,6 +685,11 @@ qla2xxx_queuecommand(struct Scsi_Host *host, struct scsi_cmnd *cmd)
  	srb_t *sp;
  	int rval;
  
@@ -45,5 +49,5 @@ index f8ebd43..0f4ade1 100644
  		if (ha->flags.pci_channel_io_perm_failure) {
  			ql_dbg(ql_dbg_aer, vha, 0x9010,
 -- 
-1.8.5.6
+2.19.2
 

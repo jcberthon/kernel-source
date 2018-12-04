@@ -1,9 +1,11 @@
 From: Thomas Zimmermann <tzimmermann@suse.de>
-Date: Tue, 13 Nov 2018 09:37:35 +0100
-Subject: drm/ast: Remove existing framebuffers before loading driver
+Date: Thu, 15 Nov 2018 11:42:16 +0100
+Subject: [PATCH] drm/ast: Remove existing framebuffers before loading driver
+Patch-mainline: 4.4.166
+References: bnc#1012382 boo#1112963 bsc#1111174
 Git-commit: 5478ad10e7850ce3d8b7056db05ddfa3c9ddad9a
-Patch-mainline: v4.20
-References: bsc#1111174 boo#1112963
+
+commit 5478ad10e7850ce3d8b7056db05ddfa3c9ddad9a upstream.
 
 If vesafb attaches to the AST device, it configures the framebuffer memory
 for uncached access by default. When ast.ko later tries to attach itself to
@@ -14,22 +16,24 @@ results in reduced performance.
 Removing the framebuffer's configuration before loding the AST driver fixes
 the problem. Other DRM drivers already contain equivalent code.
 
-Backporting notes:
-* Call remove_conflicting_framebuffers instead of
-  drm_fb_helper_remove_conflicting_framebuffers which did not exist
-  back then.
-
 Link: https://bugzilla.opensuse.org/show_bug.cgi?id=1112963
 Signed-off-by: Thomas Zimmermann <tzimmermann@suse.de>
+Cc: <stable@vger.kernel.org>
 Tested-by: Y.C. Chen <yc_chen@aspeedtech.com>
-Acked-by: Thomas Zimmermann <tzimmermann@suse.de>
+Reviewed-by: Jean Delvare <jdelvare@suse.de>
+Tested-by: Jean Delvare <jdelvare@suse.de>
+Signed-off-by: Dave Airlie <airlied@redhat.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- drivers/gpu/drm/ast/ast_drv.c |   21 +++++++++++++++++++++
+ drivers/gpu/drm/ast/ast_drv.c | 21 +++++++++++++++++++++
  1 file changed, 21 insertions(+)
 
+diff --git a/drivers/gpu/drm/ast/ast_drv.c b/drivers/gpu/drm/ast/ast_drv.c
+index 9a32d9dfdd26..011700262824 100644
 --- a/drivers/gpu/drm/ast/ast_drv.c
 +++ b/drivers/gpu/drm/ast/ast_drv.c
-@@ -60,8 +60,29 @@ static const struct pci_device_id pciidl
+@@ -60,8 +60,29 @@ static const struct pci_device_id pciidlist[] = {
  
  MODULE_DEVICE_TABLE(pci, pciidlist);
  
@@ -59,3 +63,6 @@ Acked-by: Thomas Zimmermann <tzimmermann@suse.de>
  	return drm_get_pci_dev(pdev, ent, &driver);
  }
  
+-- 
+2.19.2
+
