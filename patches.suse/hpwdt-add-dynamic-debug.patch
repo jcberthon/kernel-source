@@ -1,0 +1,49 @@
+Subject: hpwdt add dynamic debugging
+From: David Bond <dbond@suse.com>
+Patch-mainline: never, SUSE specific
+References: bsc#1114417
+
+Patial port of mainline commit ccfd69213d806 to cover only the portions
+present in 12SP3.
+
+Signed-off-by: David Bond <dbond@suse.com>
+
+
+diff --git a/drivers/watchdog/hpwdt.c b/drivers/watchdog/hpwdt.c
+index 9867111aeae0..03c8502beac9 100644
+--- a/drivers/watchdog/hpwdt.c
++++ b/drivers/watchdog/hpwdt.c
+@@ -59,6 +59,7 @@ static int hpwdt_start(struct watchdog_device *wdd)
+ {
+ 	int reload = SECS_TO_TICKS(wdd->timeout);
+ 
++	dev_dbg(wdd->parent, "start watchdog 0x%08x\n", reload);
+ 	iowrite16(reload, hpwdt_timer_reg);
+ 	iowrite8(0x85, hpwdt_timer_con);
+ 
+@@ -69,6 +70,8 @@ static void hpwdt_stop(void)
+ {
+ 	unsigned long data;
+ 
++	pr_debug("stop  watchdog\n");
++
+ 	data = ioread8(hpwdt_timer_con);
+ 	data &= 0xFE;
+ 	iowrite8(data, hpwdt_timer_con);
+@@ -85,6 +88,7 @@ static int hpwdt_ping(struct watchdog_device *wdd)
+ {
+ 	int reload = SECS_TO_TICKS(wdd->timeout);
+ 
++	dev_dbg(wdd->parent, "ping  watchdog 0x%08x\n", reload);
+ 	iowrite16(reload, hpwdt_timer_reg);
+ 
+ 	return 0;
+@@ -97,6 +101,8 @@ static unsigned int hpwdt_gettimeleft(struct watchdog_device *wdd)
+ 
+ static int hpwdt_settimeout(struct watchdog_device *wdd, unsigned int val)
+ {
++	dev_dbg(wdd->parent, "set_timeout = %d\n", val);
++
+ 	wdd->timeout = val;
+ 	hpwdt_ping(wdd);
+ 

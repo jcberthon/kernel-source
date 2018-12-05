@@ -85,7 +85,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
 
 --- a/include/linux/sched.h
 +++ b/include/linux/sched.h
-@@ -1342,6 +1342,10 @@ struct sched_rt_entity {
+@@ -1301,6 +1301,10 @@ struct sched_rt_entity {
  	unsigned long timeout;
  	unsigned long watchdog_stamp;
  	unsigned int time_slice;
@@ -98,7 +98,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  #ifdef CONFIG_RT_GROUP_SCHED
 --- a/kernel/sched/core.c
 +++ b/kernel/sched/core.c
-@@ -2245,6 +2245,10 @@ static void __sched_fork(unsigned long c
+@@ -2254,6 +2254,10 @@ static void __sched_fork(unsigned long c
  	__dl_clear_params(p);
  
  	INIT_LIST_HEAD(&p->rt.run_list);
@@ -109,7 +109,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  
  #ifdef CONFIG_PREEMPT_NOTIFIERS
  	INIT_HLIST_HEAD(&p->preempt_notifiers);
-@@ -3612,7 +3616,7 @@ EXPORT_SYMBOL(default_wake_function);
+@@ -3582,7 +3586,7 @@ EXPORT_SYMBOL(default_wake_function);
   */
  void rt_mutex_setprio(struct task_struct *p, int prio)
  {
@@ -118,7 +118,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  	struct rq *rq;
  	const struct sched_class *prev_class;
  
-@@ -3640,11 +3644,15 @@ void rt_mutex_setprio(struct task_struct
+@@ -3610,11 +3614,15 @@ void rt_mutex_setprio(struct task_struct
  
  	trace_sched_pi_setprio(p, prio);
  	oldprio = p->prio;
@@ -135,7 +135,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  	if (running)
  		put_prev_task(rq, p);
  
-@@ -3662,7 +3670,7 @@ void rt_mutex_setprio(struct task_struct
+@@ -3632,7 +3640,7 @@ void rt_mutex_setprio(struct task_struct
  		if (!dl_prio(p->normal_prio) ||
  		    (pi_task && dl_entity_preempt(&pi_task->dl, &p->dl))) {
  			p->dl.dl_boosted = 1;
@@ -144,7 +144,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  		} else
  			p->dl.dl_boosted = 0;
  		p->sched_class = &dl_sched_class;
-@@ -3670,7 +3678,7 @@ void rt_mutex_setprio(struct task_struct
+@@ -3640,7 +3648,7 @@ void rt_mutex_setprio(struct task_struct
  		if (dl_prio(oldprio))
  			p->dl.dl_boosted = 0;
  		if (oldprio < prio)
@@ -153,7 +153,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  		p->sched_class = &rt_sched_class;
  	} else {
  		if (dl_prio(oldprio))
-@@ -3685,7 +3693,7 @@ void rt_mutex_setprio(struct task_struct
+@@ -3655,7 +3663,7 @@ void rt_mutex_setprio(struct task_struct
  	if (running)
  		p->sched_class->set_curr_task(rq);
  	if (queued)
@@ -162,15 +162,15 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  
  	check_class_changed(rq, p, prev_class, oldprio);
  out_unlock:
-@@ -4041,6 +4049,7 @@ static int __sched_setscheduler(struct t
+@@ -4011,6 +4019,7 @@ static int __sched_setscheduler(struct t
  	const struct sched_class *prev_class;
  	struct rq *rq;
  	int reset_on_fork;
 +	int queue_flags = DEQUEUE_SAVE | DEQUEUE_MOVE;
  
- 	/* may grab non-irq protected spin_locks */
- 	BUG_ON(in_interrupt());
-@@ -4223,17 +4232,14 @@ static int __sched_setscheduler(struct t
+ 	/* The pi code expects interrupts enabled */
+ 	BUG_ON(pi && in_interrupt());
+@@ -4193,17 +4202,14 @@ change:
  		 * itself.
  		 */
  		new_effective_prio = rt_mutex_get_effective_prio(p, newprio);
@@ -191,7 +191,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  	if (running)
  		put_prev_task(rq, p);
  
-@@ -4243,15 +4249,14 @@ static int __sched_setscheduler(struct t
+@@ -4213,15 +4219,14 @@ change:
  	if (running)
  		p->sched_class->set_curr_task(rq);
  	if (queued) {
@@ -210,7 +210,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  	}
  
  	check_class_changed(rq, p, prev_class, oldprio);
-@@ -8091,7 +8096,7 @@ void sched_move_task(struct task_struct
+@@ -8039,7 +8044,7 @@ void sched_move_task(struct task_struct
  	queued = task_on_rq_queued(tsk);
  
  	if (queued)
@@ -219,7 +219,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  	if (unlikely(running))
  		put_prev_task(rq, tsk);
  
-@@ -8100,7 +8105,7 @@ void sched_move_task(struct task_struct
+@@ -8063,7 +8068,7 @@ void sched_move_task(struct task_struct
  	if (unlikely(running))
  		tsk->sched_class->set_curr_task(rq);
  	if (queued)
@@ -230,7 +230,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  }
 --- a/kernel/sched/rt.c
 +++ b/kernel/sched/rt.c
-@@ -436,7 +436,7 @@ static void dequeue_top_rt_rq(struct rt_
+@@ -425,7 +425,7 @@ static void dequeue_top_rt_rq(struct rt_
  
  static inline int on_rt_rq(struct sched_rt_entity *rt_se)
  {
@@ -239,7 +239,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  }
  
  #ifdef CONFIG_RT_GROUP_SCHED
-@@ -482,8 +482,8 @@ static inline struct rt_rq *group_rt_rq(
+@@ -471,8 +471,8 @@ static inline struct rt_rq *group_rt_rq(
  	return rt_se->my_q;
  }
  
@@ -250,7 +250,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  
  static void sched_rt_rq_enqueue(struct rt_rq *rt_rq)
  {
-@@ -499,7 +499,7 @@ static void sched_rt_rq_enqueue(struct r
+@@ -488,7 +488,7 @@ static void sched_rt_rq_enqueue(struct r
  		if (!rt_se)
  			enqueue_top_rt_rq(rt_rq);
  		else if (!on_rt_rq(rt_se))
@@ -259,7 +259,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  
  		if (rt_rq->highest_prio.curr < curr->prio)
  			resched_curr(rq);
-@@ -516,7 +516,7 @@ static void sched_rt_rq_dequeue(struct r
+@@ -505,7 +505,7 @@ static void sched_rt_rq_dequeue(struct r
  	if (!rt_se)
  		dequeue_top_rt_rq(rt_rq);
  	else if (on_rt_rq(rt_se))
@@ -268,7 +268,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  }
  
  static inline int rt_rq_throttled(struct rt_rq *rt_rq)
-@@ -1166,7 +1166,30 @@ void dec_rt_tasks(struct sched_rt_entity
+@@ -1157,7 +1157,30 @@ void dec_rt_tasks(struct sched_rt_entity
  	dec_rt_group(rt_se, rt_rq);
  }
  
@@ -300,7 +300,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  {
  	struct rt_rq *rt_rq = rt_rq_of_se(rt_se);
  	struct rt_prio_array *array = &rt_rq->active;
-@@ -1179,26 +1202,37 @@ static void __enqueue_rt_entity(struct s
+@@ -1170,26 +1193,37 @@ static void __enqueue_rt_entity(struct s
  	 * get throttled and the current group doesn't have any other
  	 * active members.
  	 */
@@ -348,7 +348,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  
  	dec_rt_tasks(rt_se, rt_rq);
  }
-@@ -1207,7 +1241,7 @@ static void __dequeue_rt_entity(struct s
+@@ -1198,7 +1232,7 @@ static void __dequeue_rt_entity(struct s
   * Because the prio of an upper entry depends on the lower
   * entries, we must remove entries top - down.
   */
@@ -357,7 +357,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  {
  	struct sched_rt_entity *back = NULL;
  
-@@ -1220,31 +1254,31 @@ static void dequeue_rt_stack(struct sche
+@@ -1211,31 +1245,31 @@ static void dequeue_rt_stack(struct sche
  
  	for (rt_se = back; rt_se; rt_se = rt_se->back) {
  		if (on_rt_rq(rt_se))
@@ -396,7 +396,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  	}
  	enqueue_top_rt_rq(&rq->rt);
  }
-@@ -1260,7 +1294,7 @@ enqueue_task_rt(struct rq *rq, struct ta
+@@ -1251,7 +1285,7 @@ enqueue_task_rt(struct rq *rq, struct ta
  	if (flags & ENQUEUE_WAKEUP)
  		rt_se->timeout = 0;
  
@@ -405,7 +405,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  
  	if (!task_current(rq, p) && p->nr_cpus_allowed > 1)
  		enqueue_pushable_task(rq, p);
-@@ -1271,7 +1305,7 @@ static void dequeue_task_rt(struct rq *r
+@@ -1262,7 +1296,7 @@ static void dequeue_task_rt(struct rq *r
  	struct sched_rt_entity *rt_se = &p->rt;
  
  	update_curr_rt(rq);
@@ -416,7 +416,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  }
 --- a/kernel/sched/sched.h
 +++ b/kernel/sched/sched.h
-@@ -1138,18 +1138,40 @@ static inline void finish_lock_switch(st
+@@ -1145,18 +1145,40 @@ static inline void finish_lock_switch(st
  extern const int sched_prio_to_weight[40];
  extern const u32 sched_prio_to_wmult[40];
  
