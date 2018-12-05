@@ -1,9 +1,11 @@
 From: Andy Lutomirski <luto@kernel.org>
 Date: Sun, 22 Jul 2018 11:05:09 -0700
-Subject: x86/entry/64: Remove %ebx handling from error_entry/exit
-Patch-mainline: v4.18-rc8
+Subject: [PATCH] x86/entry/64: Remove %ebx handling from error_entry/exit
+Patch-mainline: 4.4.166
+References: bnc#1012382 bnc#1102715
 Git-commit: b3681dd548d06deb2e1573890829dff4b15abf46
-References: bnc#1102715
+
+[ Upstream commit b3681dd548d06deb2e1573890829dff4b15abf46 ]
 
 error_entry and error_exit communicate the user vs. kernel status of
 the frame using %ebx.  This is unnecessary -- the information is in
@@ -65,16 +67,17 @@ Cc: xen-devel@lists.xenproject.org
 Fixes: 3ac6d8c787b8 ("x86/entry/64: Clear registers for exceptions/interrupts, to reduce speculation attack surface")
 Link: http://lkml.kernel.org/r/b5010a090d3586b2d6e06c7ad3ec5542d1241c45.1532282627.git.luto@kernel.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Juergen Gross <jgross@suse.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- arch/x86/entry/entry_64.S | 18 ++++--------------
- 1 file changed, 4 insertions(+), 14 deletions(-)
+ arch/x86/entry/entry_64.S | 20 ++++----------------
+ 1 file changed, 4 insertions(+), 16 deletions(-)
 
 diff --git a/arch/x86/entry/entry_64.S b/arch/x86/entry/entry_64.S
-index 73a522d53b53..8ae7ffda8f98 100644
+index b569b46660fc..375ed605c83d 100644
 --- a/arch/x86/entry/entry_64.S
 +++ b/arch/x86/entry/entry_64.S
-@@ -854,7 +854,7 @@ ENTRY(\sym)
+@@ -856,7 +856,7 @@ ENTRY(\sym)
  
  	call	\do_sym
  
@@ -83,7 +86,7 @@ index 73a522d53b53..8ae7ffda8f98 100644
  	.endif
  END(\sym)
  .endm
-@@ -1116,7 +1116,6 @@ END(paranoid_exit)
+@@ -1118,7 +1118,6 @@ END(paranoid_exit)
  
  /*
   * Save all registers in pt_regs, and switch gs if needed.
@@ -91,7 +94,15 @@ index 73a522d53b53..8ae7ffda8f98 100644
   */
  ENTRY(error_entry)
  	cld
-@@ -1161,7 +1160,6 @@ ENTRY(error_entry)
+@@ -1131,7 +1130,6 @@ ENTRY(error_entry)
+ 	 * the kernel CR3 here.
+ 	 */
+ 	SWITCH_KERNEL_CR3
+-	xorl	%ebx, %ebx
+ 	testb	$3, CS+8(%rsp)
+ 	jz	.Lerror_kernelspace
+ 
+@@ -1165,7 +1163,6 @@ ENTRY(error_entry)
  	 * for these here too.
  	 */
  .Lerror_kernelspace:
@@ -99,7 +110,7 @@ index 73a522d53b53..8ae7ffda8f98 100644
  	leaq	native_irq_return_iret(%rip), %rcx
  	cmpq	%rcx, RIP+8(%rsp)
  	je	.Lerror_bad_iret
-@@ -1192,28 +1190,19 @@ ENTRY(error_entry)
+@@ -1196,28 +1193,19 @@ ENTRY(error_entry)
  
  	/*
  	 * Pretend that the exception came from user mode: set up pt_regs
@@ -116,7 +127,7 @@ index 73a522d53b53..8ae7ffda8f98 100644
  
 -
 -/*
-- * On entry, EBS is a "return to kernel mode" flag:
+- * On entry, EBX is a "return to kernel mode" flag:
 - *   1: already in kernel mode, don't need SWAPGS
 - *   0: user gsbase is loaded, we need SWAPGS and standard preparation for return to usermode
 - */
@@ -132,5 +143,5 @@ index 73a522d53b53..8ae7ffda8f98 100644
  END(error_exit)
  
 -- 
-cgit 1.2-0.3.lf.el7
+2.19.2
 

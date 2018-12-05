@@ -58,27 +58,23 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  int btrfs_trim_fs(struct btrfs_root *root, struct fstrim_range *range)
  {
  	struct btrfs_fs_info *fs_info = root->fs_info;
-@@ -11041,6 +11050,10 @@ int btrfs_trim_fs(struct btrfs_root *roo
+@@ -11040,10 +11049,14 @@ int btrfs_trim_fs(struct btrfs_root *roo
+ 	u64 start;
  	u64 end;
  	u64 trimmed = 0;
- 	u64 total_bytes = btrfs_super_total_bytes(fs_info->super_copy);
 +	u64 bg_failed = 0;
 +	u64 dev_failed = 0;
 +	int bg_ret = 0;
 +	int dev_ret = 0;
  	int ret = 0;
  
- 	/*
-@@ -11051,7 +11064,7 @@ int btrfs_trim_fs(struct btrfs_root *roo
- 	else
- 		cache = btrfs_lookup_block_group(fs_info, range->start);
- 
+ 	cache = btrfs_lookup_first_block_group(fs_info, range->start);
 -	while (cache) {
 +	for (; cache; cache = next_block_group(root, cache)) {
  		if (cache->key.objectid >= (range->start + range->len)) {
  			btrfs_put_block_group(cache);
  			break;
-@@ -11065,13 +11078,15 @@ int btrfs_trim_fs(struct btrfs_root *roo
+@@ -11057,13 +11070,15 @@ int btrfs_trim_fs(struct btrfs_root *roo
  			if (!block_group_cache_done(cache)) {
  				ret = cache_block_group(cache, 0);
  				if (ret) {
@@ -98,7 +94,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				}
  			}
  			ret = btrfs_trim_block_group(cache,
-@@ -11082,27 +11097,40 @@ int btrfs_trim_fs(struct btrfs_root *roo
+@@ -11074,27 +11089,40 @@ int btrfs_trim_fs(struct btrfs_root *roo
  
  			trimmed += group_trimmed;
  			if (ret) {
