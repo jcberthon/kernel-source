@@ -1,0 +1,45 @@
+From: Yazen Ghannam <yazen.ghannam@amd.com>
+Date: Mon, 18 Dec 2017 12:37:14 +0100
+Subject: x86/MCE: Make correctable error detection look at the Deferred bit
+Git-commit: 179eb850ac57c06edaed67fc744ba9d902172f96
+Patch-mainline: v4.16-rc1
+References: bsc#1114648
+
+AMD systems may log Deferred errors. These are errors that are uncorrected
+but which do not need immediate action. The MCA_STATUS[UC] bit may not be
+set for Deferred errors.
+
+Flag the error as not correctable when MCA_STATUS[Deferred] is set and
+do not feed it into the Correctable Errors Collector.
+
+[ bp: Massage commit message. ]
+
+Signed-off-by: Yazen Ghannam <yazen.ghannam@amd.com>
+Signed-off-by: Borislav Petkov <bp@suse.de>
+Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+Link: http://lkml.kernel.org/r/20171212165143.27475-1-Yazen.Ghannam@amd.com
+---
+ arch/x86/kernel/cpu/mcheck/mce.c |   12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+--- a/arch/x86/kernel/cpu/mcheck/mce.c
++++ b/arch/x86/kernel/cpu/mcheck/mce.c
+@@ -573,6 +573,18 @@ static int srao_decode_notifier(struct n
+ 
+ 	return NOTIFY_OK;
+ }
++
++static bool mce_is_correctable(struct mce *m)
++{
++	if (m->cpuvendor == X86_VENDOR_AMD && m->status & MCI_STATUS_DEFERRED)
++		return false;
++
++	if (m->status & MCI_STATUS_UC)
++		return false;
++
++	return true;
++}
++
+ static struct notifier_block mce_srao_nb = {
+ 	.notifier_call	= srao_decode_notifier,
+ 	.priority = INT_MAX,
