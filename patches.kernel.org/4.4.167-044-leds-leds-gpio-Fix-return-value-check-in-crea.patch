@@ -1,0 +1,40 @@
+From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Date: Sat, 6 Feb 2016 22:37:33 +0800
+Subject: [PATCH] leds: leds-gpio: Fix return value check in create_gpio_led()
+References: bnc#1012382
+Patch-mainline: 4.4.167
+Git-commit: 2d88a331e48095cf60ad9bdf3177bd401bf99727
+
+commit 2d88a331e48095cf60ad9bdf3177bd401bf99727 upstream.
+
+In case of error, the function gpio_to_desc() returns NULL
+pointer not ERR_PTR(). The IS_ERR() test in the return value
+check should be replaced with NULL test.
+
+Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Signed-off-by: Jacek Anaszewski <j.anaszewski@samsung.com>
+Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/leds/leds-gpio.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/leds/leds-gpio.c b/drivers/leds/leds-gpio.c
+index 5db4515a4fd7..df186b38da78 100644
+--- a/drivers/leds/leds-gpio.c
++++ b/drivers/leds/leds-gpio.c
+@@ -118,8 +118,8 @@ static int create_gpio_led(const struct gpio_led *template,
+ 			return ret;
+ 
+ 		led_dat->gpiod = gpio_to_desc(template->gpio);
+-		if (IS_ERR(led_dat->gpiod))
+-			return PTR_ERR(led_dat->gpiod);
++		if (!led_dat->gpiod)
++			return -EINVAL;
+ 	}
+ 
+ 	led_dat->cdev.name = template->name;
+-- 
+2.19.2
+

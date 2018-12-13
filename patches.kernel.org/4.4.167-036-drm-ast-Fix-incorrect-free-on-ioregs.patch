@@ -1,10 +1,11 @@
-From dc25ab067645eabd037f1a23d49a666f9e0b8c68 Mon Sep 17 00:00:00 2001
 From: Sam Bobroff <sbobroff@linux.ibm.com>
 Date: Mon, 5 Nov 2018 16:57:47 +1100
-Subject: drm/ast: Fix incorrect free on ioregs
+Subject: [PATCH] drm/ast: Fix incorrect free on ioregs
+Patch-mainline: 4.4.167
+References: bnc#1012382 bsc#1106929
 Git-commit: dc25ab067645eabd037f1a23d49a666f9e0b8c68
-Patch-mainline: v4.20-rc5
-References: bsc#1106929
+
+commit dc25ab067645eabd037f1a23d49a666f9e0b8c68 upstream.
 
 If the platform has no IO space, ioregs is placed next to the already
 allocated regs. In this case, it should not be separately freed.
@@ -17,14 +18,17 @@ Fixes: 0dd68309b9c5 ("drm/ast: Try to use MMIO registers when PIO isn't supporte
 Signed-off-by: Sam Bobroff <sbobroff@linux.ibm.com>
 Cc: <stable@vger.kernel.org>
 Signed-off-by: Dave Airlie <airlied@redhat.com>
-Acked-by: Thomas Zimmermann <tzimmermann@suse.de>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- drivers/gpu/drm/ast/ast_main.c |    3 ++-
+ drivers/gpu/drm/ast/ast_main.c | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
 
+diff --git a/drivers/gpu/drm/ast/ast_main.c b/drivers/gpu/drm/ast/ast_main.c
+index 498a94069e6b..1acebd64fded 100644
 --- a/drivers/gpu/drm/ast/ast_main.c
 +++ b/drivers/gpu/drm/ast/ast_main.c
-@@ -582,7 +582,8 @@ int ast_driver_unload(struct drm_device
+@@ -557,7 +557,8 @@ int ast_driver_unload(struct drm_device *dev)
  	drm_mode_config_cleanup(dev);
  
  	ast_mm_fini(ast);
@@ -34,3 +38,6 @@ Acked-by: Thomas Zimmermann <tzimmermann@suse.de>
  	pci_iounmap(dev->pdev, ast->regs);
  	kfree(ast);
  	return 0;
+-- 
+2.19.2
+

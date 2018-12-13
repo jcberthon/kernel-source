@@ -1,9 +1,11 @@
 From: Geert Uytterhoeven <geert+renesas@glider.be>
 Date: Wed, 7 Nov 2018 14:18:50 +0100
-Subject: iommu/ipmmu-vmsa: Fix crash on early domain free
+Subject: [PATCH] iommu/ipmmu-vmsa: Fix crash on early domain free
+Patch-mainline: 4.4.167
+References: bnc#1012382 bsc#1106105
 Git-commit: e5b78f2e349eef5d4fca5dc1cf5a3b4b2cc27abd
-Patch-mainline: v4.20-rc4
-References: bsc#1106105
+
+[ Upstream commit e5b78f2e349eef5d4fca5dc1cf5a3b4b2cc27abd ]
 
 If iommu_ops.add_device() fails, iommu_ops.domain_free() is still
 called, leading to a crash, as the domain was only partially
@@ -31,15 +33,17 @@ Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 Reviewed-by: Robin Murphy <robin.murphy@arm.com>
 Fixes: d25a2a16f0889 ('iommu: Add driver for Renesas VMSA-compatible IPMMU')
 Signed-off-by: Joerg Roedel <jroedel@suse.de>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  drivers/iommu/ipmmu-vmsa.c | 3 +++
  1 file changed, 3 insertions(+)
 
 diff --git a/drivers/iommu/ipmmu-vmsa.c b/drivers/iommu/ipmmu-vmsa.c
-index b98a03189580..ddf3a492e1d5 100644
+index 624e7ff76166..9101be1a6b59 100644
 --- a/drivers/iommu/ipmmu-vmsa.c
 +++ b/drivers/iommu/ipmmu-vmsa.c
-@@ -498,6 +498,9 @@ static int ipmmu_domain_init_context(struct ipmmu_vmsa_domain *domain)
+@@ -372,6 +372,9 @@ static int ipmmu_domain_init_context(struct ipmmu_vmsa_domain *domain)
  
  static void ipmmu_domain_destroy_context(struct ipmmu_vmsa_domain *domain)
  {
@@ -49,4 +53,6 @@ index b98a03189580..ddf3a492e1d5 100644
  	/*
  	 * Disable the context. Flush the TLB as required when modifying the
  	 * context registers.
+-- 
+2.19.2
 

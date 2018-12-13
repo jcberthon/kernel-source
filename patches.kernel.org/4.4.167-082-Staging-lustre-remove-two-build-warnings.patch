@@ -1,0 +1,47 @@
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Date: Tue, 11 Dec 2018 13:50:37 +0100
+Subject: [PATCH] Staging: lustre: remove two build warnings
+References: bnc#1012382
+Patch-mainline: 4.4.167
+Git-commit: bcecc9e5751f7c64e96299706609ab2e85b408da
+
+[for older kernels only, lustre has been removed from upstream]
+
+When someone writes:
+	strncpy(dest, source, sizeof(source));
+they really are just doing the same thing as:
+	strcpy(dest, source);
+but somehow they feel better because they are now using the "safe"
+version of the string functions.  Cargo-cult programming at its
+finest...
+
+gcc-8 rightfully warns you about doing foolish things like this.  Now
+that the stable kernels are all starting to be built using gcc-8, let's
+get rid of this warning so that we do not have to gaze at this horror.
+
+To dropt the warning, just convert the code to using strcpy() so that if
+someone really wants to audit this code and find all of the obvious
+problems, it will be easier to do so.
+
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/staging/lustre/lustre/lmv/lmv_obd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/staging/lustre/lustre/lmv/lmv_obd.c b/drivers/staging/lustre/lustre/lmv/lmv_obd.c
+index 635a93cc94de..eed7603db5ec 100644
+--- a/drivers/staging/lustre/lustre/lmv/lmv_obd.c
++++ b/drivers/staging/lustre/lustre/lmv/lmv_obd.c
+@@ -700,7 +700,7 @@ static int lmv_fid2path(struct obd_export *exp, int len, void *karg, void *uarg)
+ 		memmove(ptr + strlen(gf->gf_path) + 1, ptr,
+ 			strlen(ori_gf->gf_path));
+ 
+-		strncpy(ptr, gf->gf_path, strlen(gf->gf_path));
++		strcpy(ptr, gf->gf_path);
+ 		ptr += strlen(gf->gf_path);
+ 		*ptr = '/';
+ 	}
+-- 
+2.19.2
+

@@ -1,9 +1,11 @@
 From: Martin Wilck <mwilck@suse.com>
 Date: Mon, 27 Nov 2017 23:47:35 +0100
-Subject: scsi: scsi_devinfo: cleanly zero-pad devinfo strings
+Subject: [PATCH] scsi: scsi_devinfo: cleanly zero-pad devinfo strings
+Patch-mainline: 4.4.167
+References: bnc#1012382 bsc#1012523 bsc#1037404 bsc#1038299 bsc#1062941
 Git-commit: 81df022b688d43d2a3667518b2f755d384397910
-Patch-mainline: v4.15 or v4.15-rc3 (next release)
-References: bsc#1062941, bsc#1037404, bsc#1012523, bsc#1038299
+
+commit 81df022b688d43d2a3667518b2f755d384397910 upstream.
 
 Cleanly fill memory for "vendor" and "model" with 0-bytes for the
 "compatible" case rather than adding only a single 0 byte.  This
@@ -16,10 +18,14 @@ SUSE kernel).
 Signed-off-by: Martin Wilck <mwilck@suse.com>
 Reviewed-by: Bart Van Assche <bart.vanassche@wdc.com>
 Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- drivers/scsi/scsi_devinfo.c |   22 +++++++---------------
+ drivers/scsi/scsi_devinfo.c | 22 +++++++---------------
  1 file changed, 7 insertions(+), 15 deletions(-)
 
+diff --git a/drivers/scsi/scsi_devinfo.c b/drivers/scsi/scsi_devinfo.c
+index 6b61b09b3226..75f2179860a7 100644
 --- a/drivers/scsi/scsi_devinfo.c
 +++ b/drivers/scsi/scsi_devinfo.c
 @@ -33,7 +33,6 @@ struct scsi_dev_info_list_table {
@@ -30,7 +36,7 @@ Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
  static unsigned scsi_default_dev_flags;
  static LIST_HEAD(scsi_dev_info_list);
  static char scsi_dev_flags[256];
-@@ -298,20 +297,13 @@ static void scsi_strcpy_devinfo(char *na
+@@ -291,20 +290,13 @@ static void scsi_strcpy_devinfo(char *name, char *to, size_t to_length,
  	size_t from_length;
  
  	from_length = strlen(from);
@@ -48,7 +54,7 @@ Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 -			strncpy(&to[from_length], spaces,
 -				to_length - from_length);
 -		}
-+	/* This zero-pads the destination */
++	/* this zero-pads the destination */
 +	strncpy(to, from, to_length);
 +	if (from_length < to_length && !compatible) {
 +		/*
@@ -58,3 +64,6 @@ Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
  	}
  	if (from_length > to_length)
  		 printk(KERN_WARNING "%s: %s string '%s' is too long\n",
+-- 
+2.19.2
+
