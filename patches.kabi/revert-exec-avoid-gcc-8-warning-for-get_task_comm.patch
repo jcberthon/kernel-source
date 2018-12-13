@@ -1,0 +1,61 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Date: Thu, 13 Dec 2018 21:02:46 +0100
+Subject: Revert "exec: avoid gcc-8 warning for get_task_comm"
+Patch-mainline: never, kabi
+References: kabi
+
+This reverts commit 2ac36cc66cb5e1835ca00989ea6946d50c9834d5, upstream
+commit 3756f6401c302617c5e091081ca4d26ab604bec5. It dropped
+get_task_comm to check just the buffer size. It broke kABI, so simply
+revert it.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ fs/exec.c             | 7 ++++---
+ include/linux/sched.h | 7 +------
+ 2 files changed, 5 insertions(+), 9 deletions(-)
+
+diff --git a/fs/exec.c b/fs/exec.c
+index 910fc70c4542..9c5ee2a880aa 100644
+--- a/fs/exec.c
++++ b/fs/exec.c
+@@ -1077,14 +1077,15 @@ killed:
+ 	return -EAGAIN;
+ }
+ 
+-char *__get_task_comm(char *buf, size_t buf_size, struct task_struct *tsk)
++char *get_task_comm(char *buf, struct task_struct *tsk)
+ {
++	/* buf must be at least sizeof(tsk->comm) in size */
+ 	task_lock(tsk);
+-	strncpy(buf, tsk->comm, buf_size);
++	strncpy(buf, tsk->comm, sizeof(tsk->comm));
+ 	task_unlock(tsk);
+ 	return buf;
+ }
+-EXPORT_SYMBOL_GPL(__get_task_comm);
++EXPORT_SYMBOL_GPL(get_task_comm);
+ 
+ /*
+  * These functions flushes out all traces of the currently running executable
+diff --git a/include/linux/sched.h b/include/linux/sched.h
+index 48a59f731406..b30540d6d125 100644
+--- a/include/linux/sched.h
++++ b/include/linux/sched.h
+@@ -2668,12 +2668,7 @@ static inline void set_task_comm(struct task_struct *tsk, const char *from)
+ {
+ 	__set_task_comm(tsk, from, false);
+ }
+-
+-extern char *__get_task_comm(char *to, size_t len, struct task_struct *tsk);
+-#define get_task_comm(buf, tsk) ({			\
+-	BUILD_BUG_ON(sizeof(buf) != TASK_COMM_LEN);	\
+-	__get_task_comm(buf, sizeof(buf), tsk);		\
+-})
++extern char *get_task_comm(char *to, struct task_struct *tsk);
+ 
+ #ifdef CONFIG_SMP
+ void scheduler_ipi(void);
+-- 
+2.19.2
+

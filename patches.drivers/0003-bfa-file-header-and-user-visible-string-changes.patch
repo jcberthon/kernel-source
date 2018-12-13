@@ -10,49 +10,47 @@ Signed-off-by: Anil Gurumurthy <anil.gurumurthy@qlogic.com>
 Reviewed-by: Johannes Thumshirn <jthumshirn@suse.de>
 Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 ---
- drivers/scsi/bfa/bfa.h           |  2 +-
- drivers/scsi/bfa/bfa_core.c      |  2 +-
- drivers/scsi/bfa/bfa_cs.h        |  2 +-
- drivers/scsi/bfa/bfa_defs.h      |  2 +-
- drivers/scsi/bfa/bfa_defs_fcs.h  |  2 +-
- drivers/scsi/bfa/bfa_defs_svc.h  |  2 +-
- drivers/scsi/bfa/bfa_fc.h        |  2 +-
- drivers/scsi/bfa/bfa_fcbuild.c   |  2 +-
- drivers/scsi/bfa/bfa_fcbuild.h   |  2 +-
- drivers/scsi/bfa/bfa_fcpim.c     |  2 +-
- drivers/scsi/bfa/bfa_fcpim.h     |  2 +-
- drivers/scsi/bfa/bfa_fcs.c       |  2 +-
- drivers/scsi/bfa/bfa_fcs.h       |  4 +--
- drivers/scsi/bfa/bfa_fcs_fcpim.c |  2 +-
- drivers/scsi/bfa/bfa_fcs_lport.c |  4 +--
- drivers/scsi/bfa/bfa_fcs_rport.c |  2 +-
- drivers/scsi/bfa/bfa_hw_cb.c     |  2 +-
- drivers/scsi/bfa/bfa_hw_ct.c     |  2 +-
- drivers/scsi/bfa/bfa_ioc.c       |  4 +--
- drivers/scsi/bfa/bfa_ioc.h       |  2 +-
- drivers/scsi/bfa/bfa_ioc_cb.c    |  2 +-
- drivers/scsi/bfa/bfa_ioc_ct.c    |  2 +-
- drivers/scsi/bfa/bfa_modules.h   |  2 +-
- drivers/scsi/bfa/bfa_plog.h      |  2 +-
- drivers/scsi/bfa/bfa_port.c      |  2 +-
- drivers/scsi/bfa/bfa_port.h      |  2 +-
- drivers/scsi/bfa/bfa_svc.c       |  2 +-
- drivers/scsi/bfa/bfa_svc.h       |  2 +-
- drivers/scsi/bfa/bfad.c          | 19 ++++-------
- drivers/scsi/bfa/bfad_attr.c     | 70 ++++++++++++++++++++--------------------
- drivers/scsi/bfa/bfad_bsg.c      |  2 +-
- drivers/scsi/bfa/bfad_bsg.h      |  2 +-
- drivers/scsi/bfa/bfad_debugfs.c  |  2 +-
- drivers/scsi/bfa/bfad_drv.h      |  2 +-
- drivers/scsi/bfa/bfad_im.c       |  4 +--
- drivers/scsi/bfa/bfad_im.h       |  2 +-
- drivers/scsi/bfa/bfi.h           |  2 +-
- drivers/scsi/bfa/bfi_ms.h        |  2 +-
- drivers/scsi/bfa/bfi_reg.h       |  4 +--
+ drivers/scsi/bfa/bfa.h           |    2 -
+ drivers/scsi/bfa/bfa_core.c      |    2 -
+ drivers/scsi/bfa/bfa_cs.h        |    2 -
+ drivers/scsi/bfa/bfa_defs.h      |    2 -
+ drivers/scsi/bfa/bfa_defs_fcs.h  |    2 -
+ drivers/scsi/bfa/bfa_defs_svc.h  |    2 -
+ drivers/scsi/bfa/bfa_fc.h        |    2 -
+ drivers/scsi/bfa/bfa_fcbuild.c   |    2 -
+ drivers/scsi/bfa/bfa_fcbuild.h   |    2 -
+ drivers/scsi/bfa/bfa_fcpim.c     |    2 -
+ drivers/scsi/bfa/bfa_fcpim.h     |    2 -
+ drivers/scsi/bfa/bfa_fcs.c       |    2 -
+ drivers/scsi/bfa/bfa_fcs.h       |    4 +-
+ drivers/scsi/bfa/bfa_fcs_fcpim.c |    2 -
+ drivers/scsi/bfa/bfa_fcs_lport.c |    4 +-
+ drivers/scsi/bfa/bfa_fcs_rport.c |    2 -
+ drivers/scsi/bfa/bfa_hw_cb.c     |    2 -
+ drivers/scsi/bfa/bfa_hw_ct.c     |    2 -
+ drivers/scsi/bfa/bfa_ioc.c       |    4 +-
+ drivers/scsi/bfa/bfa_ioc.h       |    2 -
+ drivers/scsi/bfa/bfa_ioc_cb.c    |    2 -
+ drivers/scsi/bfa/bfa_ioc_ct.c    |    2 -
+ drivers/scsi/bfa/bfa_modules.h   |    2 -
+ drivers/scsi/bfa/bfa_plog.h      |    2 -
+ drivers/scsi/bfa/bfa_port.c      |    2 -
+ drivers/scsi/bfa/bfa_port.h      |    2 -
+ drivers/scsi/bfa/bfa_svc.c       |    2 -
+ drivers/scsi/bfa/bfa_svc.h       |    2 -
+ drivers/scsi/bfa/bfad.c          |   19 +++-------
+ drivers/scsi/bfa/bfad_attr.c     |   70 +++++++++++++++++++--------------------
+ drivers/scsi/bfa/bfad_bsg.c      |    2 -
+ drivers/scsi/bfa/bfad_bsg.h      |    2 -
+ drivers/scsi/bfa/bfad_debugfs.c  |    2 -
+ drivers/scsi/bfa/bfad_drv.h      |    2 -
+ drivers/scsi/bfa/bfad_im.c       |    4 +-
+ drivers/scsi/bfa/bfad_im.h       |    2 -
+ drivers/scsi/bfa/bfi.h           |    2 -
+ drivers/scsi/bfa/bfi_ms.h        |    2 -
+ drivers/scsi/bfa/bfi_reg.h       |    4 +-
  39 files changed, 84 insertions(+), 89 deletions(-)
 
-diff --git a/drivers/scsi/bfa/bfa.h b/drivers/scsi/bfa/bfa.h
-index 7d0337b..0e119d8 100644
 --- a/drivers/scsi/bfa/bfa.h
 +++ b/drivers/scsi/bfa/bfa.h
 @@ -4,7 +4,7 @@
@@ -64,8 +62,6 @@ index 7d0337b..0e119d8 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_core.c b/drivers/scsi/bfa/bfa_core.c
-index f157a37..2ea0db4 100644
 --- a/drivers/scsi/bfa/bfa_core.c
 +++ b/drivers/scsi/bfa/bfa_core.c
 @@ -4,7 +4,7 @@
@@ -77,8 +73,6 @@ index f157a37..2ea0db4 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_cs.h b/drivers/scsi/bfa/bfa_cs.h
-index c8bb20a..da9cf65 100644
 --- a/drivers/scsi/bfa/bfa_cs.h
 +++ b/drivers/scsi/bfa/bfa_cs.h
 @@ -4,7 +4,7 @@
@@ -90,8 +84,6 @@ index c8bb20a..da9cf65 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_defs.h b/drivers/scsi/bfa/bfa_defs.h
-index da4f705..5dc3782 100644
 --- a/drivers/scsi/bfa/bfa_defs.h
 +++ b/drivers/scsi/bfa/bfa_defs.h
 @@ -4,7 +4,7 @@
@@ -103,8 +95,6 @@ index da4f705..5dc3782 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_defs_fcs.h b/drivers/scsi/bfa/bfa_defs_fcs.h
-index 5185ae3..5815a90 100644
 --- a/drivers/scsi/bfa/bfa_defs_fcs.h
 +++ b/drivers/scsi/bfa/bfa_defs_fcs.h
 @@ -4,7 +4,7 @@
@@ -116,8 +106,6 @@ index 5185ae3..5815a90 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_defs_svc.h b/drivers/scsi/bfa/bfa_defs_svc.h
-index fd2fa24..e81707f 100644
 --- a/drivers/scsi/bfa/bfa_defs_svc.h
 +++ b/drivers/scsi/bfa/bfa_defs_svc.h
 @@ -4,7 +4,7 @@
@@ -129,8 +117,6 @@ index fd2fa24..e81707f 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_fc.h b/drivers/scsi/bfa/bfa_fc.h
-index 7142309..18b7304 100644
 --- a/drivers/scsi/bfa/bfa_fc.h
 +++ b/drivers/scsi/bfa/bfa_fc.h
 @@ -4,7 +4,7 @@
@@ -142,8 +128,6 @@ index 7142309..18b7304 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_fcbuild.c b/drivers/scsi/bfa/bfa_fcbuild.c
-index 6f670d3..b8dadc9 100644
 --- a/drivers/scsi/bfa/bfa_fcbuild.c
 +++ b/drivers/scsi/bfa/bfa_fcbuild.c
 @@ -4,7 +4,7 @@
@@ -155,8 +139,6 @@ index 6f670d3..b8dadc9 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_fcbuild.h b/drivers/scsi/bfa/bfa_fcbuild.h
-index 85e3c58..b109a88 100644
 --- a/drivers/scsi/bfa/bfa_fcbuild.h
 +++ b/drivers/scsi/bfa/bfa_fcbuild.h
 @@ -4,7 +4,7 @@
@@ -168,8 +150,6 @@ index 85e3c58..b109a88 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_fcpim.c b/drivers/scsi/bfa/bfa_fcpim.c
-index 3881a72..20982e7 100644
 --- a/drivers/scsi/bfa/bfa_fcpim.c
 +++ b/drivers/scsi/bfa/bfa_fcpim.c
 @@ -4,7 +4,7 @@
@@ -181,8 +161,6 @@ index 3881a72..20982e7 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_fcpim.h b/drivers/scsi/bfa/bfa_fcpim.h
-index 0c37062..e93921d 100644
 --- a/drivers/scsi/bfa/bfa_fcpim.h
 +++ b/drivers/scsi/bfa/bfa_fcpim.h
 @@ -4,7 +4,7 @@
@@ -194,8 +172,6 @@ index 0c37062..e93921d 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_fcs.c b/drivers/scsi/bfa/bfa_fcs.c
-index 043d3c0..1e7e139 100644
 --- a/drivers/scsi/bfa/bfa_fcs.c
 +++ b/drivers/scsi/bfa/bfa_fcs.c
 @@ -4,7 +4,7 @@
@@ -207,8 +183,6 @@ index 043d3c0..1e7e139 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_fcs.h b/drivers/scsi/bfa/bfa_fcs.h
-index 30b4555..06dc215 100644
 --- a/drivers/scsi/bfa/bfa_fcs.h
 +++ b/drivers/scsi/bfa/bfa_fcs.h
 @@ -4,7 +4,7 @@
@@ -220,7 +194,7 @@ index 30b4555..06dc215 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-@@ -634,7 +634,7 @@ void bfa_fcs_fcpim_uf_recv(struct bfa_fcs_itnim_s *itnim,
+@@ -634,7 +634,7 @@ void bfa_fcs_fcpim_uf_recv(struct bfa_fc
  
  /*
   * HBA Attribute Block : BFA internal representation. Note : Some variable
@@ -229,8 +203,6 @@ index 30b4555..06dc215 100644
   * on this the size has been reduced to 16 bytes from the standard's 64 bytes.
   */
  struct bfa_fcs_fdmi_hba_attr_s {
-diff --git a/drivers/scsi/bfa/bfa_fcs_fcpim.c b/drivers/scsi/bfa/bfa_fcs_fcpim.c
-index 4fd20d9..4f089d7 100644
 --- a/drivers/scsi/bfa/bfa_fcs_fcpim.c
 +++ b/drivers/scsi/bfa/bfa_fcs_fcpim.c
 @@ -4,7 +4,7 @@
@@ -242,8 +214,6 @@ index 4fd20d9..4f089d7 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_fcs_lport.c b/drivers/scsi/bfa/bfa_fcs_lport.c
-index d823792..7733ad5 100644
 --- a/drivers/scsi/bfa/bfa_fcs_lport.c
 +++ b/drivers/scsi/bfa/bfa_fcs_lport.c
 @@ -4,7 +4,7 @@
@@ -255,17 +225,15 @@ index d823792..7733ad5 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-@@ -2654,7 +2654,7 @@ bfa_fcs_fdmi_get_hbaattr(struct bfa_fcs_lport_fdmi_s *fdmi,
+@@ -2654,7 +2654,7 @@ bfa_fcs_fdmi_get_hbaattr(struct bfa_fcs_
  
- 	strncpy(hba_attr->node_sym_name.symname,
+ 	strlcpy(hba_attr->node_sym_name.symname,
  		port->port_cfg.node_sym_name.symname, BFA_SYMNAME_MAXLEN);
 -	strcpy(hba_attr->vendor_info, "BROCADE");
 +	strcpy(hba_attr->vendor_info, "QLogic");
  	hba_attr->num_ports =
  		cpu_to_be32(bfa_ioc_get_nports(&port->fcs->bfa->ioc));
  	hba_attr->fabric_name = port->fabric->lps->pr_nwwn;
-diff --git a/drivers/scsi/bfa/bfa_fcs_rport.c b/drivers/scsi/bfa/bfa_fcs_rport.c
-index 5559faa..de50349 100644
 --- a/drivers/scsi/bfa/bfa_fcs_rport.c
 +++ b/drivers/scsi/bfa/bfa_fcs_rport.c
 @@ -4,7 +4,7 @@
@@ -277,8 +245,6 @@ index 5559faa..de50349 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_hw_cb.c b/drivers/scsi/bfa/bfa_hw_cb.c
-index e3648d9..c4a0c0e 100644
 --- a/drivers/scsi/bfa/bfa_hw_cb.c
 +++ b/drivers/scsi/bfa/bfa_hw_cb.c
 @@ -4,7 +4,7 @@
@@ -290,8 +256,6 @@ index e3648d9..c4a0c0e 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_hw_ct.c b/drivers/scsi/bfa/bfa_hw_ct.c
-index f19bc44..b0ff378 100644
 --- a/drivers/scsi/bfa/bfa_hw_ct.c
 +++ b/drivers/scsi/bfa/bfa_hw_ct.c
 @@ -4,7 +4,7 @@
@@ -303,8 +267,6 @@ index f19bc44..b0ff378 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_ioc.c b/drivers/scsi/bfa/bfa_ioc.c
-index e9a7c64..251e2ff 100644
 --- a/drivers/scsi/bfa/bfa_ioc.c
 +++ b/drivers/scsi/bfa/bfa_ioc.c
 @@ -4,7 +4,7 @@
@@ -316,7 +278,7 @@ index e9a7c64..251e2ff 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-@@ -2698,7 +2698,7 @@ bfa_ioc_reset_fwstate(struct bfa_ioc_s *ioc)
+@@ -2698,7 +2698,7 @@ bfa_ioc_reset_fwstate(struct bfa_ioc_s *
  	bfa_ioc_set_alt_ioc_fwstate(ioc, BFI_IOC_UNINIT);
  }
  
@@ -325,8 +287,6 @@ index e9a7c64..251e2ff 100644
  void
  bfa_ioc_get_adapter_attr(struct bfa_ioc_s *ioc,
  			 struct bfa_adapter_attr_s *ad_attr)
-diff --git a/drivers/scsi/bfa/bfa_ioc.h b/drivers/scsi/bfa/bfa_ioc.h
-index 0d6e165..713745d 100644
 --- a/drivers/scsi/bfa/bfa_ioc.h
 +++ b/drivers/scsi/bfa/bfa_ioc.h
 @@ -4,7 +4,7 @@
@@ -338,8 +298,6 @@ index 0d6e165..713745d 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_ioc_cb.c b/drivers/scsi/bfa/bfa_ioc_cb.c
-index 10a0042..f1b80da 100644
 --- a/drivers/scsi/bfa/bfa_ioc_cb.c
 +++ b/drivers/scsi/bfa/bfa_ioc_cb.c
 @@ -4,7 +4,7 @@
@@ -351,8 +309,6 @@ index 10a0042..f1b80da 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_ioc_ct.c b/drivers/scsi/bfa/bfa_ioc_ct.c
-index 1e5fa61..651a8fb 100644
 --- a/drivers/scsi/bfa/bfa_ioc_ct.c
 +++ b/drivers/scsi/bfa/bfa_ioc_ct.c
 @@ -4,7 +4,7 @@
@@ -364,8 +320,6 @@ index 1e5fa61..651a8fb 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_modules.h b/drivers/scsi/bfa/bfa_modules.h
-index 5b02415..53135f2 100644
 --- a/drivers/scsi/bfa/bfa_modules.h
 +++ b/drivers/scsi/bfa/bfa_modules.h
 @@ -4,7 +4,7 @@
@@ -377,8 +331,6 @@ index 5b02415..53135f2 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_plog.h b/drivers/scsi/bfa/bfa_plog.h
-index 4fdba6f..da570c0 100644
 --- a/drivers/scsi/bfa/bfa_plog.h
 +++ b/drivers/scsi/bfa/bfa_plog.h
 @@ -4,7 +4,7 @@
@@ -390,8 +342,6 @@ index 4fdba6f..da570c0 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_port.c b/drivers/scsi/bfa/bfa_port.c
-index 314548a..da1721e 100644
 --- a/drivers/scsi/bfa/bfa_port.c
 +++ b/drivers/scsi/bfa/bfa_port.c
 @@ -4,7 +4,7 @@
@@ -403,8 +353,6 @@ index 314548a..da1721e 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_port.h b/drivers/scsi/bfa/bfa_port.h
-index ba715ce..26dc1bf 100644
 --- a/drivers/scsi/bfa/bfa_port.h
 +++ b/drivers/scsi/bfa/bfa_port.h
 @@ -4,7 +4,7 @@
@@ -416,8 +364,6 @@ index ba715ce..26dc1bf 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_svc.c b/drivers/scsi/bfa/bfa_svc.c
-index 93e588f..12de292 100644
 --- a/drivers/scsi/bfa/bfa_svc.c
 +++ b/drivers/scsi/bfa/bfa_svc.c
 @@ -4,7 +4,7 @@
@@ -429,8 +375,6 @@ index 93e588f..12de292 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfa_svc.h b/drivers/scsi/bfa/bfa_svc.h
-index efb0497..ea2278b 100644
 --- a/drivers/scsi/bfa/bfa_svc.h
 +++ b/drivers/scsi/bfa/bfa_svc.h
 @@ -4,7 +4,7 @@
@@ -442,8 +386,6 @@ index efb0497..ea2278b 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfad.c b/drivers/scsi/bfa/bfad.c
-index f298b2e..9d253cb 100644
 --- a/drivers/scsi/bfa/bfad.c
 +++ b/drivers/scsi/bfa/bfad.c
 @@ -4,7 +4,7 @@
@@ -455,7 +397,7 @@ index f298b2e..9d253cb 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-@@ -131,13 +131,9 @@ MODULE_PARM_DESC(bfa_linkup_delay, "Link up delay, default=30 secs for "
+@@ -131,13 +131,9 @@ MODULE_PARM_DESC(bfa_linkup_delay, "Link
  			"boot port. Otherwise 10 secs in RHEL4 & 0 for "
  			"[RHEL5, SLES10, ESX40] Range[>0]");
  module_param(msix_disable_cb, int, S_IRUGO | S_IWUSR);
@@ -499,8 +441,6 @@ index f298b2e..9d253cb 100644
 +MODULE_DESCRIPTION("QLogic BR-series Fibre Channel HBA Driver" BFAD_PROTO_NAME);
 +MODULE_AUTHOR("QLogic Corporation");
  MODULE_VERSION(BFAD_DRIVER_VERSION);
-diff --git a/drivers/scsi/bfa/bfad_attr.c b/drivers/scsi/bfa/bfad_attr.c
-index 66cca48..13db3b7 100644
 --- a/drivers/scsi/bfa/bfad_attr.c
 +++ b/drivers/scsi/bfa/bfad_attr.c
 @@ -4,7 +4,7 @@
@@ -512,7 +452,7 @@ index 66cca48..13db3b7 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-@@ -751,65 +751,65 @@ bfad_im_model_desc_show(struct device *dev, struct device_attribute *attr,
+@@ -751,65 +751,65 @@ bfad_im_model_desc_show(struct device *d
  
  	bfa_get_adapter_model(&bfad->bfa, model);
  	nports = bfa_get_nports(&bfad->bfa);
@@ -612,8 +552,6 @@ index 66cca48..13db3b7 100644
  	} else
  		snprintf(model_descr, BFA_ADAPTER_MODEL_DESCR_LEN,
  			"Invalid Model");
-diff --git a/drivers/scsi/bfa/bfad_bsg.c b/drivers/scsi/bfa/bfad_bsg.c
-index b9d1460..d1ad020 100644
 --- a/drivers/scsi/bfa/bfad_bsg.c
 +++ b/drivers/scsi/bfa/bfad_bsg.c
 @@ -4,7 +4,7 @@
@@ -625,8 +563,6 @@ index b9d1460..d1ad020 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfad_bsg.h b/drivers/scsi/bfa/bfad_bsg.h
-index 59aca80..917e140 100644
 --- a/drivers/scsi/bfa/bfad_bsg.h
 +++ b/drivers/scsi/bfa/bfad_bsg.h
 @@ -4,7 +4,7 @@
@@ -638,8 +574,6 @@ index 59aca80..917e140 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfad_debugfs.c b/drivers/scsi/bfa/bfad_debugfs.c
-index 62b11d4..8dcd8c7 100644
 --- a/drivers/scsi/bfa/bfad_debugfs.c
 +++ b/drivers/scsi/bfa/bfad_debugfs.c
 @@ -4,7 +4,7 @@
@@ -651,8 +585,6 @@ index 62b11d4..8dcd8c7 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfad_drv.h b/drivers/scsi/bfa/bfad_drv.h
-index 58fee34..8001459 100644
 --- a/drivers/scsi/bfa/bfad_drv.h
 +++ b/drivers/scsi/bfa/bfad_drv.h
 @@ -4,7 +4,7 @@
@@ -664,8 +596,6 @@ index 58fee34..8001459 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfad_im.c b/drivers/scsi/bfa/bfad_im.c
-index 2c0cf8a..6c805e1 100644
 --- a/drivers/scsi/bfa/bfad_im.c
 +++ b/drivers/scsi/bfa/bfad_im.c
 @@ -4,7 +4,7 @@
@@ -686,8 +616,6 @@ index 2c0cf8a..6c805e1 100644
  		bfad->pci_name, BFAD_DRIVER_VERSION);
  
  	return bfa_buf;
-diff --git a/drivers/scsi/bfa/bfad_im.h b/drivers/scsi/bfa/bfad_im.h
-index 31434df..836fdc2 100644
 --- a/drivers/scsi/bfa/bfad_im.h
 +++ b/drivers/scsi/bfa/bfad_im.h
 @@ -4,7 +4,7 @@
@@ -699,8 +627,6 @@ index 31434df..836fdc2 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfi.h b/drivers/scsi/bfa/bfi.h
-index 54c93ef..97600dc 100644
 --- a/drivers/scsi/bfa/bfi.h
 +++ b/drivers/scsi/bfa/bfi.h
 @@ -4,7 +4,7 @@
@@ -712,8 +638,6 @@ index 54c93ef..97600dc 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfi_ms.h b/drivers/scsi/bfa/bfi_ms.h
-index 8699be4..ae5bfe0 100644
 --- a/drivers/scsi/bfa/bfi_ms.h
 +++ b/drivers/scsi/bfa/bfi_ms.h
 @@ -4,7 +4,7 @@
@@ -725,8 +649,6 @@ index 8699be4..ae5bfe0 100644
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License (GPL) Version 2 as
-diff --git a/drivers/scsi/bfa/bfi_reg.h b/drivers/scsi/bfa/bfi_reg.h
-index 7d071a4..fd5b876 100644
 --- a/drivers/scsi/bfa/bfi_reg.h
 +++ b/drivers/scsi/bfa/bfi_reg.h
 @@ -4,7 +4,7 @@
@@ -747,4 +669,3 @@ index 7d071a4..fd5b876 100644
   */
  
  #ifndef __BFI_REG_H__
-
