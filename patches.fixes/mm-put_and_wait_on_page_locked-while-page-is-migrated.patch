@@ -1,0 +1,217 @@
+From 9717380dad912736da8053c3382f7bbecbc92047 Mon Sep 17 00:00:00 2001
+From: Hugh Dickins <hughd@google.com>
+Date: Wed, 21 Nov 2018 13:32:09 +0100
+Subject: [PATCH] mm: put_and_wait_on_page_locked() while page is migrated
+Patch-mainline: not yet, in mmotm tree
+References: bnc#1109272
+
+[ vbabka@suse.cz: port to SLE12-SP3 where we don't have
+  wait_on_page_bit_common() so opencode the logic into
+  put_and_wait_on_page_locked(). We also don't have PG_waiters so
+  change shrink_page_list() from __clear_page_locked to unlock_page()
+  unconditionally, which is however more expensive ]
+
+Waiting on a page migration entry has used wait_on_page_locked() all
+along since 2006: but you cannot safely wait_on_page_locked() without
+holding a reference to the page, and that extra reference is enough to
+make migrate_page_move_mapping() fail with -EAGAIN, when a racing task
+faults on the entry before migrate_page_move_mapping() gets there.
+
+And that failure is retried nine times, amplifying the pain when
+trying to migrate a popular page.  With a single persistent faulter,
+migration sometimes succeeds; with two or three concurrent faulters,
+success becomes much less likely (and the more the page was mapped,
+the worse the overhead of unmapping and remapping it on each try).
+
+This is especially a problem for memory offlining, where the outer
+level retries forever (or until terminated from userspace), because
+a heavy refault workload can trigger an endless loop of migration
+failures.  wait_on_page_locked() is the wrong tool for the job.
+
+David Herrmann (but was he the first?) noticed this issue in 2014:
+https://marc.info/?l=linux-mm&m=140110465608116&w=2
+
+Tim Chen started a thread in August 2017 which appears relevant:
+https://marc.info/?l=linux-mm&m=150275941014915&w=2
+where Kan Liang went on to implicate __migration_entry_wait():
+https://marc.info/?l=linux-mm&m=150300268411980&w=2
+and the thread ended up with the v4.14 commits:
+2554db916586 ("sched/wait: Break up long wake list walk")
+11a19c7b099f ("sched/wait: Introduce wakeup boomark in wake_up_page_bit")
+
+Baoquan He reported "Memory hotplug softlock issue" 14 November 2018:
+https://marc.info/?l=linux-mm&m=154217936431300&w=2
+
+We have all assumed that it is essential to hold a page reference while
+waiting on a page lock: partly to guarantee that there is still a struct
+page when MEMORY_HOTREMOVE is configured, but also to protect against
+and the thread ended up with the v4.14 commits:
+2554db916586 ("sched/wait: Break up long wake list walk")
+11a19c7b099f ("sched/wait: Introduce wakeup boomark in wake_up_page_bit")
+
+Baoquan He reported "Memory hotplug softlock issue" 14 November 2018:
+https://marc.info/?l=linux-mm&m=154217936431300&w=2
+
+We have all assumed that it is essential to hold a page reference while
+waiting on a page lock: partly to guarantee that there is still a struct
+page when MEMORY_HOTREMOVE is configured, but also to protect against
+reuse of the struct page going to someone who then holds the page locked
+indefinitely, when the waiter can reasonably expect timely unlocking.
+
+But in fact, so long as wait_on_page_bit_common() does the put_page(),
+and is careful not to rely on struct page contents thereafter, there is
+no need to hold a reference to the page while waiting on it.  That does
+mean that this case cannot go back through the loop: but that's fine for
+the page migration case, and even if used more widely, is limited by the
+"Stop walking if it's locked" optimization in wake_page_function().
+
+Add interface put_and_wait_on_page_locked() to do this, using "behavior"
+enum in place of "lock" arg to wait_on_page_bit_common() to implement it.
+No interruptible or killable variant needed yet, but they might follow:
+I have a vague notion that reporting -EINTR should take precedence over
+return from wait_on_page_bit_common() without knowing the page state,
+so arrange it accordingly - but that may be nothing but pedantic.
+
+__migration_entry_wait() still has to take a brief reference to the
+page, prior to calling put_and_wait_on_page_locked(): but now that it
+is dropped before waiting, the chance of impeding page migration is
+very much reduced.  Should we perhaps disable preemption across this?
+
+shrink_page_list()'s __ClearPageLocked(): that was a surprise!  This
+survived a lot of testing before that showed up.  PageWaiters may have
+been set by wait_on_page_bit_common(), and the reference dropped, just
+before shrink_page_list() succeeds in freezing its last page reference:
+in such a case, unlock_page() must be used.  Follow the suggestion from
+Michal Hocko, just revert a978d6f52106 ("mm: unlockless reclaim") now:
+that optimization predates PageWaiters, and won't buy much these days;
+but we can reinstate it for the !PageWaiters case if anyone notices.
+
+It does raise the question: should vmscan.c's is_page_cache_freeable()
+and __remove_mapping() now treat a PageWaiters page as if an extra
+reference were held?  Perhaps, but I don't think it matters much, since
+shrink_page_list() already had to win its trylock_page(), so waiters are
+not very common there: I noticed no difference when trying the bigger
+change, and it's surely not needed while put_and_wait_on_page_locked()
+is only used for page migration.
+
+Reported-and-tested-by: Baoquan He <bhe@redhat.com>
+Signed-off-by: Hugh Dickins <hughd@google.com>
+Acked-by: Michal Hocko <mhocko@suse.com>
+Reviewed-by: Andrea Arcangeli <aarcange@redhat.com>
+Signed-off-by: Vlastimil Babka <vbabka@suse.cz>
+
+---
+ include/linux/pagemap.h |    2 ++
+ mm/filemap.c            |   25 +++++++++++++++++++++++++
+ mm/huge_memory.c        |    6 ++----
+ mm/migrate.c            |    9 +++------
+ mm/vmscan.c             |    8 ++++----
+ 5 files changed, 36 insertions(+), 14 deletions(-)
+
+--- a/include/linux/pagemap.h
++++ b/include/linux/pagemap.h
+@@ -536,6 +536,8 @@ static inline void wait_on_page_locked(s
+ 		wait_on_page_bit(page, PG_locked);
+ }
+ 
++extern void put_and_wait_on_page_locked(struct page *page);
++
+ /* 
+  * Wait for a page to complete writeback
+  */
+--- a/mm/filemap.c
++++ b/mm/filemap.c
+@@ -853,6 +853,31 @@ int wait_on_page_bit_killable_timeout(st
+ }
+ EXPORT_SYMBOL_GPL(wait_on_page_bit_killable_timeout);
+ 
++void put_and_wait_on_page_locked(struct page *page)
++{
++	DEFINE_WAIT_BIT(wb, &page->flags, PG_locked);
++	wait_queue_head_t *wq;
++	bool is_locked;
++
++	if (!PageLocked(page)) {
++		put_page(page);
++		return;
++	}
++
++	wq = page_waitqueue(page);
++
++	prepare_to_wait(wq, &wb.wait, TASK_UNINTERRUPTIBLE);
++
++	is_locked = PageLocked(page);
++
++	put_page(page);
++
++	if (is_locked)
++		io_schedule();
++
++	finish_wait(wq, &wb.wait);
++}
++
+ /**
+  * add_page_wait_queue - Add an arbitrary waiter to a page's wait queue
+  * @page: Page defining the wait queue of interest
+--- a/mm/huge_memory.c
++++ b/mm/huge_memory.c
+@@ -1438,8 +1438,7 @@ int do_huge_pmd_numa_page(struct mm_stru
+ 		if (!get_page_unless_zero(page))
+ 			goto out_unlock;
+ 		spin_unlock(ptl);
+-		wait_on_page_locked(page);
+-		put_page(page);
++		put_and_wait_on_page_locked(page);
+ 		goto out;
+ 	}
+ 
+@@ -1475,8 +1474,7 @@ int do_huge_pmd_numa_page(struct mm_stru
+ 		if (!get_page_unless_zero(page))
+ 			goto out_unlock;
+ 		spin_unlock(ptl);
+-		wait_on_page_locked(page);
+-		put_page(page);
++		put_and_wait_on_page_locked(page);
+ 		goto out;
+ 	}
+ 
+--- a/mm/migrate.c
++++ b/mm/migrate.c
+@@ -223,16 +223,13 @@ void __migration_entry_wait(struct mm_st
+ 
+ 	/*
+ 	 * Once radix-tree replacement of page migration started, page_count
+-	 * *must* be zero. And, we don't want to call wait_on_page_locked()
+-	 * against a page without get_page().
+-	 * So, we use get_page_unless_zero(), here. Even failed, page fault
+-	 * will occur again.
++	 * is zero; but we must not call put_and_wait_on_page_locked() without
++	 * a ref. Use get_page_unless_zero(), and just fault again if it fails.
+ 	 */
+ 	if (!get_page_unless_zero(page))
+ 		goto out;
+ 	pte_unmap_unlock(ptep, ptl);
+-	wait_on_page_locked(page);
+-	put_page(page);
++	put_and_wait_on_page_locked(page);
+ 	return;
+ out:
+ 	pte_unmap_unlock(ptep, ptl);
+--- a/mm/vmscan.c
++++ b/mm/vmscan.c
+@@ -1219,11 +1219,11 @@ static unsigned long shrink_page_list(st
+ 		/*
+ 		 * At this point, we have no other references and there is
+ 		 * no way to pick any more up (removed from LRU, removed
+-		 * from pagecache). Can use non-atomic bitops now (and
+-		 * we obviously don't have to worry about waking up a process
+-		 * waiting on the page lock, because there are no references.
++		 * from pagecache). We could use non-atomic bitops now, but
++		 * beware: earlier calls to put_and_wait_on_page_locked()
++		 * might still be waiting.
+ 		 */
+-		__clear_page_locked(page);
++		unlock_page(page);
+ free_it:
+ 		nr_reclaimed++;
+ 
