@@ -2,7 +2,7 @@ From: Christoph Paasch <cpaasch@apple.com>
 Date: Tue, 26 Sep 2017 17:38:50 -0700
 Subject: [PATCH] net: Set sk_prot_creator when cloning sockets to the right
  proto
-References: bnc#1012382
+References: CVE-2018-9568 bnc#1012382 bsc#1118319
 Patch-mainline: 4.4.94
 Git-commit: 9d538fa60bad4f7b23193c89e843797a1cf71ef3
 
