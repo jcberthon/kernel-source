@@ -1,0 +1,36 @@
+From feaf264ce7f8d54582e2f66eb82dd9dd124c94f3 Mon Sep 17 00:00:00 2001
+From: Vasily Averin <vvs@virtuozzo.com>
+Date: Tue, 6 Nov 2018 17:01:36 -0500
+Subject: [PATCH] ext4: avoid buffer leak in ext4_orphan_add() after prior
+ errors
+Git-commit: feaf264ce7f8d54582e2f66eb82dd9dd124c94f3
+Patch-mainline: v4.20-rc2
+References: bsc#1117802
+
+Fixes: d745a8c20c1f ("ext4: reduce contention on s_orphan_lock")
+Fixes: 6e3617e579e0 ("ext4: Handle non empty on-disk orphan link")
+Cc: Dmitry Monakhov <dmonakhov@gmail.com>
+Signed-off-by: Vasily Averin <vvs@virtuozzo.com>
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+Cc: stable@kernel.org # 2.6.34
+Acked-by: Jan Kara <jack@suse.cz>
+
+---
+ fs/ext4/namei.c |    6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+--- a/fs/ext4/namei.c
++++ b/fs/ext4/namei.c
+@@ -2013,8 +2013,10 @@ int ext4_orphan_add(handle_t *handle, st
+ 	 * orphan list. If so skip on-disk list modification.
+ 	 */
+ 	if (NEXT_ORPHAN(inode) && NEXT_ORPHAN(inode) <=
+-		(le32_to_cpu(EXT4_SB(sb)->s_es->s_inodes_count)))
+-			goto mem_insert;
++	    le32_to_cpu(EXT4_SB(sb)->s_es->s_inodes_count)) {
++		brelse(iloc.bh);
++		goto mem_insert;
++	}
+ 
+ 	/* Insert this inode at the head of the on-disk orphan list... */
+ 	NEXT_ORPHAN(inode) = le32_to_cpu(EXT4_SB(sb)->s_es->s_last_orphan);
