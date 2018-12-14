@@ -16,14 +16,12 @@ target for us and we need to disable target functionality.
 
 Signed-off-by: Hannes Reinecke <hare@suse.com>
 ---
- drivers/scsi/libfc/fc_rport.c | 41 +++++++++++++++++++++++++++++------------
- 1 file changed, 29 insertions(+), 12 deletions(-)
+ drivers/scsi/libfc/fc_rport.c |   56 ++++++++++++++++++++++++++++--------------
+ 1 file changed, 38 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/scsi/libfc/fc_rport.c b/drivers/scsi/libfc/fc_rport.c
-index 14666f1..47c3f54 100644
 --- a/drivers/scsi/libfc/fc_rport.c
 +++ b/drivers/scsi/libfc/fc_rport.c
-@@ -1120,7 +1120,7 @@ static void fc_rport_prli_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -1120,7 +1120,7 @@ static void fc_rport_prli_resp(struct fc
  	u32 roles = FC_RPORT_ROLE_UNKNOWN;
  	u32 fcp_parm = 0;
  	u8 op;
@@ -32,7 +30,18 @@ index 14666f1..47c3f54 100644
  
  	mutex_lock(&rdata->rp_mutex);
  
-@@ -1168,13 +1168,28 @@ static void fc_rport_prli_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -1149,8 +1149,8 @@ static void fc_rport_prli_resp(struct fc
+ 			goto out;
+ 
+ 		resp_code = (pp->spp.spp_flags & FC_SPP_RESP_MASK);
+-		FC_RPORT_DBG(rdata, "PRLI spp_flags = 0x%x\n",
+-			     pp->spp.spp_flags);
++		FC_RPORT_DBG(rdata, "PRLI spp_flags = 0x%x spp_type 0x%x\n",
++			     pp->spp.spp_flags, pp->spp.spp_type);
+ 		rdata->spp_type = pp->spp.spp_type;
+ 		if (resp_code != FC_SPP_RESP_ACK) {
+ 			if (resp_code == FC_SPP_RESP_CONF)
+@@ -1168,13 +1168,26 @@ static void fc_rport_prli_resp(struct fc
  		if (fcp_parm & FCP_SPPF_CONF_COMPL)
  			rdata->flags |= FC_RP_FLAGS_CONF_REQ;
  
@@ -43,29 +52,25 @@ index 14666f1..47c3f54 100644
 +		prov = fc_passive_prov[rdata->spp_type];
  		if (prov) {
  			memset(&temp_spp, 0, sizeof(temp_spp));
--			prov->prli(rdata, pp->prli.prli_spp_len,
--				   &pp->spp, &temp_spp);
-+			resp_code = prov->prli(rdata, pp->prli.prli_spp_len,
-+					       &pp->spp, &temp_spp);
-+		} else {
-+			memcpy(&temp_spp, &pp->spp, sizeof(temp_spp));
-+		}
+ 			prov->prli(rdata, pp->prli.prli_spp_len,
+ 				   &pp->spp, &temp_spp);
+ 		}
+-
 +		/*
 +		 * Check if the image pair could be established
 +		 */
 +		if (rdata->spp_type != FC_TYPE_FCP ||
 +		    resp_code != FC_SPP_RESP_ACK ||
-+		    !(temp_spp.spp_flags & FC_SPP_EST_IMG_PAIR)) {
++		    !(pp->spp.spp_flags & FC_SPP_EST_IMG_PAIR)) {
 +			/*
 +			 * Nope; we can't use this port as a target.
 +			 */
 +			fcp_parm &= ~FCP_SPPF_TARG_FCN;
- 		}
--
++		}
  		rdata->supported_classes = FC_COS_CLASS3;
  		if (fcp_parm & FCP_SPPF_INIT_FCN)
  			roles |= FC_RPORT_ROLE_FCP_INITIATOR;
-@@ -1226,6 +1241,15 @@ static void fc_rport_enter_prli(struct fc_rport_priv *rdata)
+@@ -1226,6 +1239,15 @@ static void fc_rport_enter_prli(struct f
  		return;
  	}
  
@@ -81,7 +86,42 @@ index 14666f1..47c3f54 100644
  	FC_RPORT_DBG(rdata, "Port entered PRLI state from %s state\n",
  		     fc_rport_state(rdata));
  
-@@ -1988,13 +2012,6 @@ static void fc_rport_recv_prli_req(struct fc_rport_priv *rdata,
+@@ -1904,7 +1926,6 @@ static void fc_rport_recv_prli_req(struc
+ 	unsigned int len;
+ 	unsigned int plen;
+ 	enum fc_els_spp_resp resp;
+-	enum fc_els_spp_resp passive;
+ 	struct fc_seq_els_data rjt_data;
+ 	struct fc4_prov *prov;
+ 
+@@ -1954,15 +1975,21 @@ static void fc_rport_recv_prli_req(struc
+ 		resp = 0;
+ 
+ 		if (rspp->spp_type < FC_FC4_PROV_SIZE) {
++			enum fc_els_spp_resp active = 0, passive = 0;
++
+ 			prov = fc_active_prov[rspp->spp_type];
+ 			if (prov)
+-				resp = prov->prli(rdata, plen, rspp, spp);
++				active = prov->prli(rdata, plen, rspp, spp);
+ 			prov = fc_passive_prov[rspp->spp_type];
+-			if (prov) {
++			if (prov)
+ 				passive = prov->prli(rdata, plen, rspp, spp);
+-				if (!resp || passive == FC_SPP_RESP_ACK)
+-					resp = passive;
+-			}
++			if (!active || passive == FC_SPP_RESP_ACK)
++				resp = passive;
++			else
++				resp = active;
++			FC_RPORT_DBG(rdata, "PRLI rspp type %x "
++				     "active %x passive %x\n",
++				     rspp->spp_type, active, passive);
+ 		}
+ 		if (!resp) {
+ 			if (spp->spp_flags & FC_SPP_EST_IMG_PAIR)
+@@ -1983,13 +2010,6 @@ static void fc_rport_recv_prli_req(struc
  	fc_fill_reply_hdr(fp, rx_fp, FC_RCTL_ELS_REP, 0);
  	lport->tt.frame_send(lport, fp);
  
@@ -95,6 +135,3 @@ index 14666f1..47c3f54 100644
  	goto drop;
  
  reject_len:
--- 
-1.8.5.6
-
