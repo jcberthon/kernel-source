@@ -1,0 +1,35 @@
+From 3dca01114dcecb1cf324534cd8d75fd1306a516b Mon Sep 17 00:00:00 2001
+From: Johan Hovold <johan@kernel.org>
+Date: Tue, 3 Jan 2017 16:39:40 +0100
+Subject: [PATCH] USB: serial: cyberjack: fix NULL-deref at open
+Git-commit: 3dca01114dcecb1cf324534cd8d75fd1306a516b
+Patch-mainline: v4.10
+References: bsc#1114672
+
+Fix NULL-pointer dereference when clearing halt at open should the device
+lack a bulk-out endpoint.
+
+Unable to handle kernel NULL pointer dereference at virtual address 00000030
+...
+PC is at cyberjack_open+0x40/0x9c [cyberjack]
+
+Fixes: 1da177e4c3f4 ("Linux-2.6.12-rc2")
+Cc: stable <stable@vger.kernel.org>
+Signed-off-by: Johan Hovold <johan@kernel.org>
+Signed-off-by: Oliver Neukum <oneukum@suse.com>
+---
+ drivers/usb/serial/cyberjack.c |    3 +++
+ 1 file changed, 3 insertions(+)
+
+--- a/drivers/usb/serial/cyberjack.c
++++ b/drivers/usb/serial/cyberjack.c
+@@ -122,6 +122,9 @@ static int cyberjack_startup(struct usb_
+ 
+ 	dbg("%s", __func__);
+ 
++	if (serial->num_bulk_out < serial->num_ports)
++		return -ENODEV;
++
+ 	/* allocate the private data structure */
+ 	priv = kmalloc(sizeof(struct cyberjack_private), GFP_KERNEL);
+ 	if (!priv)
