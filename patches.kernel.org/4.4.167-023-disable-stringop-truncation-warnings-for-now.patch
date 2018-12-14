@@ -1,0 +1,36 @@
+From: Stephen Rothwell <sfr@canb.auug.org.au>
+Date: Fri, 31 Aug 2018 07:47:28 +1000
+Subject: [PATCH] disable stringop truncation warnings for now
+References: bnc#1012382
+Patch-mainline: 4.4.167
+Git-commit: 217c3e0196758662aa0429863b09d1c13da1c5d6
+
+commit 217c3e0196758662aa0429863b09d1c13da1c5d6 upstream.
+
+They are too noisy
+
+Signed-off-by: Stephen Rothwell <sfr@canb.auug.org.au>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ Makefile | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/Makefile b/Makefile
+index 64521458d35e..050517cc4b72 100644
+--- a/Makefile
++++ b/Makefile
+@@ -793,6 +793,9 @@ KBUILD_CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
+ # disable pointer signed / unsigned warnings in gcc 4.0
+ KBUILD_CFLAGS += $(call cc-disable-warning, pointer-sign)
+ 
++# disable stringop warnings in gcc 8+
++KBUILD_CFLAGS += $(call cc-disable-warning, stringop-truncation)
++
+ # disable invalid "can't wrap" optimizations for signed / pointers
+ KBUILD_CFLAGS	+= $(call cc-option,-fno-strict-overflow)
+ 
+-- 
+2.19.2
+

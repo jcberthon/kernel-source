@@ -1,0 +1,50 @@
+From f551e13529833e052f75ec628a8af7b034af20f9 Mon Sep 17 00:00:00 2001
+From: Bin Liu <b-liu@ti.com>
+Date: Mon, 25 Apr 2016 15:53:30 -0500
+Subject: [PATCH] Revert "usb: musb: musb_host: Enable HCD_BH flag to handle
+ urb return in bottom half"
+Git-commit: f551e13529833e052f75ec628a8af7b034af20f9
+Patch-mainline: v4.10
+References: bsc#1047487
+
+This reverts commit 2035772010db634ec8566b658fb1cd87ec47ac77.
+
+Commit 20357720 claims throughput improvement for MSC/UVC, but I
+don't see much improvement. Following are the MSC measurement using
+dd on AM335x GP EVM.
+
+with BCD_BH:    read: 14.9MB/s, write: 20.9MB/s
+without BCD_BH: read: 15.2MB/s, write: 21.2MB/s
+
+However with this commit the following regressions have been observed.
+
+1. ASIX usb-ethernet dongle is completely broken on UDP RX.
+
+2. Unpluging a 3G modem, which uses option driver, behind a hub causes
+   console log flooding with the following message.
+
+   option_instat_callback: error -71
+
+Signed-off-by: Bin Liu <b-liu@ti.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Oliver Neukum <oneukum@suse.com>
+---
+ drivers/usb/musb/musb_host.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/usb/musb/musb_host.c b/drivers/usb/musb/musb_host.c
+index 58487a473521..2f8ad7f1f482 100644
+--- a/drivers/usb/musb/musb_host.c
++++ b/drivers/usb/musb/musb_host.c
+@@ -2735,7 +2735,7 @@ static const struct hc_driver musb_hc_driver = {
+ 	.description		= "musb-hcd",
+ 	.product_desc		= "MUSB HDRC host driver",
+ 	.hcd_priv_size		= sizeof(struct musb *),
+-	.flags			= HCD_USB2 | HCD_MEMORY | HCD_BH,
++	.flags			= HCD_USB2 | HCD_MEMORY,
+ 
+ 	/* not using irq handler or reset hooks from usbcore, since
+ 	 * those must be shared with peripheral code for OTG configs
+-- 
+2.16.4
+

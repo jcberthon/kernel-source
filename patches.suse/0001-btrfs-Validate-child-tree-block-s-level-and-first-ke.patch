@@ -36,19 +36,19 @@ Signed-off-by: Qu Wenruo <wqu@suse.com>
 Signed-off-by: David Sterba <dsterba@suse.com>
 ---
  fs/btrfs/backref.c     |    5 +-
- fs/btrfs/ctree.c       |   27 ++++++++++----
- fs/btrfs/disk-io.c     |   94 ++++++++++++++++++++++++++++++++++++++++++-------
+ fs/btrfs/ctree.c       |   27 +++++++++++---
+ fs/btrfs/disk-io.c     |   91 ++++++++++++++++++++++++++++++++++++++++++-------
  fs/btrfs/disk-io.h     |    6 ++-
  fs/btrfs/extent-tree.c |    6 ++-
  fs/btrfs/print-tree.c  |   10 +++--
  fs/btrfs/qgroup.c      |    7 ++-
- fs/btrfs/relocation.c  |   19 +++++++--
- fs/btrfs/tree-log.c    |   28 ++++++++------
- 9 files changed, 158 insertions(+), 44 deletions(-)
+ fs/btrfs/relocation.c  |   19 ++++++++--
+ fs/btrfs/tree-log.c    |   28 +++++++++------
+ 9 files changed, 156 insertions(+), 43 deletions(-)
 
 --- a/fs/btrfs/backref.c
 +++ b/fs/btrfs/backref.c
-@@ -793,7 +793,7 @@ static int __add_missing_keys(struct btr
+@@ -726,7 +726,7 @@ static int add_missing_keys(struct btrfs
  			continue;
  		BUG_ON(!ref->wanted_disk_byte);
  		eb = read_tree_block(fs_info->tree_root, ref->wanted_disk_byte,
@@ -57,7 +57,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		if (IS_ERR(eb)) {
  			return PTR_ERR(eb);
  		} else if (!extent_buffer_uptodate(eb)) {
-@@ -1421,7 +1421,8 @@ again:
+@@ -1251,7 +1251,8 @@ again:
  				struct extent_buffer *eb;
  
  				eb = read_tree_block(fs_info->extent_root,
@@ -265,18 +265,8 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 +				break;
  		}
  
- 		/*
-@@ -469,7 +518,8 @@ static int btree_read_extent_buffer_page
- 		 * there is no reason to read the other copies, they won't be
- 		 * any less wrong.
- 		 */
--		if (test_bit(EXTENT_BUFFER_CORRUPT, &eb->bflags))
-+		if (test_bit(EXTENT_BUFFER_CORRUPT, &eb->bflags) ||
-+		    ret == -EUCLEAN)
- 			break;
- 
  		num_copies = btrfs_num_copies(root->fs_info,
-@@ -1238,8 +1288,17 @@ int btrfs_wait_tree_block_writeback(stru
+@@ -1087,8 +1136,17 @@ int btrfs_wait_tree_block_writeback(stru
  				       buf->start, buf->start + buf->len - 1);
  }
  
@@ -295,7 +285,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  {
  	struct extent_buffer *buf = NULL;
  	int ret;
-@@ -1248,7 +1307,8 @@ struct extent_buffer *read_tree_block(st
+@@ -1097,7 +1155,8 @@ struct extent_buffer *read_tree_block(st
  	if (IS_ERR(buf))
  		return buf;
  
@@ -305,7 +295,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	if (ret) {
  		free_extent_buffer(buf);
  		return ERR_PTR(ret);
-@@ -1583,6 +1643,7 @@ static struct btrfs_root *btrfs_read_tre
+@@ -1432,6 +1491,7 @@ static struct btrfs_root *btrfs_read_tre
  	struct btrfs_path *path;
  	u64 generation;
  	int ret;
@@ -313,7 +303,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  
  	path = btrfs_alloc_path();
  	if (!path)
-@@ -1606,8 +1667,9 @@ static struct btrfs_root *btrfs_read_tre
+@@ -1455,8 +1515,9 @@ static struct btrfs_root *btrfs_read_tre
  	}
  
  	generation = btrfs_root_generation(&root->root_item);
@@ -324,7 +314,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	if (IS_ERR(root->node)) {
  		ret = PTR_ERR(root->node);
  		goto find_fail;
-@@ -2468,6 +2530,7 @@ static int btrfs_replay_log(struct btrfs
+@@ -2317,6 +2378,7 @@ static int btrfs_replay_log(struct btrfs
  	struct btrfs_root *log_tree_root;
  	struct btrfs_super_block *disk_super = fs_info->super_copy;
  	u64 bytenr = btrfs_super_log_root(disk_super);
@@ -332,7 +322,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  
  	if (fs_devices->rw_devices == 0) {
  		btrfs_warn(fs_info, "log replay required on RO media");
-@@ -2483,7 +2546,7 @@ static int btrfs_replay_log(struct btrfs
+@@ -2332,7 +2394,7 @@ static int btrfs_replay_log(struct btrfs
  			BTRFS_TREE_LOG_OBJECTID);
  
  	log_tree_root->node = read_tree_block(tree_root, bytenr,
@@ -341,7 +331,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	if (IS_ERR(log_tree_root->node)) {
  		btrfs_warn(fs_info, "failed to read log tree");
  		ret = PTR_ERR(log_tree_root->node);
-@@ -2588,6 +2651,7 @@ int open_ctree(struct super_block *sb,
+@@ -2437,6 +2499,7 @@ int open_ctree(struct super_block *sb,
  	int num_backups_tried = 0;
  	int backup_index = 0;
  	int max_active;
@@ -349,7 +339,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  
  	tree_root = fs_info->tree_root = btrfs_alloc_root(fs_info, GFP_KERNEL);
  	chunk_root = fs_info->chunk_root = btrfs_alloc_root(fs_info, GFP_KERNEL);
-@@ -2928,13 +2992,14 @@ int open_ctree(struct super_block *sb,
+@@ -2775,13 +2838,14 @@ int open_ctree(struct super_block *sb,
  	}
  
  	generation = btrfs_super_chunk_root_generation(disk_super);
@@ -365,7 +355,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	if (IS_ERR(chunk_root->node) ||
  	    !extent_buffer_uptodate(chunk_root->node)) {
  		btrfs_err(fs_info, "failed to read chunk root");
-@@ -2968,10 +3033,11 @@ int open_ctree(struct super_block *sb,
+@@ -2815,10 +2879,11 @@ int open_ctree(struct super_block *sb,
  
  retry_root_backup:
  	generation = btrfs_super_generation(disk_super);
@@ -378,7 +368,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	if (IS_ERR(tree_root->node) ||
  	    !extent_buffer_uptodate(tree_root->node)) {
  		btrfs_warn(fs_info, "failed to read tree root");
-@@ -4072,10 +4138,12 @@ void btrfs_btree_balance_dirty_nodelay(s
+@@ -3929,10 +3994,12 @@ void btrfs_btree_balance_dirty_nodelay(s
  	__btrfs_btree_balance_dirty(root, 0);
  }
  
@@ -417,7 +407,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  int btrfs_bio_wq_end_io(struct btrfs_fs_info *info, struct bio *bio,
 --- a/fs/btrfs/extent-tree.c
 +++ b/fs/btrfs/extent-tree.c
-@@ -8632,6 +8632,7 @@ static noinline int do_walk_down(struct
+@@ -8633,6 +8633,7 @@ static noinline int do_walk_down(struct
  	u64 parent;
  	u32 blocksize;
  	struct btrfs_key key;
@@ -425,7 +415,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	struct extent_buffer *next;
  	int level = wc->level;
  	int reada = 0;
-@@ -8652,6 +8653,8 @@ static noinline int do_walk_down(struct
+@@ -8653,6 +8654,8 @@ static noinline int do_walk_down(struct
  	}
  
  	bytenr = btrfs_node_blockptr(path->nodes[level], path->slots[level]);
@@ -434,7 +424,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	blocksize = root->nodesize;
  
  	next = btrfs_find_tree_block(root->fs_info, bytenr);
-@@ -8716,7 +8719,8 @@ static noinline int do_walk_down(struct
+@@ -8717,7 +8720,8 @@ static noinline int do_walk_down(struct
  	if (!next) {
  		if (reada && level == 1)
  			reada_walk_down(trans, root, wc, path);
@@ -465,7 +455,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		} else if (!extent_buffer_uptodate(next)) {
 --- a/fs/btrfs/qgroup.c
 +++ b/fs/btrfs/qgroup.c
-@@ -1652,7 +1652,7 @@ int btrfs_qgroup_trace_subtree(struct bt
+@@ -1645,7 +1645,7 @@ int btrfs_qgroup_trace_subtree(struct bt
  		return 0;
  
  	if (!extent_buffer_uptodate(root_eb)) {
@@ -474,7 +464,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		if (ret)
  			goto out;
  	}
-@@ -1683,6 +1683,7 @@ walk_down:
+@@ -1676,6 +1676,7 @@ walk_down:
  	level = root_level;
  	while (level >= 0) {
  		if (path->nodes[level] == NULL) {
@@ -482,7 +472,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			int parent_slot;
  			u64 child_gen;
  			u64 child_bytenr;
-@@ -1695,8 +1696,10 @@ walk_down:
+@@ -1688,8 +1689,10 @@ walk_down:
  			parent_slot = path->slots[level + 1];
  			child_bytenr = btrfs_node_blockptr(eb, parent_slot);
  			child_gen = btrfs_node_ptr_generation(eb, parent_slot);
@@ -496,7 +486,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				goto out;
 --- a/fs/btrfs/relocation.c
 +++ b/fs/btrfs/relocation.c
-@@ -1831,6 +1831,8 @@ again:
+@@ -1832,6 +1832,8 @@ again:
  
  	parent = eb;
  	while (1) {
@@ -505,7 +495,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		level = btrfs_header_level(parent);
  		BUG_ON(level < lowest_level);
  
-@@ -1844,6 +1846,7 @@ again:
+@@ -1845,6 +1847,7 @@ again:
  		old_bytenr = btrfs_node_blockptr(parent, slot);
  		blocksize = dest->nodesize;
  		old_ptr_gen = btrfs_node_ptr_generation(parent, slot);
@@ -513,7 +503,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  
  		if (level <= max_level) {
  			eb = path->nodes[level];
-@@ -1868,7 +1871,8 @@ again:
+@@ -1869,7 +1872,8 @@ again:
  				break;
  			}
  
@@ -523,7 +513,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			if (IS_ERR(eb)) {
  				ret = PTR_ERR(eb);
  				break;
-@@ -2027,6 +2031,8 @@ int walk_down_reloc_tree(struct btrfs_ro
+@@ -2028,6 +2032,8 @@ int walk_down_reloc_tree(struct btrfs_ro
  	last_snapshot = btrfs_root_last_snapshot(&root->root_item);
  
  	for (i = *level; i > 0; i--) {
@@ -532,7 +522,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		eb = path->nodes[i];
  		nritems = btrfs_header_nritems(eb);
  		while (path->slots[i] < nritems) {
-@@ -2047,7 +2053,8 @@ int walk_down_reloc_tree(struct btrfs_ro
+@@ -2048,7 +2054,8 @@ int walk_down_reloc_tree(struct btrfs_ro
  		}
  
  		bytenr = btrfs_node_blockptr(eb, path->slots[i]);
@@ -542,7 +532,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		if (IS_ERR(eb)) {
  			return PTR_ERR(eb);
  		} else if (!extent_buffer_uptodate(eb)) {
-@@ -2709,6 +2716,8 @@ static int do_relocation(struct btrfs_tr
+@@ -2710,6 +2717,8 @@ static int do_relocation(struct btrfs_tr
  	path->lowest_level = node->level + 1;
  	rc->backref_cache.path[node->level] = node;
  	list_for_each_entry(edge, &node->upper, list[LOWER]) {
@@ -551,7 +541,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		cond_resched();
  
  		upper = edge->node[UPPER];
-@@ -2774,7 +2783,9 @@ static int do_relocation(struct btrfs_tr
+@@ -2775,7 +2784,9 @@ static int do_relocation(struct btrfs_tr
  
  		blocksize = root->nodesize;
  		generation = btrfs_node_ptr_generation(upper->eb, slot);
@@ -562,7 +552,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		if (IS_ERR(eb)) {
  			err = PTR_ERR(eb);
  			goto next;
-@@ -2940,7 +2951,7 @@ static int get_tree_block_key(struct rel
+@@ -2941,7 +2952,7 @@ static int get_tree_block_key(struct rel
  
  	BUG_ON(block->key_ready);
  	eb = read_tree_block(rc->extent_root, block->bytenr,
@@ -600,7 +590,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		if (ret)
  			return ret;
  	}
-@@ -2294,17 +2294,16 @@ out:
+@@ -2296,17 +2296,16 @@ out:
   * back refs).
   */
  static int replay_one_buffer(struct btrfs_root *log, struct extent_buffer *eb,
@@ -620,7 +610,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	if (ret)
  		return ret;
  
-@@ -2420,6 +2419,8 @@ static noinline int walk_down_log_tree(s
+@@ -2422,6 +2421,8 @@ static noinline int walk_down_log_tree(s
  	WARN_ON(*level >= BTRFS_MAX_LEVEL);
  
  	while (*level > 0) {
@@ -629,7 +619,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		WARN_ON(*level < 0);
  		WARN_ON(*level >= BTRFS_MAX_LEVEL);
  		cur = path->nodes[*level];
-@@ -2432,6 +2433,7 @@ static noinline int walk_down_log_tree(s
+@@ -2434,6 +2435,7 @@ static noinline int walk_down_log_tree(s
  
  		bytenr = btrfs_node_blockptr(cur, path->slots[*level]);
  		ptr_gen = btrfs_node_ptr_generation(cur, path->slots[*level]);
@@ -637,7 +627,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		blocksize = root->nodesize;
  
  		parent = path->nodes[*level];
-@@ -2442,7 +2444,8 @@ static noinline int walk_down_log_tree(s
+@@ -2444,7 +2446,8 @@ static noinline int walk_down_log_tree(s
  			return PTR_ERR(next);
  
  		if (*level == 1) {
@@ -647,7 +637,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			if (ret) {
  				free_extent_buffer(next);
  				return ret;
-@@ -2450,7 +2453,8 @@ static noinline int walk_down_log_tree(s
+@@ -2452,7 +2455,8 @@ static noinline int walk_down_log_tree(s
  
  			path->slots[*level]++;
  			if (wc->free) {
@@ -657,7 +647,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				if (ret) {
  					free_extent_buffer(next);
  					return ret;
-@@ -2480,7 +2484,7 @@ static noinline int walk_down_log_tree(s
+@@ -2482,7 +2486,7 @@ static noinline int walk_down_log_tree(s
  			free_extent_buffer(next);
  			continue;
  		}
@@ -666,7 +656,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		if (ret) {
  			free_extent_buffer(next);
  			return ret;
-@@ -2529,7 +2533,8 @@ static noinline int walk_up_log_tree(str
+@@ -2531,7 +2535,8 @@ static noinline int walk_up_log_tree(str
  
  			root_owner = btrfs_header_owner(parent);
  			ret = wc->process_func(root, path->nodes[*level], wc,
@@ -676,7 +666,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			if (ret)
  				return ret;
  
-@@ -2610,7 +2615,8 @@ static int walk_log_tree(struct btrfs_tr
+@@ -2612,7 +2617,8 @@ static int walk_log_tree(struct btrfs_tr
  	/* was the root node processed? if not, catch it here */
  	if (path->nodes[orig_level]) {
  		ret = wc->process_func(log, path->nodes[orig_level], wc,

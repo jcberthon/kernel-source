@@ -1,9 +1,12 @@
 From: Lu Baolu <baolu.lu@linux.intel.com>
 Date: Mon, 5 Nov 2018 10:18:58 +0800
-Subject: iommu/vt-d: Fix NULL pointer dereference in prq_event_thread()
+Subject: [PATCH] iommu/vt-d: Fix NULL pointer dereference in
+ prq_event_thread()
+Patch-mainline: 4.4.167
+References: bnc#1012382 bsc#1106105
 Git-commit: 19ed3e2dd8549c1a34914e8dad01b64e7837645a
-Patch-mainline: v4.20-rc4
-References: bsc#1106105
+
+[ Upstream commit 19ed3e2dd8549c1a34914e8dad01b64e7837645a ]
 
 When handling page request without pasid event, go to "no_pasid"
 branch instead of "bad_req". Otherwise, a NULL pointer deference
@@ -15,15 +18,17 @@ Cc: Sohil Mehta <sohil.mehta@intel.com>
 Signed-off-by: Lu Baolu <baolu.lu@linux.intel.com>
 Fixes: a222a7f0bb6c9 'iommu/vt-d: Implement page request handling'
 Signed-off-by: Joerg Roedel <jroedel@suse.de>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  drivers/iommu/intel-svm.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/iommu/intel-svm.c b/drivers/iommu/intel-svm.c
-index db301efe126d..887150907526 100644
+index 10068a481e22..cbde03e509c1 100644
 --- a/drivers/iommu/intel-svm.c
 +++ b/drivers/iommu/intel-svm.c
-@@ -595,7 +595,7 @@ static irqreturn_t prq_event_thread(int irq, void *d)
+@@ -558,7 +558,7 @@ static irqreturn_t prq_event_thread(int irq, void *d)
  			pr_err("%s: Page request without PASID: %08llx %08llx\n",
  			       iommu->name, ((unsigned long long *)req)[0],
  			       ((unsigned long long *)req)[1]);
@@ -32,4 +37,6 @@ index db301efe126d..887150907526 100644
  		}
  
  		if (!svm || svm->pasid != req->pasid) {
+-- 
+2.19.2
 

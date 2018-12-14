@@ -14,14 +14,12 @@ Signed-off-by: Christoph Hellwig <hch@lst.de>
 Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 
 ---
- drivers/infiniband/ulp/iser/iscsi_iser.h     |  72 +++++---
- drivers/infiniband/ulp/iser/iser_initiator.c | 142 ++++++++++-----
- drivers/infiniband/ulp/iser/iser_memory.c    |  21 ++-
- drivers/infiniband/ulp/iser/iser_verbs.c     | 258 ++++++---------------------
- 4 files changed, 210 insertions(+), 283 deletions(-)
+ drivers/infiniband/ulp/iser/iscsi_iser.h     |   72 ++++---
+ drivers/infiniband/ulp/iser/iser_initiator.c |  140 +++++++++-----
+ drivers/infiniband/ulp/iser/iser_memory.c    |   21 +-
+ drivers/infiniband/ulp/iser/iser_verbs.c     |  258 +++++----------------------
+ 4 files changed, 209 insertions(+), 282 deletions(-)
 
-diff --git a/drivers/infiniband/ulp/iser/iscsi_iser.h b/drivers/infiniband/ulp/iser/iscsi_iser.h
-index 8703079..2411680 100644
 --- a/drivers/infiniband/ulp/iser/iscsi_iser.h
 +++ b/drivers/infiniband/ulp/iser/iscsi_iser.h
 @@ -151,16 +151,12 @@
@@ -152,7 +150,7 @@ index 8703079..2411680 100644
  };
  
  /**
-@@ -645,12 +641,14 @@ int iser_conn_terminate(struct iser_conn *iser_conn);
+@@ -645,12 +641,14 @@ int iser_conn_terminate(struct iser_conn
  
  void iser_release_work(struct work_struct *work);
  
@@ -196,11 +194,9 @@ index 8703079..2411680 100644
 +}
 +
  #endif
-diff --git a/drivers/infiniband/ulp/iser/iser_initiator.c b/drivers/infiniband/ulp/iser/iser_initiator.c
-index 21148b6..44ecb89 100644
 --- a/drivers/infiniband/ulp/iser/iser_initiator.c
 +++ b/drivers/infiniband/ulp/iser/iser_initiator.c
-@@ -270,11 +270,11 @@ int iser_alloc_rx_descriptors(struct iser_conn *iser_conn,
+@@ -270,11 +270,11 @@ int iser_alloc_rx_descriptors(struct ise
  			goto rx_desc_dma_map_failed;
  
  		rx_desc->dma_addr = dma_addr;
@@ -215,7 +211,7 @@ index 21148b6..44ecb89 100644
  	}
  
  	iser_conn->rx_desc_head = 0;
-@@ -373,6 +373,7 @@ int iser_send_command(struct iscsi_conn *conn,
+@@ -373,6 +373,7 @@ int iser_send_command(struct iscsi_conn
  
  	/* build the tx desc regd header and add it to the tx desc dto */
  	tx_desc->type = ISCSI_TX_SCSI_COMMAND;
@@ -223,7 +219,7 @@ index 21148b6..44ecb89 100644
  	iser_create_send_desc(iser_conn, tx_desc);
  
  	if (hdr->flags & ISCSI_FLAG_CMD_READ) {
-@@ -454,6 +455,7 @@ int iser_send_data_out(struct iscsi_conn *conn,
+@@ -454,6 +455,7 @@ int iser_send_data_out(struct iscsi_conn
  	}
  
  	tx_desc->type = ISCSI_TX_DATAOUT;
@@ -231,7 +227,7 @@ index 21148b6..44ecb89 100644
  	tx_desc->iser_header.flags = ISER_VER;
  	memcpy(&tx_desc->iscsi_header, hdr, sizeof(struct iscsi_hdr));
  
-@@ -503,6 +505,7 @@ int iser_send_control(struct iscsi_conn *conn,
+@@ -503,6 +505,7 @@ int iser_send_control(struct iscsi_conn
  
  	/* build the tx desc regd header and add it to the tx desc dto */
  	mdesc->type = ISCSI_TX_CONTROL;
@@ -258,7 +254,8 @@ index 21148b6..44ecb89 100644
  	char *data;
 -	u64 rx_dma;
 -	int rx_buflen, outstanding, count, err;
--
++	int length;
+ 
 -	/* differentiate between login to all other PDUs */
 -	if (rx_desc == (void *)&iser_conn->login_desc) {
 -		rx_dma = iser_conn->login_desc.rsp_dma;
@@ -270,8 +267,6 @@ index 21148b6..44ecb89 100644
 -		rx_buflen = ISER_RX_PAYLOAD_SIZE;
 -		hdr = &rx_desc->iscsi_header;
 -		data = rx_desc->data;
-+	int length;
-+
 +	if (unlikely(wc->status != IB_WC_SUCCESS)) {
 +		iser_err_comp(wc, "login_rsp");
 +		return;
@@ -336,7 +331,7 @@ index 21148b6..44ecb89 100644
  
  	/* decrementing conn->post_recv_buf_count only --after-- freeing the   *
  	 * task eliminates the need to worry on tasks which are completed in   *
-@@ -597,9 +625,6 @@ void iser_rcv_completion(struct iser_rx_desc *rx_desc,
+@@ -597,9 +625,6 @@ void iser_rcv_completion(struct iser_rx_
  	 * for the posted rx bufs refcount to become zero handles everything   */
  	ib_conn->post_recv_buf_count--;
  
@@ -346,7 +341,7 @@ index 21148b6..44ecb89 100644
  	outstanding = ib_conn->post_recv_buf_count;
  	if (outstanding + iser_conn->min_posted_rx <= iser_conn->qp_max_recv_dtos) {
  		count = min(iser_conn->qp_max_recv_dtos - outstanding,
-@@ -610,26 +635,47 @@ void iser_rcv_completion(struct iser_rx_desc *rx_desc,
+@@ -610,26 +635,47 @@ void iser_rcv_completion(struct iser_rx_
  	}
  }
  
@@ -409,8 +404,6 @@ index 21148b6..44ecb89 100644
  }
  
  void iser_task_rdma_init(struct iscsi_iser_task *iser_task)
-diff --git a/drivers/infiniband/ulp/iser/iser_memory.c b/drivers/infiniband/ulp/iser/iser_memory.c
-index ea765fb..76ca09b 100644
 --- a/drivers/infiniband/ulp/iser/iser_memory.c
 +++ b/drivers/infiniband/ulp/iser/iser_memory.c
 @@ -67,6 +67,11 @@ static struct iser_reg_ops fmr_ops = {
@@ -425,7 +418,7 @@ index ea765fb..76ca09b 100644
  int iser_assign_reg_ops(struct iser_device *device)
  {
  	struct ib_device *ib_dev = device->ib_device;
-@@ -414,12 +419,14 @@ iser_set_prot_checks(struct scsi_cmnd *sc, u8 *mask)
+@@ -413,12 +418,14 @@ iser_set_prot_checks(struct scsi_cmnd *s
  }
  
  static void
@@ -442,7 +435,7 @@ index ea765fb..76ca09b 100644
  	inv_wr->ex.invalidate_rkey = mr->rkey;
  	inv_wr->send_flags = 0;
  	inv_wr->num_sge = 0;
-@@ -437,6 +444,7 @@ iser_reg_sig_mr(struct iscsi_iser_task *iser_task,
+@@ -436,6 +443,7 @@ iser_reg_sig_mr(struct iscsi_iser_task *
  {
  	struct iser_tx_desc *tx_desc = &iser_task->desc;
  	struct ib_sig_attrs *sig_attrs = &tx_desc->sig_attrs;
@@ -450,7 +443,7 @@ index ea765fb..76ca09b 100644
  	struct ib_sig_handover_wr *wr;
  	int ret;
  
-@@ -448,11 +456,11 @@ iser_reg_sig_mr(struct iscsi_iser_task *iser_task,
+@@ -447,11 +455,11 @@ iser_reg_sig_mr(struct iscsi_iser_task *
  	iser_set_prot_checks(iser_task->sc, &sig_attrs->check_mask);
  
  	if (!pi_ctx->sig_mr_valid)
@@ -464,7 +457,7 @@ index ea765fb..76ca09b 100644
  	wr->wr.sg_list = &data_reg->sge;
  	wr->wr.num_sge = 1;
  	wr->wr.send_flags = 0;
-@@ -485,12 +493,13 @@ static int iser_fast_reg_mr(struct iscsi_iser_task *iser_task,
+@@ -484,12 +492,13 @@ static int iser_fast_reg_mr(struct iscsi
  			    struct iser_mem_reg *reg)
  {
  	struct iser_tx_desc *tx_desc = &iser_task->desc;
@@ -479,7 +472,7 @@ index ea765fb..76ca09b 100644
  
  	n = ib_map_mr_sg(mr, mem->sg, mem->size, SIZE_4K);
  	if (unlikely(n != mem->size)) {
-@@ -501,7 +510,7 @@ static int iser_fast_reg_mr(struct iscsi_iser_task *iser_task,
+@@ -500,7 +509,7 @@ static int iser_fast_reg_mr(struct iscsi
  
  	wr = reg_wr(iser_tx_next_wr(tx_desc));
  	wr->wr.opcode = IB_WR_REG_MR;
@@ -488,8 +481,6 @@ index ea765fb..76ca09b 100644
  	wr->wr.send_flags = 0;
  	wr->wr.num_sge = 0;
  	wr->mr = mr;
-diff --git a/drivers/infiniband/ulp/iser/iser_verbs.c b/drivers/infiniband/ulp/iser/iser_verbs.c
-index e7ff7cc..2f2fc42 100644
 --- a/drivers/infiniband/ulp/iser/iser_verbs.c
 +++ b/drivers/infiniband/ulp/iser/iser_verbs.c
 @@ -44,17 +44,6 @@
@@ -510,7 +501,7 @@ index e7ff7cc..2f2fc42 100644
  static void iser_qp_event_callback(struct ib_event *cause, void *context)
  {
  	iser_err("qp event %s (%d)\n",
-@@ -110,27 +99,14 @@ static int iser_create_device_ib_res(struct iser_device *device)
+@@ -104,27 +93,14 @@ static int iser_create_device_ib_res(str
  		goto pd_err;
  
  	for (i = 0; i < device->comps_used; i++) {
@@ -540,7 +531,7 @@ index e7ff7cc..2f2fc42 100644
  	}
  
  	if (!iser_always_reg) {
-@@ -140,7 +116,7 @@ static int iser_create_device_ib_res(struct iser_device *device)
+@@ -134,7 +110,7 @@ static int iser_create_device_ib_res(str
  
  		device->mr = ib_get_dma_mr(device->pd, access);
  		if (IS_ERR(device->mr))
@@ -549,7 +540,7 @@ index e7ff7cc..2f2fc42 100644
  	}
  
  	INIT_IB_EVENT_HANDLER(&device->event_handler, device->ib_device,
-@@ -153,15 +129,12 @@ static int iser_create_device_ib_res(struct iser_device *device)
+@@ -147,15 +123,12 @@ static int iser_create_device_ib_res(str
  handler_err:
  	if (device->mr)
  		ib_dereg_mr(device->mr);
@@ -566,7 +557,7 @@ index e7ff7cc..2f2fc42 100644
  	}
  	ib_dealloc_pd(device->pd);
  pd_err:
-@@ -182,8 +155,7 @@ static void iser_free_device_ib_res(struct iser_device *device)
+@@ -176,8 +149,7 @@ static void iser_free_device_ib_res(stru
  	for (i = 0; i < device->comps_used; i++) {
  		struct iser_comp *comp = &device->comps[i];
  
@@ -576,7 +567,7 @@ index e7ff7cc..2f2fc42 100644
  		comp->cq = NULL;
  	}
  
-@@ -723,13 +695,13 @@ int iser_conn_terminate(struct iser_conn *iser_conn)
+@@ -719,13 +691,13 @@ int iser_conn_terminate(struct iser_conn
  				 iser_conn, err);
  
  		/* post an indication that all flush errors were consumed */
@@ -593,7 +584,7 @@ index e7ff7cc..2f2fc42 100644
  	}
  
  	return 1;
-@@ -966,14 +938,21 @@ static int iser_cma_handler(struct rdma_cm_id *cma_id, struct rdma_cm_event *eve
+@@ -962,14 +934,21 @@ static int iser_cma_handler(struct rdma_
  
  void iser_conn_init(struct iser_conn *iser_conn)
  {
@@ -617,7 +608,7 @@ index e7ff7cc..2f2fc42 100644
  }
  
   /**
-@@ -999,9 +978,6 @@ int iser_connect(struct iser_conn   *iser_conn,
+@@ -995,9 +974,6 @@ int iser_connect(struct iser_conn   *ise
  
  	iser_conn->state = ISER_CONN_PENDING;
  
@@ -627,7 +618,7 @@ index e7ff7cc..2f2fc42 100644
  	ib_conn->cma_id = rdma_create_id(&init_net, iser_cma_handler,
  					 (void *)iser_conn,
  					 RDMA_PS_TCP, IB_QPT_RC);
-@@ -1044,56 +1020,60 @@ connect_failure:
+@@ -1040,56 +1016,60 @@ connect_failure:
  
  int iser_post_recvl(struct iser_conn *iser_conn)
  {
@@ -705,7 +696,7 @@ index e7ff7cc..2f2fc42 100644
  	return ib_ret;
  }
  
-@@ -1114,7 +1094,7 @@ int iser_post_send(struct ib_conn *ib_conn, struct iser_tx_desc *tx_desc,
+@@ -1110,7 +1090,7 @@ int iser_post_send(struct ib_conn *ib_co
  				      DMA_TO_DEVICE);
  
  	wr->next = NULL;
@@ -714,7 +705,7 @@ index e7ff7cc..2f2fc42 100644
  	wr->sg_list = tx_desc->tx_sg;
  	wr->num_sge = tx_desc->num_sge;
  	wr->opcode = IB_WR_SEND;
-@@ -1128,148 +1108,6 @@ int iser_post_send(struct ib_conn *ib_conn, struct iser_tx_desc *tx_desc,
+@@ -1124,148 +1104,6 @@ int iser_post_send(struct ib_conn *ib_co
  	return ib_ret;
  }
  
@@ -863,9 +854,9 @@ index e7ff7cc..2f2fc42 100644
  u8 iser_check_task_pi_status(struct iscsi_iser_task *iser_task,
  			     enum iser_data_dir cmd_dir, sector_t *sector)
  {
-@@ -1317,3 +1155,21 @@ err:
- 	/* Not alot we can do here, return ambiguous guard error */
- 	return 0x1;
+@@ -1312,3 +1150,21 @@ u8 iser_check_task_pi_status(struct iscs
+ 
+ 	return 0;
  }
 +
 +void iser_err_comp(struct ib_wc *wc, const char *type)
@@ -885,6 +876,3 @@ index e7ff7cc..2f2fc42 100644
 +			 ib_wc_status_msg(wc->status), wc->status);
 +	}
 +}
--- 
-1.8.5.6
-
