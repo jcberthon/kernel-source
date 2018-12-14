@@ -32,8 +32,8 @@ index 47c3f54..7b1ca3b 100644
 +			goto busy;
 +		}
  	default:
- 		mutex_unlock(&rdata->rp_mutex);
- 		kref_put(&rdata->kref, lport->tt.rport_destroy);
+ 		FC_RPORT_DBG(rdata,
+ 			     "Reject ELS 0x%02x while in state %s\n",
 @@ -1730,6 +1739,14 @@ reject:
  	els_data.explan = ELS_EXPL_PLOGI_REQD;
  	lport->tt.seq_els_rsp_send(fp, ELS_LS_RJT, &els_data);
