@@ -1,0 +1,32 @@
+From: Tim Chen <tim.c.chen@linux.intel.com>
+Date: Sat, 16 Dec 2017 18:25:12 +0100
+Subject: xen/x86/mm: Set IBPB upon context switch
+Patch-mainline: Never, SUSE-Xen specific
+References: bsc#1068032
+
+Set IBPB on context switch when writing CR3.
+
+Signed-off-by: Tim Chen <tim.c.chen@linux.intel.com>
+[ Convert to do x86_ibp_barrier(). ]
+Signed-off-by: Borislav Petkov <bp@suse.de>
+Automatically created from "patches.suse/09-x86-mm-set-ibpb-upon-context-switch.patch" by xen-port-patches.py
+
+--- a/arch/x86/mm/tlb-xen.c
++++ b/arch/x86/mm/tlb-xen.c
+@@ -10,6 +10,7 @@
+ #include <asm/tlbflush.h>
+ #include <asm/mmu_context.h>
+ #include <asm/cache.h>
++#include <asm/spec_ctrl.h>
+ 
+ void switch_mm(struct mm_struct *prev, struct mm_struct *next,
+ 		struct task_struct *tsk)
+@@ -31,6 +32,8 @@ void switch_mm_irqs_off(struct mm_struct
+ 		BUG_ON(!xen_feature(XENFEAT_writable_page_tables) &&
+ 		       !PagePinned(virt_to_page(next->pgd)));
+ 
++		x86_ibp_barrier();
++
+ #if defined(CONFIG_SMP) && !defined(CONFIG_XEN) /* XEN: no lazy tlb */
+ 		percpu_write(cpu_tlbstate.state, TLBSTATE_OK);
+ 		percpu_write(cpu_tlbstate.active_mm, next);
