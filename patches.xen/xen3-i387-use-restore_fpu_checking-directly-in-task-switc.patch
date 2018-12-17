@@ -14,7 +14,7 @@ bother even trying.
 
 Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 Signed-off-by: Jiri Slaby <jslaby@suse.cz>
-Automatically created from "extra/i387-use-restore_fpu_checking-directly-in-task-switc.patch" by xen-port-patches.py
+Automatically created from "patches.suse/i387-use-restore_fpu_checking-directly-in-task-switc.patch" by xen-port-patches.py
 
 --- a/arch/x86/kernel/traps-xen.c
 +++ b/arch/x86/kernel/traps-xen.c

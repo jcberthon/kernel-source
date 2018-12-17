@@ -13,10 +13,11 @@ as they would get removed again by xen-clockevents (and really shouldn't
 have been needed - see SLE11 SPn).
 
 2.6.28/arch/x86/kernel/cpu/common_64-xen.c
+patches.arch/06-x86-cpu-merge-bugs-c-and-bugs_64-c.patch/arch/x86/kernel/cpu/bugs_64.c
 
 --- a/arch/x86/Kconfig
 +++ b/arch/x86/Kconfig
-@@ -737,7 +737,7 @@ config AMD_IOMMU
+@@ -752,7 +752,7 @@ config AMD_IOMMU
  	select SWIOTLB
  	select PCI_MSI
  	select PCI_IOV
@@ -25,7 +26,7 @@ have been needed - see SLE11 SPn).
  	---help---
  	  With this option you can enable support for AMD IOMMU hardware in
  	  your system. An IOMMU is a hardware component which provides
-@@ -1493,7 +1493,7 @@ config MTRR
+@@ -1508,7 +1508,7 @@ config MTRR
  config MTRR_SANITIZER
  	def_bool y
  	prompt "MTRR cleanup support"
@@ -310,7 +311,7 @@ have been needed - see SLE11 SPn).
  ia32_syscall_end:
 --- a/arch/x86/kernel/Makefile
 +++ b/arch/x86/kernel/Makefile
-@@ -132,9 +132,11 @@ ifeq ($(CONFIG_X86_64),y)
+@@ -134,9 +134,11 @@ ifeq ($(CONFIG_X86_64),y)
  	obj-$(CONFIG_PCI_MMCONFIG)	+= mmconf-fam10h_64.o
  	obj-y				+= vsmp_64.o
  
@@ -327,7 +328,7 @@ have been needed - see SLE11 SPn).
 +disabled-obj-$(CONFIG_XEN_UNPRIVILEGED_GUEST) += probe_roms_32.o
 --- a/arch/x86/kernel/acpi/boot.c
 +++ b/arch/x86/kernel/acpi/boot.c
-@@ -1346,6 +1346,7 @@ static int __init dmi_disable_acpi(const
+@@ -1362,6 +1362,7 @@ static int __init dmi_disable_acpi(const
  	return 0;
  }
  
@@ -335,7 +336,7 @@ have been needed - see SLE11 SPn).
  /*
   * Force ignoring BIOS IRQ0 override
   */
-@@ -1358,6 +1359,7 @@ static int __init dmi_ignore_irq0_timer_
+@@ -1374,6 +1375,7 @@ static int __init dmi_ignore_irq0_timer_
  	}
  	return 0;
  }
@@ -343,7 +344,7 @@ have been needed - see SLE11 SPn).
  
  static int __init force_acpi_rsdt(const struct dmi_system_id *d)
  {
-@@ -1478,6 +1480,7 @@ static struct dmi_system_id __initdata a
+@@ -1494,6 +1496,7 @@ static struct dmi_system_id __initdata a
  	{}
  };
  
@@ -351,7 +352,7 @@ have been needed - see SLE11 SPn).
  /* second table for DMI checks that should run after early-quirks */
  static struct dmi_system_id __initdata acpi_dmi_table_late[] = {
  	/*
-@@ -1532,6 +1535,7 @@ static struct dmi_system_id __initdata a
+@@ -1548,6 +1551,7 @@ static struct dmi_system_id __initdata a
  	 },
  	{}
  };
@@ -359,7 +360,7 @@ have been needed - see SLE11 SPn).
  
  /*
   * acpi_boot_table_init() and acpi_boot_init()
-@@ -1604,8 +1608,10 @@ int __init early_acpi_boot_init(void)
+@@ -1620,8 +1624,10 @@ int __init early_acpi_boot_init(void)
  
  int __init acpi_boot_init(void)
  {
@@ -399,7 +400,7 @@ have been needed - see SLE11 SPn).
  static int modern_apic(void)
 --- a/arch/x86/kernel/cpu/amd.c
 +++ b/arch/x86/kernel/cpu/amd.c
-@@ -624,6 +624,7 @@ static void __cpuinit init_amd(struct cp
+@@ -682,6 +682,7 @@ static void __cpuinit init_amd(struct cp
  		fam10h_check_enable_mmcfg();
  	}
  
@@ -407,7 +408,7 @@ have been needed - see SLE11 SPn).
  	if (c == &boot_cpu_data && c->x86 >= 0xf) {
  		unsigned long long tseg;
  
-@@ -643,6 +644,7 @@ static void __cpuinit init_amd(struct cp
+@@ -701,6 +702,7 @@ static void __cpuinit init_amd(struct cp
  		}
  	}
  #endif
@@ -4272,7 +4273,7 @@ have been needed - see SLE11 SPn).
  	jmp syscall_exit
 --- a/arch/x86/kernel/entry_64.S
 +++ b/arch/x86/kernel/entry_64.S
-@@ -1279,7 +1279,7 @@ ENTRY(arch_unwind_init_running)
+@@ -1376,7 +1376,7 @@ ENTRY(arch_unwind_init_running)
  END(arch_unwind_init_running)
  #endif
  
@@ -4281,7 +4282,7 @@ have been needed - see SLE11 SPn).
  zeroentry xen_hypervisor_callback xen_do_hypervisor_callback
  
  /*
-@@ -1379,7 +1379,7 @@ END(xen_failsafe_callback)
+@@ -1476,7 +1476,7 @@ END(xen_failsafe_callback)
  apicinterrupt HYPERVISOR_CALLBACK_VECTOR \
  	xen_hvm_callback_vector xen_evtchn_do_upcall
  
@@ -7515,7 +7516,7 @@ have been needed - see SLE11 SPn).
  	}
 --- a/arch/x86/kernel/machine_kexec_32.c
 +++ b/arch/x86/kernel/machine_kexec_32.c
-@@ -131,22 +131,11 @@ void machine_kexec_setup_load_arg(xen_ke
+@@ -135,22 +135,11 @@ void machine_kexec_setup_load_arg(xen_ke
  	xki->page_list[PA_PTE_0] = __ma(kexec_pte0);
  	xki->page_list[PA_PTE_1] = __ma(kexec_pte1);
  
@@ -15603,7 +15604,7 @@ have been needed - see SLE11 SPn).
  }
 --- a/arch/x86/mm/Makefile
 +++ b/arch/x86/mm/Makefile
-@@ -28,6 +28,7 @@ obj-$(CONFIG_ACPI_NUMA)		+= srat.o
+@@ -27,6 +27,7 @@ obj-$(CONFIG_ACPI_NUMA)		+= srat.o
  obj-$(CONFIG_NUMA_EMU)		+= numa_emulation.o
  
  obj-$(CONFIG_XEN)		+= hypervisor.o
@@ -19952,7 +19953,7 @@ have been needed - see SLE11 SPn).
  
 --- a/arch/x86/vdso/Makefile
 +++ b/arch/x86/vdso/Makefile
-@@ -78,9 +78,7 @@ obj-$(VDSO32-y)			+= vdso32-syms.lds
+@@ -79,9 +79,7 @@ obj-$(VDSO32-y)			+= vdso32-syms.lds
  vdso32.so-$(VDSO32-y)		+= int80
  vdso32.so-$(CONFIG_COMPAT)	+= syscall
  vdso32.so-$(VDSO32-y)		+= sysenter
@@ -20465,7 +20466,7 @@ have been needed - see SLE11 SPn).
  			DPRINTK("pid received %p:%d\n",
  			        info->pid_ns, info->pid);
  		}
-@@ -1764,7 +1765,8 @@ static int __init blkif_init(void)
+@@ -1763,7 +1764,8 @@ static int __init blkif_init(void)
  		 * We only create the device when a request of a new device is
  		 * made.
  		 */

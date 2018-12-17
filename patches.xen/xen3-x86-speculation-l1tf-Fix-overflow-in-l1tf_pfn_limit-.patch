@@ -1,11 +1,9 @@
 From 9df9516940a61d29aedf4d91b483ca6597e7d480 Mon Sep 17 00:00:00 2001
 From: Vlastimil Babka <vbabka@suse.cz>
 Date: Mon, 20 Aug 2018 11:58:35 +0200
-Subject: [PATCH] xen: x86/speculation/l1tf: Fix overflow in l1tf_pfn_limit() on
+Subject: [PATCH] xen/x86/speculation/l1tf: Fix overflow in l1tf_pfn_limit() on
  32bit
-Git-commit: 9df9516940a61d29aedf4d91b483ca6597e7d480
-Patch-mainline: not yet (in tip tree)
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git
+Patch-mainline: Never, SUSE-Xen specific
 References: bnc#1087081
 
 On 32bit PAE kernels on 64bit hardware with enough physical bits,
@@ -34,13 +32,11 @@ Cc: Michal Hocko <mhocko@kernel.org>
 Cc: stable@vger.kernel.org
 Link: https://lkml.kernel.org/r/20180820095835.5298-1-vbabka@suse.cz
 
----
- arch/x86/include/mach-xen/asm/processor.h |    4 ++--
- 3 files changed, 5 insertions(+), 3 deletions(-)
+Automatically created from "patches.arch/x86-speculation-l1tf-Fix-overflow-in-l1tf_pfn_limit-.patch" by xen-port-patches.py
 
 --- a/arch/x86/include/mach-xen/asm/processor.h
 +++ b/arch/x86/include/mach-xen/asm/processor.h
-@@ -166,9 +166,9 @@ extern void cpu_detect(struct cpuinfo_x8
+@@ -171,9 +171,9 @@ extern void cpu_detect(struct cpuinfo_x8
  
  extern struct pt_regs *idle_regs(struct pt_regs *);
  
