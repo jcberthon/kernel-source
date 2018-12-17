@@ -1,9 +1,8 @@
 From cc51e5428ea54f575d49cfcede1d4cb3a72b4ec4 Mon Sep 17 00:00:00 2001
 From: Andi Kleen <ak@linux.intel.com>
 Date: Fri, 24 Aug 2018 10:03:50 -0700
-Subject: [PATCH] xen x86/speculation/l1tf: Increase l1tf memory limit for Nehalem+
-Git-commit: cc51e5428ea54f575d49cfcede1d4cb3a72b4ec4
-Patch-mainline: 4.19-rc2
+Subject: [PATCH] xen/x86/speculation/l1tf: Increase l1tf memory limit for Nehalem+
+Patch-mainline: Never, SUSE-Xen specific
 References: bnc#1105536
 
 On Nehalem and newer core CPUs the CPU cache internally uses 44 bits
@@ -39,25 +38,23 @@ Cc: stable@vger.kernel.org
 Link: https://lkml.kernel.org/r/20180824170351.34874-1-andi@firstfloor.org
 Acked-by: Michal Hocko <mhocko@suse.com>
 
----
- arch/x86/include/mach-xen/asm/processor.h |    4 ++-
-
----
- arch/x86/include/mach-xen/asm/processor.h |    4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+Automatically created from "patches.arch/0001-x86-speculation-l1tf-Increase-l1tf-memory-limit-for-.patch" by xen-port-patches.py
 
 --- a/arch/x86/include/mach-xen/asm/processor.h
 +++ b/arch/x86/include/mach-xen/asm/processor.h
-@@ -124,6 +124,8 @@ struct cpuinfo_x86 {
+@@ -124,6 +124,11 @@ struct cpuinfo_x86 {
  #ifndef CONFIG_XEN
  	u32			microcode;
  #endif
-+	/* Address space bits used by the cache internally */
++	/*
++	 * Address space bits used by the cache internally
++	 * NOTE: only to be used for l1tf mitigation
++	 */
 +	u8			x86_cache_bits;
  } __attribute__((__aligned__(SMP_CACHE_BYTES)));
  
  #define X86_VENDOR_INTEL	0
-@@ -173,7 +175,7 @@ extern struct pt_regs *idle_regs(struct
+@@ -173,7 +178,7 @@ extern struct pt_regs *idle_regs(struct
  
  static inline unsigned long long l1tf_pfn_limit(void)
  {

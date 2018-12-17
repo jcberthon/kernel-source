@@ -1,10 +1,9 @@
 From b0a182f875689647b014bc01d36b340217792852 Mon Sep 17 00:00:00 2001
 From: Vlastimil Babka <vbabka@suse.cz>
 Date: Thu, 23 Aug 2018 15:44:18 +0200
-Subject: [PATCH] xen x86/speculation/l1tf: Fix off-by-one error when warning that
+Subject: [PATCH] xen/x86/speculation/l1tf: Fix off-by-one error when warning that
  system has too much RAM
-Git-commit: b0a182f875689647b014bc01d36b340217792852
-Patch-mainline: 4.19-rc1
+Patch-mainline: Never, SUSE-Xen specific
 References: bnc#1105536
 
 Two users have reported [1] that they have an "extremely unlikely" system
@@ -41,12 +40,11 @@ Cc: stable@vger.kernel.org
 Link: https://lkml.kernel.org/r/20180823134418.17008-1-vbabka@suse.cz
 Acked-by: Michal Hocko <mhocko@suse.com>
 
----
- arch/x86/include/mach-xen/asm/processor.h |    2 +-
+Automatically created from "patches.arch/0001-x86-speculation-l1tf-Fix-off-by-one-error-when-warni.patch" by xen-port-patches.py
 
 --- a/arch/x86/include/mach-xen/asm/processor.h
 +++ b/arch/x86/include/mach-xen/asm/processor.h
-@@ -160,7 +160,7 @@ extern struct pt_regs *idle_regs(struct
+@@ -173,7 +173,7 @@ extern struct pt_regs *idle_regs(struct
  
  static inline unsigned long long l1tf_pfn_limit(void)
  {
