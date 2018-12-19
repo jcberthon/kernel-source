@@ -1,0 +1,53 @@
+From 5b6c1b4d46b0dae4edea636a776d09f2064f4cd7 Mon Sep 17 00:00:00 2001
+From: Daniel Borkmann <daniel@iogearbox.net>
+Date: Sat, 4 Jun 2016 20:50:59 +0200
+Subject: [PATCH] bpf, trace: use READ_ONCE for retrieving file ptr
+Git-commit: 5b6c1b4d46b0dae4edea636a776d09f2064f4cd7
+Patch-mainline: v4.7-rc3
+References: bsc#1119967
+
+In bpf_perf_event_read() and bpf_perf_event_output(), we must use
+READ_ONCE() for fetching the struct file pointer, which could get
+updated concurrently, so we must prevent the compiler from potential
+refetching.
+
+We already do this with tail calls for fetching the related bpf_prog,
+but not so on stored perf events. Semantics for both are the same
+with regards to updates.
+
+Fixes: a43eec304259 ("bpf: introduce bpf_perf_event_output() helper")
+Fixes: 35578d798400 ("bpf: Implement function bpf_perf_event_read() that get the selected hardware PMU conuter")
+Signed-off-by: Daniel Borkmann <daniel@iogearbox.net>
+Acked-by: Alexei Starovoitov <ast@kernel.org>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Acked-by: Petr Mladek <pmladek@suse.com>
+
+---
+ kernel/trace/bpf_trace.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/kernel/trace/bpf_trace.c b/kernel/trace/bpf_trace.c
+index 780bcbe1d4de..720b7bb01d43 100644
+--- a/kernel/trace/bpf_trace.c
++++ b/kernel/trace/bpf_trace.c
+@@ -198,7 +198,7 @@ static u64 bpf_perf_event_read(u64 r1, u64 index, u64 r3, u64 r4, u64 r5)
+ 	if (unlikely(index >= array->map.max_entries))
+ 		return -E2BIG;
+ 
+-	file = (struct file *)array->ptrs[index];
++	file = READ_ONCE(array->ptrs[index]);
+ 	if (unlikely(!file))
+ 		return -ENOENT;
+ 
+@@ -247,7 +247,7 @@ static u64 bpf_perf_event_output(u64 r1, u64 r2, u64 flags, u64 r4, u64 size)
+ 	if (unlikely(index >= array->map.max_entries))
+ 		return -E2BIG;
+ 
+-	file = (struct file *)array->ptrs[index];
++	file = READ_ONCE(array->ptrs[index]);
+ 	if (unlikely(!file))
+ 		return -ENOENT;
+ 
+-- 
+2.13.7
+
