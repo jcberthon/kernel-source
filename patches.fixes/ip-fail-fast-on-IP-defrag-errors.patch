@@ -1,0 +1,109 @@
+From: Peter Oskolkov <posk@google.com>
+Date: Tue, 28 Aug 2018 11:36:19 -0700
+Subject: ip: fail fast on IP defrag errors
+Patch-mainline: v4.20-rc1
+Git-commit: 0ff89efb524631ac9901b81446b453c29711c376
+References: CVE-2018-5391 bsc#1103097
+
+The current behavior of IP defragmentation is inconsistent:
+- some overlapping/wrong length fragments are dropped without
+  affecting the queue;
+- most overlapping fragments cause the whole frag queue to be dropped.
+
+This patch brings consistency: if a bad fragment is detected,
+the whole frag queue is dropped. Two major benefits:
+- fail fast: corrupted frag queues are cleared immediately, instead of
+  by timeout;
+- testing of overlapping fragments is now much easier: any kind of
+  random fragment length mutation now leads to the frag queue being
+  discarded (IP packet dropped); before this patch, some overlaps were
+  "corrected", with tests not seeing expected packet drops.
+
+Note that in one case (see "if (end&7)" conditional) the current
+behavior is preserved as there are concerns that this could be
+legitimate padding.
+
+Signed-off-by: Peter Oskolkov <posk@google.com>
+Reviewed-by: Eric Dumazet <edumazet@google.com>
+Reviewed-by: Willem de Bruijn <willemb@google.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Acked-by: Michal Kubecek <mkubecek@suse.cz>
+
+---
+ net/ipv4/ip_fragment.c | 21 ++++++++++++---------
+ 1 file changed, 12 insertions(+), 9 deletions(-)
+
+--- a/net/ipv4/ip_fragment.c
++++ b/net/ipv4/ip_fragment.c
+@@ -379,7 +379,7 @@ static int ip_frag_queue(struct ipq *qp, struct sk_buff *skb)
+ 		 */
+ 		if (end < qp->q.len ||
+ 		    ((qp->q.flags & INET_FRAG_LAST_IN) && end != qp->q.len))
+-			goto err;
++			goto discard_qp;
+ 		qp->q.flags |= INET_FRAG_LAST_IN;
+ 		qp->q.len = end;
+ 	} else {
+@@ -391,20 +391,20 @@ static int ip_frag_queue(struct ipq *qp, struct sk_buff *skb)
+ 		if (end > qp->q.len) {
+ 			/* Some bits beyond end -> corruption. */
+ 			if (qp->q.flags & INET_FRAG_LAST_IN)
+-				goto err;
++				goto discard_qp;
+ 			qp->q.len = end;
+ 		}
+ 	}
+ 	if (end == offset)
+-		goto err;
++		goto discard_qp;
+ 
+ 	err = -ENOMEM;
+ 	if (!pskb_pull(skb, skb_network_offset(skb) + ihl))
+-		goto err;
++		goto discard_qp;
+ 
+ 	err = pskb_trim_rcsum(skb, end - offset);
+ 	if (err)
+-		goto err;
++		goto discard_qp;
+ 
+ 	/* Find out which fragments are in front and at the back of us
+ 	 * in the chain of fragments so far.  We must know where to put
+@@ -432,13 +432,14 @@ found:
+ 	 * We do the same here for IPv4.
+ 	 */
+ 	/* Is there an overlap with the previous fragment? */
++	err = -EINVAL;
+ 	if (prev &&
+ 	    (FRAG_CB(prev)->offset + prev->len) > offset)
+-		goto discard_qp;
++		goto overlap;
+ 
+ 	/* Is there an overlap with the next fragment? */
+ 	if (next && FRAG_CB(next)->offset < end)
+-		goto discard_qp;
++		goto overlap;
+ 
+ 	FRAG_CB(skb)->offset = offset;
+ 
+@@ -479,16 +480,18 @@ found:
+ 		skb->_skb_refdst = 0UL;
+ 		err = ip_frag_reasm(qp, prev, dev);
+ 		skb->_skb_refdst = orefdst;
++		if (err)
++			inet_frag_kill(&qp->q, &ip4_frags);
+ 		return err;
+ 	}
+ 
+ 	skb_dst_drop(skb);
+ 	return -EINPROGRESS;
+ 
++overlap:
++	IP_INC_STATS(net, IPSTATS_MIB_REASM_OVERLAPS);
+ discard_qp:
+ 	inet_frag_kill(&qp->q, &ip4_frags);
+-	err = -EINVAL;
+-	IP_INC_STATS(net, IPSTATS_MIB_REASM_OVERLAPS);
+ err:
+ 	kfree_skb(skb);
+ 	return err;
