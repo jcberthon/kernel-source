@@ -1,0 +1,51 @@
+From: Michal Kubecek <mkubecek@suse.cz>
+Date: Wed, 28 Nov 2018 14:34:38 +0100
+Subject: net: ipv4: do not handle duplicate fragments as overlapping
+Patch-mainline: v4.20 or v4.20-rc8 (next release)
+Git-commit: ade446403bfb79d3528d56071a84b15351a139ad
+References: bsc#1116345
+
+Since commit 7969e5c40dfd ("ip: discard IPv4 datagrams with overlapping
+segments.") IPv4 reassembly code drops the whole queue whenever an
+overlapping fragment is received. However, the test is written in a way
+which detects duplicate fragments as overlapping so that in environments
+with many duplicate packets, fragmented packets may be undeliverable.
+
+Add an extra test and for (potentially) duplicate fragment, only drop the
+new fragment rather than the whole queue. Only starting offset and length
+are checked, not the contents of the fragments as that would be too
+expensive. For similar reason, linear list ("run") of a rbtree node is not
+iterated, we only check if the new fragment is a subset of the interval
+covered by existing consecutive fragments.
+
+v2: instead of an exact check iterating through linear list of an rbtree
+node, only check if the new fragment is subset of the "run" (suggested
+by Eric Dumazet)
+
+Fixes: 7969e5c40dfd ("ip: discard IPv4 datagrams with overlapping segments.")
+Signed-off-by: Michal Kubecek <mkubecek@suse.cz>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+
+SLE12-SP3: this is older reassembly code using a linear list for fragment
+queue rather than rbtree so that the patch is also different.
+
+---
+ net/ipv4/ip_fragment.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+--- a/net/ipv4/ip_fragment.c
++++ b/net/ipv4/ip_fragment.c
+@@ -438,8 +438,12 @@ found:
+ 		goto overlap;
+ 
+ 	/* Is there an overlap with the next fragment? */
+-	if (next && FRAG_CB(next)->offset < end)
++	if (next && FRAG_CB(next)->offset < end) {
++		/* If it's a duplicate, drop only the incoming fragment. */
++		if (FRAG_CB(next)->offset == offset && next->len == skb->len)
++			goto err;
+ 		goto overlap;
++	}
+ 
+ 	FRAG_CB(skb)->offset = offset;
+ 
