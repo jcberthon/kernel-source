@@ -1,0 +1,197 @@
+From e03e7ee34fdd1c3ef494949a75cb8c61c7265fa9 Mon Sep 17 00:00:00 2001
+From: Alexei Starovoitov <alexei.starovoitov@gmail.com>
+Date: Mon, 25 Jan 2016 20:59:49 -0800
+Subject: [PATCH] perf/bpf: Convert perf_event_array to use struct file
+Git-commit: e03e7ee34fdd1c3ef494949a75cb8c61c7265fa9
+Patch-mainline: v4.5-rc2
+References: bsc#1119967
+
+Robustify refcounting.
+
+Signed-off-by: Alexei Starovoitov <ast@kernel.org>
+Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+Cc: Alexander Shishkin <alexander.shishkin@linux.intel.com>
+Cc: Arnaldo Carvalho de Melo <acme@infradead.org>
+Cc: Arnaldo Carvalho de Melo <acme@redhat.com>
+Cc: Daniel Borkmann <daniel@iogearbox.net>
+Cc: David Ahern <dsahern@gmail.com>
+Cc: Jiri Olsa <jolsa@kernel.org>
+Cc: Jiri Olsa <jolsa@redhat.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Namhyung Kim <namhyung@kernel.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Stephane Eranian <eranian@google.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Vince Weaver <vincent.weaver@maine.edu>
+Cc: Wang Nan <wangnan0@huawei.com>
+Cc: vince@deater.net
+Link: http://lkml.kernel.org/r/20160126045947.GA40151@ast-mbp.thefacebook.com
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Acked-by: Petr Mladek <pmladek@suse.com>
+
+---
+ include/linux/perf_event.h |  4 ++--
+ kernel/bpf/arraymap.c      | 21 +++++++++++----------
+ kernel/events/core.c       | 21 ++++++++++-----------
+ kernel/trace/bpf_trace.c   | 14 ++++++++++----
+ 4 files changed, 33 insertions(+), 27 deletions(-)
+
+diff --git a/include/linux/perf_event.h b/include/linux/perf_event.h
+index 6612732d8fd0..4f90434b8d64 100644
+--- a/include/linux/perf_event.h
++++ b/include/linux/perf_event.h
+@@ -729,7 +729,7 @@ extern int perf_event_init_task(struct task_struct *child);
+ extern void perf_event_exit_task(struct task_struct *child);
+ extern void perf_event_free_task(struct task_struct *task);
+ extern void perf_event_delayed_put(struct task_struct *task);
+-extern struct perf_event *perf_event_get(unsigned int fd);
++extern struct file *perf_event_get(unsigned int fd);
+ extern const struct perf_event_attr *perf_event_attrs(struct perf_event *event);
+ extern void perf_event_print_debug(void);
+ extern void perf_pmu_disable(struct pmu *pmu);
+@@ -1070,7 +1070,7 @@ static inline int perf_event_init_task(struct task_struct *child)	{ return 0; }
+ static inline void perf_event_exit_task(struct task_struct *child)	{ }
+ static inline void perf_event_free_task(struct task_struct *task)	{ }
+ static inline void perf_event_delayed_put(struct task_struct *task)	{ }
+-static inline struct perf_event *perf_event_get(unsigned int fd)	{ return ERR_PTR(-EINVAL); }
++static inline struct file *perf_event_get(unsigned int fd)	{ return ERR_PTR(-EINVAL); }
+ static inline const struct perf_event_attr *perf_event_attrs(struct perf_event *event)
+ {
+ 	return ERR_PTR(-EINVAL);
+diff --git a/kernel/bpf/arraymap.c b/kernel/bpf/arraymap.c
+index b0799bced518..89ebbc4d1164 100644
+--- a/kernel/bpf/arraymap.c
++++ b/kernel/bpf/arraymap.c
+@@ -291,10 +291,13 @@ static void *perf_event_fd_array_get_ptr(struct bpf_map *map, int fd)
+ {
+ 	struct perf_event *event;
+ 	const struct perf_event_attr *attr;
++	struct file *file;
+ 
+-	event = perf_event_get(fd);
+-	if (IS_ERR(event))
+-		return event;
++	file = perf_event_get(fd);
++	if (IS_ERR(file))
++		return file;
++
++	event = file->private_data;
+ 
+ 	attr = perf_event_attrs(event);
+ 	if (IS_ERR(attr))
+@@ -304,24 +307,22 @@ static void *perf_event_fd_array_get_ptr(struct bpf_map *map, int fd)
+ 		goto err;
+ 
+ 	if (attr->type == PERF_TYPE_RAW)
+-		return event;
++		return file;
+ 
+ 	if (attr->type == PERF_TYPE_HARDWARE)
+-		return event;
++		return file;
+ 
+ 	if (attr->type == PERF_TYPE_SOFTWARE &&
+ 	    attr->config == PERF_COUNT_SW_BPF_OUTPUT)
+-		return event;
++		return file;
+ err:
+-	perf_event_release_kernel(event);
++	fput(file);
+ 	return ERR_PTR(-EINVAL);
+ }
+ 
+ static void perf_event_fd_array_put_ptr(void *ptr)
+ {
+-	struct perf_event *event = ptr;
+-
+-	perf_event_release_kernel(event);
++	fput((struct file *)ptr);
+ }
+ 
+ static const struct bpf_map_ops perf_event_array_ops = {
+diff --git a/kernel/events/core.c b/kernel/events/core.c
+index fe97f95f204e..eb44730afea5 100644
+--- a/kernel/events/core.c
++++ b/kernel/events/core.c
+@@ -8916,21 +8916,20 @@ void perf_event_delayed_put(struct task_struct *task)
+ 		WARN_ON_ONCE(task->perf_event_ctxp[ctxn]);
+ }
+ 
+-struct perf_event *perf_event_get(unsigned int fd)
++struct file *perf_event_get(unsigned int fd)
+ {
+-	int err;
+-	struct fd f;
+-	struct perf_event *event;
++	struct file *file;
+ 
+-	err = perf_fget_light(fd, &f);
+-	if (err)
+-		return ERR_PTR(err);
++	file = fget_raw(fd);
++	if (!file)
++		return ERR_PTR(-EBADF);
+ 
+-	event = f.file->private_data;
+-	atomic_long_inc(&event->refcount);
+-	fdput(f);
++	if (file->f_op != &perf_fops) {
++		fput(file);
++		return ERR_PTR(-EBADF);
++	}
+ 
+-	return event;
++	return file;
+ }
+ 
+ const struct perf_event_attr *perf_event_attrs(struct perf_event *event)
+diff --git a/kernel/trace/bpf_trace.c b/kernel/trace/bpf_trace.c
+index 45dd798bcd37..326a75e884db 100644
+--- a/kernel/trace/bpf_trace.c
++++ b/kernel/trace/bpf_trace.c
+@@ -191,14 +191,17 @@ static u64 bpf_perf_event_read(u64 r1, u64 index, u64 r3, u64 r4, u64 r5)
+ 	struct bpf_map *map = (struct bpf_map *) (unsigned long) r1;
+ 	struct bpf_array *array = container_of(map, struct bpf_array, map);
+ 	struct perf_event *event;
++	struct file *file;
+ 
+ 	if (unlikely(index >= array->map.max_entries))
+ 		return -E2BIG;
+ 
+-	event = (struct perf_event *)array->ptrs[index];
+-	if (!event)
++	file = (struct file *)array->ptrs[index];
++	if (unlikely(!file))
+ 		return -ENOENT;
+ 
++	event = file->private_data;
++
+ 	/* make sure event is local and doesn't have pmu::count */
+ 	if (event->oncpu != smp_processor_id() ||
+ 	    event->pmu->count)
+@@ -228,6 +231,7 @@ static u64 bpf_perf_event_output(u64 r1, u64 r2, u64 index, u64 r4, u64 size)
+ 	void *data = (void *) (long) r4;
+ 	struct perf_sample_data sample_data;
+ 	struct perf_event *event;
++	struct file *file;
+ 	struct perf_raw_record raw = {
+ 		.size = size,
+ 		.data = data,
+@@ -236,10 +240,12 @@ static u64 bpf_perf_event_output(u64 r1, u64 r2, u64 index, u64 r4, u64 size)
+ 	if (unlikely(index >= array->map.max_entries))
+ 		return -E2BIG;
+ 
+-	event = (struct perf_event *)array->ptrs[index];
+-	if (unlikely(!event))
++	file = (struct file *)array->ptrs[index];
++	if (unlikely(!file))
+ 		return -ENOENT;
+ 
++	event = file->private_data;
++
+ 	if (unlikely(event->attr.type != PERF_TYPE_SOFTWARE ||
+ 		     event->attr.config != PERF_COUNT_SW_BPF_OUTPUT))
+ 		return -EINVAL;
+-- 
+2.13.7
+

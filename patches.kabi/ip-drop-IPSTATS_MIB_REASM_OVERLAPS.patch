@@ -1,7 +1,8 @@
 From: Jiri Bohac <jbohac@suse.cz>
+Date: Tue, 18 Dec 2018 14:36:55 +0100
 Subject: kabi; ip: drop IPSTATS_MIB_REASM_OVERLAPS
-Patch-mainline: Never, KABI fix
-References: bsc#1103097, CVE-2018-5391
+Patch-mainline: Never, kabi workaround
+References: CVE-2018-5391 bsc#1103097
 
 patches.fixes/ip-discard-ipv4-datagrams-with-overlapping-segments.patch adds
 the IPSTATS_MIB_REASM_OVERLAPS snmp attribute, whic breaks KABI.
@@ -9,13 +10,11 @@ the IPSTATS_MIB_REASM_OVERLAPS snmp attribute, whic breaks KABI.
 Drop this attribute and account the dropped fragments in IPSTATS_MIB_REASMFAILS
 instead.
 
-
 Signed-off-by: Jiri Bohac <jbohac@suse.cz>
-
 ---
- include/uapi/linux/snmp.h |    1 -
- net/ipv4/ip_fragment.c    |    2 +-
- net/ipv4/proc.c           |    1 -
+ include/uapi/linux/snmp.h | 1 -
+ net/ipv4/ip_fragment.c    | 2 +-
+ net/ipv4/proc.c           | 1 -
  3 files changed, 1 insertion(+), 3 deletions(-)
 
 --- a/include/uapi/linux/snmp.h
@@ -30,18 +29,18 @@ Signed-off-by: Jiri Bohac <jbohac@suse.cz>
  
 --- a/net/ipv4/ip_fragment.c
 +++ b/net/ipv4/ip_fragment.c
-@@ -479,7 +479,7 @@ found:
- discard_qp:
- 	inet_frag_kill(&qp->q, &ip4_frags);
- 	err = -EINVAL;
+@@ -497,7 +497,7 @@ found:
+ 	return -EINPROGRESS;
+ 
+ overlap:
 -	IP_INC_STATS(net, IPSTATS_MIB_REASM_OVERLAPS);
 +	IP_INC_STATS(net, IPSTATS_MIB_REASMFAILS);
+ discard_qp:
+ 	inet_frag_kill(&qp->q, &ip4_frags);
  err:
- 	kfree_skb(skb);
- 	return err;
 --- a/net/ipv4/proc.c
 +++ b/net/ipv4/proc.c
-@@ -132,7 +132,6 @@ static const struct snmp_mib snmp4_ipext
+@@ -132,7 +132,6 @@ static const struct snmp_mib snmp4_ipextstats_list[] = {
  	SNMP_MIB_ITEM("InECT1Pkts", IPSTATS_MIB_ECT1PKTS),
  	SNMP_MIB_ITEM("InECT0Pkts", IPSTATS_MIB_ECT0PKTS),
  	SNMP_MIB_ITEM("InCEPkts", IPSTATS_MIB_CEPKTS),
