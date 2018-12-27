@@ -20,6 +20,8 @@
 # you may find current contact information at www.novell.com
 #############################################################################
 
+[ -f $(dirname $0)/../rpm/config.sh ] || exit 0
+
 source $(dirname $0)/../rpm/config.sh
 source $(dirname $0)/wd-functions.sh
 
@@ -36,7 +38,7 @@ esac
 usage() {
     cat <<END
 SYNOPSIS: $0 [-qv] [--symbol=...] [--dir=...]
-          [--fast] [last-patch-name] [--vanilla] [--fuzz=NUM]
+          [--fast] [--rapid] [last-patch-name] [--vanilla] [--fuzz=NUM]
           [--patch-dir=PATH] [--build-dir=PATH] [--config=ARCH-FLAVOR [--kabi]]
           [--ctags] [--cscope] [--etags] [--skip-reverse]
 
@@ -63,10 +65,20 @@ SYNOPSIS: $0 [-qv] [--symbol=...] [--dir=...]
   of the component patches fail to apply the tree will not be rolled
   back.
 
+  The --rapid option will use rapidquilt to apply patches.
+
   When used with last-patch-name, both --fast and --no-quilt
   will set up a quilt environment for the remaining patches.
 END
     exit 1
+}
+
+apply_rapid_patches() {
+    printf "%s\n" ${PATCHES_BEFORE[@]} >> $PATCH_DIR/series
+    rapidquilt push -a -d $PATCH_DIR -p $PWD $fuzz
+    status=$?
+
+    PATCHES=( ${PATCHES_AFTER[@]} )
 }
 
 apply_fast_patches() {
@@ -198,7 +210,7 @@ if $have_arch_patches; then
 else
 	arch_opt=""
 fi
-options=`getopt -o qvd:F: --long quilt,no-quilt,$arch_opt,symbol:,dir:,combine,fast,vanilla,fuzz,patch-dir:,build-dir:,config:,kabi,ctags,cscope,etags,skip-reverse -- "$@"`
+options=`getopt -o qvd:F: --long quilt,no-quilt,$arch_opt,symbol:,dir:,combine,fast,rapid,vanilla,fuzz,patch-dir:,build-dir:,config:,kabi,ctags,cscope,etags,skip-reverse -- "$@"`
 
 if [ $? -ne 0 ]
 then
@@ -211,6 +223,7 @@ QUIET=1
 EXTRA_SYMBOLS=
 QUILT=true
 FAST=
+RAPID=
 VANILLA=false
 SP_BUILD_DIR=
 CONFIG=
@@ -241,6 +254,9 @@ while true; do
 	    ;;
        	--fast)
 	    FAST=1
+	    ;;
+	--rapid)
+	    RAPID=1
 	    ;;
 	--arch)
 	    export PATCH_ARCH=$2
@@ -322,6 +338,8 @@ if test -z "$CONFIG"; then
 			CONFIG=$machine-smp
 		elif test -e "config/$machine/pae"; then
 			CONFIG=$machine-pae
+		elif test -e "config/$machine/azure"; then
+			CONFIG=$machine-azure
 		elif test -e "config/$machine/default"; then
 			CONFIG=$machine-default
 		elif test -n "$VARIANT" -a -e "config/$machine/${VARIANT#-}"; then
@@ -358,15 +376,17 @@ if [ $# -ne 0 ]; then
     usage
 fi
 
-# Some patches require patch 2.5.4. Abort with older versions.
-PATCH_VERSION=$(patch -v | sed -e '/^patch/!d' -e 's/patch //')
-case $PATCH_VERSION in
-    ([01].*|2.[1-4].*|2.5.[1-3])  # (check if < 2.5.4)
-	echo "patch version $PATCH_VERSION found; " \
-	     "a version >= 2.5.4 required." >&2
+# We need at least 2.7 now due to kselftests-kmp-default requiring
+# selftests with the need to ensure scripts are execuable.
+PATCH_VERSION_REQ="2.7"
+PATCH_VERSION_REQ_LD_VERSION=$(echo $PATCH_VERSION_REQ | scripts/ld-version.sh)
+PATCH_VERSION=$(patch --version | head -1 | awk '{print $3}')
+PATCH_VERSION_LD=$(echo $PATCH_VERSION | scripts/ld-version.sh)
+
+if [ $PATCH_VERSION_LD -lt $PATCH_VERSION_REQ_LD_VERSION ]; then
+	echo "$0 requires at least patch version $PATCH_VERSION_REQ"
 	exit 1
-    ;;
-esac
+fi
 
 # Check SCRATCH_AREA.
 if [ -z "$SCRATCH_AREA" ]; then
@@ -388,6 +408,7 @@ export TMPDIR
 ORIG_DIR=$SCRATCH_AREA/linux-$SRCVERSION.orig
 TAG=$(get_branch_name)
 TAG=${TAG//\//_}
+TAG=${TAG//\#/_}
 if $VANILLA; then
 	TAG=${TAG}-vanilla
 fi
@@ -559,10 +580,12 @@ fi
 mkdir $PATCH_DIR/.pc
 echo 2 > $PATCH_DIR/.pc/.version
 
-if [ -z "$FAST" ]; then
-    apply_patches
-else
+if [ -n "$FAST" ]; then
     apply_fast_patches
+elif [ -n "$RAPID" ]; then
+    apply_rapid_patches
+else
+    apply_patches
 fi
 
 if [ -n "$EXTRA_SYMBOLS" ]; then
@@ -614,7 +637,20 @@ fi
 
 if test -e supported.conf; then
     echo "[ Generating Module.supported ]"
-    scripts/guards base external < supported.conf > "$SP_BUILD_DIR/Module.supported"
+    scripts/guards --list --with-guards < supported.conf | \
+    awk '
+	    /\+external / {
+		    print $(NF) " external";
+		    next;
+	    }
+	    /^-/ {
+		    print $(NF) " no";
+		    next;
+	    }
+	    {
+		    print $(NF);
+	    }
+    ' > "$SP_BUILD_DIR/Module.supported"
 fi
 
 if test -n "$CONFIG"; then
@@ -647,8 +683,14 @@ if test -n "$CONFIG"; then
 	    echo "[ No kABI references for $CONFIG ]"
 	fi
     fi
+    if test -f ${PATCH_DIR}/scripts/kconfig/Makefile && \
+       grep -q syncconfig ${PATCH_DIR}/scripts/kconfig/Makefile; then
+        syncconfig="syncconfig"
+    else
+        syncconfig="silentoldconfig"
+    fi
     test "$SP_BUILD_DIR" != "$PATCH_DIR" && \
-	make -C $PATCH_DIR O=$SP_BUILD_DIR -s silentoldconfig
+	make -C $PATCH_DIR O=$SP_BUILD_DIR -s $syncconfig
 fi
 
 # Some archs we use for the config do not exist or have a different name in the
