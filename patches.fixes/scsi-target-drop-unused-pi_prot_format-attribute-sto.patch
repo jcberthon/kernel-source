@@ -1,0 +1,60 @@
+From e661f307864225419638b3ba54ad262b57ca2c90 Mon Sep 17 00:00:00 2001
+From: David Disseldorp <ddiss@suse.de>
+Date: Fri, 23 Nov 2018 18:36:11 +0100
+Subject: [PATCH] scsi: target: drop unused pi_prot_format attribute storage
+References: bsc#1091405
+Git-commit: 6baca7601bdee2e57f20c45d63eb53b89b33e816
+Patch-mainline: v4.21-rc1
+
+On write, the pi_prot_format configfs attribute invokes the device
+format_prot() callback if present. Read dumps the contents of
+se_dev_attrib.pi_prot_format which is always zero.  Make the configfs
+attribute write-only, and drop the always zero se_dev_attrib.pi_prot_format
+storage.
+
+Signed-off-by: David Disseldorp <ddiss@suse.de>
+Reviewed-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+[ddiss@suse.de: rebase against SLE12SP3 without 056e8924a072d
+ pi_prot_verify]
+---
+ drivers/target/target_core_configfs.c | 3 +--
+ include/target/target_core_base.h     | 1 -
+ 2 files changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/drivers/target/target_core_configfs.c b/drivers/target/target_core_configfs.c
+index 8c8e15105088..7261c646cfe3 100644
+--- a/drivers/target/target_core_configfs.c
++++ b/drivers/target/target_core_configfs.c
+@@ -531,7 +531,6 @@ DEF_CONFIGFS_ATTRIB_SHOW(emulate_3pc);
+ DEF_CONFIGFS_ATTRIB_SHOW(emulate_pr);
+ DEF_CONFIGFS_ATTRIB_SHOW(pi_prot_type);
+ DEF_CONFIGFS_ATTRIB_SHOW(hw_pi_prot_type);
+-DEF_CONFIGFS_ATTRIB_SHOW(pi_prot_format);
+ DEF_CONFIGFS_ATTRIB_SHOW(enforce_pr_isids);
+ DEF_CONFIGFS_ATTRIB_SHOW(is_nonrot);
+ DEF_CONFIGFS_ATTRIB_SHOW(emulate_rest_reord);
+@@ -1067,7 +1066,7 @@ CONFIGFS_ATTR(, emulate_3pc);
+ CONFIGFS_ATTR(, emulate_pr);
+ CONFIGFS_ATTR(, pi_prot_type);
+ CONFIGFS_ATTR_RO(, hw_pi_prot_type);
+-CONFIGFS_ATTR(, pi_prot_format);
++CONFIGFS_ATTR_WO(, pi_prot_format);
+ CONFIGFS_ATTR(, enforce_pr_isids);
+ CONFIGFS_ATTR(, is_nonrot);
+ CONFIGFS_ATTR(, emulate_rest_reord);
+diff --git a/include/target/target_core_base.h b/include/target/target_core_base.h
+index 2ab97c4ffedf..b05af8899eec 100644
+--- a/include/target/target_core_base.h
++++ b/include/target/target_core_base.h
+@@ -684,7 +684,6 @@ struct se_dev_attrib {
+ 	int		emulate_caw;
+ 	int		emulate_3pc;
+ 	int		emulate_pr;
+-	int		pi_prot_format;
+ 	enum target_prot_type pi_prot_type;
+ 	enum target_prot_type hw_pi_prot_type;
+ 	int		enforce_pr_isids;
+-- 
+2.13.7
+
