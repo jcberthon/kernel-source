@@ -1,7 +1,7 @@
 From: Mathias Payer <mathias.payer@nebelwelt.net>
 Date: Wed, 5 Dec 2018 21:19:59 +0100
 Subject: [PATCH] USB: check usb_get_extra_descriptor for proper size
-References: bnc#1012382
+References: bnc#1012382, bsc#1119714, CVE-2018-20169
 Patch-mainline: 4.4.167
 Git-commit: 704620afc70cf47abb9d6a1a57f3825d2bca49cf
 
