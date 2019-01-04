@@ -1,7 +1,7 @@
 From: Pavel Tikhomirov <ptikhomirov@virtuozzo.com>
 Date: Fri, 30 Nov 2018 14:09:00 -0800
 Subject: [PATCH] mm: cleancache: fix corruption on missed inode invalidation
-References: bnc#1012382
+References: bnc#1012382, bsc#1117186, CVE-2018-16862
 Patch-mainline: 4.4.167
 Git-commit: 6ff38bd40230af35e446239396e5fc8ebd6a5248
 
