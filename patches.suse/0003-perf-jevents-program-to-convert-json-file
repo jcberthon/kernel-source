@@ -214,7 +214,6 @@ index d710db16b963..982d6439bb07 100644
  util/%.o: $(OUTPUT)util/%.o
  	@echo "    # Redirected target $@ => $(OUTPUT)$@"
  bench/%.o: $(OUTPUT)bench/%.o
- 
 @@ -588,9 +613,10 @@ clean: $(LIBTRACEEVENT)-clean $(LIBAPI)-clean $(LIBBPF)-clean config-clean
  	$(call QUIET_CLEAN, core-objs)  $(RM) $(LIB_FILE) $(OUTPUT)perf-archive $(OUTPUT)perf-with-kcore $(LANG_BINDINGS)
  	$(Q)find . -name '*.o' -delete -o -name '\.*.cmd' -delete -o -name '\.*.d' -delete
