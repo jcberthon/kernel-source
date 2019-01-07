@@ -2,7 +2,7 @@ From: Yazen Ghannam <Yazen.Ghannam@amd.com>
 Date: Tue, 15 Nov 2016 15:13:53 -0600
 Subject: x86/mce/AMD: Reset Threshold Limit after logging error
 Git-commit: 18807ddb7f88d4ac3797302bafb18143d573e66f
-Patch-mainline: v4.10 or v4.9-rc7 (next release)
+Patch-mainline: v4.10-rc1
 References: fate#322164
 
 The error count field in MCA_MISC does not get reset by hardware when the

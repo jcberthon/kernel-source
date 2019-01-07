@@ -2,7 +2,7 @@ From: Narsimhulu Musini <nmusini@cisco.com>
 Date: Thu, 17 Mar 2016 00:51:14 -0700
 Subject: snic: Fix for missing interrupts
 Git-commit: c9747821f9bbff6c07fa36087b003d89d05245c8
-Patch-mainline: v4.7 or v4.6-rc5 (next release)
+Patch-mainline: v4.7-rc1
 References: FATE#319760, bsc#964943
 
 - On posting an IO to the firmware, adapter generates an interrupt.

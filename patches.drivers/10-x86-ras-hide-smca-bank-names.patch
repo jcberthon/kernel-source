@@ -2,7 +2,7 @@ From: Borislav Petkov <bp@suse.de>
 Date: Thu, 3 Nov 2016 21:12:33 +0100
 Subject: x86/RAS: Hide SMCA bank names
 Git-commit: c09a8c40e0a0b4994925ac8eba91b85d76f440a3
-Patch-mainline: v4.10 or v4.9-rc7 (next release)
+Patch-mainline: v4.10-rc1
 References: fate#322164
 
 Add accessor functions and hide the smca_names array. Also, add a

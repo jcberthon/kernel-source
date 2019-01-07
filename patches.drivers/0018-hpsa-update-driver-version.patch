@@ -2,7 +2,7 @@ From: Don Brace <don.brace@microsemi.com>
 Date: Wed, 27 Apr 2016 17:14:26 -0500
 Subject: hpsa: update driver version
 Git-commit: ff54aee466e3ad3f5aad76c629a8bcb88fc9b348
-Patch-mainline: v4.7 or v4.6-rc7 (next release)
+Patch-mainline: v4.7-rc1
 References: bsc#964462, FATE#319992
 
 Reviewed-by: Gerry Morong <gerry.morong@microsemi.com>

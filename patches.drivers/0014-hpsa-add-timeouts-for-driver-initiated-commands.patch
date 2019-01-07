@@ -2,7 +2,7 @@ From: Don Brace <don.brace@microsemi.com>
 Date: Wed, 27 Apr 2016 17:13:51 -0500
 Subject: hpsa: add timeouts for driver initiated commands
 Git-commit: c448ecfa0b2e648a668a1c62286e989ab1dbf6c8
-Patch-mainline: v4.7 or v4.6-rc7 (next release)
+Patch-mainline: v4.7-rc1
 References: bsc#964462, FATE#319992
 
 faulty drives can cause the driver to hang during a

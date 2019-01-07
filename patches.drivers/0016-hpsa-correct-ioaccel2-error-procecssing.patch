@@ -2,7 +2,7 @@ From: Don Brace <don.brace@microsemi.com>
 Date: Wed, 27 Apr 2016 17:14:07 -0500
 Subject: hpsa: correct ioaccel2 error procecssing.
 Git-commit: 064d1b1d2d8e0b90f1a0a49112eca0d5c2a09b16
-Patch-mainline: v4.7 or v4.6-rc7 (next release)
+Patch-mainline: v4.7-rc1
 References: bsc#964462, FATE#319992
 
 set offload_to_be_enabled to 0 when an ioaccel2 error is processed.

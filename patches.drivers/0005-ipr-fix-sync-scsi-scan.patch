@@ -2,7 +2,7 @@ From: Brian King <brking@linux.vnet.ibm.com>
 Date: Mon, 8 Aug 2016 17:53:12 -0500
 Subject: ipr: Fix sync scsi scan
 Git-commit: a3d1ddd932bc86f0f7027079754ab0aefd259109
-Patch-mainline: v4.9 or v4.8-rc2 (next release)
+Patch-mainline: v4.8-rc2
 References: bsc#992207
 
 Commit b195d5e2bffd ("ipr: Wait to do async scan until scsi host is

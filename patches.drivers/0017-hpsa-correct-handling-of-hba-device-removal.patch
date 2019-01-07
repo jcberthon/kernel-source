@@ -2,7 +2,7 @@ From: Don Brace <don.brace@microsemi.com>
 Date: Wed, 27 Apr 2016 17:14:17 -0500
 Subject: hpsa: correct handling of HBA device removal
 Git-commit: ba74fdc411b84064d7abe4b10d0708f6dad03eb2
-Patch-mainline: v4.7 or v4.6-rc7 (next release)
+Patch-mainline: v4.7-rc1
 References: bsc#964462, FATE#319992
 
 Need to report HBA device removal faster than the

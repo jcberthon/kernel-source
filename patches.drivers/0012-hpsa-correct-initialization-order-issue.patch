@@ -2,7 +2,7 @@ From: Don Brace <don.brace@microsemi.com>
 Date: Wed, 27 Apr 2016 17:13:26 -0500
 Subject: hpsa: correct initialization order issue
 Git-commit: cf47723763a72354f90cd0b3e527704f4e2f7eb7
-Patch-mainline: v4.7 or v4.6-rc7 (next release)
+Patch-mainline: v4.7-rc1
 References: bsc#964462, FATE#319992
 
 The driver was calling scsi_scan_host before enabling interrupts.

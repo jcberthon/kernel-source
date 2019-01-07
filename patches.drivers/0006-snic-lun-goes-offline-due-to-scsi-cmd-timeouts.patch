@@ -2,7 +2,7 @@ From: Narsimhulu Musini <nmusini@cisco.com>
 Date: Thu, 17 Mar 2016 00:51:11 -0700
 Subject: snic: LUN goes offline due to scsi cmd timeouts
 Git-commit: f352a0d5bafa62d1f0b044613ea42483a529f9df
-Patch-mainline: v4.7 or v4.6-rc5 (next release)
+Patch-mainline: v4.7-rc1
 References: FATE#319760, bsc#964943
 
 - LUN goes offline if there are at least two scsi command timeouts

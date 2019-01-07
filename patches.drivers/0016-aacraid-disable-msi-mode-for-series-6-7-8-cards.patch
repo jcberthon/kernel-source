@@ -2,7 +2,7 @@ From: Raghava Aditya Renukunta <RaghavaAditya.Renukunta@microsemi.com>
 Date: Mon, 25 Apr 2016 23:31:43 -0700
 Subject: aacraid: Disable MSI mode for series 6, 7, 8 cards
 Git-commit: e4d5c4e238999ba0b68618a91eec33e7079cdbd4
-Patch-mainline: v4.7 or v4.6-rc7 (next release)
+Patch-mainline: v4.7-rc1
 References: bsc#966342, FATE#320140
 
 As the firmware for series 6, 7, 8 cards does not support msi, remove it

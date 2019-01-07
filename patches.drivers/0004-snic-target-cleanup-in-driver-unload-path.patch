@@ -2,7 +2,7 @@ From: Narsimhulu Musini <nmusini@cisco.com>
 Date: Thu, 17 Mar 2016 00:51:13 -0700
 Subject: snic: target cleanup in driver unload path
 Git-commit: 58fcf92050cdf7b499ba6169459ec43aa0838662
-Patch-mainline: v4.7 or v4.6-rc5 (next release)
+Patch-mainline: v4.7-rc1
 References: FATE#319760, bsc#964943
 
 Fix deletes the snic targets synchronously prior to deletion of host.
