@@ -1,0 +1,132 @@
+From: Alexander Duyck <alexander.h.duyck@intel.com>
+Date: Tue, 17 Jan 2017 08:36:03 -0800
+Subject: ixgbe: Update code to better handle incrementing page count
+Patch-mainline: v4.11-rc1
+Git-commit: 1b56cf49f5b0bab9ad4eab18f9b0aee1929afd89
+References: bsc#1100105
+
+Batch the page count updates instead of doing them one at a time.  By doing
+this we can improve the overall performance as the atomic increment
+operations can be expensive due to the fact that on x86 they are locked
+operations which can cause stalls.  By doing bulk updates we can
+consolidate the stall which should help to improve the overall receive
+performance.
+
+Signed-off-by: Alexander Duyck <alexander.h.duyck@intel.com>
+Tested-by: Andrew Bowers <andrewx.bowers@intel.com>
+Acked-by: John Fastabend <john.r.fastabend@intel.com>
+Signed-off-by: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+Acked-by: Thomas Bogendoerfer <tbogendoerfer@suse.de>
+---
+ drivers/net/ethernet/intel/ixgbe/ixgbe.h      |    7 +++-
+ drivers/net/ethernet/intel/ixgbe/ixgbe_main.c |   41 ++++++++++++++++----------
+ 2 files changed, 32 insertions(+), 16 deletions(-)
+
+--- a/drivers/net/ethernet/intel/ixgbe/ixgbe.h
++++ b/drivers/net/ethernet/intel/ixgbe/ixgbe.h
+@@ -197,7 +197,12 @@ struct ixgbe_rx_buffer {
+ 	struct sk_buff *skb;
+ 	dma_addr_t dma;
+ 	struct page *page;
+-	unsigned int page_offset;
++#if (BITS_PER_LONG > 32) || (PAGE_SIZE >= 65536)
++	__u32 page_offset;
++#else
++	__u16 page_offset;
++#endif
++	__u16 pagecnt_bias;
+ };
+ 
+ struct ixgbe_queue_stats {
+--- a/drivers/net/ethernet/intel/ixgbe/ixgbe_main.c
++++ b/drivers/net/ethernet/intel/ixgbe/ixgbe_main.c
+@@ -1587,6 +1587,7 @@ static bool ixgbe_alloc_mapped_page(stru
+ 	bi->dma = dma;
+ 	bi->page = page;
+ 	bi->page_offset = 0;
++	bi->pagecnt_bias = 1;
+ 
+ 	return true;
+ }
+@@ -1949,13 +1950,15 @@ static bool ixgbe_can_reuse_rx_page(stru
+ 	unsigned int last_offset = ixgbe_rx_pg_size(rx_ring) -
+ 				   ixgbe_rx_bufsz(rx_ring);
+ #endif
++	unsigned int pagecnt_bias = rx_buffer->pagecnt_bias--;
++
+ 	/* avoid re-using remote pages */
+ 	if (unlikely(ixgbe_page_is_reserved(page)))
+ 		return false;
+ 
+ #if (PAGE_SIZE < 8192)
+ 	/* if we are only owner of page we can reuse it */
+-	if (unlikely(page_count(page) != 1))
++	if (unlikely(page_count(page) != pagecnt_bias))
+ 		return false;
+ 
+ 	/* flip page offset to other buffer */
+@@ -1968,10 +1971,14 @@ static bool ixgbe_can_reuse_rx_page(stru
+ 		return false;
+ #endif
+ 
+-	/* Even if we own the page, we are not allowed to use atomic_set()
+-	 * This would break get_page_unless_zero() users.
+-	 */
+-	atomic_inc(&page->_count);
++	/* If we have drained the page fragment pool we need to update
++	 * the pagecnt_bias and page count so that we fully restock the
++	 * number of references the driver holds.
++	 */
++	if (unlikely(pagecnt_bias == 1)) {
++		atomic_add(USHRT_MAX, &page->_count);
++		rx_buffer->pagecnt_bias = USHRT_MAX;
++	}
+ 
+ 	return true;
+ }
+@@ -2015,7 +2022,6 @@ static bool ixgbe_add_rx_frag(struct ixg
+ 			return true;
+ 
+ 		/* this page cannot be reused so discard it */
+-		__free_pages(page, ixgbe_rx_pg_order(rx_ring));
+ 		return false;
+ 	}
+ 
+@@ -2097,15 +2103,19 @@ dma_sync:
+ 	if (ixgbe_add_rx_frag(rx_ring, rx_buffer, size, skb)) {
+ 		/* hand second half of page back to the ring */
+ 		ixgbe_reuse_rx_page(rx_ring, rx_buffer);
+-	} else if (IXGBE_CB(skb)->dma == rx_buffer->dma) {
+-		/* the page has been released from the ring */
+-		IXGBE_CB(skb)->page_released = true;
+ 	} else {
+-		/* we are not reusing the buffer so unmap it */
+-		dma_unmap_page_attrs(rx_ring->dev, rx_buffer->dma,
+-				     ixgbe_rx_pg_size(rx_ring),
+-				     DMA_FROM_DEVICE,
+-				     &attrs);
++		if (IXGBE_CB(skb)->dma == rx_buffer->dma) {
++			/* the page has been released from the ring */
++			IXGBE_CB(skb)->page_released = true;
++		} else {
++			/* we are not reusing the buffer so unmap it */
++			dma_unmap_page_attrs(rx_ring->dev, rx_buffer->dma,
++					     ixgbe_rx_pg_size(rx_ring),
++					     DMA_FROM_DEVICE,
++					     &attrs);
++		}
++		__page_frag_cache_drain(page,
++					rx_buffer->pagecnt_bias);
+ 	}
+ 
+ 	/* clear contents of buffer_info */
+@@ -4938,7 +4948,8 @@ static void ixgbe_clean_rx_ring(struct i
+ 				     ixgbe_rx_pg_size(rx_ring),
+ 				     DMA_FROM_DEVICE,
+ 				     &attrs);
+-		__free_pages(rx_buffer->page, ixgbe_rx_pg_order(rx_ring));
++		__page_frag_cache_drain(rx_buffer->page,
++					rx_buffer->pagecnt_bias);
+ 
+ 		rx_buffer->page = NULL;
+ 	}
