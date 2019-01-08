@@ -1,0 +1,281 @@
+From: Alan Stern <stern@rowland.harvard.edu>
+Date: Wed, 11 Jul 2012 11:22:26 -0400
+Subject: USB: EHCI: use hrtimer for interrupt QH unlink
+Git-commit: df2022553dd8d34d49e16c19d851ea619438f0ef
+Patch-mainline: v3.6-rc1
+References: bsc#1117515
+
+This patch (as1577) adds hrtimer support for unlinking interrupt QHs
+in ehci-hcd.  The current code relies on a fixed delay of either 2 or
+55 us, which is not always adequate and in any case is totally bogus.
+Thanks to internal caching, the EHCI hardware may continue to access
+an interrupt QH for more than a millisecond after it has been unlinked.
+
+In fact, the EHCI spec doesn't say how long to wait before using an
+unlinked interrupt QH.  The patch sets the delay to 9 microframes
+minimum, which ought to be adequate.
+
+Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/usb/host/ehci-hcd.c   |    6 ++-
+ drivers/usb/host/ehci-hub.c   |    1 
+ drivers/usb/host/ehci-sched.c |   71 +++++++++++++++++++++++++++---------------
+ drivers/usb/host/ehci-timer.c |   34 ++++++++++++++++++++
+ drivers/usb/host/ehci.h       |   10 +++++
+ 5 files changed, 94 insertions(+), 28 deletions(-)
+
+--- a/drivers/usb/host/ehci-hcd.c
++++ b/drivers/usb/host/ehci-hcd.c
+@@ -304,6 +304,8 @@ static void ehci_quiesce (struct ehci_hc
+ 
+ static void end_unlink_async(struct ehci_hcd *ehci);
+ static void ehci_work(struct ehci_hcd *ehci);
++static void start_unlink_intr(struct ehci_hcd *ehci, struct ehci_qh *qh);
++static void end_unlink_intr(struct ehci_hcd *ehci, struct ehci_qh *qh);
+ 
+ #include "ehci-timer.c"
+ #include "ehci-hub.c"
+@@ -1031,7 +1033,7 @@ static int ehci_urb_dequeue(struct usb_h
+ 		switch (qh->qh_state) {
+ 		case QH_STATE_LINKED:
+ 		case QH_STATE_COMPLETING:
+-			intr_deschedule (ehci, qh);
++			start_unlink_intr(ehci, qh);
+ 			break;
+ 		case QH_STATE_IDLE:
+ 			qh_completions (ehci, qh);
+@@ -1161,7 +1163,7 @@ ehci_endpoint_reset(struct usb_hcd *hcd,
+ 			if (eptype == USB_ENDPOINT_XFER_BULK)
+ 				unlink_async(ehci, qh);
+ 			else
+-				intr_deschedule(ehci, qh);
++				start_unlink_intr(ehci, qh);
+ 		}
+ 	}
+ 	spin_unlock_irqrestore(&ehci->lock, flags);
+--- a/drivers/usb/host/ehci-hub.c
++++ b/drivers/usb/host/ehci-hub.c
+@@ -314,6 +314,7 @@ static int ehci_bus_suspend (struct usb_
+ 
+ 	if (ehci->async_unlink)
+ 		end_unlink_async(ehci);
++	ehci_handle_intr_unlinks(ehci);
+ 
+ 	/* allow remote wakeup */
+ 	mask = INTR_MASK;
+--- a/drivers/usb/host/ehci-sched.c
++++ b/drivers/usb/host/ehci-sched.c
+@@ -578,12 +578,20 @@ static void qh_unlink_periodic(struct eh
+ 	unsigned	i;
+ 	unsigned	period;
+ 
+-	// FIXME:
+-	// IF this isn't high speed
+-	//   and this qh is active in the current uframe
+-	//   (and overlay token SplitXstate is false?)
+-	// THEN
+-	//   qh->hw_info1 |= cpu_to_hc32(1 << 7 /* "ignore" */);
++	/*
++	 * If qh is for a low/full-speed device, simply unlinking it
++	 * could interfere with an ongoing split transaction.  To unlink
++	 * it safely would require setting the QH_INACTIVATE bit and
++	 * waiting at least one frame, as described in EHCI 4.12.2.5.
++	 *
++	 * We won't bother with any of this.  Instead, we assume that the
++	 * only reason for unlinking an interrupt QH while the current URB
++	 * is still active is to dequeue all the URBs (flush the whole
++	 * endpoint queue).
++	 *
++	 * If rebalancing the periodic schedule is ever implemented, this
++	 * approach will no longer be valid.
++	 */
+ 
+ 	/* high bandwidth, or otherwise part of every microframe */
+ 	if ((period = qh->period) == 0)
+@@ -608,12 +616,8 @@ static void qh_unlink_periodic(struct eh
+ 	qh->qh_next.ptr = NULL;
+ }
+ 
+-static void intr_deschedule (struct ehci_hcd *ehci, struct ehci_qh *qh)
++static void start_unlink_intr(struct ehci_hcd *ehci, struct ehci_qh *qh)
+ {
+-	unsigned		wait;
+-	struct ehci_qh_hw	*hw = qh->hw;
+-	int			rc;
+-
+ 	/* If the QH isn't linked then there's nothing we can do
+ 	 * unless we were called during a giveback, in which case
+ 	 * qh_completions() has to deal with it.
+@@ -626,28 +630,45 @@ static void intr_deschedule (struct ehci
+ 
+ 	qh_unlink_periodic (ehci, qh);
+ 
+-	/* simple/paranoid:  always delay, expecting the HC needs to read
+-	 * qh->hw_next or finish a writeback after SPLIT/CSPLIT ... and
+-	 * expect khubd to clean up after any CSPLITs we won't issue.
+-	 * active high speed queues may need bigger delays...
++	/* Make sure the unlinks are visible before starting the timer */
++	wmb();
++
++	/*
++	 * The EHCI spec doesn't say how long it takes the controller to
++	 * stop accessing an unlinked interrupt QH.  The timer delay is
++	 * 9 uframes; presumably that will be long enough.
+ 	 */
+-	if (list_empty (&qh->qtd_list)
+-			|| (cpu_to_hc32(ehci, QH_CMASK)
+-					& hw->hw_info2) != 0)
+-		wait = 2;
++	qh->unlink_cycle = ehci->intr_unlink_cycle;
++
++	/* New entries go at the end of the intr_unlink list */
++	if (ehci->intr_unlink)
++		ehci->intr_unlink_last->unlink_next = qh;
+ 	else
+-		wait = 55;	/* worst case: 3 * 1024 */
++		ehci->intr_unlink = qh;
++	ehci->intr_unlink_last = qh;
++
++	if (ehci->intr_unlinking)
++		;	/* Avoid recursive calls */
++	else if (ehci->rh_state < EHCI_RH_RUNNING)
++		ehci_handle_intr_unlinks(ehci);
++	else if (ehci->intr_unlink == qh) {
++		ehci_enable_event(ehci, EHCI_HRTIMER_UNLINK_INTR, true);
++		++ehci->intr_unlink_cycle;
++	}
++}
++
++static void end_unlink_intr(struct ehci_hcd *ehci, struct ehci_qh *qh)
++{
++	struct ehci_qh_hw	*hw = qh->hw;
++	int			rc;
+ 
+-	udelay (wait);
+ 	qh->qh_state = QH_STATE_IDLE;
+ 	hw->hw_next = EHCI_LIST_END(ehci);
+-	wmb ();
+ 
+ 	qh_completions(ehci, qh);
+ 
+ 	/* reschedule QH iff another request is queued */
+-	if (!list_empty(&qh->qtd_list) &&
+-			ehci->rh_state == EHCI_RH_RUNNING) {
++	if (!list_empty(&qh->qtd_list) && ehci->rh_state == EHCI_RH_RUNNING) {
+ 		rc = qh_schedule(ehci, qh);
+ 
+ 		/* An error here likely indicates handshake failure
+@@ -2303,7 +2324,7 @@ restart:
+ 						temp.qh->stamp = ehci->periodic_stamp;
+ 					if (unlikely(list_empty(&temp.qh->qtd_list) ||
+ 							temp.qh->needs_rescan))
+-						intr_deschedule(ehci, temp.qh);
++						start_unlink_intr(ehci, temp.qh);
+ 				}
+ 				break;
+ 			case Q_TYPE_FSTN:
+--- a/drivers/usb/host/ehci-timer.c
++++ b/drivers/usb/host/ehci-timer.c
+@@ -69,6 +69,7 @@ static void ehci_clear_command_bit(struc
+ static unsigned event_delays_ns[] = {
+ 	1 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_POLL_ASS */
+ 	1 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_POLL_PSS */
++	1125 * NSEC_PER_USEC,	/* EHCI_HRTIMER_UNLINK_INTR */
+ 	10 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_DISABLE_PERIODIC */
+ 	15 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_DISABLE_ASYNC */
+ };
+@@ -192,6 +193,38 @@ static void ehci_disable_PSE(struct ehci
+ }
+ 
+ 
++/* Handle unlinked interrupt QHs once they are gone from the hardware */
++static void ehci_handle_intr_unlinks(struct ehci_hcd *ehci)
++{
++	bool		stopped = (ehci->rh_state < EHCI_RH_RUNNING);
++
++	/*
++	 * Process all the QHs on the intr_unlink list that were added
++	 * before the current unlink cycle began.  The list is in
++	 * temporal order, so stop when we reach the first entry in the
++	 * current cycle.  But if the root hub isn't running then
++	 * process all the QHs on the list.
++	 */
++	ehci->intr_unlinking = true;
++	while (ehci->intr_unlink) {
++		struct ehci_qh	*qh = ehci->intr_unlink;
++
++		if (!stopped && qh->unlink_cycle == ehci->intr_unlink_cycle)
++			break;
++		ehci->intr_unlink = qh->unlink_next;
++		qh->unlink_next = NULL;
++		end_unlink_intr(ehci, qh);
++	}
++
++	/* Handle remaining entries later */
++	if (ehci->intr_unlink) {
++		ehci_enable_event(ehci, EHCI_HRTIMER_UNLINK_INTR, true);
++		++ehci->intr_unlink_cycle;
++	}
++	ehci->intr_unlinking = false;
++}
++
++
+ /*
+  * Handler functions for the hrtimer event types.
+  * Keep this array in the same order as the event types indexed by
+@@ -200,6 +233,7 @@ static void ehci_disable_PSE(struct ehci
+ static void (*event_handlers[])(struct ehci_hcd *) = {
+ 	ehci_poll_ASS,			/* EHCI_HRTIMER_POLL_ASS */
+ 	ehci_poll_PSS,			/* EHCI_HRTIMER_POLL_PSS */
++	ehci_handle_intr_unlinks,	/* EHCI_HRTIMER_UNLINK_INTR */
+ 	ehci_disable_PSE,		/* EHCI_HRTIMER_DISABLE_PERIODIC */
+ 	ehci_disable_ASE,		/* EHCI_HRTIMER_DISABLE_ASYNC */
+ };
+--- a/drivers/usb/host/ehci.h
++++ b/drivers/usb/host/ehci.h
+@@ -81,6 +81,7 @@ enum ehci_rh_state {
+ enum ehci_hrtimer_event {
+ 	EHCI_HRTIMER_POLL_ASS,		/* Poll for async schedule off */
+ 	EHCI_HRTIMER_POLL_PSS,		/* Poll for periodic schedule off */
++	EHCI_HRTIMER_UNLINK_INTR,	/* Wait for interrupt QH unlink */
+ 	EHCI_HRTIMER_DISABLE_PERIODIC,	/* Wait to disable periodic sched */
+ 	EHCI_HRTIMER_DISABLE_ASYNC,	/* Wait to disable async sched */
+ 	EHCI_HRTIMER_NUM_EVENTS		/* Must come last */
+@@ -106,13 +107,16 @@ struct ehci_hcd {			/* one per controlle
+ 	spinlock_t		lock;
+ 	enum ehci_rh_state	rh_state;
+ 
++	/* general schedule support */
++	unsigned		scanning:1;
++	bool			intr_unlinking:1;
++
+ 	/* async schedule support */
+ 	struct ehci_qh		*async;
+ 	struct ehci_qh		*dummy;		/* For AMD quirk use */
+ 	struct ehci_qh		*async_unlink;
+ 	struct ehci_qh		*async_unlink_last;
+ 	struct ehci_qh		*qh_scan_next;
+-	unsigned		scanning : 1;
+ 	unsigned		async_count;	/* async activity count */
+ 
+ 	/* periodic schedule support */
+@@ -123,6 +127,9 @@ struct ehci_hcd {			/* one per controlle
+ 	unsigned		i_thresh;	/* uframes HC might cache */
+ 
+ 	union ehci_shadow	*pshadow;	/* mirror hw periodic table */
++	struct ehci_qh		*intr_unlink;
++	struct ehci_qh		*intr_unlink_last;
++	unsigned		intr_unlink_cycle;
+ 	int			next_uframe;	/* scan periodic, start here */
+ 	unsigned		periodic_count;	/* periodic activity count */
+ 
+@@ -385,6 +392,7 @@ struct ehci_qh {
+ 	struct ehci_qh		*unlink_next;	/* next on unlink list */
+ 
+ 	unsigned long		unlink_time;
++	unsigned		unlink_cycle;
+ 	unsigned		stamp;
+ 
+ 	u8			needs_rescan;	/* Dequeue during giveback */
