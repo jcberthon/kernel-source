@@ -1,0 +1,224 @@
+From: Alan Stern <stern@rowland.harvard.edu>
+Date: Wed, 11 Jul 2012 11:22:39 -0400
+Subject: USB: EHCI: don't refcount iso_stream structures
+Git-commit: 8c5bf7be56f1a8aecc1f802f132d53f556a9bc45
+Patch-mainline: v3.6-rc1
+References: bsc#1117515
+
+This patch (as1580) makes ehci_iso_stream structures behave more like
+QHs, in that they will remain allocated until their isochronous
+endpoint is disabled.  This will come in useful in the future, when
+periodic bandwidth gets allocated as an altsetting is installed rather
+than on-the-fly.
+
+For now, the change to the ehci_iso_stream lifetimes means that each
+structure is always deallocated at exactly one spot in
+ehci_endpoint_disable() and never used again.  As a result, it is no
+longer necessary to use reference counting on these things, and the
+patch removes it.
+
+Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/usb/host/ehci-hcd.c   | 12 +++++++---
+ drivers/usb/host/ehci-sched.c | 53 +++++--------------------------------------
+ drivers/usb/host/ehci.h       |  3 +--
+ 3 files changed, 16 insertions(+), 52 deletions(-)
+
+diff --git a/drivers/usb/host/ehci-hcd.c b/drivers/usb/host/ehci-hcd.c
+index 98b945840c9e..fb1966cf5649 100644
+--- a/drivers/usb/host/ehci-hcd.c
++++ b/drivers/usb/host/ehci-hcd.c
+@@ -1085,8 +1085,14 @@ ehci_endpoint_disable (struct usb_hcd *hcd, struct usb_host_endpoint *ep)
+ 	 * accelerate iso completions ... so spin a while.
+ 	 */
+ 	if (qh->hw == NULL) {
+-		ehci_vdbg (ehci, "iso delay\n");
+-		goto idle_timeout;
++		struct ehci_iso_stream	*stream = ep->hcpriv;
++
++		if (!list_empty(&stream->td_list))
++			goto idle_timeout;
++
++		/* BUG_ON(!list_empty(&stream->free_list)); */
++		kfree(stream);
++		goto done;
+ 	}
+ 
+ 	if (ehci->rh_state < EHCI_RH_RUNNING)
+@@ -1127,8 +1133,8 @@ ehci_endpoint_disable (struct usb_hcd *hcd, struct usb_host_endpoint *ep)
+ 			list_empty (&qh->qtd_list) ? "" : "(has tds)");
+ 		break;
+ 	}
++ done:
+ 	ep->hcpriv = NULL;
+-done:
+ 	spin_unlock_irqrestore (&ehci->lock, flags);
+ }
+ 
+diff --git a/drivers/usb/host/ehci-sched.c b/drivers/usb/host/ehci-sched.c
+index 1e4f13c11b6a..11b2f21d7ac1 100644
+--- a/drivers/usb/host/ehci-sched.c
++++ b/drivers/usb/host/ehci-sched.c
+@@ -934,7 +934,6 @@ iso_stream_alloc (gfp_t mem_flags)
+ 		INIT_LIST_HEAD(&stream->td_list);
+ 		INIT_LIST_HEAD(&stream->free_list);
+ 		stream->next_uframe = -1;
+-		stream->refcount = 1;
+ 	}
+ 	return stream;
+ }
+@@ -1034,32 +1033,6 @@ iso_stream_init (
+ 	stream->maxp = maxp;
+ }
+ 
+-static void
+-iso_stream_put(struct ehci_hcd *ehci, struct ehci_iso_stream *stream)
+-{
+-	stream->refcount--;
+-
+-	/* free whenever just a dev->ep reference remains.
+-	 * not like a QH -- no persistent state (toggle, halt)
+-	 */
+-	if (stream->refcount == 1) {
+-		// BUG_ON (!list_empty(&stream->td_list));
+-
+-		if (stream->ep)
+-			stream->ep->hcpriv = NULL;
+-
+-		kfree(stream);
+-	}
+-}
+-
+-static inline struct ehci_iso_stream *
+-iso_stream_get (struct ehci_iso_stream *stream)
+-{
+-	if (likely (stream != NULL))
+-		stream->refcount++;
+-	return stream;
+-}
+-
+ static struct ehci_iso_stream *
+ iso_stream_find (struct ehci_hcd *ehci, struct urb *urb)
+ {
+@@ -1080,7 +1053,6 @@ iso_stream_find (struct ehci_hcd *ehci, struct urb *urb)
+ 	if (unlikely (stream == NULL)) {
+ 		stream = iso_stream_alloc(GFP_ATOMIC);
+ 		if (likely (stream != NULL)) {
+-			/* dev->ep owns the initial refcount */
+ 			ep->hcpriv = stream;
+ 			stream->ep = ep;
+ 			iso_stream_init(ehci, stream, urb->dev, urb->pipe,
+@@ -1095,9 +1067,6 @@ iso_stream_find (struct ehci_hcd *ehci, struct urb *urb)
+ 		stream = NULL;
+ 	}
+ 
+-	/* caller guarantees an eventual matching iso_stream_put */
+-	stream = iso_stream_get (stream);
+-
+ 	spin_unlock_irqrestore (&ehci->lock, flags);
+ 	return stream;
+ }
+@@ -1611,7 +1580,7 @@ static void itd_link_urb(
+ 			itd = list_entry (iso_sched->td_list.next,
+ 					struct ehci_itd, itd_list);
+ 			list_move_tail (&itd->itd_list, &stream->td_list);
+-			itd->stream = iso_stream_get (stream);
++			itd->stream = stream;
+ 			itd->urb = urb;
+ 			itd_init (ehci, stream, itd);
+ 		}
+@@ -1735,7 +1704,6 @@ itd_complete (
+ 			dev->devpath, stream->bEndpointAddress & 0x0f,
+ 			(stream->bEndpointAddress & USB_DIR_IN) ? "in" : "out");
+ 	}
+-	iso_stream_put (ehci, stream);
+ 
+ done:
+ 	itd->urb = NULL;
+@@ -1750,7 +1718,6 @@ itd_complete (
+ 		start_free_itds(ehci);
+ 	}
+ 
+-	iso_stream_put(ehci, stream);
+ 	return retval;
+ }
+ 
+@@ -1807,12 +1774,9 @@ static int itd_submit (struct ehci_hcd *ehci, struct urb *urb,
+ 		itd_link_urb (ehci, urb, ehci->periodic_size << 3, stream);
+ 	else
+ 		usb_hcd_unlink_urb_from_ep(ehci_to_hcd(ehci), urb);
+-done_not_linked:
++ done_not_linked:
+ 	spin_unlock_irqrestore (&ehci->lock, flags);
+-
+-done:
+-	if (unlikely (status < 0))
+-		iso_stream_put (ehci, stream);
++ done:
+ 	return status;
+ }
+ 
+@@ -2028,7 +1992,7 @@ static void sitd_link_urb(
+ 		sitd = list_entry (sched->td_list.next,
+ 				struct ehci_sitd, sitd_list);
+ 		list_move_tail (&sitd->sitd_list, &stream->td_list);
+-		sitd->stream = iso_stream_get (stream);
++		sitd->stream = stream;
+ 		sitd->urb = urb;
+ 
+ 		sitd_patch(ehci, stream, sitd, sched, packet);
+@@ -2126,7 +2090,6 @@ sitd_complete (
+ 			dev->devpath, stream->bEndpointAddress & 0x0f,
+ 			(stream->bEndpointAddress & USB_DIR_IN) ? "in" : "out");
+ 	}
+-	iso_stream_put (ehci, stream);
+ 
+ done:
+ 	sitd->urb = NULL;
+@@ -2141,7 +2104,6 @@ sitd_complete (
+ 		start_free_itds(ehci);
+ 	}
+ 
+-	iso_stream_put(ehci, stream);
+ 	return retval;
+ }
+ 
+@@ -2195,12 +2157,9 @@ static int sitd_submit (struct ehci_hcd *ehci, struct urb *urb,
+ 		sitd_link_urb (ehci, urb, ehci->periodic_size << 3, stream);
+ 	else
+ 		usb_hcd_unlink_urb_from_ep(ehci_to_hcd(ehci), urb);
+-done_not_linked:
++ done_not_linked:
+ 	spin_unlock_irqrestore (&ehci->lock, flags);
+-
+-done:
+-	if (status < 0)
+-		iso_stream_put (ehci, stream);
++ done:
+ 	return status;
+ }
+ 
+diff --git a/drivers/usb/host/ehci.h b/drivers/usb/host/ehci.h
+index bcfbb175e2b4..755e30b0000b 100644
+--- a/drivers/usb/host/ehci.h
++++ b/drivers/usb/host/ehci.h
+@@ -386,7 +386,7 @@ struct ehci_qh_hw {
+ } __attribute__ ((aligned(32)));
+ 
+ struct ehci_qh {
+-	struct ehci_qh_hw	*hw;
++	struct ehci_qh_hw	*hw;		/* Must come first */
+ 	/* the rest is HCD-private */
+ 	dma_addr_t		qh_dma;		/* address of qh */
+ 	union ehci_shadow	qh_next;	/* ptr to qh; or periodic */
+@@ -453,7 +453,6 @@ struct ehci_iso_stream {
+ 	/* first field matches ehci_hq, but is NULL */
+ 	struct ehci_qh_hw	*hw;
+ 
+-	u32			refcount;
+ 	u8			bEndpointAddress;
+ 	u8			highspeed;
+ 	struct list_head	td_list;	/* queued itds/sitds */
+
