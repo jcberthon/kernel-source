@@ -1,0 +1,65 @@
+From: Alan Stern <stern@rowland.harvard.edu>
+Date: Wed, 11 Jul 2012 11:21:43 -0400
+Subject: USB: EHCI: add pointer to end of async-unlink list
+Git-commit: 2f5bb665ba7a14c5842fa2e1cde2be039843a2a2
+Patch-mainline: v3.6-rc1
+References: bsc#1117515
+
+This patch (as1570) adds a pointer for the end of ehci-hcd's
+async-unlink list.  The list (which is actually a queue) is singly
+linked, so having a pointer to its end makes adding new entries easier
+-- there's no longer any need to scan through the whole list.
+
+In principle it could be changed to a standard doubly-linked list.  It
+turns out that doing so actually makes the code less clear, so I'm
+leaving it as is.
+
+Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/usb/host/ehci-hcd.c |    9 ++-------
+ drivers/usb/host/ehci-q.c   |    2 ++
+ drivers/usb/host/ehci.h     |    1 +
+ 3 files changed, 5 insertions(+), 7 deletions(-)
+
+--- a/drivers/usb/host/ehci-hcd.c
++++ b/drivers/usb/host/ehci-hcd.c
+@@ -994,14 +994,9 @@ static void unlink_async (struct ehci_hc
+ 
+ 	/* defer till later if busy */
+ 	if (ehci->async_unlink) {
+-		struct ehci_qh		*last;
+-
+-		for (last = ehci->async_unlink;
+-				last->unlink_next;
+-				last = last->unlink_next)
+-			continue;
+ 		qh->qh_state = QH_STATE_UNLINK_WAIT;
+-		last->unlink_next = qh;
++		ehci->async_unlink_last->unlink_next = qh;
++		ehci->async_unlink_last = qh;
+ 
+ 	/* start IAA cycle */
+ 	} else
+--- a/drivers/usb/host/ehci-q.c
++++ b/drivers/usb/host/ehci-q.c
+@@ -1226,6 +1226,8 @@ static void start_unlink_async (struct e
+ 
+ 	qh->qh_state = QH_STATE_UNLINK;
+ 	ehci->async_unlink = qh;
++	if (!qh->unlink_next)
++		ehci->async_unlink_last = qh;
+ 
+ 	prev = ehci->async;
+ 	while (prev->qh_next.qh != qh)
+--- a/drivers/usb/host/ehci.h
++++ b/drivers/usb/host/ehci.h
+@@ -82,6 +82,7 @@ struct ehci_hcd {			/* one per controlle
+ 	struct ehci_qh		*async;
+ 	struct ehci_qh		*dummy;		/* For AMD quirk use */
+ 	struct ehci_qh		*async_unlink;
++	struct ehci_qh		*async_unlink_last;
+ 	struct ehci_qh		*qh_scan_next;
+ 	unsigned		scanning : 1;
+ 
