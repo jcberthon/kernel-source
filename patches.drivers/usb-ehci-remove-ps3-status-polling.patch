@@ -1,0 +1,70 @@
+From: Alan Stern <stern@rowland.harvard.edu>
+Date: Wed, 11 Jul 2012 11:22:16 -0400
+Subject: USB: EHCI: remove PS3 status polling
+Git-commit: 9671cd7a91059bcd27665a884ee6568d31ef6857
+Patch-mainline: v3.6-rc1
+References: bsc#1117515
+
+This patch (as1575) removes special code added for status polling of
+the EHCI controller in PS3 systems.  While the controller is running,
+the polling is now carried out by an hrtimer handler.  When the
+controller is suspending or stopping, we use the same polling routine
+as the old code -- but in neither case do we need to conclude that the
+controller has died if the polling goes on for too long.
+
+As a result the entire handshake_on_error_set_halt() routine is now
+unused, so it is removed from the driver.
+
+Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/usb/host/ehci-hcd.c |   25 ++-----------------------
+ 1 file changed, 2 insertions(+), 23 deletions(-)
+
+--- a/drivers/usb/host/ehci-hcd.c
++++ b/drivers/usb/host/ehci-hcd.c
+@@ -229,22 +229,6 @@ static int ehci_halt (struct ehci_hcd *e
+ 			  STS_HALT, STS_HALT, 16 * 125);
+ }
+ 
+-static int handshake_on_error_set_halt(struct ehci_hcd *ehci, void __iomem *ptr,
+-				       u32 mask, u32 done, int usec)
+-{
+-	int error;
+-
+-	error = handshake(ehci, ptr, mask, done, usec);
+-	if (error) {
+-		ehci_halt(ehci);
+-		ehci->rh_state = EHCI_RH_HALTED;
+-		ehci_err(ehci, "force halt; handshake %p %08x %08x -> %d\n",
+-			ptr, mask, done, error);
+-	}
+-
+-	return error;
+-}
+-
+ /* put TDI/ARC silicon into EHCI mode */
+ static void tdi_reset (struct ehci_hcd *ehci)
+ {
+@@ -311,18 +295,13 @@ static void ehci_quiesce (struct ehci_hc
+ 	/* wait for any schedule enables/disables to take effect */
+ 	temp = ehci_readl(ehci, &ehci->regs->command) << 10;
+ 	temp &= STS_ASS | STS_PSS;
+-	if (handshake_on_error_set_halt(ehci, &ehci->regs->status,
+-					STS_ASS | STS_PSS, temp, 16 * 125))
+-		return;
++	handshake(ehci, &ehci->regs->status, STS_ASS | STS_PSS, temp, 16 * 125);
+ 
+ 	/* then disable anything that's still active */
+ 	temp = ehci_readl(ehci, &ehci->regs->command);
+ 	temp &= ~(CMD_ASE | CMD_IAAD | CMD_PSE);
+ 	ehci_writel(ehci, temp, &ehci->regs->command);
+-
+-	/* hardware can take 16 microframes to turn off ... */
+-	handshake_on_error_set_halt(ehci, &ehci->regs->status,
+-				    STS_ASS | STS_PSS, 0, 16 * 125);
++	handshake(ehci, &ehci->regs->status, STS_ASS | STS_PSS, 0, 16 * 125);
+ }
+ 
+ /*-------------------------------------------------------------------------*/
