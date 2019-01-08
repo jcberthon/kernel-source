@@ -1,0 +1,146 @@
+From: Alan Stern <stern@rowland.harvard.edu>
+Date: Wed, 11 Jul 2012 11:23:16 -0400
+Subject: USB: EHCI: resolve some unlikely races
+Git-commit: 43fe3a99d9caf10b25f9c596e9854cdae30db418
+Patch-mainline: v3.6-rc1
+References: bsc#1117515
+
+This patch (as1589) resolves some unlikely races involving system
+shutdown or controller death in ehci-hcd:
+
+	Shutdown races with both root-hub resume and controller
+	resume.
+
+	Controller death races with root-hub suspend.
+
+A new bitflag is added to indicate that the controller has been shut
+down (whether for system shutdown or because it died).  Tests are
+added in the suspend and resume pathways to avoid reactivating the
+controller after any sort of shutdown.
+
+Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/usb/host/ehci-hcd.c |    2 ++
+ drivers/usb/host/ehci-hub.c |   27 +++++++++++++++++++++++----
+ drivers/usb/host/ehci.h     |    1 +
+ 3 files changed, 26 insertions(+), 4 deletions(-)
+
+--- a/drivers/usb/host/ehci-hcd.c
++++ b/drivers/usb/host/ehci-hcd.c
+@@ -386,6 +386,7 @@ static void ehci_shutdown(struct usb_hcd
+ 	struct ehci_hcd	*ehci = hcd_to_ehci(hcd);
+ 
+ 	spin_lock_irq(&ehci->lock);
++	ehci->shutdown = true;
+ 	ehci->rh_state = EHCI_RH_STOPPING;
+ 	ehci->enabled_hrtimer_events = 0;
+ 	spin_unlock_irq(&ehci->lock);
+@@ -865,6 +866,7 @@ dead:
+ 		usb_hc_died(hcd);
+ 
+ 		/* Don't let the controller do anything more */
++		ehci->shutdown = true;
+ 		ehci->rh_state = EHCI_RH_STOPPING;
+ 		ehci->command &= ~(CMD_RUN | CMD_ASE | CMD_PSE);
+ 		ehci_writel(ehci, ehci->command, &ehci->regs->command);
+--- a/drivers/usb/host/ehci-hub.c
++++ b/drivers/usb/host/ehci-hub.c
+@@ -225,6 +225,8 @@ static int ehci_bus_suspend (struct usb_
+ 	ehci_quiesce(ehci);
+ 
+ 	spin_lock_irq (&ehci->lock);
++	if (ehci->rh_state < EHCI_RH_RUNNING)
++		goto done;
+ 
+ 	/* Once the controller is stopped, port resumes that are already
+ 	 * in progress won't complete.  Hence if remote wakeup is enabled
+@@ -317,6 +319,10 @@ static int ehci_bus_suspend (struct usb_
+ 	ehci_halt (ehci);
+ 
+ 	spin_lock_irq(&ehci->lock);
++	if (ehci->enabled_hrtimer_events & BIT(EHCI_HRTIMER_POLL_DEAD))
++		ehci_handle_controller_death(ehci);
++	if (ehci->rh_state != EHCI_RH_RUNNING)
++		goto done;
+ 	ehci->rh_state = EHCI_RH_SUSPENDED;
+ 
+ 	end_unlink_async(ehci);
+@@ -331,6 +337,7 @@ static int ehci_bus_suspend (struct usb_
+ 	ehci_writel(ehci, mask, &ehci->regs->intr_enable);
+ 	ehci_readl(ehci, &ehci->regs->intr_enable);
+ 
++ done:
+ 	ehci->next_statechange = jiffies + msecs_to_jiffies(10);
+ 	ehci->enabled_hrtimer_events = 0;
+ 	ehci->next_hrtimer_event = EHCI_HRTIMER_NO_EVENT;
+@@ -353,10 +360,8 @@ static int ehci_bus_resume (struct usb_h
+ 	if (time_before (jiffies, ehci->next_statechange))
+ 		msleep(5);
+ 	spin_lock_irq (&ehci->lock);
+-	if (!HCD_HW_ACCESSIBLE(hcd)) {
+-		spin_unlock_irq(&ehci->lock);
+-		return -ESHUTDOWN;
+-	}
++	if (!HCD_HW_ACCESSIBLE(hcd) || ehci->shutdown)
++		goto shutdown;
+ 
+ 	if (unlikely(ehci->debug)) {
+ 		if (!dbgp_reset_prep())
+@@ -394,6 +399,8 @@ static int ehci_bus_resume (struct usb_h
+ 	spin_unlock_irq(&ehci->lock);
+ 	msleep(8);
+ 	spin_lock_irq(&ehci->lock);
++	if (ehci->shutdown)
++		goto shutdown;
+ 
+ 	/* clear phy low-power mode before resume */
+ 	if (ehci->bus_suspended && ehci->has_hostpc) {
+@@ -412,6 +419,8 @@ static int ehci_bus_resume (struct usb_h
+ 		spin_unlock_irq(&ehci->lock);
+ 		msleep(5);
+ 		spin_lock_irq(&ehci->lock);
++		if (ehci->shutdown)
++			goto shutdown;
+ 	}
+ 
+ 	/* manually resume the ports we suspended during bus_suspend() */
+@@ -432,6 +441,8 @@ static int ehci_bus_resume (struct usb_h
+ 		spin_unlock_irq(&ehci->lock);
+ 		msleep(20);
+ 		spin_lock_irq(&ehci->lock);
++		if (ehci->shutdown)
++			goto shutdown;
+ 	}
+ 
+ 	i = HCS_N_PORTS (ehci->hcs_params);
+@@ -450,10 +461,18 @@ static int ehci_bus_resume (struct usb_h
+ 	ehci_handover_companion_ports(ehci);
+ 
+ 	/* Now we can safely re-enable irqs */
++	spin_lock_irq(&ehci->lock);
++	if (ehci->shutdown)
++		goto shutdown;
+ 	ehci_writel(ehci, INTR_MASK, &ehci->regs->intr_enable);
+ 	(void) ehci_readl(ehci, &ehci->regs->intr_enable);
++	spin_unlock_irq(&ehci->lock);
+ 
+ 	return 0;
++
++ shutdown:
++	spin_unlock_irq(&ehci->lock);
++	return -ESHUTDOWN;
+ }
+ 
+ #else
+--- a/drivers/usb/host/ehci.h
++++ b/drivers/usb/host/ehci.h
+@@ -118,6 +118,7 @@ struct ehci_hcd {			/* one per controlle
+ 	bool			need_rescan:1;
+ 	bool			intr_unlinking:1;
+ 	bool			async_unlinking:1;
++	bool			shutdown:1;
+ 	struct ehci_qh		*qh_scan_next;
+ 
+ 	/* async schedule support */
