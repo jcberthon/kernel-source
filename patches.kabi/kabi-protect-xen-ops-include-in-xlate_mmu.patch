@@ -1,0 +1,29 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: kABI: protect xen/xen-ops.h include in xlate_mmu.c
+Patch-mainline: never, kabi
+References: kabi
+
+In 4.4.168, commit 26e081481506908e75a202ac91d15b484be7b27c (xen:
+xlate_mmu: add missing header to fix 'W=1' warning), upstream commit
+72791ac854fea36034fa7976b748fde585008e78 added xen/xen-ops.h include
+to xlate_mmu.c and it made some of the symbols defined.
+
+Protect the include by __GENKSYMS__ to satisfy the kABI checker.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/xen/xlate_mmu.c |    2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/drivers/xen/xlate_mmu.c
++++ b/drivers/xen/xlate_mmu.c
+@@ -34,7 +34,9 @@
+ #include <asm/xen/hypervisor.h>
+ 
+ #include <xen/xen.h>
++#ifndef __GENKSYMS__
+ #include <xen/xen-ops.h>
++#endif
+ #include <xen/page.h>
+ #include <xen/interface/xen.h>
+ #include <xen/interface/memory.h>

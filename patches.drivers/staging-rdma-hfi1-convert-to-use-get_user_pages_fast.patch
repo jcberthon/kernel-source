@@ -21,7 +21,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 --- a/drivers/staging/rdma/hfi1/file_ops.c
 +++ b/drivers/staging/rdma/hfi1/file_ops.c
-@@ -1663,8 +1663,8 @@ static int exp_tid_setup(struct file *fp
+@@ -1669,8 +1669,8 @@ static int exp_tid_setup(struct file *fp
  		 * Now that we know how many free RcvArray entries we have,
  		 * we can pin that many user pages.
  		 */
@@ -32,7 +32,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
  		if (ret) {
  			/*
  			 * We can't continue because the pages array won't be
-@@ -1833,7 +1833,7 @@ static int exp_tid_free(struct file *fp,
+@@ -1839,7 +1839,7 @@ static int exp_tid_free(struct file *fp,
  				}
  			}
  			flush_wc();
@@ -41,7 +41,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
  			clear_bit(bitidx, &uctxt->tidusemap[idx]);
  			map &= ~(1ULL<<bitidx);
  		}
-@@ -1862,7 +1862,7 @@ static void unlock_exp_tids(struct hfi1_
+@@ -1868,7 +1868,7 @@ static void unlock_exp_tids(struct hfi1_
  		uctxt->physshadow[tid] = 0;
  		uctxt->tid_pg_list[tid] = NULL;
  		pci_unmap_page(dd->pcidev, phys, PAGE_SIZE, PCI_DMA_FROMDEVICE);
@@ -106,7 +106,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 -	for (got = 0; got < num_pages; got += ret) {
 -		ret = get_user_pages(current, current->mm,
 -				     start_page + got * PAGE_SIZE,
--				     num_pages - got, 1, 1,
+-				     num_pages - got, FOLL_WRITE | FOLL_FORCE,
 -				     p + got, NULL);
 -		if (ret < 0)
 -			goto bail_release;

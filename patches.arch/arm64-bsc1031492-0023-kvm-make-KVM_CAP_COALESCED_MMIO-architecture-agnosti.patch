@@ -23,18 +23,16 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 Conflicts: arch/mips/kvm/mips.c
 
 ---
- arch/arm/kvm/arm.c         | 3 ---
- arch/mips/kvm/mips.c       | 3 ---
- arch/powerpc/kvm/powerpc.c | 5 -----
- arch/x86/kvm/x86.c         | 3 ---
- virt/kvm/kvm_main.c        | 4 ++++
+ arch/arm/kvm/arm.c         |    3 ---
+ arch/mips/kvm/mips.c       |    3 ---
+ arch/powerpc/kvm/powerpc.c |    5 -----
+ arch/x86/kvm/x86.c         |    3 ---
+ virt/kvm/kvm_main.c        |    4 ++++
  5 files changed, 4 insertions(+), 14 deletions(-)
 
-diff --git a/arch/arm/kvm/arm.c b/arch/arm/kvm/arm.c
-index 83e7263..e20a5f7 100644
 --- a/arch/arm/kvm/arm.c
 +++ b/arch/arm/kvm/arm.c
-@@ -208,9 +208,6 @@ int kvm_vm_ioctl_check_extension(struct kvm *kvm, long ext)
+@@ -208,9 +208,6 @@ int kvm_vm_ioctl_check_extension(struct
  	case KVM_CAP_MP_STATE:
  		r = 1;
  		break;
@@ -44,11 +42,9 @@ index 83e7263..e20a5f7 100644
  	case KVM_CAP_ARM_SET_DEVICE_ADDR:
  		r = 1;
  		break;
-diff --git a/arch/mips/kvm/mips.c b/arch/mips/kvm/mips.c
-index c51c837..8bb89f5 100644
 --- a/arch/mips/kvm/mips.c
 +++ b/arch/mips/kvm/mips.c
-@@ -1094,9 +1094,6 @@ int kvm_vm_ioctl_check_extension(struct kvm *kvm, long ext)
+@@ -1094,9 +1094,6 @@ int kvm_vm_ioctl_check_extension(struct
  	case KVM_CAP_ENABLE_CAP:
  		r = 1;
  		break;
@@ -58,11 +54,9 @@ index c51c837..8bb89f5 100644
  	case KVM_CAP_MIPS_FPU:
  		r = !!cpu_has_fpu;
  		break;
-diff --git a/arch/powerpc/kvm/powerpc.c b/arch/powerpc/kvm/powerpc.c
-index 652daa5..6a29fce 100644
 --- a/arch/powerpc/kvm/powerpc.c
 +++ b/arch/powerpc/kvm/powerpc.c
-@@ -506,11 +506,6 @@ int kvm_vm_ioctl_check_extension(struct kvm *kvm, long ext)
+@@ -506,11 +506,6 @@ int kvm_vm_ioctl_check_extension(struct
  		/* We support this only for PR */
  		r = !hv_enabled;
  		break;
@@ -74,13 +68,11 @@ index 652daa5..6a29fce 100644
  #ifdef CONFIG_KVM_MPIC
  	case KVM_CAP_IRQ_MPIC:
  		r = 1;
-diff --git a/arch/x86/kvm/x86.c b/arch/x86/kvm/x86.c
-index 58f86b9..c08b2ac 100644
 --- a/arch/x86/kvm/x86.c
 +++ b/arch/x86/kvm/x86.c
-@@ -2597,9 +2597,6 @@ int kvm_vm_ioctl_check_extension(struct kvm *kvm, long ext)
+@@ -2601,9 +2601,6 @@ int kvm_vm_ioctl_check_extension(struct
  		 */
- 		r = kvm_x86_ops->cpu_has_high_real_mode_segbase();
+ 		r = kvm_x86_ops->has_emulated_msr(MSR_IA32_SMBASE);
  		break;
 -	case KVM_CAP_COALESCED_MMIO:
 -		r = KVM_COALESCED_MMIO_PAGE_OFFSET;
@@ -88,11 +80,9 @@ index 58f86b9..c08b2ac 100644
  	case KVM_CAP_VAPIC:
  		r = !kvm_x86_ops->cpu_has_accelerated_tpr();
  		break;
-diff --git a/virt/kvm/kvm_main.c b/virt/kvm/kvm_main.c
-index d6c6e02..420b33d 100644
 --- a/virt/kvm/kvm_main.c
 +++ b/virt/kvm/kvm_main.c
-@@ -2813,6 +2813,10 @@ static long kvm_vm_ioctl_check_extension_generic(struct kvm *kvm, long arg)
+@@ -2812,6 +2812,10 @@ static long kvm_vm_ioctl_check_extension
  	case KVM_CAP_IOEVENTFD_ANY_LENGTH:
  	case KVM_CAP_CHECK_EXTENSION_VM:
  		return 1;
@@ -103,6 +93,3 @@ index d6c6e02..420b33d 100644
  #ifdef CONFIG_HAVE_KVM_IRQ_ROUTING
  	case KVM_CAP_IRQ_ROUTING:
  		return KVM_MAX_IRQ_ROUTES;
--- 
-1.8.5.6
-

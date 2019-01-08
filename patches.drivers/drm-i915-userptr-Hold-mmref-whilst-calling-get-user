@@ -34,8 +34,8 @@ Signed-off-by: Takashi Iwai <tiwai@suse.de>
 --- a/drivers/gpu/drm/i915/i915_gem_userptr.c
 +++ b/drivers/gpu/drm/i915/i915_gem_userptr.c
 @@ -586,19 +586,24 @@ __i915_gem_userptr_get_pages_worker(stru
- 	if (pvec != NULL) {
- 		struct mm_struct *mm = obj->userptr.mm->mm;
+ 		if (!obj->userptr.read_only)
+ 			flags |= FOLL_WRITE;
  
 -		down_read(&mm->mmap_sem);
 -		while (pinned < npages) {

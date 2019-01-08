@@ -1,0 +1,37 @@
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Date: Sun, 16 Dec 2018 23:50:08 +0000
+Subject: [PATCH] mm/nommu.c: Switch __get_user_pages_unlocked() to use
+ __get_user_pages()
+References: bnc#1012382
+Patch-mainline: 4.4.168
+Git-commit: ff099ed77421a5dc8206bb61e5a598b28ab39ebb
+
+Extracted from commit cde70140fed8 "mm/gup: Overload get_user_pages()
+functions".  This is needed before picking commit 768ae309a961
+"mm: replace get_user_pages() write/force parameters with gup_flags".
+
+Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ mm/nommu.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/mm/nommu.c b/mm/nommu.c
+index 5462ed88a548..f5322195dbcd 100644
+--- a/mm/nommu.c
++++ b/mm/nommu.c
+@@ -215,8 +215,8 @@ long __get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
+ {
+ 	long ret;
+ 	down_read(&mm->mmap_sem);
+-	ret = get_user_pages(tsk, mm, start, nr_pages, write, force,
+-			     pages, NULL);
++	ret = __get_user_pages(tsk, mm, start, nr_pages, gup_flags, pages,
++			       NULL, NULL);
+ 	up_read(&mm->mmap_sem);
+ 	return ret;
+ }
+-- 
+2.20.1
+

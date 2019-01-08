@@ -11,12 +11,12 @@ Signed-off-by: Huaitong Han <huaitong.han@intel.com>
 Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
 Acked-by: Joerg Roedel <jroedel@suse.de>
 ---
- arch/x86/kvm/cpuid.c | 40 ++++++++++++++++++++--------------------
+ arch/x86/kvm/cpuid.c |   40 ++++++++++++++++++++--------------------
  1 file changed, 20 insertions(+), 20 deletions(-)
 
 --- a/arch/x86/kvm/cpuid.c
 +++ b/arch/x86/kvm/cpuid.c
-@@ -299,7 +299,7 @@ static inline int __do_cpuid_ent(struct
+@@ -306,7 +306,7 @@ static inline int __do_cpuid_ent(struct
  	unsigned f_xsaves = kvm_x86_ops->xsaves_supported() ? F(XSAVES) : 0;
  
  	/* cpuid 1.edx */
@@ -25,7 +25,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		F(FPU) | F(VME) | F(DE) | F(PSE) |
  		F(TSC) | F(MSR) | F(PAE) | F(MCE) |
  		F(CX8) | F(APIC) | 0 /* Reserved */ | F(SEP) |
-@@ -309,7 +309,7 @@ static inline int __do_cpuid_ent(struct
+@@ -316,7 +316,7 @@ static inline int __do_cpuid_ent(struct
  		F(FXSR) | F(XMM) | F(XMM2) | F(SELFSNOOP) |
  		0 /* HTT, TM, Reserved, PBE */;
  	/* cpuid 0x80000001.edx */
@@ -34,7 +34,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		F(FPU) | F(VME) | F(DE) | F(PSE) |
  		F(TSC) | F(MSR) | F(PAE) | F(MCE) |
  		F(CX8) | F(APIC) | 0 /* Reserved */ | F(SYSCALL) |
-@@ -319,7 +319,7 @@ static inline int __do_cpuid_ent(struct
+@@ -326,7 +326,7 @@ static inline int __do_cpuid_ent(struct
  		F(FXSR) | F(FXSR_OPT) | f_gbpages | f_rdtscp |
  		0 /* Reserved */ | f_lm | F(3DNOWEXT) | F(3DNOW);
  	/* cpuid 1.ecx */
@@ -43,7 +43,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		/* NOTE: MONITOR (and MWAIT) are emulated as NOP,
  		 * but *not* advertised to guests via CPUID ! */
  		F(XMM3) | F(PCLMULQDQ) | 0 /* DTES64, MONITOR */ |
-@@ -331,27 +331,27 @@ static inline int __do_cpuid_ent(struct
+@@ -338,7 +338,7 @@ static inline int __do_cpuid_ent(struct
  		0 /* Reserved*/ | F(AES) | F(XSAVE) | 0 /* OSXSAVE */ | F(AVX) |
  		F(F16C) | F(RDRAND);
  	/* cpuid 0x80000001.ecx */
@@ -52,7 +52,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		F(LAHF_LM) | F(CMP_LEGACY) | 0 /*SVM*/ | 0 /* ExtApicSpace */ |
  		F(CR8_LEGACY) | F(ABM) | F(SSE4A) | F(MISALIGNSSE) |
  		F(3DNOWPREFETCH) | F(OSVW) | 0 /* IBS */ | F(XOP) |
- 		0 /* SKINIT, WDT, LWP */ | F(FMA4) | F(TBM);
+@@ -349,20 +349,20 @@ static inline int __do_cpuid_ent(struct
+ 		F(AMD_IBPB) | F(AMD_IBRS) | F(VIRT_SSBD);
  
  	/* cpuid 0xC0000001.edx */
 -	const u32 kvm_supported_word5_x86_features =
@@ -74,8 +75,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 +	const u32 kvm_cpuid_D_1_eax_x86_features =
  		F(XSAVEOPT) | F(XSAVEC) | F(XGETBV1) | f_xsaves;
  
- 	/* all calls to cpuid_count() should be made on the same cpu */
-@@ -370,10 +370,10 @@ static inline int __do_cpuid_ent(struct
+ 	/* cpuid 7.0.edx*/
+@@ -385,10 +385,10 @@ static inline int __do_cpuid_ent(struct
  		entry->eax = min(entry->eax, (u32)0xd);
  		break;
  	case 1:
@@ -90,7 +91,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		/* we support x2apic emulation even if host does not support
  		 * it since we emulate x2apic in software */
  		entry->ecx |= F(X2APIC);
-@@ -427,8 +427,8 @@ static inline int __do_cpuid_ent(struct
+@@ -442,8 +442,8 @@ static inline int __do_cpuid_ent(struct
  		entry->flags |= KVM_CPUID_FLAG_SIGNIFCANT_INDEX;
  		/* Mask ebx against host capability word 9 */
  		if (index == 0) {
@@ -100,8 +101,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 +			cpuid_mask(&entry->ebx, CPUID_7_0_EBX);
  			// TSC_ADJUST is emulated
  			entry->ebx |= F(TSC_ADJUST);
- 		} else
-@@ -508,7 +508,7 @@ static inline int __do_cpuid_ent(struct
+ 			entry->edx &= kvm_cpuid_7_0_edx_x86_features;
+@@ -526,7 +526,7 @@ static inline int __do_cpuid_ent(struct
  
  			do_cpuid_1_ent(&entry[i], function, idx);
  			if (idx == 1) {
@@ -110,7 +111,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  				cpuid_mask(&entry[i].eax, 10);
  				entry[i].ebx = 0;
  				if (entry[i].eax & (F(XSAVES)|F(XSAVEC)))
-@@ -559,10 +559,10 @@ static inline int __do_cpuid_ent(struct
+@@ -577,10 +577,10 @@ static inline int __do_cpuid_ent(struct
  		entry->eax = min(entry->eax, 0x8000001a);
  		break;
  	case 0x80000001:
@@ -125,7 +126,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		break;
  	case 0x80000007: /* Advanced power management */
  		/* invariant TSC is CPUID.80000007H:EDX[8] */
-@@ -595,8 +595,8 @@ static inline int __do_cpuid_ent(struct
+@@ -627,8 +627,8 @@ static inline int __do_cpuid_ent(struct
  		entry->eax = min(entry->eax, 0xC0000004);
  		break;
  	case 0xC0000001:

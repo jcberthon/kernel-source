@@ -14,14 +14,12 @@ Cc: Joerg Roedel <joro@8bytes.org>
 Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
 Signed-off-by: Bruce Rogers <brogers@suse.com>
 ---
- arch/x86/kvm/svm.c | 24 +++++++++++++++++++++++-
+ arch/x86/kvm/svm.c |   24 +++++++++++++++++++++++-
  1 file changed, 23 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/kvm/svm.c b/arch/x86/kvm/svm.c
-index 59f8113e8808..430a22021493 100644
 --- a/arch/x86/kvm/svm.c
 +++ b/arch/x86/kvm/svm.c
-@@ -120,6 +120,7 @@ static const u32 host_save_user_msrs[] = {
+@@ -88,6 +88,7 @@ static const u32 host_save_user_msrs[] =
  	MSR_FS_BASE,
  #endif
  	MSR_IA32_SYSENTER_CS, MSR_IA32_SYSENTER_ESP, MSR_IA32_SYSENTER_EIP,
@@ -29,7 +27,7 @@ index 59f8113e8808..430a22021493 100644
  };
  
  #define NR_HOST_SAVE_USER_MSRS ARRAY_SIZE(host_save_user_msrs)
-@@ -169,6 +170,7 @@ struct vcpu_svm {
+@@ -137,6 +138,7 @@ struct vcpu_svm {
  	uint64_t asid_generation;
  	uint64_t sysenter_esp;
  	uint64_t sysenter_eip;
@@ -37,17 +35,17 @@ index 59f8113e8808..430a22021493 100644
  
  	u64 next_rip;
  
-@@ -1689,6 +1691,9 @@ static void svm_vcpu_load(struct kvm_vcpu *vcpu, int cpu)
+@@ -1279,6 +1281,9 @@ static void svm_vcpu_load(struct kvm_vcp
  			wrmsrl(MSR_AMD64_TSC_RATIO, tsc_ratio);
  		}
  	}
 +	/* This assumes that the kernel never uses MSR_TSC_AUX */
 +	if (static_cpu_has(X86_FEATURE_RDTSCP))
 +		wrmsrl(MSR_TSC_AUX, svm->tsc_aux);
- }
-
- static void svm_vcpu_put(struct kvm_vcpu *vcpu)
-@@ -3495,6 +3500,11 @@ static int svm_get_msr(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
+ 	if (sd->current_vmcb != svm->vmcb) {
+ 		sd->current_vmcb = svm->vmcb;
+ 		indirect_branch_prediction_barrier();
+@@ -3069,6 +3074,11 @@ static int svm_get_msr(struct kvm_vcpu *
  	case MSR_IA32_SYSENTER_ESP:
  		msr_info->data = svm->sysenter_esp;
  		break;
@@ -59,7 +57,7 @@ index 59f8113e8808..430a22021493 100644
  	/*
  	 * Nobody will change the following 5 values in the VMCB so we can
  	 * safely return them on rdmsr. They will always be 0 until LBRV is
-@@ -3616,6 +3626,18 @@ static int svm_set_msr(struct kvm_vcpu *vcpu, struct msr_data *msr)
+@@ -3264,6 +3274,18 @@ static int svm_set_msr(struct kvm_vcpu *
  		svm->sysenter_esp = data;
  		svm->vmcb->save.sysenter_esp = data;
  		break;
@@ -78,7 +76,7 @@ index 59f8113e8808..430a22021493 100644
  	case MSR_IA32_DEBUGCTLMSR:
  		if (!boot_cpu_has(X86_FEATURE_LBRV)) {
  			vcpu_unimpl(vcpu, "%s: MSR_IA32_DEBUGCTL 0x%llx, nop\n",
-@@ -5049,7 +5071,7 @@ static int svm_get_lpage_level(void)
+@@ -4210,7 +4232,7 @@ static int svm_get_lpage_level(void)
  
  static bool svm_rdtscp_supported(void)
  {
@@ -87,4 +85,3 @@ index 59f8113e8808..430a22021493 100644
  }
  
  static bool svm_invpcid_supported(void)
-

@@ -52,21 +52,19 @@ Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 Acked-by: Joerg Roedel <jroedel@suse.de>
 ---
- drivers/gpu/drm/etnaviv/etnaviv_gem.c   |  2 +-
- drivers/gpu/drm/i915/i915_gem_userptr.c |  2 +-
- drivers/infiniband/core/umem_odp.c      |  2 +-
- drivers/vfio/vfio_iommu_type1.c         |  2 +-
- fs/exec.c                               |  2 +-
- include/linux/mm.h                      |  2 +-
- kernel/events/uprobes.c                 |  4 ++--
- mm/gup.c                                | 12 ++++++++----
- mm/memory.c                             |  2 +-
- security/tomoyo/domain.c                |  2 +-
- 10 files changed, 18 insertions(+), 14 deletions(-)
+ drivers/gpu/drm/i915/i915_gem_userptr.c |    2 +-
+ drivers/infiniband/core/umem_odp.c      |    2 +-
+ fs/exec.c                               |    2 +-
+ include/linux/mm.h                      |    2 +-
+ kernel/events/uprobes.c                 |    4 ++--
+ mm/gup.c                                |   12 ++++++++----
+ mm/memory.c                             |    2 +-
+ security/tomoyo/domain.c                |    2 +-
+ 8 files changed, 16 insertions(+), 12 deletions(-)
 
 --- a/drivers/gpu/drm/i915/i915_gem_userptr.c
 +++ b/drivers/gpu/drm/i915/i915_gem_userptr.c
-@@ -592,7 +592,7 @@ __i915_gem_userptr_get_pages_worker(stru
+@@ -595,7 +595,7 @@ __i915_gem_userptr_get_pages_worker(stru
  					 obj->userptr.ptr + pinned * PAGE_SIZE,
  					 npages - pinned,
  					 flags,
@@ -99,7 +97,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
 --- a/include/linux/mm.h
 +++ b/include/linux/mm.h
-@@ -1214,7 +1214,7 @@ extern int access_remote_vm(struct mm_st
+@@ -1255,7 +1255,7 @@ extern int access_remote_vm(struct mm_st
  long get_user_pages_remote(struct task_struct *tsk, struct mm_struct *mm,
  			    unsigned long start, unsigned long nr_pages,
  			    unsigned int gup_flags, struct page **pages,
@@ -130,7 +128,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
 --- a/mm/gup.c
 +++ b/mm/gup.c
-@@ -838,6 +838,9 @@ EXPORT_SYMBOL(get_user_pages_unlocked);
+@@ -859,6 +859,9 @@ EXPORT_SYMBOL(get_user_pages_unlocked);
   *		only intends to ensure the pages are faulted in.
   * @vmas:	array of pointers to vmas corresponding to each page.
   *		Or NULL if the caller does not require them.
@@ -140,20 +138,20 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
   *
   * Returns number of pages pinned. This may be fewer than the number
   * requested. If nr_pages is 0 or negative, returns 0. If no pages
-@@ -881,10 +884,10 @@ EXPORT_SYMBOL(get_user_pages_unlocked);
+@@ -902,10 +905,10 @@ EXPORT_SYMBOL(get_user_pages_unlocked);
  long get_user_pages_remote(struct task_struct *tsk, struct mm_struct *mm,
  		unsigned long start, unsigned long nr_pages,
  		unsigned int gup_flags, struct page **pages,
 -		struct vm_area_struct **vmas)
 +		struct vm_area_struct **vmas, int *locked)
  {
- 	return __get_user_pages_locked(tsk, mm, start, nr_pages, pages, vmas,
--				       NULL, false,
-+				       locked, true,
+ 	return __get_user_pages_locked(tsk, mm, start, nr_pages,
+-				       pages, vmas, NULL, false,
++				       pages, vmas, locked, true,
  				       gup_flags | FOLL_TOUCH | FOLL_REMOTE);
  }
  EXPORT_SYMBOL(get_user_pages_remote);
-@@ -892,8 +895,9 @@ EXPORT_SYMBOL(get_user_pages_remote);
+@@ -913,8 +916,9 @@ EXPORT_SYMBOL(get_user_pages_remote);
  /*
   * This is the same as get_user_pages_remote(), just with a
   * less-flexible calling convention where we assume that the task
@@ -167,12 +165,12 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		unsigned int gup_flags, struct page **pages,
 --- a/mm/memory.c
 +++ b/mm/memory.c
-@@ -3722,7 +3722,7 @@ static int __access_remote_vm(struct tas
+@@ -3718,7 +3718,7 @@ static int __access_remote_vm(struct tas
  		struct page *page = NULL;
  
  		ret = get_user_pages_remote(tsk, mm, addr, 1,
--				flags, &page, &vma);
-+				flags, &page, &vma, NULL);
+-				gup_flags, &page, &vma);
++				gup_flags, &page, &vma, NULL);
  		if (ret <= 0) {
  #ifndef CONFIG_HAVE_IOREMAP_PROT
  			break;
