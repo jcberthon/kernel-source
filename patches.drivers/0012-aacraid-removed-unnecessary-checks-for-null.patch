@@ -2,7 +2,7 @@ From: Raghava Aditya Renukunta <RaghavaAditya.Renukunta@microsemi.com>
 Date: Mon, 25 Apr 2016 23:30:55 -0700
 Subject: aacraid: Removed unnecessary checks for NULL
 Git-commit: da31df8c7285910ee8c8629d901b34a480ab0005
-Patch-mainline: v4.7 or v4.6-rc7 (next release)
+Patch-mainline: v4.7-rc1
 References: bsc#966342, FATE#320140
 
 Current driver checks for NULL return from aac_fib_alloc_tag, but it not

@@ -1,7 +1,7 @@
 From: Ivan Vecera <cera@cera.cz>
 Date: Fri, 19 Jan 2018 20:23:50 +0100
 Subject: be2net: restore properly promisc mode after queues reconfiguration
-Patch-mainline: v4.15 or v4.15-rc10 (next release)
+Patch-mainline: v4.15
 Git-commit: 52acf06451930eb4cefabd5ecea56e2d46c32f76
 References: bsc#963844 FATE#320192
 

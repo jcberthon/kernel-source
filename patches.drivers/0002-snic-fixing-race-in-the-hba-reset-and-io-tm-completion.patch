@@ -2,7 +2,7 @@ From: Narsimhulu Musini <nmusini@cisco.com>
 Date: Thu, 17 Mar 2016 00:51:15 -0700
 Subject: snic: Fixing race in the hba reset and IO/TM completion
 Git-commit: 0da8519b2b1f08113cda65af88a4c9e35157dd53
-Patch-mainline: v4.7 or v4.6-rc5 (next release)
+Patch-mainline: v4.7-rc1
 References: FATE#319760, bsc#964943
 
 While HBA reset is in progress, if IO/TM completion is received for the

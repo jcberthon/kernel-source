@@ -2,7 +2,7 @@ From: Narsimhulu Musini <nmusini@cisco.com>
 Date: Thu, 17 Mar 2016 00:51:16 -0700
 Subject: snic: add scsi host after determining max IOs.
 Git-commit: be2a266d2a163a332666f396ea128a6bcc6882f7
-Patch-mainline: v4.7 or v4.6-rc5 (next release)
+Patch-mainline: v4.7-rc1
 References: FATE#319760, bsc#964943
 
 scsi host is added after negotiating the max number of IOs with

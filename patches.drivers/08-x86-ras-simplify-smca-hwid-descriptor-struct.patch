@@ -2,7 +2,7 @@ From: Borislav Petkov <bp@suse.de>
 Date: Wed, 2 Nov 2016 12:48:01 +0100
 Subject: x86/RAS: Simplify SMCA HWID descriptor struct
 Git-commit: 1ce9cd7f9f0b71af7c496b816734bc2dc699363a
-Patch-mainline: v4.10 or v4.9-rc7 (next release)
+Patch-mainline: v4.10-rc1
 References: fate#322164
 
 Call it simply smca_hwid and call local variables "hwid". More readable.

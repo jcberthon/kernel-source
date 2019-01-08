@@ -2,7 +2,7 @@ From: Borislav Petkov <bp@suse.de>
 Date: Wed, 2 Nov 2016 13:24:47 +0100
 Subject: x86/RAS: Rename smca_bank_names to smca_names
 Git-commit: a9a1c0ee04aa771e5523ae33e458c702261ab547
-Patch-mainline: v4.10 or v4.9-rc7 (next release)
+Patch-mainline: v4.10-rc1
 References: fate#322164
 
 Make it differ more from struct smca_bank_name for better readability.

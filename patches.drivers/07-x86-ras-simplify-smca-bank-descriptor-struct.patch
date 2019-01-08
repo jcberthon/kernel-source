@@ -2,7 +2,7 @@ From: Borislav Petkov <bp@suse.de>
 Date: Tue, 1 Nov 2016 17:33:00 +0100
 Subject: x86/RAS: Simplify SMCA bank descriptor struct
 Git-commit: 79349f529ab1a629b9e43e81b4a5b2c22d1e9a65
-Patch-mainline: v4.10 or v4.9-rc7 (next release)
+Patch-mainline: v4.10-rc1
 References: fate#322164
 
 Call the struct simply smca_bank, it's instance ID can be simply ->id.

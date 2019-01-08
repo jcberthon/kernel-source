@@ -2,7 +2,7 @@ From: Jiri Kosina <jkosina@suse.cz>
 Date: Tue, 25 Sep 2018 14:38:55 +0200
 Subject: x86/speculation: Enable cross-hyperthread spectre v2 STIBP mitigation
 Git-commit: 53c613fe6349994f023245519265999eed75957f
-Patch-mainline: v4.20 or v4.19-rc8 (next release)
+Patch-mainline: v4.20-rc1
 References: bsc#1106913
 
 STIBP is a feature provided by certain Intel ucodes / CPUs. This feature

@@ -2,7 +2,7 @@ From: Joseph T Handzik <joseph.t.handzik@hpe.com>
 Date: Wed, 27 Apr 2016 17:13:33 -0500
 Subject: hpsa: add sas_address to sysfs device attibute
 Git-commit: ded1be4ae6b8e279ab43a5fe2069dd60bb836d30
-Patch-mainline: v4.7 or v4.6-rc7 (next release)
+Patch-mainline: v4.7-rc1
 References: bsc#964462, FATE#319992
 
 There have been companies requesting a sysfs entry

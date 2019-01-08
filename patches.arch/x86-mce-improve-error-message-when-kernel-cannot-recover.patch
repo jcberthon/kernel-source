@@ -2,7 +2,7 @@ From: Tony Luck <tony.luck@intel.com>
 Date: Fri, 25 May 2018 14:41:39 -0700
 Subject: x86/mce: Improve error message when kernel cannot recover
 Git-commit: c7d606f560e4c698884697fef503e4abacdd8c25
-Patch-mainline: v4.18 or v4.18-rc2 (next release)
+Patch-mainline: v4.18-rc2
 References: git-fixes b2f9d678e28c
 
 Since we added support to add recovery from some errors inside the kernel in:

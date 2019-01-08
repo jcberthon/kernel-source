@@ -3,7 +3,7 @@ Date: Thu, 29 Sep 2016 13:43:21 -0700
 Subject: EDAC, {sb,skx}_edac: Use Intel model macros instead of open-coding
  them
 Git-commit: 20f4d69243785167449e6e765ce9f2a7b097ac45
-Patch-mainline: v4.10 or v4.9-rc7 (next release)
+Patch-mainline: v4.10-rc1
 References: fate#321933
 
 We now have symbolic names for a bunch of Intel CPU models via
