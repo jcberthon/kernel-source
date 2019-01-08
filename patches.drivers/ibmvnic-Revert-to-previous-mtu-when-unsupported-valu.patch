@@ -5,7 +5,7 @@ Subject: [PATCH] ibmvnic: Revert to previous mtu when unsupported value
  requested
 
 References: bsc#1076872
-Patch-mainline: v4.15 or v4.15-rc10 (next release)
+Patch-mainline: v4.15
 Git-commit: e791380340685698dbdd38c7e3f3fcbf70a3c832
 
 Using newer backing devices can cause the required padding at the end of

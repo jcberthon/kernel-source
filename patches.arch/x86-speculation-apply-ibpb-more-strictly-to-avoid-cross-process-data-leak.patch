@@ -3,7 +3,7 @@ Date: Tue, 25 Sep 2018 14:38:18 +0200
 Subject: x86/speculation: Apply IBPB more strictly to avoid cross-process data
  leak
 Git-commit: dbfe2953f63c640463c630746cd5d9de8b2f63ae
-Patch-mainline: v4.20 or v4.19-rc7 (next release)
+Patch-mainline: v4.20-rc1
 References: bsc#1106913
 
 Currently, IBPB is only issued in cases when switching into a non-dumpable

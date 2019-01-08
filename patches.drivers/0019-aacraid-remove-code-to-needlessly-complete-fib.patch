@@ -2,7 +2,7 @@ From: Raghava Aditya Renukunta <RaghavaAditya.Renukunta@microsemi.com>
 Date: Mon, 25 Apr 2016 23:32:26 -0700
 Subject: aacraid: Remove code to needlessly complete fib
 Git-commit: eef76f16295d34d7fab6994b82dda60ce002f91d
-Patch-mainline: v4.7 or v4.6-rc7 (next release)
+Patch-mainline: v4.7-rc1
 References: bsc#966342, FATE#320140
 
 Currently driver completes double completed or spurious interrupted fibs.

@@ -4,7 +4,7 @@ Date: Mon, 22 Jan 2018 15:43:31 +0100
 Subject: [PATCH] ibmvnic: Allocate and request vpd in init_resources
 
 References: bsc#1076872
-Patch-mainline: v4.15 or v4.15-rc10 (next release)
+Patch-mainline: v4.15
 Git-commit: 69d08dcbbe34347cbc044629cf6f25d062593dfe
 
 If we request an unsupported mtu value, the vnic server will suggest a

@@ -2,7 +2,7 @@ From: Raghava Aditya Renukunta <RaghavaAditya.Renukunta@microsemi.com>
 Date: Mon, 25 Apr 2016 23:32:09 -0700
 Subject: aacraid: Log firmware AIF messages
 Git-commit: 9cb62fa24e0d22dbe991c315d6c454a341ea3f76
-Patch-mainline: v4.7 or v4.6-rc7 (next release)
+Patch-mainline: v4.7-rc1
 References: bsc#966342, FATE#320140
 
 Firmware AIF messages about cache loss and data recovery are being missed

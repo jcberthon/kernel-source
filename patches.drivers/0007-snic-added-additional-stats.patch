@@ -2,7 +2,7 @@ From: Narsimhulu Musini <nmusini@cisco.com>
 Date: Thu, 17 Mar 2016 00:51:10 -0700
 Subject: snic: Added additional stats
 Git-commit: 3f5c11a463fd87b912f16976ff0ee3d6bbd1825e
-Patch-mainline: v4.7 or v4.6-rc5 (next release)
+Patch-mainline: v4.7-rc1
 References: FATE#319760, bsc#964943
 
 Adding additional stats, and fixed logging messages.

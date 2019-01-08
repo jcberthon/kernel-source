@@ -1,7 +1,7 @@
 From: Michal Kubecek <mkubecek@suse.cz>
 Date: Wed, 28 Nov 2018 14:34:38 +0100
 Subject: net: ipv4: do not handle duplicate fragments as overlapping
-Patch-mainline: v4.20 or v4.20-rc8 (next release)
+Patch-mainline: v4.20
 Git-commit: ade446403bfb79d3528d56071a84b15351a139ad
 References: bsc#1116345
 

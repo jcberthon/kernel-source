@@ -2,7 +2,7 @@ From: Wei Yongjun <weiyongjun1@huawei.com>
 Date: Sat, 22 Oct 2016 14:38:18 +0000
 Subject: EDAC, skx_edac: Fix non static symbol warnings
 Git-commit: 240ea9214a6042f3807fd09f149d74ae5700e117
-Patch-mainline: v4.10 or v4.9-rc6 (next release)
+Patch-mainline: v4.10-rc1
 References: fate#319704
 
 Fix the following sparse warnings:

@@ -2,7 +2,7 @@ From: Narsimhulu Musini <nmusini@cisco.com>
 Date: Thu, 17 Mar 2016 00:51:12 -0700
 Subject: snic: Handling control path queue issues
 Git-commit: 6e0ae74b5ca2826fa6c86a157ed5227c766156b9
-Patch-mainline: v4.7 or v4.6-rc5 (next release)
+Patch-mainline: v4.7-rc1
 References: FATE#319760, bsc#964943
 
 Fix handles control path queue issues such as queue full and sudden

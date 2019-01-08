@@ -2,7 +2,7 @@ From: Piotr Luc <piotr.luc@intel.com>
 Date: Thu, 13 Oct 2016 17:30:59 +0200
 Subject: EDAC, sb_edac: Add Knights Mill support
 Git-commit: 9a9260ca926c6e7b6bcfd3c93a1820d86565ff4f
-Patch-mainline: v4.10 or v4.9-rc7 (next release)
+Patch-mainline: v4.10-rc1
 References: fate#321933
 
 Add Knights Mill (KNM) to the list of CPU models supported by sb_edac.

@@ -2,7 +2,7 @@ From: Don Brace <don.brace@microsemi.com>
 Date: Tue, 28 Mar 2017 16:40:20 -0500
 Subject: scsi: hpsa: change driver version
 Git-commit: 5765d180fd23dc7d76109a0cbb082df6e5cfa67a
-Patch-mainline: v4.12 or v4.11-rc6 (next release)
+Patch-mainline: v4.12-rc1
 References: bsc#1022600 bsc#1028971 fate#321928
 
 Reviewed-by: Gerry Morong <gerry.morong@microsemi.com>

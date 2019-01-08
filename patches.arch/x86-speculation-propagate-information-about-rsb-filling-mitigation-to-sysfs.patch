@@ -3,7 +3,7 @@ Date: Tue, 25 Sep 2018 14:39:28 +0200
 Subject: x86/speculation: Propagate information about RSB filling mitigation
  to sysfs
 Git-commit: bb4b3b7762735cdaba5a40fd94c9303d9ffa147a
-Patch-mainline: v4.20 or v4.19-rc8 (next release)
+Patch-mainline: v4.20-rc1
 References: bsc#1106913
 
 If spectrev2 mitigation has been enabled, RSB is filled on context switch
