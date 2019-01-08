@@ -1,0 +1,46 @@
+From: Alan Stern <stern@rowland.harvard.edu>
+Date: Wed, 11 Jul 2012 11:21:17 -0400
+Subject: USB: EHCI: remove unneeded suspend/resume code
+Git-commit: 15be105b4a18c461b95fa683907f6da6deae1b75
+Patch-mainline: v3.6-rc1
+References: bsc#1117515
+
+This patch (as1566) removes the code in ehci-hcd's resume routines
+which tries to restart or cancel any transfers left active while the
+root hub or controller was asleep.  This code isn't necessary, because
+all URBs are terminated before the root hub is suspended.
+
+Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/usb/host/ehci-hub.c |   13 +------------
+ 1 file changed, 1 insertion(+), 12 deletions(-)
+
+--- a/drivers/usb/host/ehci-hub.c
++++ b/drivers/usb/host/ehci-hub.c
+@@ -436,23 +436,12 @@ static int ehci_bus_resume (struct usb_h
+ 			ehci_vdbg (ehci, "resumed port %d\n", i + 1);
+ 		}
+ 	}
+-	(void) ehci_readl(ehci, &ehci->regs->command);
+-
+-	/* maybe re-activate the schedule(s) */
+-	temp = 0;
+-	if (ehci->async->qh_next.qh)
+-		temp |= CMD_ASE;
+-	if (ehci->periodic_sched)
+-		temp |= CMD_PSE;
+-	if (temp) {
+-		ehci->command |= temp;
+-		ehci_writel(ehci, ehci->command, &ehci->regs->command);
+-	}
+ 
+ 	ehci->next_statechange = jiffies + msecs_to_jiffies(5);
+ 
+ 	/* Now we can safely re-enable irqs */
+ 	ehci_writel(ehci, INTR_MASK, &ehci->regs->intr_enable);
++	(void) ehci_readl(ehci, &ehci->regs->intr_enable);
+ 
+ 	spin_unlock_irq (&ehci->lock);
+ 	ehci_handover_companion_ports(ehci);
