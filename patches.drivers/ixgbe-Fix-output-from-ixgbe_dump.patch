@@ -1,0 +1,43 @@
+From: Alexander Duyck <alexander.h.duyck@intel.com>
+Date: Thu, 2 Mar 2017 15:01:36 -0800
+Subject: ixgbe: Fix output from ixgbe_dump
+Patch-mainline: v4.12-rc1
+Git-commit: 18a8cc9815746b8f0ae6f78733877d3846058d1c
+References: bsc#1100105
+
+I just found that when we had changed the Rx path to check for length
+instead of the DD bit we introduced an issue in ixgbe_dump since we were no
+longer clearing the status bits.
+
+To correct this I am updating ixgbe_dump to look for the length bits in the
+descriptor since that is what we are using in the Rx path.
+
+Fixes: c3630cc40b4f ("ixgbe: Use length to determine if descriptor is done")
+Signed-off-by: Alexander Duyck <alexander.h.duyck@intel.com>
+Tested-by: Andrew Bowers <andrewx.bowers@intel.com>
+Signed-off-by: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+Acked-by: Thomas Bogendoerfer <tbogendoerfer@suse.de>
+---
+ drivers/net/ethernet/intel/ixgbe/ixgbe_main.c |    4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+--- a/drivers/net/ethernet/intel/ixgbe/ixgbe_main.c
++++ b/drivers/net/ethernet/intel/ixgbe/ixgbe_main.c
+@@ -597,7 +597,6 @@ static void ixgbe_dump(struct ixgbe_adap
+ 	struct ixgbe_ring *rx_ring;
+ 	union ixgbe_adv_rx_desc *rx_desc;
+ 	struct ixgbe_rx_buffer *rx_buffer_info;
+-	u32 staterr;
+ 	int i = 0;
+ 
+ 	if (!netif_msg_hw(adapter))
+@@ -806,8 +805,7 @@ rx_ring_summary:
+ 			rx_buffer_info = &rx_ring->rx_buffer_info[i];
+ 			rx_desc = IXGBE_RX_DESC(rx_ring, i);
+ 			u0 = (struct my_u0 *)rx_desc;
+-			staterr = le32_to_cpu(rx_desc->wb.upper.status_error);
+-			if (staterr & IXGBE_RXD_STAT_DD) {
++			if (rx_desc->wb.upper.length) {
+ 				/* Descriptor Done */
+ 				pr_info("RWB[0x%03X]     %016llX "
+ 					"%016llX ---------------- %p", i,
