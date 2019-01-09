@@ -5,7 +5,7 @@ Subject: [PATCH 2/3] ocfs2: fix deadlock issue when taking inode lock at vfs
  entry points.
 
 Patch-mainline: v4.11-rc1
-Git-commit: 439a36b8ef38657f765b80b775e2885338d72451
+Git-commit: b891fa5024a95c77e0d6fd6655cb74af6fb77f46
 References: bsc#1086695
 
 The reason why taking cluster inode lock at vfs entry points opens up a
@@ -44,10 +44,10 @@ diff --git a/fs/ocfs2/acl.c b/fs/ocfs2/acl.c
 index 6ad887b380ed..57d9f9935920 100644
 --- a/fs/ocfs2/acl.c
 +++ b/fs/ocfs2/acl.c
-@@ -147,20 +147,18 @@ static struct posix_acl *ocfs2_get_acl(struct inode *inode, int type)
+@@ -147,20 +147,17 @@ static struct posix_acl *ocfs2_get_acl(struct inode *inode, int type)
  	struct buffer_head *di_bh = NULL;
  	struct posix_acl *acl;
- 	int ret;
+-	int ret;
 +	int had_lock;
 +	struct ocfs2_lock_holder oh;
  
@@ -79,7 +79,7 @@ index b2fe82e04a45..bda93bd2ca31 100644
  	handle_t *handle = NULL;
  	struct dquot *transfer_to[MAXQUOTAS] = { };
  	int qtype;
-+	int had_lock;
++	int had_lock = 0;
 +	struct ocfs2_lock_holder oh;
  
  	trace_ocfs2_setattr(inode, dentry,
