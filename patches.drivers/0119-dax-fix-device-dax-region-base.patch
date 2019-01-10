@@ -49,8 +49,8 @@ index 82e6743..5c77a97 100644
 --- a/drivers/dax/pmem.c
 +++ b/drivers/dax/pmem.c
 @@ -121,6 +121,9 @@ static int dax_pmem_probe(struct device *dev)
- 	/* adjust the dax_region resource to the start of data */
- 	res.start += le64_to_cpu(pfn_sb->dataoff);
+ 		return rc;
+ 	}
  
 +	/* adjust the dax_region resource to the start of data */
 +	res.start += le64_to_cpu(pfn_sb->dataoff);
