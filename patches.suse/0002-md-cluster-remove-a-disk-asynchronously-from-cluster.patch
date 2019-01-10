@@ -71,13 +71,13 @@ index 8f3dd3a..792854e 100644
 --- a/drivers/md/md.h
 +++ b/drivers/md/md.h
 @@ -180,6 +180,7 @@ enum flag_bits {
- 				 * so it is save to remove without
- 				 * another call.
+ 				 * Usually, this device should be faster
+ 				 * than other devices in the array
  				 */
 +	ClusterRemove,
- };
- 
- static inline int is_badblock(struct md_rdev *rdev, sector_t s, int sectors,
+ 	RemoveSynchronised,	/* synchronize_rcu was called after
+ 				 * This device was known to be faulty,
+ 				 * so it is save to remove without
 -- 
 2.6.2
 
