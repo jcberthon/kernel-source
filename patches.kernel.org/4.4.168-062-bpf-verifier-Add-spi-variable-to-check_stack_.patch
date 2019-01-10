@@ -1,0 +1,53 @@
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Date: Wed, 5 Dec 2018 22:45:15 +0000
+Subject: [PATCH] bpf/verifier: Add spi variable to check_stack_write()
+References: bnc#1012382
+Patch-mainline: 4.4.168
+Git-commit: 168cb9b7b2839e861278f9fde03820aba32c4ee0
+
+Extracted from commit dc503a8ad984 "bpf/verifier: track liveness for
+pruning".
+
+Cc: Daniel Borkmann <daniel@iogearbox.net>
+Cc: Alexei Starovoitov <ast@kernel.org>
+Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ kernel/bpf/verifier.c | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c
+index a937611c2570..4756b88c828e 100644
+--- a/kernel/bpf/verifier.c
++++ b/kernel/bpf/verifier.c
+@@ -572,7 +572,7 @@ static bool is_spillable_regtype(enum bpf_reg_type type)
+ static int check_stack_write(struct verifier_state *state, int off, int size,
+ 			     int value_regno)
+ {
+-	int i;
++	int i, spi = (MAX_BPF_STACK + off) / BPF_REG_SIZE;
+ 	/* caller checked that off % size == 0 and -MAX_BPF_STACK <= off < 0,
+ 	 * so it's aligned access and [off, off + size) are within stack limits
+ 	 */
+@@ -587,15 +587,13 @@ static int check_stack_write(struct verifier_state *state, int off, int size,
+ 		}
+ 
+ 		/* save register state */
+-		state->spilled_regs[(MAX_BPF_STACK + off) / BPF_REG_SIZE] =
+-			state->regs[value_regno];
++		state->spilled_regs[spi] = state->regs[value_regno];
+ 
+ 		for (i = 0; i < BPF_REG_SIZE; i++)
+ 			state->stack_slot_type[MAX_BPF_STACK + off + i] = STACK_SPILL;
+ 	} else {
+ 		/* regular write of data into stack */
+-		state->spilled_regs[(MAX_BPF_STACK + off) / BPF_REG_SIZE] =
+-			(struct reg_state) {};
++		state->spilled_regs[spi] = (struct reg_state) {};
+ 
+ 		for (i = 0; i < size; i++)
+ 			state->stack_slot_type[MAX_BPF_STACK + off + i] = STACK_MISC;
+-- 
+2.20.1
+

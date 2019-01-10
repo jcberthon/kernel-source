@@ -89,7 +89,7 @@ Acked-by: David Chang <dchang@suse.com>
  static void qlcnic_82xx_cancel_idc_work(struct qlcnic_adapter *adapter)
 --- a/drivers/net/vxlan.c
 +++ b/drivers/net/vxlan.c
-@@ -909,20 +909,20 @@ out:
+@@ -911,20 +911,20 @@ out:
  /* Dump forwarding table */
  static int vxlan_fdb_dump(struct sk_buff *skb, struct netlink_callback *cb,
  			  struct net_device *dev,
@@ -113,7 +113,7 @@ Acked-by: David Chang <dchang@suse.com>
  					goto skip;
  
  				err = vxlan_fdb_info(skb, vxlan, f,
-@@ -930,17 +930,15 @@ static int vxlan_fdb_dump(struct sk_buff
+@@ -932,17 +932,15 @@ static int vxlan_fdb_dump(struct sk_buff
  						     cb->nlh->nlmsg_seq,
  						     RTM_NEWNEIGH,
  						     NLM_F_MULTI, rd);
@@ -176,7 +176,7 @@ Acked-by: David Chang <dchang@suse.com>
  void switchdev_port_fwd_mark_set(struct net_device *dev,
  				 struct net_device *group_dev,
  				 bool joining);
-@@ -321,7 +321,7 @@ static inline int switchdev_port_fdb_dum
+@@ -323,7 +323,7 @@ static inline int switchdev_port_fdb_dum
  					  struct netlink_callback *cb,
  					  struct net_device *dev,
  					  struct net_device *filter_dev,
@@ -255,7 +255,7 @@ Acked-by: David Chang <dchang@suse.com>
  int br_fdb_external_learn_add(struct net_bridge *br, struct net_bridge_port *p,
 --- a/net/core/rtnetlink.c
 +++ b/net/core/rtnetlink.c
-@@ -2911,7 +2911,7 @@ static int nlmsg_populate_fdb(struct sk_
+@@ -2936,7 +2936,7 @@ static int nlmsg_populate_fdb(struct sk_
  	seq = cb->nlh->nlmsg_seq;
  
  	list_for_each_entry(ha, &list->list, list) {
@@ -264,7 +264,7 @@ Acked-by: David Chang <dchang@suse.com>
  			goto skip;
  
  		err = nlmsg_populate_fdb_fill(skb, dev, ha->addr, 0,
-@@ -2938,19 +2938,18 @@ int ndo_dflt_fdb_dump(struct sk_buff *sk
+@@ -2963,7 +2963,7 @@ int ndo_dflt_fdb_dump(struct sk_buff *sk
  		      struct netlink_callback *cb,
  		      struct net_device *dev,
  		      struct net_device *filter_dev,
@@ -272,6 +272,9 @@ Acked-by: David Chang <dchang@suse.com>
 +		      int *idx)
  {
  	int err;
+ 
+@@ -2971,14 +2971,13 @@ int ndo_dflt_fdb_dump(struct sk_buff *sk
+ 		return -EINVAL;
  
  	netif_addr_lock_bh(dev);
 -	err = nlmsg_populate_fdb(skb, cb, dev, &idx, &dev->uc);
@@ -288,7 +291,7 @@ Acked-by: David Chang <dchang@suse.com>
  }
  EXPORT_SYMBOL(ndo_dflt_fdb_dump);
  
-@@ -2963,9 +2962,13 @@ static int rtnl_fdb_dump(struct sk_buff
+@@ -2991,9 +2990,13 @@ static int rtnl_fdb_dump(struct sk_buff
  	const struct net_device_ops *cops = NULL;
  	struct ifinfomsg *ifm = nlmsg_data(cb->nlh);
  	struct net *net = sock_net(skb->sk);
@@ -303,7 +306,7 @@ Acked-by: David Chang <dchang@suse.com>
  
  	if (nlmsg_parse(cb->nlh, sizeof(struct ifinfomsg), tb, IFLA_MAX,
  			ifla_policy) == 0) {
-@@ -2983,49 +2986,71 @@ static int rtnl_fdb_dump(struct sk_buff
+@@ -3011,49 +3014,71 @@ static int rtnl_fdb_dump(struct sk_buff
  		ops = br_dev->netdev_ops;
  	}
  

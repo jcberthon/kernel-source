@@ -31,7 +31,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
 
 --- a/arch/x86/kvm/vmx.c
 +++ b/arch/x86/kvm/vmx.c
-@@ -178,7 +178,8 @@ extern const ulong vmx_return;
+@@ -186,7 +186,8 @@ extern const ulong vmx_return;
  
  static DEFINE_STATIC_KEY_FALSE(vmx_l1d_should_flush);
  
@@ -41,7 +41,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  
  static const struct {
  	const char *option;
-@@ -190,33 +191,85 @@ static const struct {
+@@ -198,33 +199,85 @@ static const struct {
  	{"always",	VMENTER_L1D_FLUSH_ALWAYS},
  };
  
@@ -137,8 +137,8 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
 +module_param_cb(vmentry_l1d_flush, &vmentry_l1d_flush_ops, NULL, S_IRUGO);
  
  #define NR_AUTOLOAD_MSRS 8
- #define VMCS02_POOL_SIZE 1
-@@ -8305,7 +8358,7 @@ static void vmx_l1d_flush(struct kvm_vcp
+ 
+@@ -8321,7 +8374,7 @@ static void vmx_l1d_flush(struct kvm_vcp
  	 * it. The flush bit gets set again either from vcpu_run() or from
  	 * one of the unsafe VMEXIT handlers.
  	 */
@@ -147,7 +147,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  	vcpu->arch.l1tf_flush_l1d = always;
  
  	vcpu->stat.l1d_flush++;
-@@ -11177,34 +11230,6 @@ static struct kvm_x86_ops vmx_x86_ops =
+@@ -11270,34 +11323,6 @@ static struct kvm_x86_ops vmx_x86_ops =
  	.setup_mce = vmx_setup_mce,
  };
  
@@ -182,7 +182,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  static void vmx_cleanup_l1d_flush(void)
  {
  	if (vmx_l1d_flush_pages) {
-@@ -11239,12 +11264,18 @@ static int __init vmx_init(void)
+@@ -11332,12 +11357,18 @@ static int __init vmx_init(void)
  		return r;
  
  	/*

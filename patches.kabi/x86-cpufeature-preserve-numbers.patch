@@ -20,7 +20,8 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  arch/x86/include/asm/required-features.h |    3 -
  arch/x86/kernel/cpu/common.c             |    1 
  arch/x86/kernel/cpu/scattered.c          |    5 +++
- 6 files changed, 36 insertions(+), 32 deletions(-)
+ arch/x86/kvm/cpuid.c                     |   10 +++++-
+ 7 files changed, 44 insertions(+), 34 deletions(-)
 
 --- a/arch/x86/include/asm/cpufeature.h
 +++ b/arch/x86/include/asm/cpufeature.h
@@ -84,7 +85,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  /* Other features, Linux-defined mapping, word 3 */
  /* This range is used for feature bits which conflict or are synthesized */
  #define X86_FEATURE_CXMMX	( 3*32+ 0) /* Cyrix MMX extensions */
-@@ -199,26 +211,29 @@
+@@ -198,26 +210,29 @@
  #define X86_FEATURE_HWP_EPP	( 7*32+13) /* Intel HWP_EPP */
  #define X86_FEATURE_HWP_PKG_REQ ( 7*32+14) /* Intel HWP_PKG_REQ */
  #define X86_FEATURE_INTEL_PT	( 7*32+15) /* Intel Processor Trace */
@@ -125,7 +126,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  #define X86_FEATURE_L1TF_PTEINV	( 7*32+29) /* "" L1TF workaround PTE inversion */
  
  /* Virtualization flags: Linux defined, word 8 */
-@@ -294,16 +309,6 @@
+@@ -293,16 +308,6 @@
  #define X86_FEATURE_SUCCOR	(17*32+1) /* Uncorrectable error containment and recovery */
  #define X86_FEATURE_SMCA	(17*32+3) /* Scalable MCA */
  
@@ -166,7 +167,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  #endif /* _ASM_X86_REQUIRED_FEATURES_H */
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -733,7 +733,6 @@ void get_cpu_cap(struct cpuinfo_x86 *c)
+@@ -730,7 +730,6 @@ void get_cpu_cap(struct cpuinfo_x86 *c)
  		c->x86_capability[CPUID_7_0_EBX] = ebx;
  
  		c->x86_capability[CPUID_7_ECX] = ecx;
@@ -188,3 +189,36 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  		{ X86_FEATURE_HW_PSTATE,	CR_EDX, 7, 0x80000007, 0 },
  		{ X86_FEATURE_CPB,		CR_EDX, 9, 0x80000007, 0 },
  		{ X86_FEATURE_PROC_FEEDBACK,	CR_EDX,11, 0x80000007, 0 },
+--- a/arch/x86/kvm/cpuid.c
++++ b/arch/x86/kvm/cpuid.c
+@@ -64,6 +64,12 @@ u64 kvm_supported_xcr0(void)
+ 
+ #define F(x) bit(X86_FEATURE_##x)
+ 
++/* These are scattered features in cpufeatures.h. */
++#define KVM_CPUID_BIT_SPEC_CTRL		26
++#define KVM_CPUID_BIT_ARCH_CAPABILITIES	29
++#define KVM_CPUID_BIT_SPEC_CTRL_SSBD	31
++#define KF(x) bit(KVM_CPUID_BIT_##x)
++
+ int kvm_update_cpuid(struct kvm_vcpu *vcpu)
+ {
+ 	struct kvm_cpuid_entry2 *best;
+@@ -364,7 +370,7 @@ static inline int __do_cpuid_ent(struct
+ 
+ 	/* cpuid 7.0.edx*/
+ 	const u32 kvm_cpuid_7_0_edx_x86_features =
+-		F(SPEC_CTRL) | F(SPEC_CTRL_SSBD) | F(ARCH_CAPABILITIES);
++		KF(SPEC_CTRL) | KF(SPEC_CTRL_SSBD) | KF(ARCH_CAPABILITIES);
+ 
+ 	/* all calls to cpuid_count() should be made on the same cpu */
+ 	get_cpu();
+@@ -444,7 +450,7 @@ static inline int __do_cpuid_ent(struct
+ 			// TSC_ADJUST is emulated
+ 			entry->ebx |= F(TSC_ADJUST);
+ 			entry->edx &= kvm_cpuid_7_0_edx_x86_features;
+-			cpuid_mask(&entry->edx, CPUID_7_EDX);
++			entry->edx &= get_scattered_cpuid_leaf(7, 0, CPUID_EDX);
+ 		} else {
+ 			entry->ebx = 0;
+ 			entry->edx = 0;
