@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Mon, 18 Jul 2016 11:13:13 +0200
 Subject: [PATCH 02/22] libfc: additional debugging messages
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Git-commit: 57d3ec7e468bb6659d9a461294d8747906fb7231
+Patch-mainline: v4.10-rc1
 
 Signed-off-by: Hannes Reinecke <hare@suse.com>
 Acked-by: Hannes Reinecke <hare@suse.de>

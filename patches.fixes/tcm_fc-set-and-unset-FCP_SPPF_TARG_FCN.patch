@@ -1,8 +1,9 @@
 From: Hannes Reinecke <hare@suse.de>
 Date: Wed, 29 Jun 2016 13:32:28 +0200
 Subject: tcm_fc: set and unset FCP_SPPF_TARG_FCN
-Patch-Mainline: submitted linux-scsi 2016/07/15
+Patch-mainline: v4.8-rc1
 References: bsc#989133
+Git-commit: 107818e2dad943ec357f6fdfa70377317a142d9d
 
 When registering and unregistering as an target port we should
 be setting the FC-4 service params correctly.

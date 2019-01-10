@@ -1,9 +1,12 @@
 From: Gao Feng <fgao@ikuai8.com>
 Date: Sat, 25 Mar 2017 18:24:36 +0800
-Subject: netfilter: nf_nat_snmp: Fix panic when snmp_trap_helper fails to register
-Patch-mainline: v4.11-rc6
+Subject: [PATCH] netfilter: nf_nat_snmp: Fix panic when snmp_trap_helper fails
+ to register
+Patch-mainline: 4.4.108
+References: bnc#1012382 bsc#1042286
 Git-commit: 75c689dca98851d65ef5a27e5ce26b625b68751c
-References: bsc#1042286
+
+[ Upstream commit 75c689dca98851d65ef5a27e5ce26b625b68751c ]
 
 In the commit 93557f53e1fb ("netfilter: nf_conntrack: nf_conntrack snmp
 helper"), the snmp_helper is replaced by nf_nat_snmp_hook. So the
@@ -16,14 +19,15 @@ error handler.
 Fixes: 93557f53e1fb ("netfilter: nf_conntrack: nf_conntrack snmp helper")
 Signed-off-by: Gao Feng <fgao@ikuai8.com>
 Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
-Acked-by: Michal Kubecek <mkubecek@suse.cz>
-
+Signed-off-by: Sasha Levin <alexander.levin@verizon.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  net/ipv4/netfilter/nf_nat_snmp_basic.c | 19 +------------------
  1 file changed, 1 insertion(+), 18 deletions(-)
 
 diff --git a/net/ipv4/netfilter/nf_nat_snmp_basic.c b/net/ipv4/netfilter/nf_nat_snmp_basic.c
-index ddb894ac1458..50d185fa369e 100644
+index 2689c9c4f1a0..182eb878633d 100644
 --- a/net/ipv4/netfilter/nf_nat_snmp_basic.c
 +++ b/net/ipv4/netfilter/nf_nat_snmp_basic.c
 @@ -1260,16 +1260,6 @@ static const struct nf_conntrack_expect_policy snmp_exp_policy = {
@@ -63,5 +67,5 @@ index ddb894ac1458..50d185fa369e 100644
  
  static void __exit nf_nat_snmp_basic_fini(void)
 -- 
-2.13.0
+2.15.1
 

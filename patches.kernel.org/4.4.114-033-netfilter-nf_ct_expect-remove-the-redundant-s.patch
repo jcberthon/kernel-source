@@ -1,9 +1,12 @@
 From: Liping Zhang <liping.zhang@spreadtrum.com>
 Date: Mon, 8 Aug 2016 21:57:58 +0800
-Subject: netfilter: nf_ct_expect: remove the redundant slash when policy name is empty
-Patch-mainline: v4.8-rc3
+Subject: [PATCH] netfilter: nf_ct_expect: remove the redundant slash when
+ policy name is empty
+Patch-mainline: 4.4.114
+References: bnc#1012382 bsc#1042286
 Git-commit: b173a28f62cf929324a8a6adcc45adadce311d16
-References: bsc#1042286
+
+commit b173a28f62cf929324a8a6adcc45adadce311d16 upstream.
 
 The 'name' filed in struct nf_conntrack_expect_policy{} is not a
 pointer, so check it is NULL or not will always return true. Even if the
@@ -16,13 +19,14 @@ Fixes: 3a8fc53a45c4 ("netfilter: nf_ct_helper: allocate 16 bytes for the helper 
 Signed-off-by: Liping Zhang <liping.zhang@spreadtrum.com>
 Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
 Acked-by: Michal Kubecek <mkubecek@suse.cz>
-
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  net/netfilter/nf_conntrack_expect.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/net/netfilter/nf_conntrack_expect.c b/net/netfilter/nf_conntrack_expect.c
-index acf5c7b3f378..fbbb16b58696 100644
+index 7f16d19d6198..a91f8bd51d05 100644
 --- a/net/netfilter/nf_conntrack_expect.c
 +++ b/net/netfilter/nf_conntrack_expect.c
 @@ -560,7 +560,7 @@ static int exp_seq_show(struct seq_file *s, void *v)
@@ -35,5 +39,5 @@ index acf5c7b3f378..fbbb16b58696 100644
  				   helper->expect_policy[expect->class].name);
  	}
 -- 
-2.13.0
+2.16.1
 

@@ -1,22 +1,7 @@
-Content-Type: text/plain; charset="utf-8"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Subject: [v7,
-	2/3] Documentation: gpio: Update description for X-Gene standby GPIO
-	controller DTS binding
+Subject: gpio: X-Gene standby GPIO controller DTS binding
 From: Quan Nguyen <qnguyen@apm.com>
-X-Patchwork-Id: 8338581
-Message-Id: <1455714909-3027-3-git-send-email-qnguyen@apm.com>
-To: linus.walleij@linaro.org, linux-gpio@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	Thomas Gleixner <tglx@linutronix.de>,
-	Jason Cooper <jason@lakedaemon.net>, Marc Zyngier <marc.zyngier@arm.com>
-Cc: Feng Kan <fkan@apm.com>, Quan Nguyen <qnguyen@apm.com>,
-	Phong Vo <pvo@apm.com>, Duc Dang <dhdang@apm.com>, patches@apm.com,
-	Loc Ho <lho@apm.com>, Iyappan Subramanian <isubramanian@apm.com>,
-	Y Vo <yvo@apm.com>
-Date: Wed, 17 Feb 2016 20:15:08 +0700
-Patch-mainline: Submitted, https://patchwork.kernel.org/patch/8338581/
+Git-commit: 8cae5f9740676a46c0b5eb35e60cd13c46b99bd0
+Patch-mainline: v4.6-rc1
 
 Update description for X-Gene standby GPIO controller DTS binding to
 support GPIO line configuration as input, output or external IRQ pin.

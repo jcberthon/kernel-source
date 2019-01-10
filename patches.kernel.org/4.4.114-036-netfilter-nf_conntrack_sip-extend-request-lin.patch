@@ -1,9 +1,11 @@
 From: Ulrich Weber <ulrich.weber@riverbed.com>
 Date: Mon, 24 Oct 2016 18:07:23 +0200
-Subject: netfilter: nf_conntrack_sip: extend request line validation
-Patch-mainline: v4.9-rc6
+Subject: [PATCH] netfilter: nf_conntrack_sip: extend request line validation
+Patch-mainline: 4.4.114
+References: bnc#1012382 bsc#1042286
 Git-commit: 444f901742d054a4cd5ff045871eac5131646cfb
-References: bsc#1042286
+
+commit 444f901742d054a4cd5ff045871eac5131646cfb upstream.
 
 on SIP requests, so a fragmented TCP SIP packet from an allow header starting with
  INVITE,NOTIFY,OPTIONS,REFER,REGISTER,UPDATE,SUBSCRIBE
@@ -19,7 +21,8 @@ Signed-off-by: Ulrich Weber <ulrich.weber@riverbed.com>
 Acked-by: Marco Angaroni <marcoangaroni@gmail.com>
 Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
 Acked-by: Michal Kubecek <mkubecek@suse.cz>
-
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  net/netfilter/nf_conntrack_sip.c | 5 ++++-
  1 file changed, 4 insertions(+), 1 deletion(-)
@@ -43,5 +46,5 @@ index 885b4aba3695..1665c2159e4b 100644
  		if (ct_sip_get_header(ct, *dptr, 0, *datalen, SIP_HDR_CSEQ,
  				      &matchoff, &matchlen) <= 0) {
 -- 
-2.13.0
+2.16.1
 

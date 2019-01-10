@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Tue, 17 May 2016 11:11:06 +0200
 Subject: [PATCH] aacraid: do not activate events on non-SRC adapters
 References: bsc#979497
-Patch-mainline: Submitted, 2016-05-17
+Git-commit: 787ab6e97024926f38773287d9f98a9b330bce23
+Patch-mainline: v4.7-rc2
 
 Only SRC-based adapters support the AifReqEvent function, so
 there is no point in trying to activate it on older, non-SRC

@@ -1,9 +1,12 @@
 From: Hongxu Jia <hongxu.jia@windriver.com>
 Date: Tue, 29 Nov 2016 21:56:26 -0500
-Subject: netfilter: arp_tables: fix invoking 32bit "iptable -P INPUT ACCEPT" failed in 64bit kernel
-Patch-mainline: v4.9-rc8
+Subject: [PATCH] netfilter: arp_tables: fix invoking 32bit "iptable -P INPUT
+ ACCEPT" failed in 64bit kernel
+Patch-mainline: 4.4.114
+References: CVE-2016-4997 CVE-2016-4998 bnc#1012382 bsc#986362 bsc#986365
 Git-commit: 17a49cd549d9dc8707dc9262210166455c612dde
-References: CVE-2016-4997 CVE-2016-4998 bsc#986362 bsc#986365
+
+commit 17a49cd549d9dc8707dc9262210166455c612dde upstream.
 
 Since 09d9686047db ("netfilter: x_tables: do compat validation via
 translate_table"), it used compatr structure to assign newinfo
@@ -26,7 +29,9 @@ Signed-off-by: Hongxu Jia <hongxu.jia@windriver.com>
 Acked-by: Florian Westphal <fw@strlen.de>
 Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
 Acked-by: Michal Kubecek <mkubecek@suse.cz>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  net/ipv4/netfilter/arp_tables.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
@@ -47,5 +52,5 @@ index d6531c544a82..c75211528991 100644
  	entry1 = newinfo->entries;
  	pos = entry1;
 -- 
-2.12.2
+2.16.1
 

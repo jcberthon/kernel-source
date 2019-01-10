@@ -2,7 +2,8 @@ From: Joe Carnuccio <joe.carnuccio@qlogic.com>
 Date: Tue, 9 Apr 2013 14:37:30 -0700
 Subject: qla2xxx: Add module parameter for interrupt mode.
 References: bnc#853689,FATE#315933
-Patch-Mainline: queued in scsi-misc for v3.14
+Git-commit: e7240af5108fc8b068b1b21988e48f0c5005cae6
+Patch-mainline: v4.15-rc1
 
 [hare: patch needs validation; not present in 4.4]
 

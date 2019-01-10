@@ -1,10 +1,10 @@
 From cf1d93171d232dc6e14955616b10a58a38a01502 Mon Sep 17 00:00:00 2001
 From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 28 Jul 2016 10:43:55 +0200
-Subject: [PATCH 11/22] fcoe: inhibit writing invalid values into the 'enabled'
+Subject: [PATCH 11/22] fcoe: catch invalid values for the 'enabled' attribute
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
- attribute
+Patch-Mainline: v4.10-rc1
+Git-commit: 5cc5512690537fcfafd50a5941cdbdb9f4134308
 
 The 'enabled' sysfs attribute only accepts the values '0' and '1',
 so we should error out any other values.

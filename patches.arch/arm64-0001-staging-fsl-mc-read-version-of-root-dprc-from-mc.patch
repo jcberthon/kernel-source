@@ -2,9 +2,8 @@ From 46cac6991c8bd1802802c59756aa9365847a4b9a Mon Sep 17 00:00:00 2001
 From: Itai Katz <itai.katz@freescale.com>
 Date: Wed, 21 Oct 2015 15:57:56 +0300
 Subject: [PATCH 1/4] staging: fsl-mc: read version of root dprc from mc
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://github.com/qoriq-open-source/linux.git nxp/linux-v4.5
-Git-commit: 46cac6991c8bd1802802c59756aa9365847a4b9a
+Git-commit: 9529d166f32a2364fa644f8431ba508443953d64
+Patch-mainline: v4.7-rc1
 References: fate#319900
 
 

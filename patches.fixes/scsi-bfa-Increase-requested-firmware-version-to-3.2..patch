@@ -1,8 +1,9 @@
 From: Benjamin Poirier <bpoirier@suse.com>
 Date: Fri, 23 Dec 2016 11:41:05 -0800
 Subject: scsi: bfa: Increase requested firmware version to 3.2.5.1
-Patch-mainline: Submitted, to linux-scsi@ on 23 Dec 2016 20:40:19 -0800
+Patch-mainline: v4.10-rc4
 References: bsc#1013273
+Git-commit: 2d1148f0f45079d25a0fa0d67e4fdb2a656d12fb
 
 bna & bfa firmware version 3.2.5.1 was submitted to linux-firmware on
 Feb 17 19:10:20 2015 -0500 in 0ab54ff1dc ("linux-firmware: Add QLogic BR

@@ -1,9 +1,11 @@
 From: Andy Lutomirski <luto@kernel.org>
 Date: Tue, 29 Dec 2015 20:12:18 -0800
-Subject: x86/vsdo: Fix build on PARAVIRT_CLOCK=y, KVM_GUEST=n
+Subject: [PATCH] x86/vsdo: Fix build on PARAVIRT_CLOCK=y, KVM_GUEST=n
+Patch-mainline: 4.4.112
+References: FATE#318845 Performance bnc#1012382
 Git-commit: 8705d603edd49f1cff165cd3b7998f4c7f098d27
-Patch-mainline: v4.5-rc1
-References: Performance,fate#318845
+
+commit 8705d603edd49f1cff165cd3b7998f4c7f098d27 upstream.
 
 arch/x86/built-in.o: In function `arch_setup_additional_pages':
  (.text+0x587): undefined reference to `pvclock_pvti_cpu0_va'
@@ -17,11 +19,15 @@ Cc: Oleg Nesterov <oleg@redhat.com>
 Cc: Kees Cook <keescook@chromium.org>
 Link: http://lkml.kernel.org/r/444d38a9bcba832685740ea1401b569861d09a72.1451446564.git.luto@kernel.org
 Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
-Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
+Cc: James Dingwall <james@dingwall.me.uk>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- arch/x86/include/asm/pvclock.h |    2 +-
+ arch/x86/include/asm/pvclock.h | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/arch/x86/include/asm/pvclock.h b/arch/x86/include/asm/pvclock.h
+index 6045cef376c2..c926255745e1 100644
 --- a/arch/x86/include/asm/pvclock.h
 +++ b/arch/x86/include/asm/pvclock.h
 @@ -4,7 +4,7 @@
@@ -33,3 +39,6 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  extern struct pvclock_vsyscall_time_info *pvclock_pvti_cpu0_va(void);
  #else
  static inline struct pvclock_vsyscall_time_info *pvclock_pvti_cpu0_va(void)
+-- 
+2.15.1
+

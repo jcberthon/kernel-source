@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 18 Aug 2016 12:07:18 +0200
 Subject: fc_rport: Return LS_RJT_BUSY for PRLI in status PLOGI
 References: bsc#994356
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Git-commit: 8acf1b50cfa44c8260fb1fcf7464a4eee69aefcf
+Patch-mainline: v4.10-rc1
 
 Occasionally it might happen that we receive a PRLI while we're still
 waiting for our PLOGI response. In that case we should return

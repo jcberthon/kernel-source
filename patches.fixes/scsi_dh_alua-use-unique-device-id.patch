@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Mon, 8 Oct 2012 10:12:34 +0200
 Subject: scsi_dh_alua: use unique device id
 References: bnc#708296
-Patch-Mainline: submitted to linux-scsi 2016/02/19
+Git-commit: 0047220c6c3641eeaf0460fb1cc8bbb7f81bd47e
+Patch-Mainline: v4.6
 
 Use scsi_vpd_lun_id() to assign a unique device identification
 to the alua port group structure.

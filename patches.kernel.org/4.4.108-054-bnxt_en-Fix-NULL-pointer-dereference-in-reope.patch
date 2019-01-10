@@ -1,9 +1,11 @@
 From: Sankar Patchineelam <sankar.patchineelam@broadcom.com>
 Date: Tue, 28 Mar 2017 19:47:29 -0400
-Subject: bnxt_en: Fix NULL pointer dereference in reopen failure path
-Patch-mainline: v4.11-rc6
+Subject: [PATCH] bnxt_en: Fix NULL pointer dereference in reopen failure path
+Patch-mainline: 4.4.108
+References: bnc#1012382 bnc#1038583
 Git-commit: 2247925f0942dc4e7c09b1cde45ca18461d94c5f
-References: bnc#1038583
+
+[ Upstream commit 2247925f0942dc4e7c09b1cde45ca18461d94c5f ]
 
 Net device reset can fail when the h/w or f/w is in a bad state.
 Subsequent netdevice open fails in bnxt_hwrm_stat_ctx_alloc().
@@ -22,14 +24,18 @@ bnxt_init_chip() is invoked.
 Signed-off-by: Sankar Patchineelam <sankar.patchineelam@broadcom.com>
 Signed-off-by: Michael Chan <michael.chan@broadcom.com>
 Signed-off-by: David S. Miller <davem@davemloft.net>
-Acked-by: David Chang <dchang@suse.com>
+Signed-off-by: Sasha Levin <alexander.levin@verizon.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- drivers/net/ethernet/broadcom/bnxt/bnxt.c |   13 +++++++++++++
+ drivers/net/ethernet/broadcom/bnxt/bnxt.c | 13 +++++++++++++
  1 file changed, 13 insertions(+)
 
+diff --git a/drivers/net/ethernet/broadcom/bnxt/bnxt.c b/drivers/net/ethernet/broadcom/bnxt/bnxt.c
+index 4744919440e0..a38a9cb3d544 100644
 --- a/drivers/net/ethernet/broadcom/bnxt/bnxt.c
 +++ b/drivers/net/ethernet/broadcom/bnxt/bnxt.c
-@@ -2299,6 +2299,18 @@ static int bnxt_init_one_rx_ring(struct
+@@ -2014,6 +2014,18 @@ static int bnxt_init_one_rx_ring(struct bnxt *bp, int ring_nr)
  	return 0;
  }
  
@@ -48,7 +54,7 @@ Acked-by: David Chang <dchang@suse.com>
  static int bnxt_init_rx_rings(struct bnxt *bp)
  {
  	int i, rc = 0;
-@@ -4464,6 +4476,7 @@ static int bnxt_shutdown_nic(struct bnxt
+@@ -3977,6 +3989,7 @@ static int bnxt_shutdown_nic(struct bnxt *bp, bool irq_re_init)
  
  static int bnxt_init_nic(struct bnxt *bp, bool irq_re_init)
  {
@@ -56,3 +62,6 @@ Acked-by: David Chang <dchang@suse.com>
  	bnxt_init_rx_rings(bp);
  	bnxt_init_tx_rings(bp);
  	bnxt_init_ring_grps(bp, irq_re_init);
+-- 
+2.15.1
+

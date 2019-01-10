@@ -1,7 +1,8 @@
 From: Sachin Prabhu <sprabhu@redhat.com>
 Subject: cifs_get_root shouldn't use path with tree name
-Patch-mainline: not yet, linux-cifs 2016-09-07
+Patch-mainline: v4.10-rc1
 References: bsc#963655, bsc#979681
+Git-commit: 374402a2a1dfbbee8ab1a5a32ec4887bf8c15d52
 
 When a server returns the optional flag SMB_SHARE_IS_IN_DFS in response
 to a tree connect, cifs_build_path_to_root() will return a pathname
@@ -29,7 +30,6 @@ Signed-off-by: Sachin Prabhu <sprabhu@redhat.com>
 Reported-by: Pierguido Lambri <plambri@redhat.com>
 
 Acked-by: Aurélien Aptel <aaptel@suse.com>
-
 --- a/fs/cifs/cifsfs.c
 +++ b/fs/cifs/cifsfs.c
 @@ -608,7 +608,7 @@ cifs_get_root(struct smb_vol *vol, struc

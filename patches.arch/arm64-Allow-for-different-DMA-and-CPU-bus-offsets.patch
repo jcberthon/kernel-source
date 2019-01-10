@@ -3,7 +3,8 @@ From: Alexander Graf <agraf@suse.de>
 Date: Wed, 18 May 2016 01:13:04 +0200
 Subject: [PATCH v2] arm64: Allow for different DMA and CPU bus offsets
 References: bsc#980439
-Patch-mainline: Submitted, http://lists.infradead.org/pipermail/linux-arm-kernel/2016-May/430057.html
+Patch-mainline: v4.8-rc1
+Git-commit: 1a9a0536d8ad0ad804758f1f2ce1f2dc0c5e053a
 
 On arm64, all SoCs we supported so far either have an IOMMU or have bus
 addresses equal to CPU addresses.

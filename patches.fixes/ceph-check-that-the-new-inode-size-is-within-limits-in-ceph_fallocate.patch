@@ -2,9 +2,8 @@ From: Luis Henriques <lhenriques@suse.com>
 Date: Fri, 5 May 2017 18:28:44 +0100
 Subject: ceph: Check that the new inode size is within limits in
  ceph_fallocate()
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: git://github.com/ceph/ceph-client
-Git-commit: 6f58448462f50f65a56d09b22f9adfc34af2e353
+Git-commit: 42c99fc4c7069371da7b04b9099319dd1c633ee2
+Patch-mainline: v4.12-rc3
 References: bsc#1037969
 
 Currently the ceph client doesn't respect the rlimit in fallocate.  This

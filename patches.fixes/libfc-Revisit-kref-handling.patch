@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Mon, 11 Jul 2016 12:51:39 +0200
 Subject: [PATCH 01/22] libfc: Revisit kref handling
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Patch-mainline: v4.10-rc1
+Git-commit: 4d2095cc42a2d8062590891f929d9d694cbd927f
 
 The kref handling in fc_rport is a mess. This patch updates
 the kref handling according to the following rules:

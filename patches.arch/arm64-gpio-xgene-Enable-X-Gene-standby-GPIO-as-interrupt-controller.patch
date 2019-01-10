@@ -1,21 +1,7 @@
-Content-Type: text/plain; charset="utf-8"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Subject: [v7,
-	1/3] gpio: xgene: Enable X-Gene standby GPIO as interrupt controller
 From: Quan Nguyen <qnguyen@apm.com>
-X-Patchwork-Id: 8338591
-Message-Id: <1455714909-3027-2-git-send-email-qnguyen@apm.com>
-To: linus.walleij@linaro.org, linux-gpio@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	Thomas Gleixner <tglx@linutronix.de>,
-	Jason Cooper <jason@lakedaemon.net>, Marc Zyngier <marc.zyngier@arm.com>
-Cc: Feng Kan <fkan@apm.com>, Quan Nguyen <qnguyen@apm.com>,
-	Phong Vo <pvo@apm.com>, Duc Dang <dhdang@apm.com>, patches@apm.com,
-	Loc Ho <lho@apm.com>, Iyappan Subramanian <isubramanian@apm.com>,
-	Y Vo <yvo@apm.com>
-Date: Wed, 17 Feb 2016 20:15:07 +0700
-Patch-mainline: Submitted, https://patchwork.kernel.org/patch/8338591/
+Subject: gpio: xgene: Enable X-Gene standby GPIO as interrupt controller
+Git-commit: 1013fc417cc15ead7c3a9091a47617f357db71a4
+Patch-mainline: v4.6-rc1
 
 Enable X-Gene standby GPIO controller as interrupt controller to provide
 its own resources. This avoids ambiguity where GIC interrupt resource is

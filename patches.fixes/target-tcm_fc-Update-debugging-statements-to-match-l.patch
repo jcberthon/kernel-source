@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 18 Aug 2016 12:15:46 +0200
 Subject: target/tcm_fc: Update debugging statements to match libfc usage
 References: bsc#994356
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Patch-mainline: v4.9-rc2
+Git-commit: 8962a4d29bcb3d12164c02d207c8ff1ab8b04558
 
 Update the debug statements to match those from libfc.
 

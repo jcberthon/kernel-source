@@ -3,8 +3,8 @@ From: Lubomir Rintel <lkundrak@v3.sk>
 Date: Mon, 2 May 2016 09:06:51 +0200
 Subject: [PATCH 103/110] ARM: bcm2835: dt: Add the ethernet to the device
  trees
-Git-commit: 7d56ccc6e4d87092d735c6b5342e49664b303ed1
-Patch-mainline: v4.6
+Git-commit: 6a93792774fc72861b7e8efaa3545a88272b4413
+Patch-mainline: v4.8-rc1
 References: bsc#983145
 
 The hub and the ethernet in its port 1 are hardwired on the board.

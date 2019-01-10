@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 24 Aug 2017 14:43:53 +0200
 Subject: [PATCH] mptsas: Fixup device hotplug for VMWare ESXi
 References: bsc#1030850
-Patch-Mainline: submitted linux-scsi 2017/07/24
+Git-commit: ee3e2d8392f695343d2fdfd43e881d14fb406d24
+Patch-mainline: v4.14-rc1
 
 VMWare ESXi emulates an mptsas HBA, but exposes all drives as
 direct-attached SAS drives.

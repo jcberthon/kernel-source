@@ -1,7 +1,7 @@
 From: Harish Zunjarrao <harish.zunjarrao@qlogic.com>
 Date: Wed, 27 Jan 2016 12:03:33 -0500
 Subject: qla2xxx: Add support for Private link statistics counters.
-Git-commit: baafadb2a16aa3b3b72db80fe7c21d89cf96718e
+Git-commit: 243de6768db50266f595ec62c5ae34783edb72ea
 Patch-mainline: v4.6-rc1
 References: FATE#320146, bsc#966328
 

@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Tue, 16 Aug 2016 16:49:16 +0200
 Subject: libfc: Clarify ramp-down messages
 References: bsc#990245
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Patch-mainline: v4.10-rc1
+Git-commit: 5d339d163a541ceb13074789ac2f8c35b11ebda9
 
 When the queue depth is reduced we should print out the reason
 for this; it might be due to a queue full condition.

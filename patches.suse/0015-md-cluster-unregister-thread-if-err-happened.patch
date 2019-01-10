@@ -2,9 +2,8 @@ From 2fba94244a78902b739511ac6ddafac461a4ed9b Mon Sep 17 00:00:00 2001
 From: Guoqing Jiang <gqjiang@suse.com>
 Date: Mon, 2 May 2016 11:33:11 -0400
 Subject: [PATCH 15/24] md-cluster: unregister thread if err happened
-Git-commit: 4c768295cac1c38abc0454af1a45135ca13d70ab
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/shli/md.git
-Patch-mainline: Queued in subsystem maintainer repository
+Git-commit: 5b0fb33e8aa1c8a94f763d1025445146412ca766
+Patch-mainline: v4.7-rc1
 References: fate#316335
 
 The two threads need to be unregistered if a node

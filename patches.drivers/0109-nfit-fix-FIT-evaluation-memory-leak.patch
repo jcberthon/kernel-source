@@ -1,8 +1,9 @@
 From: Dan Williams <dan.j.williams@intel.com>
 Subject: [PATCH v3 1/2] nfit: fix _FIT evaluation memory leak + use after free
 Date: Tue, 19 Jul 2016 16:12:26 -0700
-Patch-mainline: Submitted, https://patchwork.kernel.org/patch/9238435/
 References: FATE#320897
+Git-commit: 3193204149de4d563519d6847aba638bb4d9662b
+Patch-mainline: v4.8-rc1
 
 acpi_evaluate_object() allocates memory. Free the buffer allocated
 during acpi_nfit_add(). In order for this memory to be freed

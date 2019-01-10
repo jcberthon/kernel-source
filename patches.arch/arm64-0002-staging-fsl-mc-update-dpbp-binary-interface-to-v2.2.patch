@@ -2,9 +2,8 @@ From 84d84ccbb8bb198478ac46e55d1b34ea73fcbc76 Mon Sep 17 00:00:00 2001
 From: Stuart Yoder <stuart.yoder@nxp.com>
 Date: Wed, 2 Mar 2016 10:44:39 -0600
 Subject: [PATCH 02/12] staging: fsl-mc: update dpbp binary interface to v2.2
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://github.com/qoriq-open-source/linux.git nxp/linux-v4.5
-Git-commit: 84d84ccbb8bb198478ac46e55d1b34ea73fcbc76
+Git-commit: 6606c073a5695ef566bea3b0f3af979395a64e17
+Patch-mainline: v4.7-rc1
 References: fate#319900
 
 Signed-off-by: Stuart Yoder <stuart.yoder@nxp.com>

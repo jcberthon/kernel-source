@@ -1,23 +1,31 @@
-From e607bcb095b86010019d314f738ea491f10818d4 Mon Sep 17 00:00:00 2001
 From: Oliver Neukum <oneukum@suse.com>
-Date: Tue, 27 Oct 2015 12:42:38 +0100
+Date: Tue, 27 Oct 2015 09:51:34 -0200
 Subject: [PATCH] usbvision fix overflow of interfaces array
+Patch-mainline: 4.4.112
+References: bnc#1012382 bnc#950998
 Git-commit: 588afcc1c0e45358159090d95bf7b246fb67565f
-Patch-mainline: v4.5-rc1
-References: bnc#950998
+
+commit 588afcc1c0e45358159090d95bf7b246fb67565f upstream.
 
 This fixes the crash reported in:
 http://seclists.org/bugtraq/2015/Oct/35
 The interface number needs a sanity check.
 
 Signed-off-by: Oliver Neukum <oneukum@suse.com>
+Cc: Vladis Dronov <vdronov@redhat.com>
+Signed-off-by: Hans Verkuil <hans.verkuil@cisco.com>
+Signed-off-by: Mauro Carvalho Chehab <mchehab@osg.samsung.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- drivers/media/usb/usbvision/usbvision-video.c |    7 +++++++
+ drivers/media/usb/usbvision/usbvision-video.c | 7 +++++++
  1 file changed, 7 insertions(+)
 
+diff --git a/drivers/media/usb/usbvision/usbvision-video.c b/drivers/media/usb/usbvision/usbvision-video.c
+index 91d709efef7a..cafc34938a79 100644
 --- a/drivers/media/usb/usbvision/usbvision-video.c
 +++ b/drivers/media/usb/usbvision/usbvision-video.c
-@@ -1461,6 +1461,13 @@ static int usbvision_probe(struct usb_in
+@@ -1461,6 +1461,13 @@ static int usbvision_probe(struct usb_interface *intf,
  	printk(KERN_INFO "%s: %s found\n", __func__,
  				usbvision_device_data[model].model_string);
  
@@ -31,3 +39,6 @@ Signed-off-by: Oliver Neukum <oneukum@suse.com>
  	if (usbvision_device_data[model].interface >= 0)
  		interface = &dev->actconfig->interface[usbvision_device_data[model].interface]->altsetting[0];
  	else if (ifnum < dev->actconfig->desc.bNumInterfaces)
+-- 
+2.15.1
+

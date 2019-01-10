@@ -1,9 +1,12 @@
 From: Andy Lutomirski <luto@kernel.org>
 Date: Thu, 10 Dec 2015 19:20:20 -0800
-Subject: x86/vdso: Get pvclock data from the vvar VMA instead of the fixmap
+Subject: [PATCH] x86/vdso: Get pvclock data from the vvar VMA instead of the
+ fixmap
+Patch-mainline: 4.4.110
+References: FATE#318845 Performance bnc#1012382
 Git-commit: dac16fba6fc590fa7239676b35ed75dae4c4cd2b
-Patch-mainline: v4.5-rc1
-References: Performance,fate#318845
+
+commit dac16fba6fc590fa7239676b35ed75dae4c4cd2b upstream.
 
 Signed-off-by: Andy Lutomirski <luto@kernel.org>
 Reviewed-by: Paolo Bonzini <pbonzini@redhat.com>
@@ -18,17 +21,21 @@ Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: linux-mm@kvack.org
 Link: http://lkml.kernel.org/r/9d37826fdc7e2d2809efe31d5345f97186859284.1449702533.git.luto@kernel.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
+Cc: Jamie Iles <jamie.iles@oracle.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- arch/x86/entry/vdso/vclock_gettime.c  |   20 ++++++++------------
- arch/x86/entry/vdso/vdso-layout.lds.S |    3 ++-
- arch/x86/entry/vdso/vdso2c.c          |    3 +++
- arch/x86/entry/vdso/vma.c             |   13 +++++++++++++
- arch/x86/include/asm/pvclock.h        |    9 +++++++++
- arch/x86/include/asm/vdso.h           |    1 +
- arch/x86/kernel/kvmclock.c            |    5 +++++
+ arch/x86/entry/vdso/vclock_gettime.c  | 20 ++++++++------------
+ arch/x86/entry/vdso/vdso-layout.lds.S |  3 ++-
+ arch/x86/entry/vdso/vdso2c.c          |  3 +++
+ arch/x86/entry/vdso/vma.c             | 13 +++++++++++++
+ arch/x86/include/asm/pvclock.h        |  9 +++++++++
+ arch/x86/include/asm/vdso.h           |  1 +
+ arch/x86/kernel/kvmclock.c            |  5 +++++
  7 files changed, 41 insertions(+), 13 deletions(-)
 
+diff --git a/arch/x86/entry/vdso/vclock_gettime.c b/arch/x86/entry/vdso/vclock_gettime.c
+index c325ba1bdddf..5dd363d54348 100644
 --- a/arch/x86/entry/vdso/vclock_gettime.c
 +++ b/arch/x86/entry/vdso/vclock_gettime.c
 @@ -36,6 +36,11 @@ static notrace cycle_t vread_hpet(void)
@@ -43,7 +50,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  #ifndef BUILD_VDSO32
  
  #include <linux/kernel.h>
-@@ -62,23 +67,14 @@ notrace static long vdso_fallback_gtod(s
+@@ -62,23 +67,14 @@ notrace static long vdso_fallback_gtod(struct timeval *tv, struct timezone *tz)
  
  #ifdef CONFIG_PARAVIRT_CLOCK
  
@@ -70,6 +77,8 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  	cycle_t ret;
  	u64 tsc, pvti_tsc;
  	u64 last, delta, pvti_system_time;
+diff --git a/arch/x86/entry/vdso/vdso-layout.lds.S b/arch/x86/entry/vdso/vdso-layout.lds.S
+index de2c921025f5..4158acc17df0 100644
 --- a/arch/x86/entry/vdso/vdso-layout.lds.S
 +++ b/arch/x86/entry/vdso/vdso-layout.lds.S
 @@ -25,7 +25,7 @@ SECTIONS
@@ -89,6 +98,8 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  
  	. = SIZEOF_HEADERS;
  
+diff --git a/arch/x86/entry/vdso/vdso2c.c b/arch/x86/entry/vdso/vdso2c.c
+index 785d9922b106..491020b2826d 100644
 --- a/arch/x86/entry/vdso/vdso2c.c
 +++ b/arch/x86/entry/vdso/vdso2c.c
 @@ -73,6 +73,7 @@ enum {
@@ -115,9 +126,11 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  	[sym_VDSO_FAKE_SECTION_TABLE_START] = {
  		"VDSO_FAKE_SECTION_TABLE_START", false
  	},
+diff --git a/arch/x86/entry/vdso/vma.c b/arch/x86/entry/vdso/vma.c
+index 64df47148160..aa828191c654 100644
 --- a/arch/x86/entry/vdso/vma.c
 +++ b/arch/x86/entry/vdso/vma.c
-@@ -100,6 +100,7 @@ static int map_vdso(const struct vdso_im
+@@ -100,6 +100,7 @@ static int map_vdso(const struct vdso_image *image, bool calculate_addr)
  		.name = "[vvar]",
  		.pages = no_pages,
  	};
@@ -125,7 +138,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  
  	if (calculate_addr) {
  		addr = vdso_addr(current->mm->start_stack,
-@@ -169,6 +170,18 @@ static int map_vdso(const struct vdso_im
+@@ -169,6 +170,18 @@ static int map_vdso(const struct vdso_image *image, bool calculate_addr)
  	}
  #endif
  
@@ -144,6 +157,8 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  up_fail:
  	if (ret)
  		current->mm->context.vdso = NULL;
+diff --git a/arch/x86/include/asm/pvclock.h b/arch/x86/include/asm/pvclock.h
+index baad72e4c100..6045cef376c2 100644
 --- a/arch/x86/include/asm/pvclock.h
 +++ b/arch/x86/include/asm/pvclock.h
 @@ -4,6 +4,15 @@
@@ -162,6 +177,8 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  /* some helper functions for xen and kvm pv clock sources */
  cycle_t pvclock_clocksource_read(struct pvclock_vcpu_time_info *src);
  u8 pvclock_read_flags(struct pvclock_vcpu_time_info *src);
+diff --git a/arch/x86/include/asm/vdso.h b/arch/x86/include/asm/vdso.h
+index 756de9190aec..deabaf9759b6 100644
 --- a/arch/x86/include/asm/vdso.h
 +++ b/arch/x86/include/asm/vdso.h
 @@ -22,6 +22,7 @@ struct vdso_image {
@@ -172,9 +189,11 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  	long sym_VDSO32_NOTE_MASK;
  	long sym___kernel_sigreturn;
  	long sym___kernel_rt_sigreturn;
+diff --git a/arch/x86/kernel/kvmclock.c b/arch/x86/kernel/kvmclock.c
+index 2bd81e302427..ec1b06dc82d2 100644
 --- a/arch/x86/kernel/kvmclock.c
 +++ b/arch/x86/kernel/kvmclock.c
-@@ -45,6 +45,11 @@ early_param("no-kvmclock", parse_no_kvmc
+@@ -45,6 +45,11 @@ early_param("no-kvmclock", parse_no_kvmclock);
  static struct pvclock_vsyscall_time_info *hv_clock;
  static struct pvclock_wall_clock wall_clock;
  
@@ -186,3 +205,6 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  /*
   * The wallclock is the time of day when we booted. Since then, some time may
   * have elapsed since the hypervisor wrote the data. So we try to account for
+-- 
+2.15.1
+

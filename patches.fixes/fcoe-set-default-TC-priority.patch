@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 29 Jul 2016 10:37:46 +0200
 Subject: fcoe: set default TC priority
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Patch-mainline: v4.10-rc1
+Git-commit: c216e8762f96b6bddf043b5788094e0b698dd4b3
 
 If DCB is not enabled or compiled in we still should be setting
 a sane default priority. So put FCoE frames in priority class

@@ -1,8 +1,9 @@
-From:	Jeff Mahoney <jeffm@suse.com>
+From: Jeff Mahoney <jeffm@suse.com>
 Subject: [PATCH] lightnvm: fix warning: ret may be used uninitialized
-Date:	Mon, 4 Apr 2016 14:05:51 -0400
+Date: Mon, 4 Apr 2016 14:05:51 -0400
 References: FATE#319466
-Patch-mainline: Submitted, 2016-04-04
+Patch-mainline: v4.7-rc1
+Git-commit: 57aac2f1be4a0711b7f24f7d367e8672ebaa3844
 
 This fixes the following warnings:
 drivers/lightnvm/sysblk.c:125:9: warning: ‘ret’ may be used

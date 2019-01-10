@@ -108,8 +108,8 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 --- a/drivers/nvme/host/pci.c
 +++ b/drivers/nvme/host/pci.c
 @@ -129,8 +129,6 @@ struct nvme_dev {
- 	struct work_struct probe_work;
  	struct work_struct scan_work;
+ 	struct mutex shutdown_lock;
  	bool subsystem;
 -	u32 max_hw_sectors;
 -	u32 stripe_size;

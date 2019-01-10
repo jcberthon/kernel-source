@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 27 Oct 2016 09:20:23 +0200
 Subject: [PATCH] scsi: Add 'AIX VDASD' to blacklist
 References: bsc#1006469
-Patch-Mainline: submitted to linux-scsi 2016/10/27
+Git-commit: c1a7b647805894d918126c146f43ebab0fa3f14a
+Patch-mainline: v4.15-rc1
 
 The AIX VDASD devices do support VPD pages, but implement
 only SPC. So set BLIST_TRY_VPD_PAGS to correctly display

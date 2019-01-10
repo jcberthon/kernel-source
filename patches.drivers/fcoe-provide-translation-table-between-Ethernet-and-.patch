@@ -3,7 +3,8 @@ From: Johannes Thumshirn <jthumshirn@suse.de>
 Date: Mon, 15 Aug 2016 17:19:48 +0200
 Subject: [PATCH] fcoe: provide translation table between Ethernet and FC port speeds
 References: bsc#988035
-Patch-mainline: Submitted, https://patchwork.kernel.org/patch/9281331/
+Git-commit: 0b924e5505a568e7a70e07b529a02ed12295ff7c
+Patch-mainline: v4.9-rc1
 
 Provide a translation table between Ethernet and FC port speeds so odd
 speeds (from a Ethernet POV) like 8 Gbit are correctly mapped to sysfs

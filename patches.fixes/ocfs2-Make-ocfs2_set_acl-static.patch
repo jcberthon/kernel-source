@@ -2,7 +2,8 @@ From c1f009760ccf8e6bd593888f0ebefa4076eece94 Mon Sep 17 00:00:00 2001
 From: Jan Kara <jack@suse.cz>
 Date: Thu, 22 Jun 2017 09:08:05 +0200
 Subject: [PATCH 07/11] ocfs2: Make ocfs2_set_acl() static
-Patch-mainline: Submitted Jul 17 2017
+Git-commit: 01ffb56bc1cb27f0d9fd50be096446a8d1ab6354
+Patch-mainline: v4.14-rc1
 References: bsc#1030552
 
 The function is never called outside of fs/ocfs2/acl.c.

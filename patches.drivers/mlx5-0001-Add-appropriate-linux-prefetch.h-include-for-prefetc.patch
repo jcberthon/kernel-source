@@ -2,7 +2,8 @@ From: "Cho, Yu-Chen" <acho@suse.com>
 Date: Fri, 31 Jul 2015 18:09:14 +0800
 Subject: [PATCH] Add appropriate <linux/prefetch.h> include for prefetch users
  mlx5
-Patch-mainline: not yet
+Git-commit: 18bcf742fbb0ddaf68d58ebf50b248748c983cea (partial)
+Patch-mainline: v4.11-rc1
 References: bsc#923036 FATE#318772
 
 follow 70c7160 to fix mlx5 driver built error on s390.

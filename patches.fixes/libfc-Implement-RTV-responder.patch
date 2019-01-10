@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 29 Jul 2016 11:32:56 +0200
 Subject: [PATCH 19/22] libfc: Implement RTV responder
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Git-commit: 7c5a51b8f82fcfba1925fa64f08413c8258590d2
+Patch-mainline: v4.10-rc1
 
 The libfc stack generates an RTV request, so we should be implementing
 an RTV responder, too.

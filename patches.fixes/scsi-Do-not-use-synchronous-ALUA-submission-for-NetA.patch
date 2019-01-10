@@ -2,7 +2,9 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Wed, 28 Sep 2016 15:22:45 +0200
 Subject: [PATCH] scsi: Do not use synchronous ALUA submission for NetApp arrays
 References: bsc#1001688
-Patch-Mainline: submitted linux-scsi 2016/09/28
+Git-commit: 9c58b395563b15866c9fd9bb7e6f7f8db12ac3ae
+X-notes: Same patch, different source
+Patch-mainline: v4.10-rc1
 
 Both NetApp FAS and NetAPP E-series should be capable of sustaining
 asynchronous STPG submissions, so we don't need to blacklist them

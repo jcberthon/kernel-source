@@ -575,7 +575,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  		blk_mq_unfreeze_queue(ns->queue);
  		blk_mq_start_stopped_hw_queues(ns->queue, true);
 @@ -2269,23 +2102,6 @@ static void nvme_dev_shutdown(struct nvm
- 		nvme_clear_queue(dev->queues[i]);
+ 	mutex_unlock(&dev->shutdown_lock);
  }
  
 -static void nvme_dev_remove(struct nvme_dev *dev)
@@ -654,8 +654,8 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 -	INIT_LIST_HEAD(&dev->namespaces);
 +	INIT_LIST_HEAD(&dev->ctrl.namespaces);
  	INIT_WORK(&dev->reset_work, nvme_reset_work);
+ 	mutex_init(&dev->shutdown_lock);
  	dev->dev = get_device(&pdev->dev);
- 	pci_set_drvdata(pdev, dev);
 @@ -2647,17 +2471,17 @@ static int nvme_probe(struct pci_dev *pd
  		goto release;
  

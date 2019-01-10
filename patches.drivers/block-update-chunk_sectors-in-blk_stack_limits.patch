@@ -1,8 +1,9 @@
 From: Hannes Reinecke <hare@suse.de>
 Date: Tue, 28 Jul 2015 08:26:16 +0200
 Subject: block: update chunk_sectors in blk_stack_limits()
-Patch-Mainline: Submitted to linux-block 04/25/2016
+Patch-mainline: v4.10-rc1
 References: bnc#940180,FATE#318723
+Git-commit: 987b3b26eb7b19960160505faf9b2f50ae77e14d
 
 Signed-off-by: Hannes Reinecke <hare@suse.com>
 ---

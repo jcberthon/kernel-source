@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 17 Nov 2016 11:23:53 +0100
 Subject: hpsa: use correct DID_NO_CONNECT hostbyte
 References: bsc#1010665
-Patch-Mainline: submitted linux-scsi 2016/11/18
+Patch-mainline: v4.10-rc1
+Git-commit: 1ccde7004ff66cdcbe4c8005f3bb44dda6ab0b99
 
 Signed-off-by: Hannes Reinecke <hare@suse.com>
 ---

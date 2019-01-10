@@ -5,7 +5,7 @@ Subject: [PATCH] PCI: xilinx-nwl: Add support for Xilinx NWL PCIe Host
  Controller
 Patch-mainline: v4.6-rc1
 References: fate#320029
-Git-commit: 223c0df92fcae8e053a7dd3ab8f7e408d2e6384e
+Git-commit: ab597d35ef11d2a921e0ec507a9b7861bcb44cbd
 
 Add PCIe Root Port driver for Xilinx PCIe NWL bridge IP.
 

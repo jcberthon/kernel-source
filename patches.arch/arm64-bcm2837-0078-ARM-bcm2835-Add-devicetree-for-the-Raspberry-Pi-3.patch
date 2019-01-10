@@ -2,9 +2,8 @@ From 36951c5043a0d12dd1ea7f102a0292dac2482fa0 Mon Sep 17 00:00:00 2001
 From: Eric Anholt <eric@anholt.net>
 Date: Thu, 18 Feb 2016 13:05:06 -0800
 Subject: [PATCH 078/101] ARM: bcm2835: Add devicetree for the Raspberry Pi 3
-Git-commit: 61b0fd58600d0a91bc928e7fab2ad18dc36cfa91
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://github.com/anholt/linux.git
+Git-commit: 9d56c22a78616e79b911f8078e883dac75e513e2
+Patch-mainline: v4.7-rc1
 References: FATE#319481
 
 While this devicetree also works for booting in 32-bit mode, it's

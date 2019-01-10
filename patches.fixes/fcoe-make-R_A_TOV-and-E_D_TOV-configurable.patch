@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 28 Jul 2016 08:37:14 +0200
 Subject: [PATCH 08/22] fcoe: make R_A_TOV and E_D_TOV configurable
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Git-commit: 69aabccede61f86b828928084dc8df288ecb2d83
+Patch-mainline: v4.10-rc1
 
 The user might want to modify the values for R_A_TOV and E_D_TOV,
 so add new module parameters 'e_d_tov' and 'r_a_tov' for the

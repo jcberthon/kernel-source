@@ -1,10 +1,12 @@
 From: Arnd Bergmann <arnd@arndb.de>
 Date: Mon, 1 Feb 2016 17:42:02 +0100
-Patch-mainline: v4.6-rc1
-Git-commit: 3021376d6d12dd1be8a0a13c16dae8badb7766fd
-References: bsc#963897,FATE#320114
 Subject: [PATCH] infiniband: cxgb4: use %pR format string for printing
  resources
+Patch-mainline: 4.4.118
+References: FATE#320114 bnc#1012382 bsc#963897
+Git-commit: 3021376d6d12dd1be8a0a13c16dae8badb7766fd
+
+commit 3021376d6d12dd1be8a0a13c16dae8badb7766fd upstream.
 
 The cxgb4 prints an MMIO resource using the "0x%x" and "%p" format
 strings on the length and start, respective, but that
@@ -21,16 +23,17 @@ the resource, avoids the warning and is shorter.
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 Acked-by: Steve Wise <swise@opengridcomputing.com>
 Signed-off-by: Doug Ledford <dledford@redhat.com>
-Acked-by: John Jolly <jjolly@suse.de>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  drivers/infiniband/hw/cxgb4/device.c | 5 ++---
  1 file changed, 2 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/infiniband/hw/cxgb4/device.c b/drivers/infiniband/hw/cxgb4/device.c
-index 8024ea4..ebd60a2 100644
+index 58fce1742b8d..337b1a5eb41c 100644
 --- a/drivers/infiniband/hw/cxgb4/device.c
 +++ b/drivers/infiniband/hw/cxgb4/device.c
-@@ -801,10 +801,9 @@ static int c4iw_rdev_open(struct c4iw_rdev *rdev)
+@@ -809,10 +809,9 @@ static int c4iw_rdev_open(struct c4iw_rdev *rdev)
  	     rdev->lldi.vr->qp.size,
  	     rdev->lldi.vr->cq.start,
  	     rdev->lldi.vr->cq.size);
@@ -44,5 +47,5 @@ index 8024ea4..ebd60a2 100644
  	     rdev->qpmask, rdev->cqmask);
  
 -- 
-1.8.5.2
+2.16.2
 

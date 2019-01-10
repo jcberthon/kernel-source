@@ -18,9 +18,9 @@ index 56ab77c..f166fff2 100644
 --- a/include/linux/usb.h
 +++ b/include/linux/usb.h
 @@ -332,6 +332,7 @@ struct usb_host_bos {
- 	struct usb_ss_cap_descriptor	*ss_cap;
  	struct usb_ssp_cap_descriptor	*ssp_cap;
  	struct usb_ss_container_id_descriptor	*ss_id;
+ 	struct usb_ptm_cap_descriptor	*ptm_cap;
 +	void *suse_kabi_padding;
  };
  

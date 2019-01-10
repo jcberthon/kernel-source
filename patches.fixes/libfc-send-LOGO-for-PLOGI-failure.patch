@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 5 Aug 2016 14:33:13 +0200
 Subject: libfc: send LOGO for PLOGI failure
 References: bsc#962846
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Git-commit: d391966a03846176a78ef8d53898de8b4302a2be
+Patch-mainline: v4.9-rc1
 
 When running in point-to-multipoint mode PLOGI is done after
 FLOGI completed. So when the PLOGI fails we should be sending

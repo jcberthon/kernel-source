@@ -3,8 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 28 Jul 2016 08:51:50 +0200
 Subject: [PATCH 12/22] libfc: don't fail sequence abort for completed
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
- exchanges
+Patch-mainline: v4.10-rc1
+Git-commit: d11b44eff113e2a848577ce58af6488f161b6f7d
 
 If a sequence should be aborted the exchange might already
 be completed (eg if the response is still queued in the rx

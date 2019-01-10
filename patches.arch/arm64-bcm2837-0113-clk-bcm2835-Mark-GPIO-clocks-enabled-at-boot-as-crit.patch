@@ -3,8 +3,9 @@ From: Eric Anholt <eric@anholt.net>
 Date: Wed, 1 Jun 2016 12:05:34 -0700
 Subject: [PATCH 113/114] clk: bcm2835: Mark GPIO clocks enabled at boot as
  critical
-Patch-mainline: Submitted 06/01/2016 linux-rpi-kernel@lists.infradead.org
+Patch-mainline: v4.9-rc1
 References: bsc#983145
+Git-commit: eddcbe8398fc7103fccd22aa6df6917caf0123bf
 
 These divide off of PLLD_PER and are used for the ethernet and wifi
 PHYs source PLLs.  Neither of them is currently represented by a phy
@@ -16,6 +17,7 @@ disable their own clocks and trigger PLLD_PER's refcount going to 0.
 Signed-off-by: Eric Anholt <eric@anholt.net>
 Message-id: 1464807936-532-3-git-send-email-eric@anholt.net
 (cherry picked from commit 7ef135d59a99471490acc5d17d7d10f85a7cabab)
+
 Signed-off-by: Alexander Graf <agraf@suse.de>
 ---
  drivers/clk/bcm/clk-bcm2835.c | 10 +++++++++-

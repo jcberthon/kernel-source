@@ -236,7 +236,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  			flush_kthread_worker(dq->worker);
  			nvme_disable_queue(dev, 0);
 @@ -2821,7 +2825,7 @@ static void nvme_dev_shutdown(struct nvm
- 
+ 	mutex_lock(&dev->shutdown_lock);
  	if (pci_is_enabled(to_pci_dev(dev->dev))) {
  		nvme_freeze_queues(dev);
 -		csts = readl(&dev->bar->csts);

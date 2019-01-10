@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 5 Aug 2016 11:26:27 +0200
 Subject: libfc: Issue PRLI after a PRLO has been received
 References: bsc#962846
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Patch-mainline: v4.9-rc1
+Git-commit: 166f310b629c046b7f5ca846adf978cda47b06c2
 
 When receiving a PRLO it just means that the operating parameters
 have changed, it does _not_ mean that the port doesn't want to

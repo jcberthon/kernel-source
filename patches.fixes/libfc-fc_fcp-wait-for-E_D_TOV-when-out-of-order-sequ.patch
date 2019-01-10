@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Tue, 16 Aug 2016 08:44:55 +0200
 Subject: libfc: wait for E_D_TOV when out-of-order sequence is received
 References: bsc#990245
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Git-commit: 87da3b832e54bcee7fac220bec00ca42b931bab0
+Patch-mainline: v4.10-rc1
 
 When detecting an out-of-order sequence we should be waiting for
 E_D_TOV before trying to abort the sequence.

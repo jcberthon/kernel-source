@@ -3,9 +3,8 @@ From: Guoqing Jiang <gqjiang@suse.com>
 Date: Mon, 2 May 2016 11:33:09 -0400
 Subject: [PATCH 13/24] md-cluser: make resync_finish only called after
  pers->sync_request
-Git-commit: c928beda38011601b57cebf68557efe2ba7ed43b
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/shli/md.git
-Patch-mainline: Queued in subsystem maintainer repository
+Git-commit: 2c97cf138527a0f0283fcca9acf4a06216bec7da
+Patch-mainline: v4.7-rc1
 References: fate#316335
 
 It is not reasonable that cluster raid to release resync

@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 18 Aug 2016 11:52:58 +0200
 Subject: fc_rport: PRLI fixes
 References: bsc#994356
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Git-commit: 386b97b43c0c9e0d878eec7ea1db16af22b036ae
+Patch-mainline: v4.10-rc1
 
 PRLI is only required if the port is acting as an initiator; ports
 which support target functionality only do not need to send PRLI.

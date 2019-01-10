@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 19 Aug 2016 12:52:01 +0200
 Subject: target/tcm_fc: use CPU affinity for responses
 References: bsc#993866
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Patch-mainline: v4.9-rc2
+Git-commit: 1ba0158fa66b5b2c597a748f87be1650c9960ccc
 
 The libfc stack assigns exchange IDs based on the CPU the request
 was received on, so we need to send the responses via the same CPU.

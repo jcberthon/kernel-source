@@ -1,9 +1,11 @@
 From: Florian Westphal <fw@strlen.de>
 Date: Thu, 14 Jul 2016 17:51:26 +0200
-Subject: netfilter: x_tables: speed up jump target validation
-Patch-mainline: v4.8-rc1
+Subject: [PATCH] netfilter: x_tables: speed up jump target validation
+Patch-mainline: 4.4.114
+References: CVE-2016-4997 CVE-2016-4998 bnc#1012382 bsc#986362 bsc#986365
 Git-commit: f4dc77713f8016d2e8a3295e1c9c53a21f296def
-References: CVE-2016-4997 CVE-2016-4998 bsc#986362 bsc#986365
+
+commit f4dc77713f8016d2e8a3295e1c9c53a21f296def upstream.
 
 The dummy ruleset I used to test the original validation change was broken,
 most rules were unreachable and were not tested by mark_source_chains().
@@ -46,7 +48,8 @@ Tested-by: Jeff Wu <wujiafu@gmail.com>
 Signed-off-by: Florian Westphal <fw@strlen.de>
 Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
 Acked-by: Michal Kubecek <mkubecek@suse.cz>
-
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  include/linux/netfilter/x_tables.h |  4 +++
  net/ipv4/netfilter/arp_tables.c    | 47 ++++++++++++++++++-----------------
@@ -184,16 +187,16 @@ index 6e3e0e8b1ce3..d6531c544a82 100644
  
  	/* Finally, each sanity check must pass */
  	i = 0;
-@@ -720,6 +720,9 @@ static int translate_table(struct xt_table_info *newinfo, void *entry0,
+@@ -719,6 +719,9 @@ static int translate_table(struct xt_table_info *newinfo, void *entry0,
+ 		return ret;
  	}
  
- 	return ret;
++	return ret;
 + out_free:
 +	kvfree(offsets);
-+	return ret;
+ 	return ret;
  }
  
- static void get_counters(const struct xt_table_info *t,
 diff --git a/net/ipv4/netfilter/ip_tables.c b/net/ipv4/netfilter/ip_tables.c
 index a399c5419622..2ba158f2cb72 100644
 --- a/net/ipv4/netfilter/ip_tables.c
@@ -304,16 +307,16 @@ index a399c5419622..2ba158f2cb72 100644
  
  	/* Finally, each sanity check must pass */
  	i = 0;
-@@ -885,6 +885,9 @@ translate_table(struct net *net, struct xt_table_info *newinfo, void *entry0,
+@@ -884,6 +884,9 @@ translate_table(struct net *net, struct xt_table_info *newinfo, void *entry0,
+ 		return ret;
  	}
  
- 	return ret;
++	return ret;
 + out_free:
 +	kvfree(offsets);
-+	return ret;
+ 	return ret;
  }
  
- static void
 diff --git a/net/ipv6/netfilter/ip6_tables.c b/net/ipv6/netfilter/ip6_tables.c
 index 22f39e00bef3..c26bed92f523 100644
 --- a/net/ipv6/netfilter/ip6_tables.c
@@ -424,18 +427,18 @@ index 22f39e00bef3..c26bed92f523 100644
  
  	/* Finally, each sanity check must pass */
  	i = 0;
-@@ -897,6 +897,9 @@ translate_table(struct net *net, struct xt_table_info *newinfo, void *entry0,
+@@ -896,6 +896,9 @@ translate_table(struct net *net, struct xt_table_info *newinfo, void *entry0,
+ 		return ret;
  	}
  
- 	return ret;
++	return ret;
 + out_free:
 +	kvfree(offsets);
-+	return ret;
+ 	return ret;
  }
  
- static void
 diff --git a/net/netfilter/x_tables.c b/net/netfilter/x_tables.c
-index c7b7cecb5bd1..6794cf8210ed 100644
+index 2fc6ca9d1286..7b42b0ad3f9b 100644
 --- a/net/netfilter/x_tables.c
 +++ b/net/netfilter/x_tables.c
 @@ -701,6 +701,56 @@ int xt_check_entry_offsets(const void *base,
@@ -496,5 +499,5 @@ index c7b7cecb5bd1..6794cf8210ed 100644
  		    unsigned int size, u_int8_t proto, bool inv_proto)
  {
 -- 
-2.9.2
+2.16.1
 

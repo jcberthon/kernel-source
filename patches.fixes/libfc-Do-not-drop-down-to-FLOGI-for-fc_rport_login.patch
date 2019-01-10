@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Thu, 11 Aug 2016 15:16:58 +0200
 Subject: libfc: Do not drop down to FLOGI for fc_rport_login()
 References: bsc#994356
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Patch-mainline: v4.10-rc1
+Git-commit: e5a20009dae054344d71a79e9bfbea84152f3eb8
 
 When fc_rport_login() is called while the rport is not
 in RPORT_ST_INIT, RPORT_ST_READY, or RPORT_ST_DELETE

@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Wed, 17 Jul 2013 15:05:11 +0200
 Subject: scsi: Do not retry invalid function error
 References: bnc#809122
-Patch-Mainline: n/a
+Git-commit: a8bbb2ab4e4fac8ebd2a402d5d81500cbeaaebaf
+Patch-mainline: v4.15-rc1
 
 Hitachi USP-V returns 'Invalid function' when the internal
 staging mechanism encountered an error. These errors should

@@ -1,22 +1,18 @@
-Content-Type: text/plain; charset="utf-8"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Subject: [v2, 3/4] perf: xgene: Add APM X-Gene SoC Performance Monitoring Unit
-	driver
 From: Tai Nguyen <ttnguyen@apm.com>
-X-Patchwork-Id: 8817901
-Message-Id: <1460510547-17611-4-git-send-email-ttnguyen@apm.com>
-To: mark.rutland@arm.com,
-	will.deacon@arm.com,
-	catalin.marinas@arm.com
-Cc: devicetree@vger.kernel.org, patches@apm.com, linux-kernel@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, Tai Nguyen <ttnguyen@apm.com>
-Date: Tue, 12 Apr 2016 18:22:26 -0700
-Patch-mainline: Submitted, https://patchwork.kernel.org/patch/8817901
+Date: Fri, 15 Jul 2016 10:38:04 -0700
+Subject: perf: xgene: Add APM X-Gene SoC Performance Monitoring Unit driver
+
+Git-commit: 832c927d119b5be3a01376b8e3033286eb5797e1
+Patch-mainline: v4.9-rc1
+References: bsc#1036737
+
+This patch adds a driver for the SoC-wide (AKA uncore) PMU hardware
+found in APM X-Gene SoCs.
 
 Signed-off-by: Tai Nguyen <ttnguyen@apm.com>
+Reviewed-by: Mark Rutland <mark.rutland@arm.com>
+Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 Signed-off-by: Matthias Brugger <mbrugger@suse.com>
-
 ---
 Documentation/perf/xgene-pmu.txt |   48 ++
  Documentation/perf/xgene-pmu.txt |   48 +

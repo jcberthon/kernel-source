@@ -2,9 +2,8 @@ From e4d6534d0c544ed9857947257645663edc2fe3a3 Mon Sep 17 00:00:00 2001
 From: Eric Anholt <eric@anholt.net>
 Date: Mon, 4 Apr 2016 14:25:59 -0700
 Subject: [PATCH 079/101] drm/vc4: Fix NULL deref in HDMI init error path
-Git-commit: 4ef3e2e380cff9f6dfbffc0e63188bd681548cd3
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://github.com/anholt/linux.git
+Git-commit: 5883980313af70aec0ceebaef6ef0709726e5e63
+Patch-mainline: v4.7-rc1
 References: FATE#319481
 
 If you make it here other than through err_destroy_encoder, vc4->hdmi

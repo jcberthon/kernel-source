@@ -1,8 +1,9 @@
 From: Hannes Reinecke <hare@suse.de>
 Date: Tue, 9 Aug 2016 13:25:44 +0200
 Subject: fcoe: correct sending FIP VLAN packets on VLAN 0
+Git-commit: f7e6ed0654128979a1939be6640416abb6a54811
+Patch-mainline: v4.10-rc1
 References: bsc#989133
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
 
 The FIP VLAN frame consists of an ethernet header followed
 by the FIP VLAN frame, so we need to skip the ethernet header

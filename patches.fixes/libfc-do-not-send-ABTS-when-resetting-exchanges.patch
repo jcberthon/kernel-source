@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 5 Aug 2016 14:41:37 +0200
 Subject: libfc: do not send ABTS when resetting exchanges
 References: bsc#962846
-Patch-Mainline: submitted to linux-scsi, 2016/08/18
+Patch-mainline: v4.9-rc1
+Git-commit: a850ced42916a9bf25f4595c744156e6b8b8f5c0
 
 When all exchanges are reset the upper layers have already logged
 out of the remote port, so the exchanges can be reset without

@@ -3,7 +3,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 22 Jul 2016 13:18:43 +0200
 Subject: [PATCH 04/22] libfc: spurious I/O error under high load
 References: bnc#990245
-Patch-Mainline: submitted linux-scsi 2016/08/03
+Patch-mainline: v4.10-rc1
+Git-commit: a0452bb45c6bcf523acff635325fee7dd961c6bd
 
 If a command times out libfc is sending an REC, which also
 might fail (due to frames being lost or something).

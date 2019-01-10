@@ -2,7 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Tue, 24 May 2016 08:11:58 +0200
 Subject: libfc: Update rport reference counting
 References: bsc#953233
-Patch-Mainline: Submitted linux-scsi 2016/05/24
+Patch-mainline: v4.8-rc1
+Git-commit: baa6719f902af9c03e528b08dfb847de295b5137
 
 Originally libfc would just be initializing the refcount to '1',
 and using the disc_mutex to synchronize if and when the final put

@@ -2,9 +2,8 @@ From c996f7e375f9c49a7dbd5415a0a5bc4324d7ffab Mon Sep 17 00:00:00 2001
 From: Eric Anholt <eric@anholt.net>
 Date: Wed, 10 Feb 2016 11:42:32 -0800
 Subject: [PATCH 071/101] drm/vc4: Add DPI driver
-Git-commit: 4abfa518f0a071bb3c66e6f88feae3eeefaede03
-Patch-mainline: Queued in subsystem maintainer repository
-Git-repo: https://github.com/anholt/linux.git
+Git-commit: 08302c35b59d306ff37b996e56fb2a488c1d2c2e
+Patch-mainline: v4.7-rc1
 References: FATE#319481
 
 The DPI interface involves taking a ton of our GPIOs to be used as

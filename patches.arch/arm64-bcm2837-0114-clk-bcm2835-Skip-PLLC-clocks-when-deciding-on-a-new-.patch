@@ -3,8 +3,9 @@ From: Eric Anholt <eric@anholt.net>
 Date: Wed, 1 Jun 2016 12:05:36 -0700
 Subject: [PATCH 114/114] clk: bcm2835: Skip PLLC clocks when deciding on a new
  clock parent
-Patch-mainline: Submitted 06/01/2016 linux-rpi-kernel@lists.infradead.org
+Patch-mainline: v4.9-rc1
 References: bsc#983145
+Git-commit: 67615c588a059b731df9d019edc3c561d8006ec9
 
 If the firmware had set up a clock to source from PLLC, go along with
 it.  But if we're looking for a new parent, we don't want to switch it
@@ -20,6 +21,7 @@ Signed-off-by: Eric Anholt <eric@anholt.net>
 Message-id: 1464807936-532-5-git-send-email-eric@anholt.net
 Fixes: 41691b8862e2 ("clk: bcm2835: Add support for programming the audio domain clocks")
 (cherry picked from commit 0573e85c0e33ced2067af830510b4f2caa119f75)
+
 Signed-off-by: Alexander Graf <agraf@suse.de>
 ---
  drivers/clk/bcm/clk-bcm2835.c | 23 +++++++++++++++++++++++
