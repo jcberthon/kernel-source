@@ -1,6 +1,7 @@
 From: Jean Delvare <jdelvare@suse.de>
 Subject: watchdog: w83627hf_wdt: Add quirk for Inves system
-Patch-mainline: Not yet, needs extended testing
+Patch-mainline: v5.0
+Git-commit: 31eb42bd9353c807522697ddc2a6ab14b4924fa5
 References: bsc#1106434
 
 On some systems, the NCT6791D comes with a companion chip and the
@@ -11,6 +12,9 @@ Use DMI strings to identify such system and adjust the unlocking
 sequence automatically.
 
 Signed-off-by: Jean Delvare <jdelvare@suse.de>
+Reviewed-by: Guenter Roeck <linux@roeck-us.net>
+Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+Signed-off-by: Wim Van Sebroeck <wim@linux-watchdog.org>
 ---
  drivers/watchdog/w83627hf_wdt.c |   40 +++++++++++++++++++++++++++++++++++++---
  1 file changed, 37 insertions(+), 3 deletions(-)
