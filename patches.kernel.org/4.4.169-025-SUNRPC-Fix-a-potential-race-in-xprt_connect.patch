@@ -1,9 +1,11 @@
 From: Trond Myklebust <trond.myklebust@hammerspace.com>
 Date: Sat, 1 Dec 2018 23:18:00 -0500
 Subject: [PATCH] SUNRPC: Fix a potential race in xprt_connect()
+Patch-mainline: 4.4.169
+References: bnc#1012382 git-fixes
 Git-commit: 0a9a4304f3614e25d9de9b63502ca633c01c0d70
-Patch-mainline: v4.20
-References: git-fixes
+
+[ Upstream commit 0a9a4304f3614e25d9de9b63502ca633c01c0d70 ]
 
 If an asynchronous connection attempt completes while another task is
 in xprt_connect(), then the call to rpc_sleep_on() could end up
@@ -14,12 +16,14 @@ can be no asynchronous connection attempts still in progress.
 
 Fixes: 0b9e79431377d ("SUNRPC: Move the test for XPRT_CONNECTING into...")
 Signed-off-by: Trond Myklebust <trond.myklebust@hammerspace.com>
-Acked-by: NeilBrown <neilb@suse.com>
-
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- net/sunrpc/xprt.c |   11 +++++++++--
+ net/sunrpc/xprt.c | 11 +++++++++--
  1 file changed, 9 insertions(+), 2 deletions(-)
 
+diff --git a/net/sunrpc/xprt.c b/net/sunrpc/xprt.c
+index 2e98f4a243e5..112c191b8336 100644
 --- a/net/sunrpc/xprt.c
 +++ b/net/sunrpc/xprt.c
 @@ -758,8 +758,15 @@ void xprt_connect(struct rpc_task *task)
@@ -40,3 +44,6 @@ Acked-by: NeilBrown <neilb@suse.com>
  	}
  	xprt_release_write(xprt, task);
  }
+-- 
+2.20.1
+

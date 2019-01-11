@@ -1,10 +1,12 @@
-From 63238173b2faf3d6b85a416f1c69af6c7be2413f Mon Sep 17 00:00:00 2001
 From: Brian Norris <briannorris@chromium.org>
 Date: Wed, 5 Dec 2018 10:16:57 -0800
-Subject: Revert "drm/rockchip: Allow driver to be shutdown on reboot/kexec"
+Subject: [PATCH] Revert "drm/rockchip: Allow driver to be shutdown on
+ reboot/kexec"
+Patch-mainline: 4.4.169
+References: bnc#1012382 bsc#1106929
 Git-commit: 63238173b2faf3d6b85a416f1c69af6c7be2413f
-Patch-mainline: v4.20-rc7
-References: bsc#1106929
+
+commit 63238173b2faf3d6b85a416f1c69af6c7be2413f upstream.
 
 This reverts commit 7f3ef5dedb146e3d5063b6845781ad1bb59b92b5.
 
@@ -60,16 +62,17 @@ Cc: stable@vger.kernel.org
 Signed-off-by: Brian Norris <briannorris@chromium.org>
 Signed-off-by: Heiko Stuebner <heiko@sntech.de>
 Link: https://patchwork.freedesktop.org/patch/msgid/20181205181657.177703-1-briannorris@chromium.org
-Acked-by: Thomas Zimmermann <tzimmermann@suse.de>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  drivers/gpu/drm/rockchip/rockchip_drm_drv.c | 6 ------
  1 file changed, 6 deletions(-)
 
 diff --git a/drivers/gpu/drm/rockchip/rockchip_drm_drv.c b/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
-index 941f35233b1f..5864cb452c5c 100644
+index d1f3be78c649..f22e1e1ee64a 100644
 --- a/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
 +++ b/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
-@@ -448,11 +448,6 @@ static int rockchip_drm_platform_remove(struct platform_device *pdev)
+@@ -547,11 +547,6 @@ static int rockchip_drm_platform_remove(struct platform_device *pdev)
  	return 0;
  }
  
@@ -81,7 +84,7 @@ index 941f35233b1f..5864cb452c5c 100644
  static const struct of_device_id rockchip_drm_dt_ids[] = {
  	{ .compatible = "rockchip,display-subsystem", },
  	{ /* sentinel */ },
-@@ -462,7 +457,6 @@ MODULE_DEVICE_TABLE(of, rockchip_drm_dt_ids);
+@@ -561,7 +556,6 @@ MODULE_DEVICE_TABLE(of, rockchip_drm_dt_ids);
  static struct platform_driver rockchip_drm_platform_driver = {
  	.probe = rockchip_drm_platform_probe,
  	.remove = rockchip_drm_platform_remove,
