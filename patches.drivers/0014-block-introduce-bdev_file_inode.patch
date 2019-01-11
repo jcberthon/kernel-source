@@ -20,7 +20,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 
 --- a/fs/block_dev.c
 +++ b/fs/block_dev.c
-@@ -163,11 +163,16 @@ static void submit_failfast_bio(int rw,
+@@ -155,11 +155,16 @@ static void submit_failfast_bio(int rw,
  	submit_bio(rw, bio);
  }
  
