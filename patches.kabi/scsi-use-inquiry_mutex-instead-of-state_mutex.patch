@@ -1,0 +1,218 @@
+From: Hannes Reinecke <hare@suse.de>
+Date: Fri, 11 Jan 2019 14:53:47 +0100
+Subject: [PATCH] scsi: use 'inquiry_mutex' instead of 'state_mutex'
+Patch-Mainline: never, SLE12 SP3 kABI fix
+References: bsc#1119877
+
+'state_mutex' and 'inquiry_mutex' are used for two distinct use-cases,
+and will never collide. So we can use 'inquiry_mutex' instead of
+'state_mutex' and can drop 'state_mutex' completely, preserving
+the kABI.
+
+Signed-off-by: Hannes Reinecke <hare@suse.com>
+---
+ drivers/scsi/scsi_error.c         |  4 ++--
+ drivers/scsi/scsi_lib.c           | 16 ++++++++--------
+ drivers/scsi/scsi_scan.c          |  5 ++---
+ drivers/scsi/scsi_sysfs.c         | 12 ++++++------
+ drivers/scsi/scsi_transport_srp.c |  4 ++--
+ drivers/scsi/sd.c                 |  4 ++--
+ include/scsi/scsi_device.h        |  1 -
+ 7 files changed, 22 insertions(+), 24 deletions(-)
+
+diff --git a/drivers/scsi/scsi_error.c b/drivers/scsi/scsi_error.c
+index ac3196420435..457eb54e4466 100644
+--- a/drivers/scsi/scsi_error.c
++++ b/drivers/scsi/scsi_error.c
+@@ -1635,9 +1635,9 @@ static void scsi_eh_offline_sdevs(struct list_head *work_q,
+ 			    "not ready after error recovery\n");
+ 		sdev = scmd->device;
+ 
+-		mutex_lock(&sdev->state_mutex);
++		mutex_lock(&sdev->inquiry_mutex);
+ 		scsi_device_set_state(sdev, SDEV_OFFLINE);
+-		mutex_unlock(&sdev->state_mutex);
++		mutex_unlock(&sdev->inquiry_mutex);
+ 
+ 		if (scmd->eh_eflags & SCSI_EH_CANCEL_CMD) {
+ 			/*
+diff --git a/drivers/scsi/scsi_lib.c b/drivers/scsi/scsi_lib.c
+index 0554a6a7ea55..e5e52fbbea9d 100644
+--- a/drivers/scsi/scsi_lib.c
++++ b/drivers/scsi/scsi_lib.c
+@@ -2884,9 +2884,9 @@ scsi_device_quiesce(struct scsi_device *sdev)
+ {
+ 	int err;
+ 
+-	mutex_lock(&sdev->state_mutex);
++	mutex_lock(&sdev->inquiry_mutex);
+ 	err = scsi_device_set_state(sdev, SDEV_QUIESCE);
+-	mutex_unlock(&sdev->state_mutex);
++	mutex_unlock(&sdev->inquiry_mutex);
+ 
+ 	if (err)
+ 		return err;
+@@ -2915,11 +2915,11 @@ void scsi_device_resume(struct scsi_device *sdev)
+ 	 * so assume the state is being managed elsewhere (for example
+ 	 * device deleted during suspend)
+ 	 */
+-	mutex_lock(&sdev->state_mutex);
++	mutex_lock(&sdev->inquiry_mutex);
+ 	if (sdev->sdev_state == SDEV_QUIESCE &&
+ 	    scsi_device_set_state(sdev, SDEV_RUNNING) == 0)
+ 		scsi_run_queue(sdev->request_queue);
+-	mutex_unlock(&sdev->state_mutex);
++	mutex_unlock(&sdev->inquiry_mutex);
+ }
+ EXPORT_SYMBOL(scsi_device_resume);
+ 
+@@ -3018,7 +3018,7 @@ static int scsi_internal_device_block(struct scsi_device *sdev)
+ 	struct request_queue *q = sdev->request_queue;
+ 	int err;
+ 
+-	mutex_lock(&sdev->state_mutex);
++	mutex_lock(&sdev->inquiry_mutex);
+ 	err = scsi_internal_device_block_nowait(sdev);
+ 	if (err == 0) {
+ 		if (q->mq_ops)
+@@ -3026,7 +3026,7 @@ static int scsi_internal_device_block(struct scsi_device *sdev)
+ 		else
+ 			scsi_wait_for_queuecommand(sdev);
+ 	}
+-	mutex_unlock(&sdev->state_mutex);
++	mutex_unlock(&sdev->inquiry_mutex);
+ 
+ 	return err;
+ }
+@@ -3105,9 +3105,9 @@ static int scsi_internal_device_unblock(struct scsi_device *sdev,
+ {
+ 	int ret;
+ 
+-	mutex_lock(&sdev->state_mutex);
++	mutex_lock(&sdev->inquiry_mutex);
+ 	ret = scsi_internal_device_unblock_nowait(sdev, new_state);
+-	mutex_unlock(&sdev->state_mutex);
++	mutex_unlock(&sdev->inquiry_mutex);
+ 
+ 	return ret;
+ }
+diff --git a/drivers/scsi/scsi_scan.c b/drivers/scsi/scsi_scan.c
+index e6de4eee97a3..a6cfa289ccd6 100644
+--- a/drivers/scsi/scsi_scan.c
++++ b/drivers/scsi/scsi_scan.c
+@@ -231,7 +231,6 @@ static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
+ 	sdev->id = starget->id;
+ 	sdev->lun = lun;
+ 	sdev->channel = starget->channel;
+-	mutex_init(&sdev->state_mutex);
+ 	sdev->sdev_state = SDEV_CREATED;
+ 	INIT_LIST_HEAD(&sdev->siblings);
+ 	INIT_LIST_HEAD(&sdev->same_target_siblings);
+@@ -944,11 +943,11 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
+ 
+ 	/* set the device running here so that slave configure
+ 	 * may do I/O */
+-	mutex_lock(&sdev->state_mutex);
++	mutex_lock(&sdev->inquiry_mutex);
+ 	ret = scsi_device_set_state(sdev, SDEV_RUNNING);
+ 	if (ret)
+ 		ret = scsi_device_set_state(sdev, SDEV_BLOCK);
+-	mutex_unlock(&sdev->state_mutex);
++	mutex_unlock(&sdev->inquiry_mutex);
+ 
+ 	if (ret) {
+ 		sdev_printk(KERN_ERR, sdev,
+diff --git a/drivers/scsi/scsi_sysfs.c b/drivers/scsi/scsi_sysfs.c
+index ce470f62a8ae..21c91d48d062 100644
+--- a/drivers/scsi/scsi_sysfs.c
++++ b/drivers/scsi/scsi_sysfs.c
+@@ -734,9 +734,9 @@ store_state_field(struct device *dev, struct device_attribute *attr,
+ 	if (!state)
+ 		return -EINVAL;
+ 
+-	mutex_lock(&sdev->state_mutex);
++	mutex_lock(&sdev->inquiry_mutex);
+ 	ret = scsi_device_set_state(sdev, state);
+-	mutex_unlock(&sdev->state_mutex);
++	mutex_unlock(&sdev->inquiry_mutex);
+ 
+ 	return ret == 0 ? count : -EINVAL;
+ }
+@@ -1289,7 +1289,7 @@ void __scsi_remove_device(struct scsi_device *sdev)
+ 		 * If scsi_internal_target_block() is running concurrently,
+ 		 * wait until it has finished before changing the device state.
+ 		 */
+-		mutex_lock(&sdev->state_mutex);
++		mutex_lock(&sdev->inquiry_mutex);
+ 		/*
+ 		 * If blocked, we go straight to DEL and restart the queue so
+ 		 * any commands issued during driver shutdown (like sync
+@@ -1301,7 +1301,7 @@ void __scsi_remove_device(struct scsi_device *sdev)
+ 			if (res == 0)
+ 				scsi_start_queue(sdev);
+ 		}
+-		mutex_unlock(&sdev->state_mutex);
++		mutex_unlock(&sdev->inquiry_mutex);
+ 
+ 		if (res != 0)
+ 			return;
+@@ -1319,9 +1319,9 @@ void __scsi_remove_device(struct scsi_device *sdev)
+ 	 * scsi_run_queue() invocations have finished before tearing down the
+ 	 * device.
+ 	 */
+-	mutex_lock(&sdev->state_mutex);
++	mutex_lock(&sdev->inquiry_mutex);
+ 	scsi_device_set_state(sdev, SDEV_DEL);
+-	mutex_unlock(&sdev->state_mutex);
++	mutex_unlock(&sdev->inquiry_mutex);
+ 
+ 	blk_cleanup_queue(sdev->request_queue);
+ 	cancel_work_sync(&sdev->requeue_work);
+diff --git a/drivers/scsi/scsi_transport_srp.c b/drivers/scsi/scsi_transport_srp.c
+index f617021c94f7..91dc733ab46c 100644
+--- a/drivers/scsi/scsi_transport_srp.c
++++ b/drivers/scsi/scsi_transport_srp.c
+@@ -555,10 +555,10 @@ int srp_reconnect_rport(struct srp_rport *rport)
+ 		 * these devices into running so do that explicitly.
+ 		 */
+ 		shost_for_each_device(sdev, shost) {
+-			mutex_lock(&sdev->state_mutex);
++			mutex_lock(&sdev->inquiry_mutex);
+ 			if (sdev->sdev_state == SDEV_OFFLINE)
+ 				sdev->sdev_state = SDEV_RUNNING;
+-			mutex_unlock(&sdev->state_mutex);
++			mutex_unlock(&sdev->inquiry_mutex);
+ 		}
+ 	} else if (rport->state == SRP_RPORT_RUNNING) {
+ 		/*
+diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
+index 53b6d72c214d..0f15c0a84256 100644
+--- a/drivers/scsi/sd.c
++++ b/drivers/scsi/sd.c
+@@ -1846,9 +1846,9 @@ static int sd_eh_action(struct scsi_cmnd *scmd, int eh_disp)
+ 	if (sdkp->medium_access_timed_out >= sdkp->max_medium_access_timeouts) {
+ 		scmd_printk(KERN_ERR, scmd,
+ 			    "Medium access timeout failure. Offlining disk!\n");
+-		mutex_lock(&sdev->state_mutex);
++		mutex_lock(&sdev->inquiry_mutex);
+ 		scsi_device_set_state(sdev, SDEV_OFFLINE);
+-		mutex_unlock(&sdev->state_mutex);
++		mutex_unlock(&sdev->inquiry_mutex);
+ 
+ 		return FAILED;
+ 	}
+diff --git a/include/scsi/scsi_device.h b/include/scsi/scsi_device.h
+index d13bc80825b1..5f24dae2a8e1 100644
+--- a/include/scsi/scsi_device.h
++++ b/include/scsi/scsi_device.h
+@@ -207,7 +207,6 @@ struct scsi_device {
+ 	void			*handler_data;
+ 
+ 	unsigned char		access_state;
+-	struct mutex		state_mutex;
+ 	enum scsi_device_state sdev_state;
+ 	unsigned long		sdev_data[0];
+ } __attribute__((aligned(sizeof(unsigned long))));
+-- 
+2.16.4
+
