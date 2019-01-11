@@ -24,7 +24,7 @@ Reviewed-by: Radim Krčmář <rkrcmar@redhat.com>
 Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
 Acked-by: Joerg Roedel <jroedel@suse.de>
 ---
- arch/x86/kvm/svm.c | 89 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ arch/x86/kvm/svm.c |   89 +++++++++++++++++++++++++++++++++++++++++++++++++++++
  1 file changed, 89 insertions(+)
 
 --- a/arch/x86/kvm/svm.c
@@ -37,7 +37,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  #include <asm/perf_event.h>
  #include <asm/tlbflush.h>
  #include <asm/desc.h>
-@@ -181,6 +182,7 @@ struct vcpu_svm {
+@@ -193,6 +194,7 @@ struct vcpu_svm {
  	u32 ldr_reg;
  	struct page *avic_backing_page;
  	u64 *avic_physical_id_cache;
@@ -45,7 +45,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  };
  
  #define AVIC_LOGICAL_ID_ENTRY_GUEST_PHYSICAL_ID_MASK	(0xFF)
-@@ -1313,6 +1315,72 @@ free_avic:
+@@ -1348,6 +1350,72 @@ free_avic:
  	return err;
  }
  
@@ -118,7 +118,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  static void svm_vcpu_reset(struct kvm_vcpu *vcpu, bool init_event)
  {
  	struct vcpu_svm *svm = to_svm(vcpu);
-@@ -1376,6 +1444,11 @@ static struct kvm_vcpu *svm_create_vcpu(
+@@ -1414,6 +1482,11 @@ static struct kvm_vcpu *svm_create_vcpu(
  			goto free_page4;
  	}
  
@@ -130,16 +130,16 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	svm->nested.hsave = page_address(hsave_page);
  
  	svm->msrpm = page_address(msrpm_pages);
-@@ -1449,6 +1522,8 @@ static void svm_vcpu_load(struct kvm_vcp
- 	/* This assumes that the kernel never uses MSR_TSC_AUX */
- 	if (static_cpu_has(X86_FEATURE_RDTSCP))
- 		wrmsrl(MSR_TSC_AUX, svm->tsc_aux);
+@@ -1500,6 +1573,8 @@ static void svm_vcpu_load(struct kvm_vcp
+ 		sd->current_vmcb = svm->vmcb;
+ 		indirect_branch_prediction_barrier();
+ 	}
 +
 +	avic_vcpu_load(vcpu, cpu);
  }
  
  static void svm_vcpu_put(struct kvm_vcpu *vcpu)
-@@ -1456,6 +1531,8 @@ static void svm_vcpu_put(struct kvm_vcpu
+@@ -1507,6 +1582,8 @@ static void svm_vcpu_put(struct kvm_vcpu
  	struct vcpu_svm *svm = to_svm(vcpu);
  	int i;
  
@@ -148,7 +148,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	++vcpu->stat.host_state_reload;
  	kvm_load_ldt(svm->host.ldt);
  #ifdef CONFIG_X86_64
-@@ -1471,6 +1548,16 @@ static void svm_vcpu_put(struct kvm_vcpu
+@@ -1522,6 +1599,16 @@ static void svm_vcpu_put(struct kvm_vcpu
  		wrmsrl(host_save_user_msrs[i], svm->host_user_msrs[i]);
  }
  
@@ -165,7 +165,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  static unsigned long svm_get_rflags(struct kvm_vcpu *vcpu)
  {
  	return to_svm(vcpu)->vmcb->save.rflags;
-@@ -4833,6 +4920,8 @@ static struct kvm_x86_ops svm_x86_ops =
+@@ -5037,6 +5124,8 @@ static struct kvm_x86_ops svm_x86_ops =
  	.prepare_guest_switch = svm_prepare_guest_switch,
  	.vcpu_load = svm_vcpu_load,
  	.vcpu_put = svm_vcpu_put,

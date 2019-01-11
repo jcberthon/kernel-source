@@ -15,15 +15,15 @@ Signed-off-by: Suravee Suthikulpanit <suravee.suthikulpanit@amd.com>
 Signed-off-by: Radim Krčmář <rkrcmar@redhat.com>
 Acked-by: Joerg Roedel <jroedel@suse.de>
 ---
- arch/x86/include/asm/kvm_host.h | 2 +-
- arch/x86/kvm/svm.c              | 2 +-
- arch/x86/kvm/vmx.c              | 2 +-
- arch/x86/kvm/x86.c              | 2 +-
+ arch/x86/include/asm/kvm_host.h |    2 +-
+ arch/x86/kvm/svm.c              |    2 +-
+ arch/x86/kvm/vmx.c              |    2 +-
+ arch/x86/kvm/x86.c              |    2 +-
  4 files changed, 4 insertions(+), 4 deletions(-)
 
 --- a/arch/x86/include/asm/kvm_host.h
 +++ b/arch/x86/include/asm/kvm_host.h
-@@ -882,7 +882,7 @@ struct kvm_x86_ops {
+@@ -877,7 +877,7 @@ struct kvm_x86_ops {
  	void (*enable_nmi_window)(struct kvm_vcpu *vcpu);
  	void (*enable_irq_window)(struct kvm_vcpu *vcpu);
  	void (*update_cr8_intercept)(struct kvm_vcpu *vcpu, int tpr, int irr);
@@ -34,7 +34,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	void (*hwapic_isr_update)(struct kvm *kvm, int isr);
 --- a/arch/x86/kvm/svm.c
 +++ b/arch/x86/kvm/svm.c
-@@ -4344,7 +4344,7 @@ static void svm_set_virtual_x2apic_mode(
+@@ -4427,7 +4427,7 @@ static void svm_set_virtual_x2apic_mode(
  	return;
  }
  
@@ -45,8 +45,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  }
 --- a/arch/x86/kvm/vmx.c
 +++ b/arch/x86/kvm/vmx.c
-@@ -4552,7 +4552,7 @@ static void vmx_disable_intercept_msr_wr
- 			msr, MSR_TYPE_W);
+@@ -4684,7 +4684,7 @@ static void vmx_update_msr_bitmap(struct
+ 	vmx->msr_bitmap_mode = mode;
  }
  
 -static bool vmx_get_enable_apicv(void)
@@ -56,7 +56,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  }
 --- a/arch/x86/kvm/x86.c
 +++ b/arch/x86/kvm/x86.c
-@@ -7685,7 +7685,7 @@ int kvm_arch_vcpu_init(struct kvm_vcpu *
+@@ -7689,7 +7689,7 @@ int kvm_arch_vcpu_init(struct kvm_vcpu *
  	BUG_ON(vcpu->kvm == NULL);
  	kvm = vcpu->kvm;
  

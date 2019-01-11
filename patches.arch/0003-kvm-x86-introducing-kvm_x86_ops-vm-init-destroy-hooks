@@ -12,14 +12,14 @@ Signed-off-by: Suravee Suthikulpanit <suravee.suthikulpanit@amd.com>
 Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
 Acked-by: Joerg Roedel <jroedel@suse.de>
 ---
- arch/x86/include/asm/kvm_host.h | 3 +++
- arch/x86/kvm/x86.c              | 5 +++++
+ arch/x86/include/asm/kvm_host.h |    3 +++
+ arch/x86/kvm/x86.c              |    5 +++++
  2 files changed, 8 insertions(+)
 
 --- a/arch/x86/include/asm/kvm_host.h
 +++ b/arch/x86/include/asm/kvm_host.h
-@@ -770,6 +770,9 @@ struct kvm_x86_ops {
- 	bool (*cpu_has_high_real_mode_segbase)(void);
+@@ -794,6 +794,9 @@ struct kvm_x86_ops {
+ 	bool (*has_emulated_msr)(int index);
  	void (*cpuid_update)(struct kvm_vcpu *vcpu);
  
 +	int (*vm_init)(struct kvm *kvm);
@@ -30,7 +30,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	void (*vcpu_free)(struct kvm_vcpu *vcpu);
 --- a/arch/x86/kvm/x86.c
 +++ b/arch/x86/kvm/x86.c
-@@ -7757,6 +7757,9 @@ int __x86_set_memory_region(struct kvm *
+@@ -7868,6 +7868,9 @@ int __x86_set_memory_region(struct kvm *
  		WARN_ON(r < 0);
  	}
  
@@ -40,7 +40,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	return 0;
  }
  EXPORT_SYMBOL_GPL(__x86_set_memory_region);
-@@ -7785,6 +7788,8 @@ void kvm_arch_destroy_vm(struct kvm *kvm
+@@ -7896,6 +7899,8 @@ void kvm_arch_destroy_vm(struct kvm *kvm
  		x86_set_memory_region(kvm, IDENTITY_PAGETABLE_PRIVATE_MEMSLOT, 0, 0);
  		x86_set_memory_region(kvm, TSS_PRIVATE_MEMSLOT, 0, 0);
  	}

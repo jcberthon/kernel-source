@@ -18,15 +18,15 @@ Reviewed-by: Xiao Guangrong <guangrong.xiao@linux.intel.com>
 Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
 Acked-by: Joerg Roedel <jroedel@suse.de>
 ---
- arch/x86/include/asm/kvm_host.h |  3 ++-
- arch/x86/kvm/cpuid.c            | 23 +++++++++++++++++++++--
- arch/x86/kvm/cpuid.h            |  8 ++++++++
- arch/x86/kvm/x86.c              |  9 ++++++---
- 4 files changed, 37 insertions(+), 6 deletions(-)
+ arch/x86/include/asm/kvm_host.h |    3 ++-
+ arch/x86/kvm/cpuid.c            |   20 +++++++++++++++++++-
+ arch/x86/kvm/cpuid.h            |    8 ++++++++
+ arch/x86/kvm/x86.c              |    9 ++++++---
+ 4 files changed, 35 insertions(+), 5 deletions(-)
 
 --- a/arch/x86/include/asm/kvm_host.h
 +++ b/arch/x86/include/asm/kvm_host.h
-@@ -57,7 +57,8 @@
+@@ -58,7 +58,8 @@
  			  | X86_CR4_PSE | X86_CR4_PAE | X86_CR4_MCE     \
  			  | X86_CR4_PGE | X86_CR4_PCE | X86_CR4_OSFXSR | X86_CR4_PCIDE \
  			  | X86_CR4_OSXSAVE | X86_CR4_SMEP | X86_CR4_FSGSBASE \
@@ -38,7 +38,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
 --- a/arch/x86/kvm/cpuid.c
 +++ b/arch/x86/kvm/cpuid.c
-@@ -81,6 +81,16 @@ int kvm_update_cpuid(struct kvm_vcpu *vc
+@@ -94,6 +94,16 @@ int kvm_update_cpuid(struct kvm_vcpu *vc
  			apic->lapic_timer.timer_mode_mask = 1 << 17;
  	}
  
@@ -55,38 +55,40 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	best = kvm_find_cpuid_entry(vcpu, 0xD, 0);
  	if (!best) {
  		vcpu->arch.guest_supported_xcr0 = 0;
-@@ -354,6 +364,9 @@ static inline int __do_cpuid_ent(struct
+@@ -371,6 +381,9 @@ static inline int __do_cpuid_ent(struct
  	const u32 kvm_cpuid_D_1_eax_x86_features =
  		F(XSAVEOPT) | F(XSAVEC) | F(XGETBV1) | f_xsaves;
  
 +	/* cpuid 7.0.ecx*/
 +	const u32 kvm_cpuid_7_0_ecx_x86_features = F(PKU) | 0 /*OSPKE*/;
 +
- 	/* all calls to cpuid_count() should be made on the same cpu */
- 	get_cpu();
- 
-@@ -431,10 +444,16 @@ static inline int __do_cpuid_ent(struct
+ 	/* cpuid 7.0.edx*/
+ 	const u32 kvm_cpuid_7_0_edx_x86_features =
+ 		KF(SPEC_CTRL) | KF(SPEC_CTRL_SSBD) | KF(ARCH_CAPABILITIES);
+@@ -452,14 +465,19 @@ static inline int __do_cpuid_ent(struct
  			cpuid_mask(&entry->ebx, CPUID_7_0_EBX);
  			// TSC_ADJUST is emulated
  			entry->ebx |= F(TSC_ADJUST);
--		} else
 +			entry->ecx &= kvm_cpuid_7_0_ecx_x86_features;
 +			cpuid_mask(&entry->ecx, CPUID_7_ECX);
 +			/* PKU is not yet implemented for shadow paging. */
 +			if (!tdp_enabled)
 +				entry->ecx &= ~F(PKU);
-+		} else {
+ 			entry->edx &= kvm_cpuid_7_0_edx_x86_features;
+ 			entry->edx &= get_scattered_cpuid_leaf(7, 0, CPUID_EDX);
+ 		} else {
  			entry->ebx = 0;
 +			entry->ecx = 0;
-+		}
+ 			entry->edx = 0;
+ 		}
  		entry->eax = 0;
 -		entry->ecx = 0;
- 		entry->edx = 0;
  		break;
  	}
+ 	case 9:
 --- a/arch/x86/kvm/cpuid.h
 +++ b/arch/x86/kvm/cpuid.h
-@@ -78,6 +78,14 @@ static inline bool guest_cpuid_has_fsgsb
+@@ -79,6 +79,14 @@ static inline bool guest_cpuid_has_fsgsb
  	return best && (best->ebx & bit(X86_FEATURE_FSGSBASE));
  }
  
@@ -103,7 +105,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	struct kvm_cpuid_entry2 *best;
 --- a/arch/x86/kvm/x86.c
 +++ b/arch/x86/kvm/x86.c
-@@ -728,7 +728,7 @@ int kvm_set_cr4(struct kvm_vcpu *vcpu, u
+@@ -731,7 +731,7 @@ int kvm_set_cr4(struct kvm_vcpu *vcpu, u
  {
  	unsigned long old_cr4 = kvm_read_cr4(vcpu);
  	unsigned long pdptr_bits = X86_CR4_PGE | X86_CR4_PSE | X86_CR4_PAE |
@@ -112,7 +114,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
  	if (cr4 & CR4_RESERVED_BITS)
  		return 1;
-@@ -745,6 +745,9 @@ int kvm_set_cr4(struct kvm_vcpu *vcpu, u
+@@ -748,6 +748,9 @@ int kvm_set_cr4(struct kvm_vcpu *vcpu, u
  	if (!guest_cpuid_has_fsgsbase(vcpu) && (cr4 & X86_CR4_FSGSBASE))
  		return 1;
  
@@ -122,7 +124,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	if (is_long_mode(vcpu)) {
  		if (!(cr4 & X86_CR4_PAE))
  			return 1;
-@@ -770,7 +773,7 @@ int kvm_set_cr4(struct kvm_vcpu *vcpu, u
+@@ -774,7 +777,7 @@ int kvm_set_cr4(struct kvm_vcpu *vcpu, u
  	    (!(cr4 & X86_CR4_PCIDE) && (old_cr4 & X86_CR4_PCIDE)))
  		kvm_mmu_reset_context(vcpu);
  
@@ -131,7 +133,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		kvm_update_cpuid(vcpu);
  
  	return 0;
-@@ -7058,7 +7061,7 @@ int kvm_arch_vcpu_ioctl_set_sregs(struct
+@@ -7159,7 +7162,7 @@ int kvm_arch_vcpu_ioctl_set_sregs(struct
  
  	mmu_reset_needed |= kvm_read_cr4(vcpu) != sregs->cr4;
  	kvm_x86_ops->set_cr4(vcpu, sregs->cr4);
