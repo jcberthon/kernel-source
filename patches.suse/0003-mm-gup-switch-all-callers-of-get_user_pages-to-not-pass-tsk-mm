@@ -42,36 +42,36 @@ Link: http://lkml.kernel.org/r/20160212210156.113E9407@viggo.jf.intel.com
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Acked-by: Joerg Roedel <jroedel@suse.de>
 ---
- arch/cris/arch-v32/drivers/cryptocop.c      |  8 ++------
- arch/ia64/kernel/err_inject.c               |  3 +--
- arch/mips/mm/gup.c                          |  3 +--
- arch/s390/mm/gup.c                          |  4 +---
- arch/sh/mm/gup.c                            |  2 +-
- arch/sparc/mm/gup.c                         |  2 +-
- arch/x86/mm/gup.c                           |  2 +-
- arch/x86/mm/mpx.c                           |  4 ++--
- drivers/gpu/drm/amd/amdgpu/amdgpu_ttm.c     |  3 +--
- drivers/gpu/drm/radeon/radeon_ttm.c         |  3 +--
- drivers/gpu/drm/via/via_dmablit.c           |  3 +--
- drivers/infiniband/core/umem.c              |  2 +-
- drivers/infiniband/hw/mthca/mthca_memfree.c |  3 +--
- drivers/infiniband/hw/qib/qib_user_pages.c  |  3 +--
- drivers/infiniband/hw/usnic/usnic_uiom.c    |  2 +-
- drivers/media/pci/ivtv/ivtv-udma.c          |  4 ++--
- drivers/media/pci/ivtv/ivtv-yuv.c           | 10 ++++------
- drivers/media/v4l2-core/videobuf-dma-sg.c   |  3 +--
- drivers/misc/mic/scif/scif_rma.c            |  2 --
- drivers/misc/sgi-gru/grufault.c             |  3 +--
- drivers/scsi/st.c                           |  2 --
- drivers/video/fbdev/pvr2fb.c                |  4 ++--
- drivers/virt/fsl_hypervisor.c               |  5 ++---
- mm/frame_vector.c                           |  2 +-
- mm/gup.c                                    |  6 ++++--
- mm/ksm.c                                    |  2 +-
- mm/mempolicy.c                              |  6 +++---
- net/ceph/pagevec.c                          |  2 +-
- virt/kvm/kvm_main.c                         | 10 +++++-----
- 29 files changed, 44 insertions(+), 64 deletions(-)
+ arch/cris/arch-v32/drivers/cryptocop.c      |    8 ++------
+ arch/ia64/kernel/err_inject.c               |    3 +--
+ arch/mips/mm/gup.c                          |    3 +--
+ arch/s390/mm/gup.c                          |    5 ++---
+ arch/sh/mm/gup.c                            |    2 +-
+ arch/sparc/mm/gup.c                         |    2 +-
+ arch/x86/mm/gup.c                           |    2 +-
+ arch/x86/mm/mpx.c                           |    4 ++--
+ drivers/gpu/drm/amd/amdgpu/amdgpu_ttm.c     |    3 +--
+ drivers/gpu/drm/radeon/radeon_ttm.c         |    4 ++--
+ drivers/gpu/drm/via/via_dmablit.c           |    3 +--
+ drivers/infiniband/core/umem.c              |    2 +-
+ drivers/infiniband/hw/mthca/mthca_memfree.c |    3 +--
+ drivers/infiniband/hw/qib/qib_user_pages.c  |    3 +--
+ drivers/infiniband/hw/usnic/usnic_uiom.c    |    2 +-
+ drivers/media/pci/ivtv/ivtv-udma.c          |    5 ++---
+ drivers/media/pci/ivtv/ivtv-yuv.c           |   11 +++++------
+ drivers/media/v4l2-core/videobuf-dma-sg.c   |    3 +--
+ drivers/misc/mic/scif/scif_rma.c            |    2 --
+ drivers/misc/sgi-gru/grufault.c             |    3 +--
+ drivers/scsi/st.c                           |    2 --
+ drivers/video/fbdev/pvr2fb.c                |    4 ++--
+ drivers/virt/fsl_hypervisor.c               |    6 ++----
+ mm/frame_vector.c                           |    2 +-
+ mm/gup.c                                    |    6 ++++--
+ mm/ksm.c                                    |    2 +-
+ mm/mempolicy.c                              |    6 +++---
+ net/ceph/pagevec.c                          |    2 +-
+ virt/kvm/kvm_main.c                         |   10 +++++-----
+ 29 files changed, 47 insertions(+), 66 deletions(-)
 
 --- a/arch/cris/arch-v32/drivers/cryptocop.c
 +++ b/arch/cris/arch-v32/drivers/cryptocop.c
@@ -85,8 +85,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 +	err = get_user_pages((unsigned long int)(oper.indata + prev_ix),
  			     noinpages,
  			     0,  /* read access only for in data */
- 			     0, /* no force */
-@@ -2736,9 +2734,7 @@ static int cryptocop_ioctl_process(struc
+ 			     inpages,
+@@ -2735,9 +2733,7 @@ static int cryptocop_ioctl_process(struc
  	}
  	noinpages = err;
  	if (oper.do_cipher){
@@ -95,8 +95,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 -				     (unsigned long int)oper.cipher_outdata,
 +		err = get_user_pages((unsigned long int)oper.cipher_outdata,
  				     nooutpages,
- 				     1, /* write access for out data */
- 				     0, /* no force */
+ 				     FOLL_WRITE, /* write access for out data */
+ 				     outpages,
 --- a/arch/ia64/kernel/err_inject.c
 +++ b/arch/ia64/kernel/err_inject.c
 @@ -142,8 +142,7 @@ store_virtual_to_phys(struct device *dev
@@ -104,8 +104,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	int ret;
  
 -        ret = get_user_pages(current, current->mm, virt_addr,
--                        1, VM_READ, 0, NULL, NULL);
-+	ret = get_user_pages(virt_addr, 1, VM_READ, 0, NULL, NULL);
+-			     1, FOLL_WRITE, NULL, NULL);
++	ret = get_user_pages(virt_addr, 1, FOLL_WRITE, NULL, NULL);
  	if (ret<=0) {
  #ifdef ERR_INJ_DEBUG
  		printk("Virtual address %lx is not existing.\n",virt_addr);
@@ -118,12 +118,12 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 -	ret = get_user_pages_unlocked(current, mm, start,
 -				      (end - start) >> PAGE_SHIFT,
 +	ret = get_user_pages_unlocked(start, (end - start) >> PAGE_SHIFT,
- 				      write, 0, pages);
+ 				      pages, write ? FOLL_WRITE : 0);
  
  	/* Have to be a bit careful with return values */
 --- a/arch/s390/mm/gup.c
 +++ b/arch/s390/mm/gup.c
-@@ -273,7 +273,6 @@ int __get_user_pages_fast(unsigned long
+@@ -230,7 +230,6 @@ int __get_user_pages_fast(unsigned long
  int get_user_pages_fast(unsigned long start, int nr_pages, int write,
  			struct page **pages)
  {
@@ -131,13 +131,14 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	int nr, ret;
  
  	start &= PAGE_MASK;
-@@ -284,8 +283,7 @@ int get_user_pages_fast(unsigned long st
+@@ -241,8 +240,8 @@ int get_user_pages_fast(unsigned long st
  	/* Try to get the remaining pages with get_user_pages */
  	start += nr << PAGE_SHIFT;
  	pages += nr;
 -	ret = get_user_pages_unlocked(current, mm, start,
--			     nr_pages - nr, write, 0, pages);
-+	ret = get_user_pages_unlocked(start, nr_pages - nr, write, 0, pages);
+-			     nr_pages - nr, pages, write ? FOLL_WRITE : 0);
++	ret = get_user_pages_unlocked(start, nr_pages - nr, pages,
++				     write ? FOLL_WRITE : 0);
  	/* Have to be a bit careful with return values */
  	if (nr > 0)
  		ret = (ret < 0) ? nr : ret + nr;
@@ -149,9 +150,9 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
 -		ret = get_user_pages_unlocked(current, mm, start,
 +		ret = get_user_pages_unlocked(start,
- 			(end - start) >> PAGE_SHIFT, write, 0, pages);
+ 			(end - start) >> PAGE_SHIFT, pages,
+ 			write ? FOLL_WRITE : 0);
  
- 		/* Have to be a bit careful with return values */
 --- a/arch/sparc/mm/gup.c
 +++ b/arch/sparc/mm/gup.c
 @@ -249,7 +249,7 @@ slow:
@@ -160,54 +161,55 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
 -		ret = get_user_pages_unlocked(current, mm, start,
 +		ret = get_user_pages_unlocked(start,
- 			(end - start) >> PAGE_SHIFT, write, 0, pages);
+ 			(end - start) >> PAGE_SHIFT, pages,
+ 			write ? FOLL_WRITE : 0);
  
- 		/* Have to be a bit careful with return values */
 --- a/arch/x86/mm/gup.c
 +++ b/arch/x86/mm/gup.c
-@@ -452,7 +452,7 @@ slow_irqon:
+@@ -437,7 +437,7 @@ slow_irqon:
  		start += nr << PAGE_SHIFT;
  		pages += nr;
  
 -		ret = get_user_pages_unlocked(current, mm, start,
 +		ret = get_user_pages_unlocked(start,
  					      (end - start) >> PAGE_SHIFT,
- 					      write, 0, pages);
+ 					      pages, write ? FOLL_WRITE : 0);
  
 --- a/arch/x86/mm/mpx.c
 +++ b/arch/x86/mm/mpx.c
-@@ -546,8 +546,8 @@ static int mpx_resolve_fault(long __user
+@@ -537,8 +537,8 @@ static int mpx_resolve_fault(long __user
+ 	long gup_ret;
  	int nr_pages = 1;
- 	int force = 0;
  
 -	gup_ret = get_user_pages(current, current->mm, (unsigned long)addr,
--				 nr_pages, write, force, NULL, NULL);
-+	gup_ret = get_user_pages((unsigned long)addr, nr_pages, write,
-+			force, NULL, NULL);
+-				 nr_pages, write ? FOLL_WRITE : 0, NULL, NULL);
++	gup_ret = get_user_pages((unsigned long)addr, nr_pages,
++			write ? FOLL_WRITE : 0, NULL, NULL);
  	/*
  	 * get_user_pages() returns number of pages gotten.
  	 * 0 means we failed to fault in and get anything,
 --- a/drivers/gpu/drm/amd/amdgpu/amdgpu_ttm.c
 +++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_ttm.c
-@@ -518,8 +518,7 @@ static int amdgpu_ttm_tt_pin_userptr(str
+@@ -522,8 +522,7 @@ static int amdgpu_ttm_tt_pin_userptr(str
  		uint64_t userptr = gtt->userptr + pinned * PAGE_SIZE;
  		struct page **pages = ttm->pages + pinned;
  
 -		r = get_user_pages(current, current->mm, userptr, num_pages,
--				   write, 0, pages, NULL);
-+		r = get_user_pages(userptr, num_pages, write, 0, pages, NULL);
+-				   flags, pages, NULL);
++		r = get_user_pages(userptr, num_pages, flags, pages, NULL);
  		if (r < 0)
  			goto release_pages;
  
 --- a/drivers/gpu/drm/radeon/radeon_ttm.c
 +++ b/drivers/gpu/drm/radeon/radeon_ttm.c
-@@ -556,8 +556,7 @@ static int radeon_ttm_tt_pin_userptr(str
+@@ -556,8 +556,8 @@ static int radeon_ttm_tt_pin_userptr(str
  		uint64_t userptr = gtt->userptr + pinned * PAGE_SIZE;
  		struct page **pages = ttm->pages + pinned;
  
 -		r = get_user_pages(current, current->mm, userptr, num_pages,
--				   write, 0, pages, NULL);
-+		r = get_user_pages(userptr, num_pages, write, 0, pages, NULL);
+-				   write ? FOLL_WRITE : 0, pages, NULL);
++		r = get_user_pages(userptr, num_pages, write ? FOLL_WRITE : 0,
++				   pages, NULL);
  		if (r < 0)
  			goto release_pages;
  
@@ -221,11 +223,11 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 -			     (unsigned long)xfer->mem_addr,
 +	ret = get_user_pages((unsigned long)xfer->mem_addr,
  			     vsg->num_pages,
- 			     (vsg->direction == DMA_FROM_DEVICE),
- 			     0, vsg->pages, NULL);
+ 			     (vsg->direction == DMA_FROM_DEVICE) ? FOLL_WRITE : 0,
+ 			     vsg->pages, NULL);
 --- a/drivers/infiniband/core/umem.c
 +++ b/drivers/infiniband/core/umem.c
-@@ -190,7 +190,7 @@ struct ib_umem *ib_umem_get(struct ib_uc
+@@ -185,7 +185,7 @@ struct ib_umem *ib_umem_get(struct ib_uc
  	sg_list_start = umem->sg_head.sgl;
  
  	while (npages) {
@@ -233,16 +235,16 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 +		ret = get_user_pages(cur_base,
  				     min_t(unsigned long, npages,
  					   PAGE_SIZE / sizeof (struct page *)),
- 				     1, !umem->writable, page_list, vma_list);
+ 				     gup_flags, page_list, vma_list);
 --- a/drivers/infiniband/hw/mthca/mthca_memfree.c
 +++ b/drivers/infiniband/hw/mthca/mthca_memfree.c
 @@ -472,8 +472,7 @@ int mthca_map_user_db(struct mthca_dev *
  		goto out;
  	}
  
--	ret = get_user_pages(current, current->mm, uaddr & PAGE_MASK, 1, 1, 0,
--			     pages, NULL);
-+	ret = get_user_pages(uaddr & PAGE_MASK, 1, 1, 0, pages, NULL);
+-	ret = get_user_pages(current, current->mm, uaddr & PAGE_MASK, 1,
+-			     FOLL_WRITE, pages, NULL);
++	ret = get_user_pages(uaddr & PAGE_MASK, 1, FOLL_WRITE, pages, NULL);
  	if (ret < 0)
  		goto out;
  
@@ -255,12 +257,12 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 -		ret = get_user_pages(current, current->mm,
 -				     start_page + got * PAGE_SIZE,
 +		ret = get_user_pages(start_page + got * PAGE_SIZE,
- 				     num_pages - got, 1, 1,
+ 				     num_pages - got,
+ 				     FOLL_WRITE | FOLL_FORCE,
  				     p + got, NULL);
- 		if (ret < 0)
 --- a/drivers/infiniband/hw/usnic/usnic_uiom.c
 +++ b/drivers/infiniband/hw/usnic/usnic_uiom.c
-@@ -144,7 +144,7 @@ static int usnic_uiom_get_pages(unsigned
+@@ -147,7 +147,7 @@ static int usnic_uiom_get_pages(unsigned
  	ret = 0;
  
  	while (npages) {
@@ -268,53 +270,55 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 +		ret = get_user_pages(cur_base,
  					min_t(unsigned long, npages,
  					PAGE_SIZE / sizeof(struct page *)),
- 					1, !writable, page_list, NULL);
+ 					gup_flags, page_list, NULL);
 --- a/drivers/media/pci/ivtv/ivtv-udma.c
 +++ b/drivers/media/pci/ivtv/ivtv-udma.c
-@@ -124,8 +124,8 @@ int ivtv_udma_setup(struct ivtv *itv, un
+@@ -124,9 +124,8 @@ int ivtv_udma_setup(struct ivtv *itv, un
  	}
  
  	/* Get user pages for DMA Xfer */
 -	err = get_user_pages_unlocked(current, current->mm,
--			user_dma.uaddr, user_dma.page_count, 0, 1, dma->map);
-+	err = get_user_pages_unlocked(user_dma.uaddr, user_dma.page_count, 0,
-+			1, dma->map);
+-			user_dma.uaddr, user_dma.page_count, dma->map,
+-			FOLL_FORCE);
++	err = get_user_pages_unlocked(user_dma.uaddr, user_dma.page_count,
++			dma->map, FOLL_FORCE);
  
  	if (user_dma.page_count != err) {
  		IVTV_DEBUG_WARN("failed to map user pages, returned %d instead of %d\n",
 --- a/drivers/media/pci/ivtv/ivtv-yuv.c
 +++ b/drivers/media/pci/ivtv/ivtv-yuv.c
-@@ -75,14 +75,12 @@ static int ivtv_yuv_prep_user_dma(struct
+@@ -75,14 +75,13 @@ static int ivtv_yuv_prep_user_dma(struct
  	ivtv_udma_get_page_info (&uv_dma, (unsigned long)args->uv_source, 360 * uv_decode_height);
  
  	/* Get user pages for DMA Xfer */
 -	y_pages = get_user_pages_unlocked(current, current->mm,
--				y_dma.uaddr, y_dma.page_count, 0, 1,
--				&dma->map[0]);
+-				y_dma.uaddr, y_dma.page_count,
+-				&dma->map[0], FOLL_FORCE);
 +	y_pages = get_user_pages_unlocked(y_dma.uaddr,
-+			y_dma.page_count, 0, 1, &dma->map[0]);
++			y_dma.page_count, &dma->map[0], FOLL_FORCE);
  	uv_pages = 0; /* silence gcc. value is set and consumed only if: */
  	if (y_pages == y_dma.page_count) {
 -		uv_pages = get_user_pages_unlocked(current, current->mm,
--					uv_dma.uaddr, uv_dma.page_count, 0, 1,
--					&dma->map[y_pages]);
+-					uv_dma.uaddr, uv_dma.page_count,
+-					&dma->map[y_pages], FOLL_FORCE);
 +		uv_pages = get_user_pages_unlocked(uv_dma.uaddr,
-+				uv_dma.page_count, 0, 1, &dma->map[y_pages]);
++				uv_dma.page_count, &dma->map[y_pages],
++				FOLL_FORCE);
  	}
  
  	if (y_pages != y_dma.page_count || uv_pages != uv_dma.page_count) {
 --- a/drivers/media/v4l2-core/videobuf-dma-sg.c
 +++ b/drivers/media/v4l2-core/videobuf-dma-sg.c
-@@ -181,8 +181,7 @@ static int videobuf_dma_init_user_locked
+@@ -185,8 +185,7 @@ static int videobuf_dma_init_user_locked
  	dprintk(1, "init user [0x%lx+0x%lx => %d pages]\n",
  		data, size, dma->nr_pages);
  
 -	err = get_user_pages(current, current->mm,
 -			     data & PAGE_MASK, dma->nr_pages,
 +	err = get_user_pages(data & PAGE_MASK, dma->nr_pages,
- 			     rw == READ, 1, /* force */
- 			     dma->pages, NULL);
+ 			     flags, dma->pages, NULL);
  
+ 	if (err != dma->nr_pages) {
 --- a/drivers/misc/mic/scif/scif_rma.c
 +++ b/drivers/misc/mic/scif/scif_rma.c
 @@ -1394,8 +1394,6 @@ retry:
@@ -325,7 +329,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 -				mm,
  				(u64)addr,
  				nr_pages,
- 				!!(prot & SCIF_PROT_WRITE),
+ 				(prot & SCIF_PROT_WRITE) ? FOLL_WRITE : 0,
 --- a/drivers/misc/sgi-gru/grufault.c
 +++ b/drivers/misc/sgi-gru/grufault.c
 @@ -198,8 +198,7 @@ static int non_atomic_pte_lookup(struct
@@ -333,14 +337,14 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	*pageshift = PAGE_SHIFT;
  #endif
 -	if (get_user_pages
--	    (current, current->mm, vaddr, 1, write, 0, &page, NULL) <= 0)
-+	if (get_user_pages(vaddr, 1, write, 0, &page, NULL) <= 0)
+-	    (current, current->mm, vaddr, 1, write ? FOLL_WRITE : 0, &page, NULL) <= 0)
++	if (get_user_pages(vaddr, 1, write ? FOLL_WRITE : 0, &page, NULL) <= 0)
  		return -EFAULT;
  	*paddr = page_to_phys(page);
  	put_page(page);
 --- a/drivers/scsi/st.c
 +++ b/drivers/scsi/st.c
-@@ -4920,8 +4920,6 @@ static int sgl_map_user_pages(struct st_
+@@ -4917,8 +4917,6 @@ static int sgl_map_user_pages(struct st_
          /* Try to fault in all of the necessary pages */
          /* rw==READ means read from drive, write into memory area */
  	res = get_user_pages_unlocked(
@@ -348,7 +352,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 -		current->mm,
  		uaddr,
  		nr_pages,
- 		rw == READ,
+ 		pages,
 --- a/drivers/video/fbdev/pvr2fb.c
 +++ b/drivers/video/fbdev/pvr2fb.c
 @@ -686,8 +686,8 @@ static ssize_t pvr2fb_write(struct fb_in
@@ -356,40 +360,42 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		return -ENOMEM;
  
 -	ret = get_user_pages_unlocked(current, current->mm, (unsigned long)buf,
--				      nr_pages, WRITE, 0, pages);
-+	ret = get_user_pages_unlocked((unsigned long)buf, nr_pages, WRITE,
-+			0, pages);
+-				      nr_pages, pages, FOLL_WRITE);
++	ret = get_user_pages_unlocked((unsigned long)buf, nr_pages, pages,
++			FOLL_WRITE);
  
  	if (ret < nr_pages) {
  		nr_pages = ret;
 --- a/drivers/virt/fsl_hypervisor.c
 +++ b/drivers/virt/fsl_hypervisor.c
-@@ -244,9 +244,8 @@ static long ioctl_memcpy(struct fsl_hv_i
+@@ -244,10 +244,9 @@ static long ioctl_memcpy(struct fsl_hv_i
  
  	/* Get the physical addresses of the source buffer */
  	down_read(&current->mm->mmap_sem);
 -	num_pinned = get_user_pages(current, current->mm,
 -		param.local_vaddr - lb_offset, num_pages,
--		(param.source == -1) ? READ : WRITE,
+-		(param.source == -1) ? 0 : FOLL_WRITE,
+-		pages, NULL);
 +	num_pinned = get_user_pages(param.local_vaddr - lb_offset,
-+		num_pages, (param.source == -1) ? READ : WRITE,
- 		0, pages, NULL);
++		num_pages, (param.source == -1) ? 0 : FOLL_WRITE,
++		pages, NULL);
  	up_read(&current->mm->mmap_sem);
  
+ 	if (num_pinned != num_pages) {
 --- a/mm/frame_vector.c
 +++ b/mm/frame_vector.c
-@@ -58,7 +58,7 @@ int get_vaddr_frames(unsigned long start
+@@ -55,7 +55,7 @@ int get_vaddr_frames(unsigned long start
  	if (!(vma->vm_flags & (VM_IO | VM_PFNMAP))) {
  		vec->got_ref = true;
  		vec->is_pfns = false;
 -		ret = get_user_pages_locked(current, mm, start, nr_frames,
 +		ret = get_user_pages_locked(start, nr_frames,
- 			write, force, (struct page **)(vec->ptrs), &locked);
+ 			gup_flags, (struct page **)(vec->ptrs), &locked);
  		goto out;
  	}
 --- a/mm/gup.c
 +++ b/mm/gup.c
-@@ -929,8 +929,10 @@ long get_user_pages_remote(struct task_s
+@@ -895,8 +895,10 @@ long get_user_pages_remote(struct task_s
  EXPORT_SYMBOL(get_user_pages_remote);
  
  /*
@@ -401,7 +407,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 + * obviously don't pass FOLL_REMOTE in here.
   */
  long get_user_pages6(unsigned long start, unsigned long nr_pages,
- 		int write, int force, struct page **pages,
+ 		unsigned int gup_flags, struct page **pages,
 --- a/mm/ksm.c
 +++ b/mm/ksm.c
 @@ -353,7 +353,7 @@ static inline bool ksm_test_exit(struct
@@ -425,8 +431,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	struct page *p;
  	int err;
  
--	err = get_user_pages(current, mm, addr & PAGE_MASK, 1, 0, 0, &p, NULL);
-+	err = get_user_pages(addr & PAGE_MASK, 1, 0, 0, &p, NULL);
+-	err = get_user_pages(current, mm, addr & PAGE_MASK, 1, 0, &p, NULL);
++	err = get_user_pages(addr & PAGE_MASK, 1, 0, &p, NULL);
  	if (err >= 0) {
  		err = page_to_nid(p);
  		put_page(p);
@@ -448,11 +454,11 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 -		rc = get_user_pages_unlocked(current, current->mm,
 +		rc = get_user_pages_unlocked(
  		    (unsigned long)data + ((unsigned long)got * PAGE_SIZE),
- 		    num_pages - got, write_page, 0, pages + got);
+ 		    num_pages - got, pages + got, write_page ? FOLL_WRITE : 0);
  		if (rc < 0)
 --- a/virt/kvm/kvm_main.c
 +++ b/virt/kvm/kvm_main.c
-@@ -1277,15 +1277,16 @@ unsigned long kvm_vcpu_gfn_to_hva_prot(s
+@@ -1275,15 +1275,16 @@ unsigned long kvm_vcpu_gfn_to_hva_prot(s
  	return gfn_to_hva_memslot_prot(slot, gfn, writable);
  }
  
@@ -472,7 +478,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  }
  
  static inline int check_user_page_hwpoison(unsigned long addr)
-@@ -1347,8 +1348,7 @@ static int hva_to_pfn_slow(unsigned long
+@@ -1345,8 +1346,7 @@ static int hva_to_pfn_slow(unsigned long
  
  	if (async) {
  		down_read(&current->mm->mmap_sem);
@@ -480,5 +486,5 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 -					      addr, write_fault, page);
 +		npages = get_user_page_nowait(addr, write_fault, page);
  		up_read(&current->mm->mmap_sem);
- 	} else
- 		npages = __get_user_pages_unlocked(current, current->mm, addr, 1,
+ 	} else {
+ 		unsigned int flags = FOLL_TOUCH | FOLL_HWPOISON;

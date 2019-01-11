@@ -42,13 +42,13 @@ Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
 Signed-off-by: Jiri Kosina <jkosina@suse.cz>
 ---
  arch/x86/include/asm/kvm_host.h |    4 ++++
- arch/x86/kvm/vmx.c              |   22 +++++++++++++++++++++-
+ arch/x86/kvm/vmx.c              |   21 ++++++++++++++++++++-
  arch/x86/kvm/x86.c              |    7 +++++++
- 3 files changed, 32 insertions(+), 1 deletion(-)
+ 3 files changed, 31 insertions(+), 1 deletion(-)
 
 --- a/arch/x86/include/asm/kvm_host.h
 +++ b/arch/x86/include/asm/kvm_host.h
-@@ -614,6 +614,9 @@ struct kvm_vcpu_arch {
+@@ -609,6 +609,9 @@ struct kvm_vcpu_arch {
  
  	int pending_ioapic_eoi;
  	int pending_external_vector;
@@ -58,7 +58,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  };
  
  struct kvm_lpage_info {
-@@ -769,6 +772,7 @@ struct kvm_vcpu_stat {
+@@ -764,6 +767,7 @@ struct kvm_vcpu_stat {
  	u32 signal_exits;
  	u32 irq_window_exits;
  	u32 nmi_window_exits;
@@ -68,7 +68,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  	u32 halt_attempted_poll;
 --- a/arch/x86/kvm/vmx.c
 +++ b/arch/x86/kvm/vmx.c
-@@ -8273,9 +8273,20 @@ static int vmx_handle_exit(struct kvm_vc
+@@ -8293,9 +8293,20 @@ static int vmx_handle_exit(struct kvm_vc
  #define L1D_CACHE_ORDER 4
  static void *vmx_l1d_flush_pages;
  
@@ -90,11 +90,10 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  
  	if (static_cpu_has(X86_FEATURE_FLUSH_L1D)) {
  		wrmsrl(MSR_IA32_FLUSH_CMD, L1D_FLUSH);
-@@ -8736,6 +8747,12 @@ static void __noclone vmx_vcpu_run(struc
- 	x86_spec_ctrl_set_guest(vmx->spec_ctrl, 0);
+@@ -8762,6 +8773,11 @@ static void __noclone vmx_vcpu_run(struc
  
  	vmx->__launched = vmx->loaded_vmcs->launched;
-+
+ 
 +	if (static_branch_unlikely(&vmx_l1d_should_flush)) {
 +		if (vcpu->arch.l1tf_flush_l1d)
 +			vmx_l1d_flush(vcpu);
@@ -103,7 +102,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  	asm(
  		/* Store host registers */
  		"push %%" _ASM_DX "; push %%" _ASM_BP ";"
-@@ -10150,6 +10167,9 @@ static int nested_vmx_run(struct kvm_vcp
+@@ -10227,6 +10243,9 @@ static int nested_vmx_run(struct kvm_vcp
  		}
  	}
  
@@ -115,7 +114,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  	 * the nested entry.
 --- a/arch/x86/kvm/x86.c
 +++ b/arch/x86/kvm/x86.c
-@@ -4351,6 +4351,9 @@ static int kvm_write_guest_virt_helper(g
+@@ -4349,6 +4349,9 @@ static int kvm_write_guest_virt_helper(g
  	void *data = val;
  	int r = X86EMUL_CONTINUE;
  
@@ -125,7 +124,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  	while (bytes) {
  		gpa_t gpa =  vcpu->arch.walk_mmu->gva_to_gpa(vcpu, addr,
  							     access,
-@@ -5483,6 +5486,8 @@ int x86_emulate_instruction(struct kvm_v
+@@ -5477,6 +5480,8 @@ int x86_emulate_instruction(struct kvm_v
  	bool writeback = true;
  	bool write_fault_to_spt = vcpu->arch.write_fault_to_shadow_pgtable;
  
@@ -134,7 +133,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  	/*
  	 * Clear write_fault_to_shadow_pgtable here to ensure it is
  	 * never reused.
-@@ -6828,6 +6833,7 @@ static int vcpu_run(struct kvm_vcpu *vcp
+@@ -6833,6 +6838,7 @@ static int vcpu_run(struct kvm_vcpu *vcp
  	struct kvm *kvm = vcpu->kvm;
  
  	vcpu->srcu_idx = srcu_read_lock(&kvm->srcu);
@@ -142,7 +141,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  
  	for (;;) {
  		if (kvm_vcpu_running(vcpu)) {
-@@ -7790,6 +7796,7 @@ void kvm_arch_vcpu_uninit(struct kvm_vcp
+@@ -7795,6 +7801,7 @@ void kvm_arch_vcpu_uninit(struct kvm_vcp
  
  void kvm_arch_sched_in(struct kvm_vcpu *vcpu, int cpu)
  {

@@ -27,9 +27,30 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  arch/x86/kvm/vmx.c                  |   65 ++++++++++++++++++++++++++++++++++--
  2 files changed, 75 insertions(+), 2 deletions(-)
 
+--- a/Documentation/kernel-parameters.txt
++++ b/Documentation/kernel-parameters.txt
+@@ -1887,6 +1887,18 @@ bytes respectively. Such letter suffixes
+ 			(virtualized real and unpaged mode) on capable
+ 			Intel chips. Default is 1 (enabled)
+ 
++	kvm-intel.vmentry_l1d_flush=[KVM,Intel] Mitigation for L1 Terminal Fault
++			CVE-2018-3620.
++
++			Valid arguments: never, cond, always
++
++			always: L1D cache flush on every VMENTER.
++			cond:	Flush L1D on VMENTER only when the code between
++				VMEXIT and VMENTER can leak host memory.
++			never:	Disables the mitigation
++
++			Default is cond (do L1 cache flush in specific instances)
++
+ 	kvm-intel.vpid=	[KVM,Intel] Disable Virtual Processor Identification
+ 			feature (tagged TLBs) on capable Intel chips.
+ 			Default is 1 (enabled)
 --- a/arch/x86/kvm/vmx.c
 +++ b/arch/x86/kvm/vmx.c
-@@ -176,6 +176,54 @@ module_param(ple_window_max, int, S_IRUG
+@@ -184,6 +184,54 @@ module_param(ple_window_max, int, S_IRUG
  
  extern const ulong vmx_return;
  
@@ -82,9 +103,9 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
 +module_param_cb(vmentry_l1d_flush, &vmentry_l1d_flush_ops, &vmentry_l1d_flush, S_IRUGO);
 +
  #define NR_AUTOLOAD_MSRS 8
- #define VMCS02_POOL_SIZE 1
  
-@@ -11042,10 +11090,23 @@ static struct kvm_x86_ops vmx_x86_ops =
+ struct vmcs {
+@@ -11116,10 +11164,23 @@ static struct kvm_x86_ops vmx_x86_ops =
  	.setup_mce = vmx_setup_mce,
  };
  
@@ -110,24 +131,3 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>
  	if (r)
  		return r;
  
---- a/Documentation/kernel-parameters.txt
-+++ b/Documentation/kernel-parameters.txt
-@@ -1889,6 +1889,18 @@ bytes respectively. Such letter suffixes
- 			(virtualized real and unpaged mode) on capable
- 			Intel chips. Default is 1 (enabled)
- 
-+	kvm-intel.vmentry_l1d_flush=[KVM,Intel] Mitigation for L1 Terminal Fault
-+			CVE-2018-3620.
-+
-+			Valid arguments: never, cond, always
-+
-+			always: L1D cache flush on every VMENTER.
-+			cond:	Flush L1D on VMENTER only when the code between
-+				VMEXIT and VMENTER can leak host memory.
-+			never:	Disables the mitigation
-+
-+			Default is cond (do L1 cache flush in specific instances)
-+
- 	kvm-intel.vpid=	[KVM,Intel] Disable Virtual Processor Identification
- 			feature (tagged TLBs) on capable Intel chips.
- 			Default is 1 (enabled)

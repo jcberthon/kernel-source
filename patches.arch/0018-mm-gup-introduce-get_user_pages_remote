@@ -52,29 +52,28 @@ Link: http://lkml.kernel.org/r/20160212210154.3F0E51EA@viggo.jf.intel.com
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Acked-by: Joerg Roedel <jroedel@suse.de>
 ---
- drivers/gpu/drm/etnaviv/etnaviv_gem.c   |  6 +++---
- drivers/gpu/drm/i915/i915_gem_userptr.c | 10 +++++-----
- drivers/infiniband/core/umem_odp.c      |  8 ++++----
- fs/exec.c                               |  8 ++++++--
- include/linux/mm.h                      |  5 +++++
- kernel/events/uprobes.c                 | 10 ++++++++--
- mm/gup.c                                | 27 ++++++++++++++++++++++-----
- mm/memory.c                             |  2 +-
- mm/process_vm_access.c                  | 11 ++++++++---
- security/tomoyo/domain.c                |  9 ++++++++-
- virt/kvm/async_pf.c                     |  8 +++++++-
- 11 files changed, 77 insertions(+), 27 deletions(-)
+ drivers/gpu/drm/i915/i915_gem_userptr.c |   10 +++++-----
+ drivers/infiniband/core/umem_odp.c      |    7 ++++---
+ fs/exec.c                               |    8 ++++++--
+ include/linux/mm.h                      |    5 +++++
+ kernel/events/uprobes.c                 |   10 ++++++++--
+ mm/gup.c                                |   24 +++++++++++++++++++++++-
+ mm/memory.c                             |    4 ++--
+ mm/process_vm_access.c                  |   12 ++++++++----
+ security/tomoyo/domain.c                |   10 ++++++++--
+ virt/kvm/async_pf.c                     |    9 ++++++++-
+ 10 files changed, 77 insertions(+), 22 deletions(-)
 
 --- a/drivers/gpu/drm/i915/i915_gem_userptr.c
 +++ b/drivers/gpu/drm/i915/i915_gem_userptr.c
-@@ -584,11 +584,11 @@ __i915_gem_userptr_get_pages_worker(stru
+@@ -588,11 +588,11 @@ __i915_gem_userptr_get_pages_worker(stru
  
  		down_read(&mm->mmap_sem);
  		while (pinned < npages) {
 -			ret = get_user_pages(work->task, mm,
 -					     obj->userptr.ptr + pinned * PAGE_SIZE,
 -					     npages - pinned,
--					     !obj->userptr.read_only, 0,
+-					     flags,
 -					     pvec + pinned, NULL);
 +			ret = get_user_pages_remote(work->task, mm,
 +					obj->userptr.ptr + pinned * PAGE_SIZE,
@@ -86,14 +85,13 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
 --- a/drivers/infiniband/core/umem_odp.c
 +++ b/drivers/infiniband/core/umem_odp.c
-@@ -572,10 +572,10 @@ int ib_umem_odp_map_dma_pages(struct ib_
+@@ -576,9 +576,10 @@ int ib_umem_odp_map_dma_pages(struct ib_
  		 * complex (and doesn't gain us much performance in most use
  		 * cases).
  		 */
 -		npages = get_user_pages(owning_process, owning_mm, user_virt,
 -					gup_num_pages,
--					access_mask & ODP_WRITE_ALLOWED_BIT, 0,
--					local_page_list, NULL);
+-					flags, local_page_list, NULL);
 +		npages = get_user_pages_remote(owning_process, owning_mm,
 +				user_virt, gup_num_pages,
 +				access_mask & ODP_WRITE_ALLOWED_BIT,
@@ -103,12 +101,12 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		if (npages < 0)
 --- a/fs/exec.c
 +++ b/fs/exec.c
-@@ -198,8 +198,12 @@ static struct page *get_arg_page(struct
- 			return NULL;
- 	}
- #endif
--	ret = get_user_pages(current, bprm->mm, pos,
--			1, write, 1, &page, NULL);
+@@ -204,8 +204,12 @@ static struct page *get_arg_page(struct
+ 	if (write)
+ 		gup_flags |= FOLL_WRITE;
+ 
+-	ret = get_user_pages(current, bprm->mm, pos, 1, gup_flags,
+-			&page, NULL);
 +	/*
 +	 * We are doing an exec().  'current' is the process
 +	 * doing the exec and bprm->mm is the new process's mm.
@@ -120,7 +118,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
 --- a/include/linux/mm.h
 +++ b/include/linux/mm.h
-@@ -1213,6 +1213,10 @@ long __get_user_pages(struct task_struct
+@@ -1230,6 +1230,10 @@ long __get_user_pages(struct task_struct
  		      unsigned long start, unsigned long nr_pages,
  		      unsigned int foll_flags, struct page **pages,
  		      struct vm_area_struct **vmas, int *nonblocking);
@@ -130,22 +128,22 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 +			    struct vm_area_struct **vmas);
  long get_user_pages(struct task_struct *tsk, struct mm_struct *mm,
  		    unsigned long start, unsigned long nr_pages,
- 		    int write, int force, struct page **pages,
-@@ -2132,6 +2136,7 @@ static inline struct page *follow_page(s
+ 		    unsigned int gup_flags, struct page **pages,
+@@ -2177,6 +2181,7 @@ static inline struct page *follow_page(s
  #define FOLL_MIGRATION	0x400	/* wait for page to replace migration entry */
  #define FOLL_TRIED	0x800	/* a retry, previous pass started an IO */
  #define FOLL_MLOCK	0x1000	/* lock present pages */
 +#define FOLL_REMOTE	0x2000	/* we are working on non-current tsk/mm */
  #define FOLL_COW	0x4000	/* internal GUP flag */
+ #define FOLL_ANON	0x8000	/* don't do file mappings */
  
- typedef int (*pte_fn_t)(pte_t *pte, pgtable_t token, unsigned long addr,
 --- a/kernel/events/uprobes.c
 +++ b/kernel/events/uprobes.c
 @@ -299,7 +299,7 @@ int uprobe_write_opcode(struct mm_struct
  
  retry:
  	/* Read the page with vaddr into memory */
--	ret = get_user_pages(NULL, mm, vaddr, 1, 0, 1, &old_page, &vma);
+-	ret = get_user_pages(NULL, mm, vaddr, 1, FOLL_FORCE, &old_page, &vma);
 +	ret = get_user_pages_remote(NULL, mm, vaddr, 1, 0, 1, &old_page, &vma);
  	if (ret <= 0)
  		return ret;
@@ -154,7 +152,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	if (likely(result == 0))
  		goto out;
  
--	result = get_user_pages(NULL, mm, vaddr, 1, 0, 1, &page, NULL);
+-	result = get_user_pages(NULL, mm, vaddr, 1, FOLL_FORCE, &page, NULL);
 +	/*
 +	 * The NULL 'tsk' here ensures that any faults that occur here
 +	 * will not be accounted to the task.  'mm' *is* current->mm,
@@ -167,7 +165,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
 --- a/mm/gup.c
 +++ b/mm/gup.c
-@@ -827,7 +827,7 @@ long get_user_pages_unlocked(struct task
+@@ -826,7 +826,7 @@ long get_user_pages_unlocked(struct task
  EXPORT_SYMBOL(get_user_pages_unlocked);
  
  /*
@@ -176,22 +174,25 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
   * @tsk:	the task_struct to use for page fault accounting, or
   *		NULL if faults are not to be recorded.
   * @mm:		mm_struct of target mm
-@@ -881,12 +881,29 @@ EXPORT_SYMBOL(get_user_pages_unlocked);
+@@ -880,6 +880,28 @@ EXPORT_SYMBOL(get_user_pages_unlocked);
   * should use get_user_pages because it cannot pass
   * FAULT_FLAG_ALLOW_RETRY to handle_mm_fault.
   */
--long get_user_pages(struct task_struct *tsk, struct mm_struct *mm,
--		unsigned long start, unsigned long nr_pages, int write,
--		int force, struct page **pages, struct vm_area_struct **vmas)
 +long get_user_pages_remote(struct task_struct *tsk, struct mm_struct *mm,
 +		unsigned long start, unsigned long nr_pages,
 +		int write, int force, struct page **pages,
 +		struct vm_area_struct **vmas)
- {
- 	return __get_user_pages_locked(tsk, mm, start, nr_pages, write, force,
--				       pages, vmas, NULL, false, FOLL_TOUCH);
++{
++	unsigned int flags = FOLL_TOUCH | FOLL_REMOTE;
++
++	if (write)
++		flags |= FOLL_WRITE;
++	if (force)
++		flags |= FOLL_FORCE;
++
++	return __get_user_pages_locked(tsk, mm, start, nr_pages,
 +				       pages, vmas, NULL, false,
-+				       FOLL_TOUCH | FOLL_REMOTE);
++				       flags);
 +}
 +EXPORT_SYMBOL(get_user_pages_remote);
 +
@@ -199,55 +200,58 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 + * This is the same as get_user_pages_remote() for the time
 + * being.
 + */
-+long get_user_pages(struct task_struct *tsk, struct mm_struct *mm,
-+		unsigned long start, unsigned long nr_pages,
-+		int write, int force, struct page **pages,
-+		struct vm_area_struct **vmas)
-+{
-+	return __get_user_pages_locked(tsk, mm, start, nr_pages,
-+				       write, force, pages, vmas, NULL, false,
-+				       FOLL_TOUCH);
- }
- EXPORT_SYMBOL(get_user_pages);
- 
+ long get_user_pages(struct task_struct *tsk, struct mm_struct *mm,
+ 		unsigned long start, unsigned long nr_pages,
+ 		unsigned int gup_flags, struct page **pages,
 --- a/mm/memory.c
 +++ b/mm/memory.c
-@@ -3730,7 +3730,7 @@ static int __access_remote_vm(struct tas
+@@ -3713,8 +3713,8 @@ static int __access_remote_vm(struct tas
  		void *maddr;
  		struct page *page = NULL;
  
 -		ret = get_user_pages(tsk, mm, addr, 1,
+-				gup_flags, &page, &vma);
 +		ret = get_user_pages_remote(tsk, mm, addr, 1,
- 				write, 1, &page, &vma);
++				write, 1, &page, &vma);
  		if (ret <= 0) {
  #ifndef CONFIG_HAVE_IOREMAP_PROT
+ 			break;
 --- a/mm/process_vm_access.c
 +++ b/mm/process_vm_access.c
-@@ -98,9 +98,14 @@ static int process_vm_rw_single_vec(unsi
+@@ -88,7 +88,7 @@ static int process_vm_rw_single_vec(unsi
+ 	ssize_t rc = 0;
+ 	unsigned long max_pages_per_loop = PVM_MAX_KMALLOC_PAGES
+ 		/ sizeof(struct pages *);
+-	unsigned int flags = 0;
++	unsigned int flags = FOLL_REMOTE;
+ 
+ 	/* Work out address and page range required */
+ 	if (len == 0)
+@@ -102,9 +102,13 @@ static int process_vm_rw_single_vec(unsi
  		int pages = min(nr_pages, max_pages_per_loop);
  		size_t bytes;
  
 -		/* Get the pages we're interested in */
 -		pages = get_user_pages_unlocked(task, mm, pa, pages,
--						vm_write, 0, process_pages);
+-						process_pages, flags);
 +		/*
 +		 * Get the pages we're interested in.  We must
 +		 * add FOLL_REMOTE because task/mm might not
 +		 * current/current->mm
 +		 */
 +		pages = __get_user_pages_unlocked(task, mm, pa, pages,
-+						  vm_write, 0, process_pages,
-+						  FOLL_REMOTE);
++						  process_pages, flags);
  		if (pages <= 0)
  			return -EFAULT;
  
 --- a/security/tomoyo/domain.c
 +++ b/security/tomoyo/domain.c
-@@ -874,7 +874,14 @@ bool tomoyo_dump_page(struct linux_binpr
+@@ -874,8 +874,14 @@ bool tomoyo_dump_page(struct linux_binpr
  	}
  	/* Same with get_arg_page(bprm, pos, 0) in fs/exec.c */
  #ifdef CONFIG_MMU
--	if (get_user_pages(current, bprm->mm, pos, 1, 0, 1, &page, NULL) <= 0)
+-	if (get_user_pages(current, bprm->mm, pos, 1,
+-			   FOLL_FORCE, &page, NULL) <= 0)
 +	/*
 +	 * This is called at execve() time in order to dig around
 +	 * in the argv/environment of the new proceess
@@ -261,17 +265,18 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  	page = bprm->page[pos / PAGE_SIZE];
 --- a/virt/kvm/async_pf.c
 +++ b/virt/kvm/async_pf.c
-@@ -80,7 +80,13 @@ static void async_pf_execute(struct work
+@@ -80,7 +80,14 @@ static void async_pf_execute(struct work
  
  	might_sleep();
  
--	get_user_pages_unlocked(NULL, mm, addr, 1, 1, 0, NULL);
+-	get_user_pages_unlocked(NULL, mm, addr, 1, NULL, FOLL_WRITE);
 +	/*
 +	 * This work is run asynchromously to the task which owns
 +	 * mm and might be done in another context, so we must
 +	 * use FOLL_REMOTE.
 +	 */
-+	__get_user_pages_unlocked(NULL, mm, addr, 1, 1, 0, NULL, FOLL_REMOTE);
++	__get_user_pages_unlocked(NULL, mm, addr, 1, NULL,
++			FOLL_WRITE | FOLL_REMOTE);
 +
  	kvm_async_page_present_sync(vcpu, apf);
  

@@ -49,6 +49,52 @@ Signed-off-by: Takashi Iwai <tiwai@suse.de>
  };
  
  struct k_clock {
+--- a/kernel/time/alarmtimer.c
++++ b/kernel/time/alarmtimer.c
+@@ -478,6 +478,7 @@ static enum alarmtimer_restart alarm_han
+ 						ptr->it.alarm.interval);
+ 		result = ALARMTIMER_RESTART;
+ 	}
++	ptr->__it_overrun = (unsigned int)ptr->it_overrun;
+ 	spin_unlock_irqrestore(&ptr->it_lock, flags);
+ 
+ 	return result;
+--- a/kernel/time/posix-cpu-timers.c
++++ b/kernel/time/posix-cpu-timers.c
+@@ -104,6 +104,7 @@ static void bump_cpu_timer(struct k_itim
+ 
+ 		timer->it.cpu.expires += incr;
+ 		timer->it_overrun += 1LL << i;
++		timer->__it_overrun = (unsigned int)timer->it_overrun;
+ 		delta -= incr;
+ 	}
+ }
+@@ -745,6 +746,8 @@ static int posix_cpu_timer_set(struct k_
+ 		~REQUEUE_PENDING;
+ 	timer->it_overrun_last = 0;
+ 	timer->it_overrun = -1;
++	timer->__it_overrun_last = 0;
++	timer->__it_overrun = -1;
+ 
+ 	if (new_expires != 0 && !(val < new_expires)) {
+ 		/*
+@@ -1101,6 +1104,8 @@ void posix_cpu_timer_schedule(struct k_i
+ out:
+ 	timer->it_overrun_last = timer->it_overrun;
+ 	timer->it_overrun = -1;
++	timer->__it_overrun_last = (unsigned int)timer->it_overrun_last;
++	timer->__it_overrun = -1;
+ 	++timer->it_requeue_pending;
+ }
+ 
+@@ -1306,6 +1311,7 @@ static int do_cpu_nanosleep(const clocki
+ 	spin_lock_init(&timer.it_lock);
+ 	timer.it_clock = which_clock;
+ 	timer.it_overrun = -1;
++	timer.__it_overrun = -1;
+ 	error = posix_cpu_timer_create(&timer);
+ 	timer.it_process = current;
+ 	if (!error) {
 --- a/kernel/time/posix-timers.c
 +++ b/kernel/time/posix-timers.c
 @@ -379,6 +379,8 @@ static void schedule_next_timer(struct k
@@ -63,7 +109,7 @@ Signed-off-by: Takashi Iwai <tiwai@suse.de>
 @@ -504,6 +506,7 @@ static enum hrtimer_restart posix_timer_
  #endif
  			timr->it_overrun += hrtimer_forward(timer, now,
- 							    timr->it.real.interval);
+ 						timr->it.real.interval);
 +			timr->__it_overrun = (unsigned int)timr->it_overrun;
  			ret = HRTIMER_RESTART;
  			++timr->it_requeue_pending;
@@ -96,49 +142,3 @@ Signed-off-by: Takashi Iwai <tiwai@suse.de>
  
  	/* switch off the timer when it_value is zero */
  	if (!new_setting->it_value.tv_sec && !new_setting->it_value.tv_nsec)
---- a/kernel/time/alarmtimer.c
-+++ b/kernel/time/alarmtimer.c
-@@ -478,6 +478,7 @@ static enum alarmtimer_restart alarm_han
- 						ptr->it.alarm.interval);
- 		result = ALARMTIMER_RESTART;
- 	}
-+	ptr->__it_overrun = (unsigned int)ptr->it_overrun;
- 	spin_unlock_irqrestore(&ptr->it_lock, flags);
- 
- 	return result;
---- a/kernel/time/posix-cpu-timers.c
-+++ b/kernel/time/posix-cpu-timers.c
-@@ -104,6 +104,7 @@ static void bump_cpu_timer(struct k_itim
- 
- 		timer->it.cpu.expires += incr;
- 		timer->it_overrun += 1LL << i;
-+		timer->__it_overrun = (unsigned int)timer->it_overrun;
- 		delta -= incr;
- 	}
- }
-@@ -745,6 +746,8 @@ static int posix_cpu_timer_set(struct k_
- 		~REQUEUE_PENDING;
- 	timer->it_overrun_last = 0;
- 	timer->it_overrun = -1LL;
-+	timer->__it_overrun_last = 0;
-+	timer->__it_overrun = -1;
- 
- 	if (new_expires != 0 && !(val < new_expires)) {
- 		/*
-@@ -1101,6 +1104,8 @@ void posix_cpu_timer_schedule(struct k_i
- out:
- 	timer->it_overrun_last = timer->it_overrun;
- 	timer->it_overrun = -1LL;
-+	timer->__it_overrun_last = (unsigned int)timer->it_overrun_last;
-+	timer->__it_overrun = -1;
- 	++timer->it_requeue_pending;
- }
- 
-@@ -1306,6 +1311,7 @@ static int do_cpu_nanosleep(const clocki
- 	spin_lock_init(&timer.it_lock);
- 	timer.it_clock = which_clock;
- 	timer.it_overrun = -1LL;
-+	timer.__it_overrun = -1;
- 	error = posix_cpu_timer_create(&timer);
- 	timer.it_process = current;
- 	if (!error) {

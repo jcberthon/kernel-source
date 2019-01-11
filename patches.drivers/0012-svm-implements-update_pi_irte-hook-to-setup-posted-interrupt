@@ -32,15 +32,15 @@ Signed-off-by: Bruce Rogers <brogers@suse.com>
 
 --- a/arch/x86/kvm/svm.c
 +++ b/arch/x86/kvm/svm.c
-@@ -44,6 +44,7 @@
- #include <asm/debugreg.h>
+@@ -45,6 +45,7 @@
  #include <asm/kvm_para.h>
+ #include <asm/microcode.h>
  #include <asm/spec-ctrl.h>
 +#include <asm/irq_remapping.h>
  
  #include <asm/virtext.h>
  #include "trace.h"
-@@ -201,6 +202,23 @@ struct vcpu_svm {
+@@ -210,6 +211,23 @@ struct vcpu_svm {
  	struct page *avic_backing_page;
  	u64 *avic_physical_id_cache;
  	bool avic_is_running;
@@ -64,7 +64,7 @@ Signed-off-by: Bruce Rogers <brogers@suse.com>
  };
  
  #define AVIC_LOGICAL_ID_ENTRY_GUEST_PHYSICAL_ID_MASK	(0xFF)
-@@ -1440,31 +1458,34 @@ free_avic:
+@@ -1472,31 +1490,34 @@ free_avic:
  	return err;
  }
  
@@ -118,7 +118,7 @@ Signed-off-by: Bruce Rogers <brogers@suse.com>
  }
  
  static void avic_vcpu_load(struct kvm_vcpu *vcpu, int cpu)
-@@ -1491,6 +1512,8 @@ static void avic_vcpu_load(struct kvm_vc
+@@ -1523,6 +1544,8 @@ static void avic_vcpu_load(struct kvm_vc
  		entry |= AVIC_PHYSICAL_ID_ENTRY_IS_RUNNING_MASK;
  
  	WRITE_ONCE(*(svm->avic_physical_id_cache), entry);
@@ -127,7 +127,7 @@ Signed-off-by: Bruce Rogers <brogers@suse.com>
  }
  
  static void avic_vcpu_put(struct kvm_vcpu *vcpu)
-@@ -1502,10 +1525,27 @@ static void avic_vcpu_put(struct kvm_vcp
+@@ -1534,10 +1557,27 @@ static void avic_vcpu_put(struct kvm_vcp
  		return;
  
  	entry = READ_ONCE(*(svm->avic_physical_id_cache));
@@ -155,7 +155,7 @@ Signed-off-by: Bruce Rogers <brogers@suse.com>
  static void svm_vcpu_reset(struct kvm_vcpu *vcpu, bool init_event)
  {
  	struct vcpu_svm *svm = to_svm(vcpu);
-@@ -1567,6 +1607,9 @@ static struct kvm_vcpu *svm_create_vcpu(
+@@ -1602,6 +1642,9 @@ static struct kvm_vcpu *svm_create_vcpu(
  		err = avic_init_backing_page(&svm->vcpu);
  		if (err)
  			goto free_page4;
@@ -165,7 +165,7 @@ Signed-off-by: Bruce Rogers <brogers@suse.com>
  	}
  
  	/* We initialize this flag to true to make sure that the is_running
-@@ -4334,6 +4377,209 @@ static void svm_deliver_avic_intr(struct
+@@ -4466,6 +4509,209 @@ static void svm_deliver_avic_intr(struct
  		kvm_vcpu_wake_up(vcpu);
  }
  
@@ -375,7 +375,7 @@ Signed-off-by: Bruce Rogers <brogers@suse.com>
  static int svm_nmi_allowed(struct kvm_vcpu *vcpu)
  {
  	struct vcpu_svm *svm = to_svm(vcpu);
-@@ -5173,6 +5419,7 @@ static struct kvm_x86_ops svm_x86_ops =
+@@ -5342,6 +5588,7 @@ static struct kvm_x86_ops svm_x86_ops =
  
  	.pmu_ops = &amd_pmu_ops,
  	.deliver_posted_interrupt = svm_deliver_avic_intr,
