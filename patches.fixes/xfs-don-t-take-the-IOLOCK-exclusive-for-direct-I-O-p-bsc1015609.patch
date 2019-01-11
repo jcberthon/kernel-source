@@ -136,7 +136,7 @@ index 09a250d..7f88a75 100644
  	 */
 -	if (unaligned_io || mapping->nrpages)
 +	if ((pos & mp->m_blockmask) ||
-+		((pos + count) & mp->m_blockmask)) {
++	    ((pos + count) & mp->m_blockmask)) {
 +		unaligned_io = 1;
  		iolock = XFS_IOLOCK_EXCL;
 -	else

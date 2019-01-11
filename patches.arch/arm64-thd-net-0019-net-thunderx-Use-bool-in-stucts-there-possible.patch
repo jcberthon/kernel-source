@@ -3,12 +3,14 @@ From: Robert Richter <rrichter@cavium.com>
 Date: Mon, 23 Nov 2015 16:29:15 +0100
 Subject: [PATCH 09/23] net, thunderx: Use bool in stucts there possible
 Patch-mainline: Not yet, needs submission
+References: updated commit
 
 Signed-off-by: Robert Richter <rrichter@cavium.com>
 Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 
 ---
- drivers/net/ethernet/cavium/thunder/nic.h | 12 ++++++------
+
+ drivers/net/ethernet/cavium/thunder/nic.h |    12 +++---
  1 file changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/net/ethernet/cavium/thunder/nic.h b/drivers/net/ethernet/cavium/thunder/nic.h
@@ -23,7 +25,7 @@ index 39ca674..e051dc2 100644
 -	u8			sqs_mode:1;
 -	u8			loopback_supported:1;
 +	bool			tns_mode;
-+	bool                    sqs_mode;
++	bool			sqs_mode;
 +	bool			loopback_supported;
  	u16			mtu;
  	struct queue_set	*qs;

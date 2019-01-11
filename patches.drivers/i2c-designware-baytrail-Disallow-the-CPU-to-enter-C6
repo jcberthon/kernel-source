@@ -70,7 +70,7 @@ Signed-off-by: Takashi Iwai <tiwai@suse.de>
  	} while (time_before(jiffies, end));
  
  	dev_err(dev->dev, "punit semaphore timed out, resetting\n");
-+ out:
++out:
  	reset_semaphore(dev);
  
  	ret = iosf_mbi_read(BT_MBI_UNIT_PMC, BT_MBI_BUNIT_READ, addr, &sem);

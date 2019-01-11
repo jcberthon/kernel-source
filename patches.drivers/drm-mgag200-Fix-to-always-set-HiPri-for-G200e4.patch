@@ -40,7 +40,7 @@ Acked-by: Takashi Iwai <tiwai@suse.de>
  			}
 +		} else {
 +			if ((bw =
-+			     mga_vga_calculate_mode_bandwidth(mode, bpp)) 
++			     mga_vga_calculate_mode_bandwidth(mode, bpp))
 +			    > (55000 * 1024)) {
 +				DRM_DEBUG_KMS("Mode %d exceeds bandwidth: %d > %d",
 +					      mode->base.id, bw, 55000 * 1024);

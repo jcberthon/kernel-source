@@ -34,7 +34,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 -	u8			node;
 -	bool			tns_mode;
 +	u8			sqs_id;
- 	bool                    sqs_mode;
+ 	bool			sqs_mode;
 -	bool			loopback_supported;
  	bool			hw_tso;
 -	u16			mtu;
