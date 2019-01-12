@@ -26,14 +26,13 @@ Acked-by: NeilBrown <neilb@suse.com>
 
 --- a/drivers/md/raid1.c
 +++ b/drivers/md/raid1.c
-@@ -414,14 +414,17 @@ static void raid1_end_write_request(stru
+@@ -414,13 +414,16 @@ static void raid1_end_write_request(stru
+ 	int mirror, behind = test_bit(R1BIO_BehindIO, &r1_bio->state);
  	struct r1conf *conf = r1_bio->mddev->private;
  	struct bio *to_put = NULL;
- 	struct md_rdev *rdev;
 +	bool discard_error;
  
  	mirror = find_bio_disk(r1_bio, bio);
- 	rdev = conf->mirrors[mirror].rdev;
  
 +	discard_error = bio->bi_error && (bio->bi_rw & REQ_DISCARD);
 +

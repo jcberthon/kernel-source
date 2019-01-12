@@ -68,9 +68,9 @@ index 792854e..c1c0feb 100644
 --- a/drivers/md/md.h
 +++ b/drivers/md/md.h
 @@ -220,6 +220,9 @@ struct mddev {
+ 				 */
  #define MD_JOURNAL_CLEAN 5	/* A raid with journal is already clean */
  #define MD_HAS_JOURNAL	6	/* The raid array has journal feature set */
- #define MD_NEED_REWRITE 7	/* metadata write need to be repeated */
 +#define MD_RELOAD_SB	8	/* Reload the superblock because another node
 +				 * updated it.
 +				 */

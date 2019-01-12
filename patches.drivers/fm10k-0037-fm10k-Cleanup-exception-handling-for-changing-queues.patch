@@ -73,7 +73,7 @@ Acked-by: David Chang <dchang@suse.com>
 +	return err;
  }
  
- static int __fm10k_setup_tc(struct net_device *dev, u32 handle, __be16 proto,
+ static int fm10k_ioctl(struct net_device *netdev, struct ifreq *ifr, int cmd)
 --- a/drivers/net/ethernet/intel/fm10k/fm10k_pci.c
 +++ b/drivers/net/ethernet/intel/fm10k/fm10k_pci.c
 @@ -186,7 +186,13 @@ static void fm10k_reinit(struct fm10k_in

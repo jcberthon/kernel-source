@@ -141,7 +141,7 @@ v3->v4:
  		}
  		nn -= j;
 @@ -1586,8 +1594,6 @@ static void nvme_scan_ns_sequential(stru
- {
+ 	struct nvme_ns *ns, *next;
  	unsigned i;
  
 -	lockdep_assert_held(&ctrl->namespaces_mutex);

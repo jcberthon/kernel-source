@@ -1632,13 +1632,13 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  		return -EINVAL;
  
 -	spin_lock_init(&bgc->lock);
--	bgc->gc.dev = dev;
+-	bgc->gc.parent = dev;
 -	bgc->gc.label = dev_name(dev);
 -	bgc->gc.base = -1;
 -	bgc->gc.ngpio = bgc->bits;
 -	bgc->gc.request = bgpio_request;
 +	spin_lock_init(&gc->bgpio_lock);
-+	gc->dev = dev;
++	gc->parent = dev;
 +	gc->label = dev_name(dev);
 +	gc->base = -1;
 +	gc->ngpio = gc->bgpio_bits;
@@ -2025,7 +2025,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 -	bgc->data = bgc->read_reg(bgc->reg_set);
 -	bgc->gc.base = 0;
 -	bgc->gc.ngpio = 32;
--	bgc->gc.dev = dev;
+-	bgc->gc.parent = dev;
 -	bgc->gc.owner = THIS_MODULE;
 +	gc->label = "moxart-gpio";
 +	gc->request = gpiochip_generic_request;
@@ -2033,7 +2033,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	gc->bgpio_data = bgc->read_reg(bgc->reg_set);
 +	gc->base = 0;
 +	gc->ngpio = 32;
-+	gc->dev = dev;
++	gc->parent = dev;
 +	gc->owner = THIS_MODULE;
  
 -	ret = gpiochip_add(&bgc->gc);

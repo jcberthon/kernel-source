@@ -68,7 +68,7 @@ index 72eb587..e94a56e 100644
  
 @@ -1122,10 +1126,13 @@ static void fc_rport_prli_resp(struct fc_seq *sp, struct fc_frame *fp,
  	u8 op;
- 	enum fc_els_spp_resp resp_code;
+ 	u8 resp_code = 0;
  
 -	mutex_lock(&rdata->rp_mutex);
 -

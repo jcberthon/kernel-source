@@ -1,6 +1,6 @@
 From: Michal Hocko <mhocko@suse.cz>
 Subject: Warn on pagecache limit usage
-Patch-mainline: never
+Patch-mainline: never, only for SLES for SAP
 References: FATE309111
 
 Let's be verbose about page cache limit usage for support purpose.
@@ -35,7 +35,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.cz>
  	{
  		.procname	= "pagecache_limit_ignore_dirty",
 @@ -2198,6 +2201,18 @@ static int do_proc_dointvec(struct ctl_t
- 			buffer, lenp, ppos, conv, data);
+ 				   buffer, lenp, ppos, conv, data);
  }
  
 +int pc_limit_proc_dointvec(struct ctl_table *table, int write,

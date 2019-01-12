@@ -188,9 +188,9 @@ Signed-off-by: Hannes Reinecke <hare@suse.com>
  	unsigned	ws16 : 1;
 +	unsigned	rc_basis: 2;
 +	unsigned	zoned: 2;
+ 	unsigned	ignore_medium_access_errors : 1;
  };
  #define to_scsi_disk(obj) container_of(obj,struct scsi_disk,dev)
- 
 @@ -156,6 +158,11 @@ static inline unsigned int logical_to_by
  	return blocks * sdev->sector_size;
  }

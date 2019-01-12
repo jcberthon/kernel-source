@@ -4,7 +4,7 @@ Date: Tue, 18 Aug 2015 16:02:38 +0300
 Subject: [PATCH] iwlwifi: pcie: add RTPM support when wifi is enabled
 Git-commit: 4cbb8e50338a2f2453ba399ce52562e0a111fc1f
 Patch-mainline: 4.6-rc1
-References: FATE#321353, FATE#323335
+References: FATE#321353
 
 Enable runtime power management (RTPM) for PCIe devices and implement
 the corresponding functions to enable D0i3 mode when the device is
@@ -222,7 +222,7 @@ Acked-by: Takashi Iwai <tiwai@suse.de>
 -#ifdef CONFIG_IWLWIFI_PCIE_RTPM
 -	pm_runtime_put_sync(trans->dev);
 -#endif /* CONFIG_IWLWIFI_PCIE_RTPM */
- 	/* re-take ownership to prevent other users from stealing the deivce */
+ 	/* re-take ownership to prevent other users from stealing the device */
  	iwl_pcie_prepare_card_hw(trans);
  }
 @@ -1359,9 +1354,10 @@ static int _iwl_trans_pcie_start_hw(stru

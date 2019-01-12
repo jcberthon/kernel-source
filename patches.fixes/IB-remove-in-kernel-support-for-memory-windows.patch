@@ -366,9 +366,9 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 --- a/drivers/infiniband/hw/mlx4/mlx4_ib.h
 +++ b/drivers/infiniband/hw/mlx4/mlx4_ib.h
 @@ -713,8 +713,6 @@ struct ib_mr *mlx4_ib_reg_user_mr(struct
+ 				  struct ib_udata *udata);
  int mlx4_ib_dereg_mr(struct ib_mr *mr);
- struct ib_mw *mlx4_ib_alloc_mw(struct ib_pd *pd, enum ib_mw_type type,
- 			       struct ib_udata *udata);
+ struct ib_mw *mlx4_ib_alloc_mw(struct ib_pd *pd, enum ib_mw_type type);
 -int mlx4_ib_bind_mw(struct ib_qp *qp, struct ib_mw *mw,
 -		    struct ib_mw_bind *mw_bind);
  int mlx4_ib_dealloc_mw(struct ib_mw *mw);
@@ -674,9 +674,9 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 -	int		mw_access_flags;
 -};
 -
- struct ib_send_wr {
- 	struct ib_send_wr      *next;
- 	u64			wr_id;
+ struct ib_cqe {
+ 	void (*done)(struct ib_cq *cq, struct ib_wc *wc);
+ };
 @@ -1226,19 +1207,6 @@ static inline struct ib_reg_wr *reg_wr(s
  	return container_of(wr, struct ib_reg_wr, wr);
  }
@@ -717,9 +717,9 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  	int	max_pages;
  	int	max_maps;
 @@ -1836,9 +1792,6 @@ struct ib_device {
+ 						int sg_nents);
  	struct ib_mw *             (*alloc_mw)(struct ib_pd *pd,
- 					       enum ib_mw_type type,
- 					       struct ib_udata *udata);
+ 					       enum ib_mw_type type);
 -	int                        (*bind_mw)(struct ib_qp *qp,
 -					      struct ib_mw *mw,
 -					      struct ib_mw_bind *mw_bind);

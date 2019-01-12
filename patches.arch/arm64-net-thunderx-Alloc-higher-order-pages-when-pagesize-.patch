@@ -25,4 +25,4 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	int order = (PAGE_SIZE <= 4096) ?  PAGE_ALLOC_COSTLY_ORDER : 0;
  
  	/* Check if request can be accomodated in previous allocated page */
- 	if (nic->rb_page &&
+ 	if (nic->rb_page) {

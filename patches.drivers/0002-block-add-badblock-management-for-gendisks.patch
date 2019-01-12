@@ -54,7 +54,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  {
  	struct device *ddev = disk_to_dev(disk);
 @@ -668,6 +679,11 @@ void del_gendisk(struct gendisk *disk)
- 	}
+ 	blk_unregister_queue(disk);
  	blk_unregister_region(disk_devt(disk), disk->minors);
  
 +	if (disk->bb) {

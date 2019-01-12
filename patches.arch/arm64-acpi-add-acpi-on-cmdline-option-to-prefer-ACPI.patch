@@ -60,7 +60,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +static bool param_acpi_on __initdata;
  static bool param_acpi_force __initdata;
  
- void __init acpi_numa_arch_fixup(void) {}
+ static int __init parse_acpi(char *arg)
 @@ -54,6 +55,8 @@ static int __init parse_acpi(char *arg)
  	/* "acpi=off" disables both ACPI table parsing and interpreter */
  	if (strcmp(arg, "off") == 0)

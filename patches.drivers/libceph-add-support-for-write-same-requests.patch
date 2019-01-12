@@ -126,7 +126,7 @@ Acked-by: David Disseldorp <ddiss@suse.de>
 +	op->writesame.offset = offset;
 +	op->writesame.length = length;
 +	op->writesame.data_length = data_length;
-+	op->payload_len = data_length;
++	op->indata_len = data_length;
 +}
 +EXPORT_SYMBOL(osd_req_op_writesame_init);
 +

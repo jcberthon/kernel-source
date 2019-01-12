@@ -43,7 +43,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +
  config ARCH_XGENE
  	bool "AppliedMicro X-Gene SOC Family"
- 	select MFD_SYSCON
+ 	help
 --- a/arch/arm64/boot/dts/broadcom/Makefile
 +++ b/arch/arm64/boot/dts/broadcom/Makefile
 @@ -1,4 +1,5 @@

@@ -20,7 +20,7 @@ index c09707b..3b22035 100644
 --- a/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts
 +++ b/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts
 @@ -25,9 +25,16 @@
- 	hpd-gpios = <&gpio 46 GPIO_ACTIVE_HIGH>;
+ 	};
  };
  
 +/* uart0 communicates with the BT module */

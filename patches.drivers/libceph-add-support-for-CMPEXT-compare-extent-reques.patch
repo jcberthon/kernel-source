@@ -73,7 +73,7 @@ Acked-by: David Disseldorp <ddiss@suse.de>
 +	    opcode == CEPH_OSD_OP_CMPEXT)
  		payload_len += length;
  
- 	op->payload_len = payload_len;
+ 	op->indata_len = payload_len;
 @@ -762,6 +769,7 @@ static u64 osd_req_encode_op(struct ceph
  	case CEPH_OSD_OP_WRITEFULL:
  	case CEPH_OSD_OP_ZERO:

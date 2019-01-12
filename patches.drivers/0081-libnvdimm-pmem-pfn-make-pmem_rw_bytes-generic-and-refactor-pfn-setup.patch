@@ -376,7 +376,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  
  	blk_queue_make_request(pmem->pmem_queue, pmem_make_request);
  	blk_queue_physical_block_size(pmem->pmem_queue, PAGE_SIZE);
-@@ -291,53 +300,17 @@ static int pmem_attach_disk(struct devic
+@@ -291,54 +300,18 @@ static int pmem_attach_disk(struct devic
  	set_capacity(disk, (pmem->size - pmem->pfn_pad - pmem->data_offset)
  			/ 512);
  	pmem->pmem_disk = disk;
@@ -395,6 +395,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 -	nvdimm_badblocks_populate(to_nd_region(dev->parent), &pmem->bb,
 -			&bb_res);
 +	nvdimm_badblocks_populate(to_nd_region(dev->parent), &pmem->bb, res);
+ 	disk->bb = &pmem->bb;
  	add_disk(disk);
  	revalidate_disk(disk);
  

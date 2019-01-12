@@ -67,7 +67,7 @@ index 99a95ba..684062a 100644
 -	struct nvme_ns *ns, *next;
  	unsigned i;
  
- 	lockdep_assert_held(&ctrl->namespaces_mutex);
+ 	for (i = 1; i <= nn; i++)
 @@ -1574,10 +1586,7 @@ static void nvme_scan_ns_sequential(struct nvme_ctrl *ctrl, unsigned nn)
  	for (i = 1; i <= nn; i++)
  		nvme_validate_ns(ctrl, i);

@@ -122,8 +122,8 @@ Signed-off-by: Michal Marek <mmarek@suse.cz>
  
  /*
 @@ -1273,6 +1274,7 @@ struct sched_entity {
- 	/* Per entity load average tracking */
- 	struct sched_avg	avg;
+ 	 */
+ 	struct sched_avg	avg ____cacheline_aligned_in_smp;
  #endif
 +	void *suse_kabi_padding;
  };

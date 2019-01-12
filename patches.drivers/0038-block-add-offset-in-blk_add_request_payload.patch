@@ -57,14 +57,14 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
 @@ -806,7 +806,7 @@ static int sd_setup_discard_cmnd(struct
+ 	 * discarded on disk. This allows us to report completion on the full
  	 * amount of blocks described by the request.
  	 */
- 	if (len) {
--		blk_add_request_payload(rq, page, len);
-+		blk_add_request_payload(rq, page, 0, len);
- 		ret = scsi_init_io(cmd);
- 	}
+-	blk_add_request_payload(rq, page, len);
++	blk_add_request_payload(rq, page, 0, len);
+ 	ret = scsi_init_io(cmd);
  	rq->__data_len = nr_bytes;
+ 
 --- a/include/linux/blkdev.h
 +++ b/include/linux/blkdev.h
 @@ -779,7 +779,7 @@ extern struct request *blk_make_request(

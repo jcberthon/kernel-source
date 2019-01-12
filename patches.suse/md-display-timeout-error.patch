@@ -60,7 +60,7 @@ Signed-off-by: Neil Brown <neilb@suse.de>
  				printk(KERN_WARNING
  				  "md: journal device provided without journal feature, ignoring the device\n");
 @@ -1679,6 +1686,11 @@ static int super_1_validate(struct mddev
- 				set_bit(MD_JOURNAL_CLEAN, &mddev->flags);
+ 			rdev->journal_tail = le64_to_cpu(sb->journal_tail);
  			rdev->raid_disk = 0;
  			break;
 +		case MD_DISK_ROLE_TIMEOUT: /* faulty, timeout */
@@ -155,7 +155,7 @@ Signed-off-by: Neil Brown <neilb@suse.de>
 +				 */
  };
  
- #define BB_LEN_MASK	(0x00000000000001FFULL)
+ static inline int is_badblock(struct md_rdev *rdev, sector_t s, int sectors,
 --- a/drivers/md/raid10.c
 +++ b/drivers/md/raid10.c
 @@ -370,6 +370,7 @@ static void raid10_end_read_request(stru

@@ -75,8 +75,8 @@ Signed-off-by: Coly Li <colyli@suse.de>
  }
  
 @@ -748,6 +749,8 @@ void md_super_write(struct mddev *mddev,
- 
- 	bio = bio_alloc_mddev(GFP_NOIO, 1, mddev);
+ 	 */
+ 	struct bio *bio = bio_alloc_mddev(GFP_NOIO, 1, mddev);
  
 +	atomic_inc(&rdev->nr_pending);
 +

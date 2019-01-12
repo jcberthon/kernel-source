@@ -115,7 +115,7 @@ Signed-off-by: David Disseldorp <ddiss@suse.de>
  
 -	ceph_osd_data_pagelist_init(&op->xattr.osd_data, pagelist);
 +	ceph_osd_data_pagelist_init(&op->xattr.request_data, req_pagelist);
- 	op->payload_len = payload_len;
+ 	op->indata_len = payload_len;
 +
  	return 0;
 +

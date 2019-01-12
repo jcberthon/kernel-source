@@ -27,7 +27,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/arch/arm64/include/asm/efi.h
 +++ b/arch/arm64/include/asm/efi.h
 @@ -5,9 +5,9 @@
- #include <asm/neon.h>
+ #include <asm/ptrace.h>
  
  #ifdef CONFIG_EFI
 -extern void efi_init(void);
@@ -37,7 +37,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +#define efi_init_fdt(x)
  #endif
  
- #define efi_call_virt(f, ...)						\
+ #define arch_efi_call_virt_setup()					\
 --- a/arch/arm64/kernel/efi.c
 +++ b/arch/arm64/kernel/efi.c
 @@ -50,6 +50,8 @@ static struct mm_struct efi_mm = {
@@ -66,7 +66,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	uefi_debug = params.verbose;
  	efi_system_table = params.system_table;
  
- 	memblock_reserve(params.mmap & PAGE_MASK,
+ 	memmap.phys_map = params.mmap;
 --- a/arch/arm64/kernel/setup.c
 +++ b/arch/arm64/kernel/setup.c
 @@ -181,6 +181,9 @@ static void __init setup_machine_fdt(phy
@@ -81,7 +81,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  			"Error: invalid device tree blob at physical address %pa (virtual address 0x%p)\n"
 @@ -313,7 +316,6 @@ void __init setup_arch(char **cmdline_p)
  	 */
- 	local_async_enable();
+ 	cpu_uninstall_idmap();
  
 -	efi_init();
  	arm64_memblock_init();

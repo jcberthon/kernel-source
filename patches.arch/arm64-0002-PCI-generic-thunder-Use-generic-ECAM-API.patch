@@ -346,7 +346,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  		.read		= pci_generic_config_read,
  		.write		= pci_generic_config_write,
  	}
-@@ -70,26 +41,25 @@ static const struct of_device_id gen_pci
+@@ -70,25 +41,24 @@ static const struct of_device_id gen_pci
  	  .data = &gen_pci_cfg_cam_bus_ops },
  
  	{ .compatible = "pci-host-ecam-generic",
@@ -369,11 +369,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 -	if (!pci)
 -		return -ENOMEM;
 +	of_id = of_match_node(gen_pci_of_match, pdev->dev.of_node);
-+	set_dev_node(&pdev->dev, of_node_to_nid(pdev->dev.of_node));
 +	ops = (struct pci_ecam_ops *)of_id->data;
  
 -	of_id = of_match_node(gen_pci_of_match, dev->of_node);
--	set_dev_node(dev, of_node_to_nid(dev->of_node));
 -	pci->cfg.ops = (struct gen_pci_cfg_bus_ops *)of_id->data;
  
 -	return pci_host_common_probe(pdev, pci);

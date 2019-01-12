@@ -61,5 +61,5 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 -	res->flags = resource_type(parent);
 +	res->flags = resource_type(parent) | resource_ext_type(parent);
  	res->flags |= IORESOURCE_BUSY | flags;
- 	res->desc = IORES_DESC_NONE;
  
+ 	write_lock(&resource_lock);

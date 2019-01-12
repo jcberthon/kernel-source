@@ -29,7 +29,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 --- a/drivers/net/ethernet/mellanox/mlx5/core/en_rx.c
 +++ b/drivers/net/ethernet/mellanox/mlx5/core/en_rx.c
 @@ -35,6 +35,7 @@
- #include <linux/prefetch.h>
+ #include <linux/tcp.h>
  #include <net/busy_poll.h>
  #include "en.h"
 +#include "en_tc.h"

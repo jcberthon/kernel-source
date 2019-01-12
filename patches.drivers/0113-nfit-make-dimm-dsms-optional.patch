@@ -35,22 +35,22 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 @@ -1185,11 +1185,11 @@ static int acpi_nfit_add_dimm(struct acp
  
  	/*
- 	 * Until standardization materializes we need to consider several
+ 	 * Until standardization materializes we need to consider up to 3
 -	 * different command sets.  Note, that checking for zero functions
 -	 * tells us if any commands might be reachable through this uuid.
 +	 * different command sets.  Note, that checking for function0 (bit0)
 +	 * tells us if any commands are reachable through this uuid.
  	 */
- 	for (i = NVDIMM_FAMILY_INTEL; i <= NVDIMM_FAMILY_MSFT; i++)
+ 	for (i = NVDIMM_FAMILY_INTEL; i <= NVDIMM_FAMILY_HPE2; i++)
 -		if (acpi_check_dsm(adev_dimm->handle, to_nfit_uuid(i), 1, 0))
 +		if (acpi_check_dsm(adev_dimm->handle, to_nfit_uuid(i), 1, 1))
  			break;
  
  	/* limit the supported commands to those that are publicly documented */
 @@ -1207,9 +1207,10 @@ static int acpi_nfit_add_dimm(struct acp
- 	} else if (nfit_mem->family == NVDIMM_FAMILY_MSFT)
- 		dsm_mask = 0xffffffff;
- 	else {
+ 		if (disable_vendor_specific)
+ 			dsm_mask &= ~(1 << 8);
+ 	} else {
 -		dev_err(dev, "unknown dimm command family\n");
 +		dev_dbg(dev, "unknown dimm command family\n");
  		nfit_mem->family = -1;

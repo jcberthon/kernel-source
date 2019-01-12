@@ -47,9 +47,9 @@ index 4da1b27..56a76b6 100644
  #include <asm/cacheflush.h>
  #include <asm/efi.h>
 @@ -244,7 +245,23 @@ void __init efi_init_fdt(void *fdt)
- 
- 	reserve_regions();
- 	early_memunmap(memmap.map, params.mmap_size);
+ 	memblock_reserve(params.mmap & PAGE_MASK,
+ 			 PAGE_ALIGN(params.mmap_size +
+ 				    (params.mmap & ~PAGE_MASK)));
 +
 +	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI)
 +		memblock_reserve(screen_info.lfb_base, screen_info.lfb_size);

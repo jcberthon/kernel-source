@@ -26,13 +26,13 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  {
 +	if (!bb)
 +		return;
- 	if (bb->dev)
- 		devm_kfree(bb->dev, bb->page);
- 	else
+ 	kfree(bb->page);
+ 	bb->page = NULL;
+ }
 --- a/block/genhd.c
 +++ b/block/genhd.c
 @@ -679,11 +679,6 @@ void del_gendisk(struct gendisk *disk)
- 	}
+ 	blk_unregister_queue(disk);
  	blk_unregister_region(disk_devt(disk), disk->minors);
  
 -	if (disk->bb) {

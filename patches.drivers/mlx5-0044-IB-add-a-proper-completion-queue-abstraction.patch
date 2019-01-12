@@ -381,8 +381,8 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  #include <linux/socket.h>
 +#include <linux/irq_poll.h>
  #include <uapi/linux/if_ether.h>
- #include <net/ipv6.h>
- #include <net/ip.h>
+ 
+ #include <linux/atomic.h>
 @@ -58,6 +59,7 @@
  #include <asm/uaccess.h>
  
@@ -404,7 +404,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  	enum ib_wc_opcode	opcode;
  	u32			vendor_err;
 @@ -1122,9 +1127,16 @@ struct ib_sge {
- 	u32	lkey;
+ 	int		mw_access_flags;
  };
  
 +struct ib_cqe {

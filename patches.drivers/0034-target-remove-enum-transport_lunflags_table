@@ -396,6 +396,6 @@ Acked-by: Lee Duncan <lduncan@suse.com>
  	u32			lun_link_magic;
 -	u32			lun_access;
 +	bool			lun_access_ro;
- #ifndef __GENKSYMS__
  	bool			lun_shutdown;
- #endif
+ 	u32			lun_index;
+ 

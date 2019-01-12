@@ -32,7 +32,7 @@ index 8fad3e9..ec608ef 100644
  static void fc_rport_work(struct work_struct *);
  
  static const char *fc_rport_state_names[] = {
-@@ -584,18 +584,17 @@ static void fc_rport_timeout(struct work_struct *work)
+@@ -584,20 +584,19 @@ static void fc_rport_timeout(struct work_struct *work)
  /**
   * fc_rport_error() - Error handler, called once retries have been exhausted
   * @rdata: The remote port the error is happened on
@@ -47,6 +47,8 @@ index 8fad3e9..ec608ef 100644
 -static void fc_rport_error(struct fc_rport_priv *rdata, struct fc_frame *fp)
 +static void fc_rport_error(struct fc_rport_priv *rdata, int err)
  {
+ 	struct fc_lport *lport = rdata->local_port;
+ 
 -	FC_RPORT_DBG(rdata, "Error %ld in state %s, retries %d\n",
 -		     IS_ERR(fp) ? -PTR_ERR(fp) : 0,
 -		     fc_rport_state(rdata), rdata->retries);
@@ -113,7 +115,7 @@ index 8fad3e9..ec608ef 100644
  
  	if (fp == ERR_PTR(-FC_EX_CLOSED))
  		goto put;
-@@ -732,18 +732,30 @@ static void fc_rport_flogi_resp(struct fc_seq *sp, struct fc_frame *fp,
+@@ -732,18 +732,29 @@ static void fc_rport_flogi_resp(struct fc_seq *sp, struct fc_frame *fp,
  	}
  
  	if (IS_ERR(fp)) {
@@ -140,18 +142,16 @@ index 8fad3e9..ec608ef 100644
 +	}
  
  	flogi = fc_frame_payload_get(fp, sizeof(*flogi));
--	if (!flogi)
-+	if (!flogi) {
+ 	if (!flogi) {
+		FC_RPORT_DBG(rdata, "Bad FLOGI response\n");
 +		err = -FC_EX_ALLOC_ERR;
  		goto bad;
-+	}
+ 	}
  	r_a_tov = ntohl(flogi->fl_csp.sp_r_a_tov);
- 	if (r_a_tov > rdata->r_a_tov)
- 		rdata->r_a_tov = r_a_tov;
 @@ -761,7 +773,7 @@ put:
+ 	kref_put(&rdata->kref, lport->tt.rport_destroy);
  	return;
  bad:
- 	FC_RPORT_DBG(rdata, "Bad FLOGI response\n");
 -	fc_rport_error_retry(rdata, fp);
 +	fc_rport_error_retry(rdata, err);
  	goto out;

@@ -214,7 +214,7 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
 +			remove_free_nid(sbi, nid);
  	}
  	mutex_unlock(&curseg->curseg_mutex);
- 
+ 	up_read(&nm_i->nat_tree_lock);
 @@ -1578,22 +1599,21 @@ bool alloc_nid(struct f2fs_sb_info *sbi, nid_t *nid)
  	if (unlikely(sbi->total_valid_node_count + 1 > nm_i->available_nids))
  		return false;

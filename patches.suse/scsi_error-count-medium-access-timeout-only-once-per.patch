@@ -2,9 +2,8 @@ From: Hannes Reinecke <hare@suse.de>
 Date: Fri, 23 Sep 2016 08:29:16 +0200
 Subject: scsi_error: count medium access timeout only once per EH run
 References: bsc#993832, bsc#1032345
-Patch-Mainline: Queued in subsystem maintainer repository
+Patch-mainline: v4.12-rc1
 Git-commit: 7a38dc0bfb4cc39ed57e120e2224673f3d4d200f
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
 
 The current medium access timeout counter will be increased for
 each command, so if there are enough failed commands we'll hit
@@ -114,9 +113,9 @@ index a79fb69..d57b910 100644
 --- a/drivers/scsi/sd.h
 +++ b/drivers/scsi/sd.h
 @@ -97,6 +97,7 @@ struct scsi_disk {
+ 	unsigned	lbpvpd : 1;
+ 	unsigned	ws10 : 1;
  	unsigned	ws16 : 1;
- 	unsigned	rc_basis: 2;
- 	unsigned	zoned: 2;
 +	unsigned	ignore_medium_access_errors : 1;
  };
  #define to_scsi_disk(obj) container_of(obj,struct scsi_disk,dev)

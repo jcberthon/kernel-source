@@ -69,9 +69,9 @@ index f7c1107..b2ce91a 100644
 +	memblock_reserve(params.mmap & PAGE_MASK,
 +			 PAGE_ALIGN(params.mmap_size +
 +				    (params.mmap & ~PAGE_MASK)));
+ }
  
- 	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI) {
- 		pci_notify_on_update_resource(&efi_pci_notifier_block);
+ static bool __init efi_virtmap_init(void)
 -- 
 2.10.0
 

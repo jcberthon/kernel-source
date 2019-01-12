@@ -45,4 +45,4 @@ Acked-by: NeilBrown <neilb@suse.com>
 +			continue;
  
  		wbio->bi_rw = WRITE;
- 		wbio->bi_end_io = end_sync_write;
+ 		if (test_bit(FailFast, &conf->mirrors[i].rdev->flags))

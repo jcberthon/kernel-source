@@ -47,7 +47,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  static int nicvf_poll_reg(struct nicvf *nic, int qidx,
  			  u64 reg, int bit_pos, int bits, int val)
 @@ -81,16 +90,15 @@ static inline int nicvf_alloc_rcv_buffer
- 	int order = get_order(buf_len);
+ 	int order = (PAGE_SIZE <= 4096) ?  PAGE_ALLOC_COSTLY_ORDER : 0;
  
  	/* Check if request can be accomodated in previous allocated page */
 -	if (nic->rb_page) {

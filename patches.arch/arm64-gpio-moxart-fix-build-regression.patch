@@ -34,4 +34,4 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	gc->bgpio_data = gc->read_reg(gc->reg_set);
  	gc->base = 0;
  	gc->ngpio = 32;
- 	gc->dev = dev;
+ 	gc->parent = dev;

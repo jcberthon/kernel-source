@@ -20,7 +20,7 @@ Signed-off-by: Neil Brown <neilb@suse.de>
 --- a/fs/block_dev.c
 +++ b/fs/block_dev.c
 @@ -156,17 +156,27 @@ blkdev_get_block(struct inode *inode, se
- 	return 0;
+ 	return file->f_mapping->host;
  }
  
 +static void submit_failfast_bio(int rw, struct bio *bio, struct inode *inode,
@@ -34,7 +34,7 @@ Signed-off-by: Neil Brown <neilb@suse.de>
  blkdev_direct_IO(struct kiocb *iocb, struct iov_iter *iter, loff_t offset)
  {
  	struct file *file = iocb->ki_filp;
- 	struct inode *inode = file->f_mapping->host;
+ 	struct inode *inode = bdev_file_inode(file);
 +	dio_submit_t *submit_io = NULL;
  
 +	if (file->f_flags & O_NONBLOCK)

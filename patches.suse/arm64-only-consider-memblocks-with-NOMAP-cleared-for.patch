@@ -44,8 +44,8 @@ index 2257f2d..e23aa1a 100644
 +		if (memblock_is_nomap(reg))
 +			continue;
  
- 		__map_memblock(pgd, start, end);
- 	}
+ 		if (ARM64_SWAPPER_USES_SECTION_MAPS) {
+ 			/*
 -- 
 2.7.3
 

@@ -68,4 +68,4 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 -	&dev_attr_rev_id.attr,
  	&dev_attr_flags.attr,
  	&dev_attr_id.attr,
- 	NULL,
+ 	&dev_attr_family.attr,

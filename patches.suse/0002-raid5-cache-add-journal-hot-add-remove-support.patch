@@ -52,7 +52,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
  		return -EBUSY;
 @@ -6122,8 +6124,23 @@ static int add_new_disk(struct mddev *md
  		else
- 			clear_bit(FailFast, &rdev->flags);
+ 			clear_bit(WriteMostly, &rdev->flags);
  
 -		if (info->state & (1<<MD_DISK_JOURNAL))
 +		if (info->state & (1<<MD_DISK_JOURNAL)) {

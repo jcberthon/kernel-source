@@ -49,8 +49,8 @@ Signed-off-by: Neil Brown <neilb@suse.de>
 +
 +	bio = bio_alloc_mddev(GFP_NOIO, 1, mddev);
  
- 	bio->bi_bdev = rdev->meta_bdev ? rdev->meta_bdev : rdev->bdev;
- 	bio->bi_iter.bi_sector = sector;
+ 	atomic_inc(&rdev->nr_pending);
+ 
 @@ -749,14 +761,21 @@ void md_super_write(struct mddev *mddev,
  	bio->bi_private = rdev;
  	bio->bi_end_io = super_written;
@@ -119,7 +119,7 @@ Signed-off-by: Neil Brown <neilb@suse.de>
 +		goto rewrite;
  	/* if there was a failure, MD_CHANGE_DEVS was set, and we re-write super */
  
- 	spin_lock(&mddev->lock);
+ 	if (mddev_is_clustered(mddev) && ret == 0)
 @@ -5482,8 +5505,9 @@ static void __md_stop_writes(struct mdde
  
  	del_timer_sync(&mddev->safemode_timer);
@@ -144,15 +144,15 @@ Signed-off-by: Neil Brown <neilb@suse.de>
 +				 */
  };
  
- #define BB_LEN_MASK	(0x00000000000001FFULL)
+ static inline int is_badblock(struct md_rdev *rdev, sector_t s, int sectors,
 @@ -240,6 +244,7 @@ struct mddev {
- 				 */
+ 				 * it then */
  #define MD_JOURNAL_CLEAN 5	/* A raid with journal is already clean */
  #define MD_HAS_JOURNAL	6	/* The raid array has journal feature set */
 +#define MD_NEED_REWRITE 7	/* metadata write need to be repeated */
- 
- 	int				suspended;
- 	atomic_t			active_io;
+ #define MD_RELOAD_SB	8	/* Reload the superblock because another node
+ 				 * updated it.
+ 				 */
 @@ -653,7 +658,7 @@ extern int mddev_congested(struct mddev
  extern void md_flush_request(struct mddev *mddev, struct bio *bio);
  extern void md_super_write(struct mddev *mddev, struct md_rdev *rdev,

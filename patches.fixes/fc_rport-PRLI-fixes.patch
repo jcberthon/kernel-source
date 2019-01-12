@@ -28,7 +28,7 @@ Signed-off-by: Hannes Reinecke <hare@suse.com>
 -	u8 resp_code = 0;
 +	enum fc_els_spp_resp resp_code;
  
- 	mutex_lock(&rdata->rp_mutex);
+ 	FC_RPORT_DBG(rdata, "Received a PRLI %s\n", fc_els_resp_type(fp));
  
 @@ -1149,8 +1149,8 @@ static void fc_rport_prli_resp(struct fc
  			goto out;

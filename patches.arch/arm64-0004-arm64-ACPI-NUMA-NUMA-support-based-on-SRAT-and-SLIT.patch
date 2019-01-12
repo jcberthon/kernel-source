@@ -74,9 +74,9 @@ index 474691f..49147c0 100644
  arm64-obj-$(CONFIG_ARMV8_DEPRECATED)	+= armv8_deprecated.o
  arm64-obj-$(CONFIG_ACPI)		+= acpi.o
 +arm64-obj-$(CONFIG_ACPI_NUMA)		+= acpi_numa.o
+ arm64-obj-$(CONFIG_ARM64_ACPI_PARKING_PROTOCOL)	+= acpi_parking_protocol.o
  
  obj-y					+= $(arm64-obj-y) vdso/
- obj-m					+= $(arm64-obj-m)
 diff --git a/arch/arm64/kernel/acpi_numa.c b/arch/arm64/kernel/acpi_numa.c
 new file mode 100644
 index 0000000..f85149c
@@ -205,9 +205,9 @@ index 7d07f09..d48fc8f 100644
  
 +	early_map_cpu_to_node(cpu_count, acpi_numa_get_nid(cpu_count, hwid));
 +
- 	cpu_count++;
- }
- 
+ 	/*
+ 	 * Set-up the ACPI parking protocol cpu entries
+ 	 * while initializing the cpu_logical_map to
 diff --git a/arch/arm64/mm/numa.c b/arch/arm64/mm/numa.c
 index 1def1de..c7fe3ec 100644
 --- a/arch/arm64/mm/numa.c

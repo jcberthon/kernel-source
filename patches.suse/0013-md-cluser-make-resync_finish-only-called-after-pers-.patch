@@ -49,7 +49,7 @@ index be934ac..cb8f036 100644
  	rdev_for_each(rdev, mddev) {
  		if (rdev->raid_disk >= 0 &&
 @@ -2480,6 +2481,9 @@ rewrite:
- 		goto rewrite;
+ 	md_super_wait(mddev);
  	/* if there was a failure, MD_CHANGE_DEVS was set, and we re-write super */
  
 +	if (mddev_is_clustered(mddev) && ret == 0)

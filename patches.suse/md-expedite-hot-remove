@@ -66,17 +66,17 @@ Signed-off-by: Neil Brown <neilb@suse.de>
 --- a/drivers/md/md.h
 +++ b/drivers/md/md.h
 @@ -196,6 +196,11 @@ enum flag_bits {
- 				 * Usually, this device should be faster
  				 * than other devices in the array
  				 */
+ 	ClusterRemove,
 +	RemoveSynchronised,	/* synchronize_rcu was called after
 +				 * This device was known to be faulty,
 +				 * so it is save to remove without
 +				 * another call.
 +				 */
- 	FailFast,		/* Minimal retries should be attempted on
- 				 * this device, so use REQ_FAILFAST_DEV.
- 				 * Also don't try to repair failed reads.
+ };
+ 
+ static inline int is_badblock(struct md_rdev *rdev, sector_t s, int sectors,
 --- a/drivers/md/raid10.c
 +++ b/drivers/md/raid10.c
 @@ -1845,7 +1845,8 @@ static int raid10_remove_disk(struct mdd

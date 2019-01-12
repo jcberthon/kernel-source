@@ -136,9 +136,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/arch/arm64/kernel/Makefile
 +++ b/arch/arm64/kernel/Makefile
 @@ -42,6 +42,7 @@ arm64-obj-$(CONFIG_PCI)			+= pci.o
+ arm64-obj-$(CONFIG_PCI)			+= pci.o
  arm64-obj-$(CONFIG_ARMV8_DEPRECATED)	+= armv8_deprecated.o
  arm64-obj-$(CONFIG_ACPI)		+= acpi.o
- arm64-obj-$(CONFIG_ACPI_NUMA)		+= acpi_numa.o
 +arm64-obj-$(CONFIG_ARM64_ACPI_PARKING_PROTOCOL)	+= acpi_parking_protocol.o
  
  obj-y					+= $(arm64-obj-y) vdso/
@@ -364,8 +364,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  
  /*
 @@ -447,6 +448,17 @@ acpi_map_gic_cpu_interface(struct acpi_m
- 
- 	early_map_cpu_to_node(cpu_count, acpi_numa_get_nid(cpu_count, hwid));
+ 	/* map the logical cpu id to cpu MPIDR */
+ 	cpu_logical_map(cpu_count) = hwid;
  
 +	/*
 +	 * Set-up the ACPI parking protocol cpu entries

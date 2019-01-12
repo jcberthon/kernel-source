@@ -132,7 +132,6 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  drivers/gpio/gpio-wm831x.c                    |    2 -
  drivers/gpio/gpio-wm8350.c                    |    2 -
  drivers/gpio/gpio-wm8994.c                    |    2 -
- drivers/gpio/gpio-xgene-sb.c                  |    8 ++--
  drivers/gpio/gpio-xgene.c                     |    2 -
  drivers/gpio/gpio-xilinx.c                    |    2 -
  drivers/gpio/gpio-xlp.c                       |    2 -
@@ -195,7 +194,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  sound/soc/codecs/wm8903.c                     |    2 -
  sound/soc/codecs/wm8962.c                     |    2 -
  sound/soc/codecs/wm8996.c                     |    2 -
- 129 files changed, 278 insertions(+), 265 deletions(-)
+ 128 files changed, 274 insertions(+), 261 deletions(-)
 
 --- a/arch/avr32/mach-at32ap/pio.c
 +++ b/arch/avr32/mach-at32ap/pio.c
@@ -563,15 +562,15 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  		err = gpiochip_add(&bank->chip);
 --- a/drivers/gpio/gpio-generic.c
 +++ b/drivers/gpio/gpio-generic.c
-@@ -518,7 +518,7 @@ int bgpio_init(struct gpio_chip *gc, str
+@@ -545,7 +545,7 @@ int bgpio_init(struct bgpio_chip *bgc, s
  		return -EINVAL;
  
- 	spin_lock_init(&gc->bgpio_lock);
--	gc->dev = dev;
-+	gc->parent = dev;
- 	gc->label = dev_name(dev);
- 	gc->base = -1;
- 	gc->ngpio = gc->bgpio_bits;
+ 	spin_lock_init(&bgc->lock);
+-	bgc->gc.dev = dev;
++	bgc->gc.parent = dev;
+ 	bgc->gc.label = dev_name(dev);
+ 	bgc->gc.base = -1;
+ 	bgc->gc.ngpio = bgc->bits;
 --- a/drivers/gpio/gpio-ich.c
 +++ b/drivers/gpio/gpio-ich.c
 @@ -282,7 +282,7 @@ static void ichx_gpiolib_setup(struct gp
@@ -787,15 +786,15 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  		if (type == MCP_TYPE_017)
 --- a/drivers/gpio/gpio-moxart.c
 +++ b/drivers/gpio/gpio-moxart.c
-@@ -60,7 +60,7 @@ static int moxart_gpio_probe(struct plat
- 	gc->bgpio_data = gc->read_reg(gc->reg_set);
- 	gc->base = 0;
- 	gc->ngpio = 32;
--	gc->dev = dev;
-+	gc->parent = dev;
- 	gc->owner = THIS_MODULE;
+@@ -61,7 +61,7 @@ static int moxart_gpio_probe(struct plat
+ 	bgc->data = bgc->read_reg(bgc->reg_set);
+ 	bgc->gc.base = 0;
+ 	bgc->gc.ngpio = 32;
+-	bgc->gc.dev = dev;
++	bgc->gc.parent = dev;
+ 	bgc->gc.owner = THIS_MODULE;
  
- 	ret = gpiochip_add_data(gc, NULL);
+ 	ret = gpiochip_add(&bgc->gc);
 --- a/drivers/gpio/gpio-msic.c
 +++ b/drivers/gpio/gpio-msic.c
 @@ -293,7 +293,7 @@ static int platform_msic_gpio_probe(stru
@@ -1416,34 +1415,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	if (pdata && pdata->gpio_base)
  		wm8994_gpio->gpio_chip.base = pdata->gpio_base;
  	else
---- a/drivers/gpio/gpio-xgene-sb.c
-+++ b/drivers/gpio/gpio-xgene-sb.c
-@@ -130,10 +130,10 @@ static int xgene_gpio_sb_to_irq(struct g
- 			(gpio > HWIRQ_TO_GPIO(priv, priv->nirq)))
- 		return -ENXIO;
- 
--	if (gc->dev->of_node)
--		fwspec.fwnode = of_node_to_fwnode(gc->dev->of_node);
-+	if (gc->parent->of_node)
-+		fwspec.fwnode = of_node_to_fwnode(gc->parent->of_node);
- 	else
--		fwspec.fwnode = gc->dev->fwnode;
-+		fwspec.fwnode = gc->parent->fwnode;
- 	fwspec.param_count = 2;
- 	fwspec.param[0] = GPIO_TO_HWIRQ(priv, gpio);
- 	fwspec.param[1] = IRQ_TYPE_NONE;
-@@ -147,7 +147,7 @@ static void xgene_gpio_sb_domain_activat
- 	u32 gpio = HWIRQ_TO_GPIO(priv, irq_data->hwirq);
- 
- 	if (gpiochip_lock_as_irq(&priv->gc, gpio)) {
--		dev_err(priv->gc.dev,
-+		dev_err(priv->gc.parent,
- 		"Unable to configure XGene GPIO standby pin %d as IRQ\n",
- 				gpio);
- 		return;
 --- a/drivers/gpio/gpio-xgene.c
 +++ b/drivers/gpio/gpio-xgene.c
-@@ -193,7 +193,7 @@ static int xgene_gpio_probe(struct platf
+@@ -181,7 +181,7 @@ static int xgene_gpio_probe(struct platf
  	gpio->chip.ngpio = XGENE_MAX_GPIOS;
  
  	spin_lock_init(&gpio->lock);
@@ -2655,8 +2629,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 + * @parent: optional parent device providing the GPIOs
   * @cdev: class device used by sysfs interface (may be NULL)
   * @owner: helps prevent removal of modules exporting active GPIOs
-  * @data: per-instance data assigned by the driver
-@@ -108,7 +108,7 @@ struct seq_file;
+  * @list: links gpio_chips together for traversal
+@@ -89,7 +89,7 @@ struct seq_file;
   */
  struct gpio_chip {
  	const char		*label;
@@ -2664,7 +2638,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 +	struct device		*parent;
  	struct device		*cdev;
  	struct module		*owner;
- 	void			*data;
+ 	struct list_head        list;
 --- a/sound/soc/codecs/rt5677.c
 +++ b/sound/soc/codecs/rt5677.c
 @@ -4696,7 +4696,7 @@ static void rt5677_init_gpio(struct i2c_

@@ -40,9 +40,9 @@ Signed-off-by: Coly Li <colyli@suse.de>
 -				set_bit(MD_JOURNAL_CLEAN, &mddev->flags);
  			rdev->raid_disk = 0;
  			break;
- 		case MD_DISK_ROLE_TIMEOUT: /* faulty, timeout */
+ 		default:
 @@ -1712,8 +1715,6 @@ static int super_1_validate(struct mddev
- 			set_bit(FailFast, &rdev->flags);
+ 			set_bit(WriteMostly, &rdev->flags);
  		if (le32_to_cpu(sb->feature_map) & MD_FEATURE_REPLACEMENT)
  			set_bit(Replacement, &rdev->flags);
 -		if (le32_to_cpu(sb->feature_map) & MD_FEATURE_JOURNAL)

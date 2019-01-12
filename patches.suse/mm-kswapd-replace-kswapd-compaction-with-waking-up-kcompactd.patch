@@ -430,7 +430,7 @@ Signed-off-by: Mel Gorman <mgorman@suse.de>
  	int i;
  	int end_zone = 0;	/* Inclusive.  0 = ZONE_DMA */
 @@ -3187,9 +3175,7 @@ static unsigned long balance_pgdat(pg_da
- 		__shrink_page_cache(GFP_KERNEL);
+ 	count_vm_event(PAGEOUTRUN);
  
  	do {
 -		unsigned long nr_attempted = 0;

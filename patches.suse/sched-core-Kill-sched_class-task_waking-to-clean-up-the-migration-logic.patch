@@ -154,18 +154,27 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  #endif
 --- a/kernel/sched/sched.h
 +++ b/kernel/sched/sched.h
+@@ -1168,7 +1168,7 @@ extern const u32 sched_prio_to_wmult[40];
+  *
+  * ENQUEUE_HEAD      - place at front of runqueue (tail if not specified)
+  * ENQUEUE_REPLENISH - CBS (replenish runtime and postpone deadline)
+- * ENQUEUE_WAKING    - sched_class::task_waking was called
++ * ENQUEUE_MIGRATED  - the task was migrated during wakeup
+  *
+  */
+ 
 @@ -1141,9 +1141,9 @@ extern const u32 sched_prio_to_wmult[40]
- #define ENQUEUE_WAKEUP		0x01
- #define ENQUEUE_HEAD		0x02
+ #define ENQUEUE_HEAD		0x08
+ #define ENQUEUE_REPLENISH	0x10
  #ifdef CONFIG_SMP
--#define ENQUEUE_WAKING		0x04	/* sched_class::task_waking was called */
-+#define ENQUEUE_MIGRATED	0x04
+-#define ENQUEUE_WAKING		0x20
++#define ENQUEUE_MIGRATED	0x20
  #else
 -#define ENQUEUE_WAKING		0x00
 +#define ENQUEUE_MIGRATED	0x00
  #endif
- #define ENQUEUE_REPLENISH	0x08
- #define ENQUEUE_RESTORE	0x10
+ 
+ #define RETRY_TASK		((void *)-1UL)
 @@ -1179,7 +1179,6 @@ struct sched_class {
  	int  (*select_task_rq)(struct task_struct *p, int task_cpu, int sd_flag, int flags);
  	void (*migrate_task_rq)(struct task_struct *p);

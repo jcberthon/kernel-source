@@ -121,4 +121,4 @@ Acked-by: Michal Hocko <mhocko@suse.cz>
 +	return err;
  
   bug_cleanup:
- 	/* module_bug_cleanup needs module_mutex protection */
+ 	destroy_params(mod->kp, mod->num_kp);

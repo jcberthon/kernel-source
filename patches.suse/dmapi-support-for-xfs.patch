@@ -3936,8 +3936,8 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
  xfs_file_read_iter(
  	struct kiocb		*iocb,
 @@ -338,6 +357,24 @@ xfs_file_read_iter(
- 	 * serialisation.
- 	 */
+ 		return -EIO;
+ 
  	xfs_rw_ilock(ip, XFS_IOLOCK_SHARED);
 +
 +	if (DM_EVENT_ENABLED(ip, DM_EVENT_READ) && !(ioflags & XFS_IO_INVIS)) {
@@ -3958,8 +3958,8 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 +	}
 +
  	if ((ioflags & XFS_IO_ISDIRECT) && inode->i_mapping->nrpages) {
- 		xfs_rw_iunlock(ip, XFS_IOLOCK_SHARED);
- 		xfs_rw_ilock(ip, XFS_IOLOCK_EXCL);
+ 		ret = filemap_write_and_wait_range(mapping, iocb->ki_pos, end);
+ 		if (ret)
 @@ -404,6 +441,19 @@ xfs_file_splice_read(
  
  	xfs_rw_ilock(ip, XFS_IOLOCK_SHARED);
@@ -4035,8 +4035,8 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
  	struct file		*file = iocb->ki_filp;
  	struct address_space	*mapping = file->f_mapping;
 @@ -749,7 +828,7 @@ xfs_file_dio_aio_write(
- 		xfs_rw_ilock(ip, iolock);
- 	}
+ 
+ 	xfs_rw_ilock(ip, iolock);
  
 -	ret = xfs_file_aio_write_checks(iocb, from, &iolock);
 +	ret = xfs_file_aio_write_checks(iocb, from, &iolock, eventsent);
@@ -4207,9 +4207,9 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
 --- a/fs/xfs/xfs_inode.c
 +++ b/fs/xfs/xfs_inode.c
 @@ -48,6 +48,7 @@
- #include "xfs_trans_priv.h"
  #include "xfs_log.h"
  #include "xfs_bmap_btree.h"
+ #include "xfs_dir2_priv.h"
 +#include "xfs_dmapi.h"
  
  kmem_zone_t *xfs_inode_zone;
@@ -5110,7 +5110,7 @@ Acked-by: Jeff Mahoney <jeffm@suse.com>
  #include "xfs_trans.h"
  #include "xfs_log.h"
 +#include "xfs_dmapi.h"
- 
+
  /* ----- Kernel only functions below ----- */
  STATIC int
 @@ -208,6 +209,17 @@ xfs_symlink(

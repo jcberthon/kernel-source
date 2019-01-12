@@ -84,8 +84,8 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
  {
  	struct efi_fdt_params params;
 @@ -246,8 +282,10 @@ void __init efi_init_fdt(void *fdt)
- 	reserve_regions();
- 	early_memunmap(memmap.map, params.mmap_size);
+ 			 PAGE_ALIGN(params.mmap_size +
+ 				    (params.mmap & ~PAGE_MASK)));
  
 -	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI)
 +	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI) {

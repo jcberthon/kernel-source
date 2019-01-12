@@ -302,7 +302,7 @@ Reviewed-by: David Disseldorp <ddiss@suse.de>
 +		if (data_length) {
 +			BUG_ON(osd_data->type == CEPH_OSD_DATA_TYPE_NONE);
 +			ceph_osdc_msg_data_add(req->r_request, osd_data);
-+			src->payload_len += data_length;
++			src->indata_len += data_length;
 +			request_data_len += data_length;
 +		}
 +		osd_data = &src->notify.response_data;

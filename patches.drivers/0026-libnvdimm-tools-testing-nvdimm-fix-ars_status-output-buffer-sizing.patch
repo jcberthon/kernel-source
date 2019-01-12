@@ -137,5 +137,5 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 +	nd_cmd->out_length = sizeof(struct nd_cmd_ars_status);
 +	/* TODO: emit error records */
  	nd_cmd->num_records = 0;
- 	nd_cmd->status = 0;
- 
+ 	nd_cmd->address = 0;
+ 	nd_cmd->length = -1ULL;

@@ -4,7 +4,7 @@ Date: Wed, 6 Jan 2016 18:40:38 -0200
 Subject: [PATCH] iwlwifi: pcie: add initial RTPM support for PCI
 Git-commit: b3ff1270566d41eb8ab2d67844bf17b7fa9fee78
 Patch-mainline: 4.6-rc1
-References: FATE#321353, FATE#323335
+References: FATE#321353
 
 Add an initial implementation of runtime power management (RTPM) for
 PCI devices.  With this patch, RTPM is only used when wifi is off
@@ -157,7 +157,7 @@ Acked-by: Takashi Iwai <tiwai@suse.de>
 +#ifdef CONFIG_IWLWIFI_PCIE_RTPM
 +	pm_runtime_put_sync(trans->dev);
 +#endif /* CONFIG_IWLWIFI_PCIE_RTPM */
- 	/* re-take ownership to prevent other users from stealing the deivce */
+ 	/* re-take ownership to prevent other users from stealing the device */
  	iwl_pcie_prepare_card_hw(trans);
  }
 @@ -1353,6 +1359,9 @@ static int _iwl_trans_pcie_start_hw(stru

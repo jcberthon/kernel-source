@@ -89,8 +89,8 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  
  /*
 @@ -2023,7 +2028,7 @@ struct request_queue *blk_mq_init_alloca
- 	if (!q->nr_hw_queues)
- 		goto err_hctxs;
+ 		hctxs[i]->queue_num = i;
+ 	}
  
 -	setup_timer(&q->timeout, blk_mq_rq_timer, (unsigned long) q);
 +	INIT_WORK(&q->timeout_work, blk_mq_timeout_work);
@@ -119,7 +119,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  
  	list_for_each_entry_safe(rq, tmp, &q->timeout_list, timeout_list)
 @@ -145,6 +148,7 @@ void blk_rq_timed_out_timer(unsigned lon
- 		mod_timer(&q->timeout, next);
+ 		mod_timer(&q->timeout, round_jiffies_up(next));
  
  	spin_unlock_irqrestore(q->queue_lock, flags);
 +	blk_queue_exit(q);

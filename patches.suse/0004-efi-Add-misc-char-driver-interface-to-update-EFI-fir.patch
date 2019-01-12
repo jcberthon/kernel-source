@@ -64,11 +64,11 @@ Acked-by: Lee, Chun-Yi <jlee@suse.com>
 --- a/drivers/firmware/efi/Makefile
 +++ b/drivers/firmware/efi/Makefile
 @@ -20,3 +20,5 @@ obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= ru
+ obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= runtime-wrappers.o
  obj-$(CONFIG_EFI_STUB)			+= libstub/
  obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
 +
 +obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
- obj-$(CONFIG_EFI_PARAMS_FROM_FDT)	+= efi-fdt.o
 --- /dev/null
 +++ b/drivers/firmware/efi/capsule-loader.c
 @@ -0,0 +1,343 @@

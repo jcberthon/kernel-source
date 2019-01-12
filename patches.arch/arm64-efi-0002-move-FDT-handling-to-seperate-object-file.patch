@@ -19,9 +19,9 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 --- a/drivers/firmware/efi/Makefile
 +++ b/drivers/firmware/efi/Makefile
 @@ -18,3 +18,4 @@ obj-$(CONFIG_EFI_RUNTIME_MAP)		+= runtim
- obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= runtime-wrappers.o
- obj-$(CONFIG_EFI_STUB)			+= libstub/
  obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
+ 
+ obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
 +obj-$(CONFIG_EFI_PARAMS_FROM_FDT)	+= efi-fdt.o
 --- /dev/null
 +++ b/drivers/firmware/efi/efi-fdt.c

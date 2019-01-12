@@ -50,7 +50,7 @@ Signed-off-by: NeilBrown <neilb@suse.de>
 +			set_bit(FailFast, &rdev->flags);
  		if (le32_to_cpu(sb->feature_map) & MD_FEATURE_REPLACEMENT)
  			set_bit(Replacement, &rdev->flags);
- 		if (le32_to_cpu(sb->feature_map) & MD_FEATURE_JOURNAL)
+ 	} else /* MULTIPATH are always insync */
 @@ -1710,6 +1716,10 @@ static void super_1_sync(struct mddev *m
  	sb->chunksize = cpu_to_le32(mddev->chunk_sectors);
  	sb->level = cpu_to_le32(mddev->level);
@@ -112,8 +112,8 @@ Signed-off-by: NeilBrown <neilb@suse.de>
 +		else
 +			clear_bit(FailFast, &rdev->flags);
  
- 		if (info->state & (1<<MD_DISK_JOURNAL))
- 			set_bit(Journal, &rdev->flags);
+ 		if (info->state & (1<<MD_DISK_JOURNAL)) {
+ 			struct md_rdev *rdev2;
 @@ -6112,6 +6139,8 @@ static int add_new_disk(struct mddev *md
  
  		if (info->state & (1<<MD_DISK_WRITEMOSTLY))
@@ -126,8 +126,8 @@ Signed-off-by: NeilBrown <neilb@suse.de>
 --- a/drivers/md/md.h
 +++ b/drivers/md/md.h
 @@ -183,6 +183,12 @@ enum flag_bits {
- 				 * Usually, this device should be faster
- 				 * than other devices in the array
+ 				 * so it is save to remove without
+ 				 * another call.
  				 */
 +	FailFast,		/* Minimal retries should be attempted on
 +				 * this device, so use REQ_FAILFAST_DEV.
@@ -137,7 +137,7 @@ Signed-off-by: NeilBrown <neilb@suse.de>
 +				 */
  };
  
- #define BB_LEN_MASK	(0x00000000000001FFULL)
+ static inline int is_badblock(struct md_rdev *rdev, sector_t s, int sectors,
 --- a/include/uapi/linux/raid/md_p.h
 +++ b/include/uapi/linux/raid/md_p.h
 @@ -84,6 +84,10 @@

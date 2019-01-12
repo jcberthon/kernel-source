@@ -34,7 +34,7 @@ index a348f9d..1b50d76 100644
 --- a/arch/arm64/include/asm/efi.h
 +++ b/arch/arm64/include/asm/efi.h
 @@ -11,28 +11,21 @@ extern void efi_init_fdt(void *fdt);
- #define efi_init_fdt(x)
+ #define efi_init()
  #endif
  
 -#define efi_call_virt(f, ...)						\

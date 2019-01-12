@@ -36,13 +36,13 @@ index 1b50d76..6043e56 100644
 --- a/arch/arm64/include/asm/efi.h
 +++ b/arch/arm64/include/asm/efi.h
 @@ -4,6 +4,7 @@
- #include <asm/boot.h>
+ 
  #include <asm/io.h>
  #include <asm/neon.h>
 +#include <asm/ptrace.h>
  
  #ifdef CONFIG_EFI
- extern void efi_init_fdt(void *fdt);
+ extern void efi_init(void);
 @@ -30,6 +31,8 @@ extern void efi_init_fdt(void *fdt);
  	kernel_neon_end();						\
  })
@@ -51,7 +51,7 @@ index 1b50d76..6043e56 100644
 +
  /* arch specific definitions used by the stub code */
  
- #define EFI_FDT_ALIGN		MIN_FDT_ALIGN
+ /*
 -- 
 1.8.5.6
 

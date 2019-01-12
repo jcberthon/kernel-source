@@ -271,9 +271,9 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  			break;
  		case ELS_RJT_LOGIC:
  		case ELS_RJT_UNAB:
-+			FC_FCP_DBG(fsp, "device %x REC reject %d/%d\n"
++			FC_FCP_DBG(fsp, "device %x REC reject %d/%d xfer_len %zx\n",
 +				   fsp->rport->port_id, rjt->er_reason,
-+				   rjt->er_explan);
++				   rjt->er_explan, fsp->xfer_len);
  			/*
  			 * If no data transfer, the command frame got dropped
  			 * so we just retry.  If data was transferred, we

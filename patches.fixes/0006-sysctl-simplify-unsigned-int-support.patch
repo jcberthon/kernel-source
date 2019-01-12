@@ -315,9 +315,9 @@ index b47a479de51d..b1f0ff6234c4 100644
 +				   buffer, lenp, ppos, conv, data);
 +}
 +
- int pc_limit_proc_dointvec(struct ctl_table *table, int write,
- 		     void __user *buffer, size_t *lenp, loff_t *ppos)
- {
+ /**
+  * proc_dointvec - read a vector of integers
+  * @table: the sysctl table
 @@ -2336,8 +2475,8 @@ int proc_dointvec(struct ctl_table *table, int write,
  int proc_douintvec(struct ctl_table *table, int write,
  		     void __user *buffer, size_t *lenp, loff_t *ppos)

@@ -54,8 +54,8 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	/* map all the memory banks */
  	for_each_memblock(memory, reg) {
 @@ -399,29 +385,8 @@ static void __init map_mem(void)
- 		if (start >= end)
- 			break;
+ 		if (memblock_is_nomap(reg))
+ 			continue;
  
 -		if (ARM64_SWAPPER_USES_SECTION_MAPS) {
 -			/*

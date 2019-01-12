@@ -60,7 +60,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  		bb->shift = -1;
  		return -ENOMEM;
  	}
-@@ -547,15 +544,40 @@ int badblocks_init(struct badblocks *bb,
+@@ -547,17 +544,42 @@ int badblocks_init(struct badblocks *bb,
  
  	return 0;
  }
@@ -94,6 +94,8 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
   */
  void badblocks_exit(struct badblocks *bb)
  {
+ 	if (!bb)
+ 		return;
 -	kfree(bb->page);
 +	if (bb->dev)
 +		devm_kfree(bb->dev, bb->page);

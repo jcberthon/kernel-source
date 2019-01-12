@@ -28,8 +28,8 @@ index 6f47dd2bb1db..e2c3801dd6ae 100644
 +	hpd-gpios = <&gpio 46 GPIO_ACTIVE_HIGH>;
 +};
  
- &uart1 {
- 	status = "okay";
+ /* uart0 communicates with the BT module */
+ &uart0 {
 -- 
 1.8.5.6
 

@@ -81,5 +81,5 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
 +	 */
 +	struct sched_avg	avg ____cacheline_aligned_in_smp;
  #endif
- 	void *suse_kabi_padding;
  };
+ 

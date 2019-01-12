@@ -21,7 +21,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
 --- a/fs/block_dev.c
 +++ b/fs/block_dev.c
 @@ -155,11 +155,16 @@ static void submit_failfast_bio(int rw,
- 	submit_bio(rw, bio);
+ 	return 0;
  }
  
 +static struct inode *bdev_file_inode(struct file *file)
@@ -35,9 +35,9 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.com>
  	struct file *file = iocb->ki_filp;
 -	struct inode *inode = file->f_mapping->host;
 +	struct inode *inode = bdev_file_inode(file);
- 	dio_submit_t *submit_io = NULL;
  
- 	if (file->f_flags & O_NONBLOCK)
+ 	if (IS_DAX(inode))
+ 		return dax_do_io(iocb, inode, iter, offset, blkdev_get_block,
 @@ -348,7 +353,7 @@ static int blkdev_write_end(struct file
   */
  static loff_t block_llseek(struct file *file, loff_t offset, int whence)
