@@ -136,7 +136,7 @@ Automatically created from "patches.arch/x86-l1tf-04-protect-PROT_NONE-ptes.patc
 -		     massage_pgprot(pgprot));
 +	phys_addr_t paddr = PFN_PHYS(page_nr);
 +	paddr ^= protnone_mask(pgprot_val(pgprot));
-+	paddr &= PMD_PAGE_MASK;
++	paddr &= PHYSICAL_PMD_PAGE_MASK;
 +	return __pmd(paddr | massage_pgprot(pgprot));
  }
  
@@ -162,7 +162,7 @@ Automatically created from "patches.arch/x86-l1tf-04-protect-PROT_NONE-ptes.patc
  	val &= _HPAGE_CHG_MASK;
  	val |= massage_pgprot(newprot) & ~_HPAGE_CHG_MASK;
 -
-+	val = flip_protnone_guard(oldval, val, PMD_PAGE_MASK);
++	val = flip_protnone_guard(oldval, val, PHYSICAL_PMD_PAGE_MASK);
  	return __pmd(val);
  }
  #endif

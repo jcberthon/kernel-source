@@ -1,6 +1,6 @@
 From: Michal Hocko <mhocko@suse.com>
-Subject: xen, x86, l1tf: Protect PROT_NONE PTEs against speculation fixup
-Patch-mainline: never (suse specific)
+Subject: xen: x86, l1tf: Protect PROT_NONE PTEs against speculation fixup
+Patch-mainline: Never, SUSE-Xen specific
 References: bnc#1104684, bnc#1104818
 
 When backporting patches.arch/x86-l1tf-04-protect-PROT_NONE-ptes.patch I
@@ -16,9 +16,7 @@ state (bnc#1104818).
 
 Signed-off-by: Michal Hocko <mhocko@suse.com>
 
----
- arch/x86/include/mach-xen/asm/pgtable.h |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Automatically created from "patches.arch/x86-l1tf-04-protect-PROT_NONE-ptes-fix.patch" by xen-port-patches.py
 
 --- a/arch/x86/include/mach-xen/asm/pgtable.h
 +++ b/arch/x86/include/mach-xen/asm/pgtable.h
@@ -26,8 +24,17 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  {
  	phys_addr_t paddr = PFN_PHYS(page_nr);
  	paddr ^= protnone_mask(pgprot_val(pgprot));
--	paddr &= PMD_PAGE_MASK;
+-	paddr &= PHYSICAL_PMD_PAGE_MASK;
 +	paddr &= PTE_PFN_MASK;
  	return __pmd(paddr | massage_pgprot(pgprot));
  }
  
+@@ -364,7 +364,7 @@ static inline pmd_t pmd_modify(pmd_t pmd
+ 
+ 	val &= _HPAGE_CHG_MASK;
+ 	val |= massage_pgprot(newprot) & ~_HPAGE_CHG_MASK;
+-	val = flip_protnone_guard(oldval, val, PHYSICAL_PMD_PAGE_MASK);
++	val = flip_protnone_guard(oldval, val, PTE_PFN_MASK);
+ 	return __pmd(val);
+ }
+ #endif
