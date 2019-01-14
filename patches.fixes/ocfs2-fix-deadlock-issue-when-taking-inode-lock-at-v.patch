@@ -36,15 +36,14 @@ Fixes them by adding the tracking logic (in the previous patch) for these
 funcs above, ocfs2_permission(), ocfs2_iop_[set|get]_acl(),
 ocfs2_setattr().
 ---
- fs/ocfs2/acl.c  | 14 ++++++--------
- fs/ocfs2/file.c | 59 +++++++++++++++++++++++++++++++++++++++++++--------------
- 2 files changed, 51 insertions(+), 22 deletions(-)
+ fs/ocfs2/acl.c  |   15 +++++---------
+ fs/ocfs2/file.c |   59 ++++++++++++++++++++++++++++++++++++++++++--------------
+ 2 files changed, 51 insertions(+), 23 deletions(-)
 
-diff --git a/fs/ocfs2/acl.c b/fs/ocfs2/acl.c
-index 6ad887b380ed..57d9f9935920 100644
 --- a/fs/ocfs2/acl.c
 +++ b/fs/ocfs2/acl.c
-@@ -147,20 +147,17 @@ static struct posix_acl *ocfs2_get_acl(struct inode *inode, int type)
+@@ -146,21 +146,18 @@ static struct posix_acl *ocfs2_get_acl(s
+ 	struct ocfs2_super *osb = OCFS2_SB(inode->i_sb);
  	struct buffer_head *di_bh = NULL;
  	struct posix_acl *acl;
 -	int ret;
@@ -71,11 +70,9 @@ index 6ad887b380ed..57d9f9935920 100644
  
  	brelse(di_bh);
  
-diff --git a/fs/ocfs2/file.c b/fs/ocfs2/file.c
-index b2fe82e04a45..bda93bd2ca31 100644
 --- a/fs/ocfs2/file.c
 +++ b/fs/ocfs2/file.c
-@@ -1112,6 +1112,8 @@ int ocfs2_setattr(struct dentry *dentry, struct iattr *attr)
+@@ -1112,6 +1112,8 @@ int ocfs2_setattr(struct dentry *dentry,
  	handle_t *handle = NULL;
  	struct dquot *transfer_to[MAXQUOTAS] = { };
  	int qtype;
@@ -84,7 +81,7 @@ index b2fe82e04a45..bda93bd2ca31 100644
  
  	trace_ocfs2_setattr(inode, dentry,
  			    (unsigned long long)OCFS2_I(inode)->ip_blkno,
-@@ -1143,11 +1145,30 @@ int ocfs2_setattr(struct dentry *dentry, struct iattr *attr)
+@@ -1143,11 +1145,30 @@ int ocfs2_setattr(struct dentry *dentry,
  		}
  	}
  
@@ -119,7 +116,7 @@ index b2fe82e04a45..bda93bd2ca31 100644
  	}
  	inode_locked = 1;
  
-@@ -1248,8 +1269,8 @@ int ocfs2_setattr(struct dentry *dentry, struct iattr *attr)
+@@ -1248,8 +1269,8 @@ int ocfs2_setattr(struct dentry *dentry,
  bail_commit:
  	ocfs2_commit_trans(osb, handle);
  bail_unlock:
@@ -179,6 +176,3 @@ index b2fe82e04a45..bda93bd2ca31 100644
  out:
  	return ret;
  }
--- 
-2.12.3
-
