@@ -1,0 +1,27 @@
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Date: Sun, 13 Jan 2019 10:05:34 +0100
+Subject: [PATCH] Linux 4.4.170
+References: bnc#1012382
+Patch-mainline: 4.4.170
+Git-commit: b83b3fa78445387f351cef477a112e503d72b9f0
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 0d41b0626c0c..bc58f206c0da 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,6 +1,6 @@
+ VERSION = 4
+ PATCHLEVEL = 4
+-SUBLEVEL = 169
++SUBLEVEL = 170
+ EXTRAVERSION =
+ NAME = Blurry Fish Butt
+ 
+-- 
+2.20.1
+
