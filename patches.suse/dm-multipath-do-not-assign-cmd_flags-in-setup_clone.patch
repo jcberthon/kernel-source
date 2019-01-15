@@ -1,0 +1,49 @@
+From: Hannes Reinecke <hare@suse.de>
+Date: Fri, 11 Jan 2019 10:54:01 +0100
+Subject: [PATCH] dm-multipath: do not assign cmd_flags in setup_clone()
+References: bsc#1103156
+Patch-Mainline: never, SLE12 SP3 specific
+
+setup_clone() is called from two locations in different order;
+the 'old' (request-based) implementation is calling setup_clone()
+before __multipath_map(), and the 'new' (blk-mq based) implementation
+is calling setup_clone() _after_ __multipath_map().
+The problem is not that in __multipath_map() itself we only have
+access to the original request for the 'new' implementation, not the
+'old' one.
+Hence we can't copy over the original cmd_flags() in here.
+At the same time we can't use setup_clone() as then the modifications
+would be overwritten by __multipath_map().
+
+So stop modifying cmd_flags() in setup_clone() and use the calling
+location; with that the flags will be set correctly in all cases.
+
+Signed-off-by: Hannes Reinecke <hare@suse.com>
+---
+ drivers/md/dm-rq.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/drivers/md/dm-rq.c b/drivers/md/dm-rq.c
+index d1a93c0e4b9f..bf16e52d3bca 100644
+--- a/drivers/md/dm-rq.c
++++ b/drivers/md/dm-rq.c
+@@ -498,7 +498,6 @@ static int setup_clone(struct request *clone, struct request *rq,
+ 	if (r)
+ 		return r;
+ 
+-	clone->cmd_flags = rq->cmd_flags | REQ_NOMERGE;
+ 	clone->end_io = end_clone_request;
+ 	clone->end_io_data = tio;
+ 
+@@ -525,7 +524,7 @@ static struct request *clone_old_rq(struct request *rq, struct mapped_device *md
+ 		free_old_clone_request(md, clone);
+ 		return NULL;
+ 	}
+-
++	clone->cmd_flags = rq->cmd_flags | REQ_NOMERGE;
+ 	return clone;
+ }
+ 
+-- 
+2.16.4
+

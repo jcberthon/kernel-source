@@ -1,7 +1,7 @@
 Subject: hpwdt calculate reload value on each use
 From: David Bond <dbond@suse.com>
 Patch-mainline: never, SUSE specific 
-References: bsc#1114417
+References: bsc#1114417 bsc#1116962
 
 Partial port of mainline commit 0458f403fee34 to fix bug where
 calling hpwdt_settimeout() doesn't work due to missing logic
