@@ -1,52 +1,55 @@
-From 51c2cfdd270f76f068ea875fba77384e49156ac6 Mon Sep 17 00:00:00 2001
 From: Michal Hocko <mhocko@suse.com>
-Date: Mon, 3 Dec 2018 10:27:18 +0100
-Subject: [RFC PATCH] hwpoison, memory_hotplug: allow hwpoisoned pages to be
+Date: Fri, 28 Dec 2018 00:38:01 -0800
+Subject: [PATCH] hwpoison, memory_hotplug: allow hwpoisoned pages to be
  offlined
-Patch-mainline: not yet, under discussion
-References: bnc#1116336
+References: bnc#1012382 bnc#1116336
+Patch-mainline: 4.4.170
+Git-commit: b15c87263a69272423771118c653e9a1d0672caa
+
+commit b15c87263a69272423771118c653e9a1d0672caa upstream.
 
 We have received a bug report that an injected MCE about faulty memory
-prevents memory offline to succeed on 4.4 base kernel. The underlying
-reason was that the HWPoison page has an elevated reference count and
-the migration keeps failing. There are two problems with that. First
-of all it is dubious to migrate the poisoned page because we know that
-accessing that memory is possible to fail. Secondly it doesn't make any
-sense to migrate a potentially broken content and preserve the memory
-corruption over to a new location.
+prevents memory offline to succeed on 4.4 base kernel.  The underlying
+reason was that the HWPoison page has an elevated reference count and the
+migration keeps failing.  There are two problems with that.  First of all
+it is dubious to migrate the poisoned page because we know that accessing
+that memory is possible to fail.  Secondly it doesn't make any sense to
+migrate a potentially broken content and preserve the memory corruption
+over to a new location.
 
 Oscar has found out that 4.4 and the current upstream kernels behave
 slightly differently with his simply testcase
+
 ===
 
 int main(void)
 {
-    int ret;
-    int i;
-    int fd;
-    char *array = malloc(4096);
-    char *array_locked = malloc(4096);
+        int ret;
+        int i;
+        int fd;
+        char *array = malloc(4096);
+        char *array_locked = malloc(4096);
 
-    fd = open("/tmp/data", O_RDONLY);
-    read(fd, array, 4095);
+        fd = open("/tmp/data", O_RDONLY);
+        read(fd, array, 4095);
 
-    for (i = 0; i < 4096; i++)
-	    array_locked[i] = 'd';
+        for (i = 0; i < 4096; i++)
+                array_locked[i] = 'd';
 
-    ret = mlock((void *)PAGE_ALIGN((unsigned long)array_locked), sizeof(array_locked));
-    if (ret)
-	    perror("mlock");
+        ret = mlock((void *)PAGE_ALIGN((unsigned long)array_locked), sizeof(array_locked));
+        if (ret)
+                perror("mlock");
 
-    sleep (20);
+        sleep (20);
 
-    ret = madvise((void *)PAGE_ALIGN((unsigned long)array_locked), 4096, MADV_HWPOISON);
-    if (ret)
-	    perror("madvise");
+        ret = madvise((void *)PAGE_ALIGN((unsigned long)array_locked), 4096, MADV_HWPOISON);
+        if (ret)
+                perror("madvise");
 
-    for (i = 0; i < 4096; i++)
-	    array_locked[i] = 'd';
+        for (i = 0; i < 4096; i++)
+                array_locked[i] = 'd';
 
-    return 0;
+        return 0;
 }
 ===
 
@@ -75,27 +78,29 @@ kernel:  [<ffffffff81215f08>] do_execve+0x28/0x30
 kernel:  [<ffffffff81095ddb>] call_usermodehelper_exec_async+0xfb/0x130
 kernel:  [<ffffffff8161c045>] ret_from_fork+0x55/0x80
 
-And that later confuses the hotremove path because an LRU page is
+And that latter confuses the hotremove path because an LRU page is
 attempted to be migrated and that fails due to an elevated reference
-count. It is quite possible that the reuse of the HWPoisoned page is
-some kind of fixed race condition but I am not really sure about that.
+count.  It is quite possible that the reuse of the HWPoisoned page is some
+kind of fixed race condition but I am not really sure about that.
 
-With the upstream kernel the failure is slightly different. The page
-doesn't seem to have LRU bit set but isolate_movable_page simply fails
-and do_migrate_range simply puts all the isolated pages back to LRU and
+With the upstream kernel the failure is slightly different.  The page
+doesn't seem to have LRU bit set but isolate_movable_page simply fails and
+do_migrate_range simply puts all the isolated pages back to LRU and
 therefore no progress is made and scan_movable_pages finds same set of
 pages over and over again.
 
-Fix both cases by explicitly checking HWPoisoned pages before we even
-try to get a reference on the page, try to unmap it if it is still
-mapped. As explained by Naoya
+Fix both cases by explicitly checking HWPoisoned pages before we even try
+to get reference on the page, try to unmap it if it is still mapped.  As
+explained by Naoya:
+
 : Hwpoison code never unmapped those for no big reason because
 : Ksm pages never dominate memory, so we simply didn't have strong
 : motivation to save the pages.
 
 Also put WARN_ON(PageLRU) in case there is a race and we can hit LRU
-HWPoison pages which shouldn't happen but I couldn't convince myself
-about that. Naoya has noted the following
+HWPoison pages which shouldn't happen but I couldn't convince myself about
+that.  Naoya has noted the following:
+
 : Theoretically no such gurantee, because try_to_unmap() doesn't have a
 : guarantee of success and then memory_failure() returns immediately
 : when hwpoison_user_mappings fails.
@@ -115,29 +120,35 @@ about that. Naoya has noted the following
 : So I think it's OK to keep "if (WARN_ON(PageLRU(page)))" block in
 : current version of your patch.
 
-Debugged-by: Oscar Salvador <osalvador@suse.com>
-Cc: stable
+Link: http://lkml.kernel.org/r/20181206120135.14079-1-mhocko@kernel.org
+Signed-off-by: Michal Hocko <mhocko@suse.com>
 Reviewed-by: Oscar Salvador <osalvador@suse.com>
+Debugged-by: Oscar Salvador <osalvador@suse.com>
 Tested-by: Oscar Salvador <osalvador@suse.com>
 Acked-by: David Hildenbrand <david@redhat.com>
 Acked-by: Naoya Horiguchi <n-horiguchi@ah.jp.nec.com>
-Signed-off-by: Michal Hocko <mhocko@suse.com>
-
+Cc: <stable@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- mm/memory_hotplug.c |   16 ++++++++++++++++
+ mm/memory_hotplug.c | 16 ++++++++++++++++
  1 file changed, 16 insertions(+)
 
+diff --git a/mm/memory_hotplug.c b/mm/memory_hotplug.c
+index a18923e4359d..0addef5f8aa3 100644
 --- a/mm/memory_hotplug.c
 +++ b/mm/memory_hotplug.c
-@@ -34,6 +34,7 @@
+@@ -32,6 +32,7 @@
+ #include <linux/hugetlb.h>
  #include <linux/memblock.h>
  #include <linux/bootmem.h>
- #include <linux/compaction.h>
 +#include <linux/rmap.h>
  
  #include <asm/tlbflush.h>
  
-@@ -1453,6 +1454,21 @@ do_migrate_range(unsigned long start_pfn
+@@ -1471,6 +1472,21 @@ do_migrate_range(unsigned long start_pfn, unsigned long end_pfn)
  			continue;
  		}
  
@@ -159,3 +170,6 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  		if (!get_page_unless_zero(page))
  			continue;
  		/*
+-- 
+2.20.1
+

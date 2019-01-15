@@ -1,9 +1,11 @@
 From: Sohil Mehta <sohil.mehta@intel.com>
 Date: Wed, 21 Nov 2018 15:29:33 -0800
-Subject: iommu/vt-d: Handle domain agaw being less than iommu agaw
+Subject: [PATCH] iommu/vt-d: Handle domain agaw being less than iommu agaw
+Patch-mainline: 4.4.170
+References: bnc#1012382 bsc#1106105
 Git-commit: 3569dd07aaad71920c5ea4da2d5cc9a167c1ffd4
-Patch-mainline: v5.0-rc1
-References: bsc#1106105
+
+commit 3569dd07aaad71920c5ea4da2d5cc9a167c1ffd4 upstream.
 
 The Intel IOMMU driver opportunistically skips a few top level page
 tables from the domain paging directory while programming the IOMMU
@@ -29,15 +31,17 @@ Reported-by: Ramos Falcon, Ernesto R <ernesto.r.ramos.falcon@intel.com>
 Tested-by: Ricardo Neri <ricardo.neri-calderon@linux.intel.com>
 Signed-off-by: Sohil Mehta <sohil.mehta@intel.com>
 Signed-off-by: Joerg Roedel <jroedel@suse.de>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  drivers/iommu/intel-iommu.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/iommu/intel-iommu.c b/drivers/iommu/intel-iommu.c
-index f3ccf025108b..fdf79baf1d79 100644
+index 7feaa82f8c7c..8b4a4d95669a 100644
 --- a/drivers/iommu/intel-iommu.c
 +++ b/drivers/iommu/intel-iommu.c
-@@ -2044,7 +2044,7 @@ static int domain_context_mapping_one(struct dmar_domain *domain,
+@@ -2041,7 +2041,7 @@ static int domain_context_mapping_one(struct dmar_domain *domain,
  	 * than default.  Unnecessary for PT mode.
  	 */
  	if (translation != CONTEXT_TT_PASS_THROUGH) {
@@ -46,7 +50,7 @@ index f3ccf025108b..fdf79baf1d79 100644
  			ret = -ENOMEM;
  			pgd = phys_to_virt(dma_pte_addr(pgd));
  			if (!dma_pte_present(pgd))
-@@ -2058,7 +2058,7 @@ static int domain_context_mapping_one(struct dmar_domain *domain,
+@@ -2055,7 +2055,7 @@ static int domain_context_mapping_one(struct dmar_domain *domain,
  			translation = CONTEXT_TT_MULTI_LEVEL;
  
  		context_set_address_root(context, virt_to_phys(pgd));
@@ -55,4 +59,6 @@ index f3ccf025108b..fdf79baf1d79 100644
  	} else {
  		/*
  		 * In pass through mode, AW must be programmed to
+-- 
+2.20.1
 

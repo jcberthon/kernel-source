@@ -1,0 +1,44 @@
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 10 Dec 2018 17:52:36 +0100
+Subject: [PATCH] mmc: core: Reset HPI enabled state during re-init and in case
+ of errors
+References: bnc#1012382
+Patch-mainline: 4.4.170
+Git-commit: a0741ba40a009f97c019ae7541dc61c1fdf41efb
+
+commit a0741ba40a009f97c019ae7541dc61c1fdf41efb upstream.
+
+During a re-initialization of the eMMC card, we may fail to re-enable HPI.
+In these cases, that isn't properly reflected in the card->ext_csd.hpi_en
+bit, as it keeps being set. This may cause following attempts to use HPI,
+even if's not enabled. Let's fix this!
+
+Fixes: eb0d8f135b67 ("mmc: core: support HPI send command")
+Cc: <stable@vger.kernel.org>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/mmc/core/mmc.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 79a0c26e1419..a31789be0840 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1608,9 +1608,11 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		if (err) {
+ 			pr_warn("%s: Enabling HPI failed\n",
+ 				mmc_hostname(card->host));
++			card->ext_csd.hpi_en = 0;
+ 			err = 0;
+-		} else
++		} else {
+ 			card->ext_csd.hpi_en = 1;
++		}
+ 	}
+ 
+ 	/*
+-- 
+2.20.1
+
