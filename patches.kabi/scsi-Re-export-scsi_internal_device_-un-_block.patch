@@ -1,0 +1,68 @@
+From: Hannes Reinecke <hare@suse.de>
+Date: Mon, 14 Jan 2019 08:10:58 +0100
+Subject: [PATCH] scsi: Re-export scsi_internal_device_{,un}_block()
+Patch-Mainline: never, SLE12 SP3 kABI fix
+References: bsc#1119877
+
+Re-export symbols which got dropped to preserve the kABI.
+
+Signed-off-by: Hannes Reinecke <hare@suse.com>
+---
+ drivers/scsi/scsi_lib.c | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/scsi/scsi_lib.c b/drivers/scsi/scsi_lib.c
+index e5e52fbbea9d..99b1a2a0a826 100644
+--- a/drivers/scsi/scsi_lib.c
++++ b/drivers/scsi/scsi_lib.c
+@@ -2996,7 +2996,9 @@ EXPORT_SYMBOL_GPL(scsi_internal_device_block_nowait);
+ 
+ /**
+  * scsi_internal_device_block - try to transition to the SDEV_BLOCK state
+- * @sdev: device to block
++ * @sdev:      device to block
++ * @wait:      Whether or not to wait until ongoing .queuecommand() /
++ *             .queue_rq() calls have finished.
+  *
+  * Pause SCSI command processing on the specified device and wait until all
+  * ongoing scsi_request_fn() / scsi_queue_rq() calls have finished. May sleep.
+@@ -3013,11 +3015,13 @@ EXPORT_SYMBOL_GPL(scsi_internal_device_block_nowait);
+  * scsi_internal_device_block() has blocked a SCSI device and also
+  * remove the rport mutex lock and unlock calls from srp_queuecommand().
+  */
+-static int scsi_internal_device_block(struct scsi_device *sdev)
++static int scsi_internal_device_block(struct scsi_device *sdev, bool wait)
+ {
+ 	struct request_queue *q = sdev->request_queue;
+ 	int err;
+ 
++	if (!wait)
++		return scsi_internal_device_block_nowait(sdev);
+ 	mutex_lock(&sdev->inquiry_mutex);
+ 	err = scsi_internal_device_block_nowait(sdev);
+ 	if (err == 0) {
+@@ -3030,6 +3034,7 @@ static int scsi_internal_device_block(struct scsi_device *sdev)
+ 
+ 	return err;
+ }
++EXPORT_SYMBOL_GPL(scsi_internal_device_block);
+  
+ void scsi_start_queue(struct scsi_device *sdev)
+ {
+@@ -3111,11 +3116,12 @@ static int scsi_internal_device_unblock(struct scsi_device *sdev,
+ 
+ 	return ret;
+ }
++EXPORT_SYMBOL_GPL(scsi_internal_device_unblock);
+ 
+ static void
+ device_block(struct scsi_device *sdev, void *data)
+ {
+-	scsi_internal_device_block(sdev);
++	scsi_internal_device_block(sdev, true);
+ }
+ 
+ static int
+-- 
+2.16.4
+
