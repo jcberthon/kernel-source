@@ -1,12 +1,15 @@
 From: Dinar Valeev <dvaleev@suse.com>
 Subject: PPC: Build only vmlinux target
-Patch-Mainline: no, tbd (ancient patch)
+Patch-Mainline: no, not needed
 
 References: bsc#1070805
 
 The zImage target doesn't build on ppc64le and we only ever
 care about the resulting vmlinux file anyway, so drop compilation
 of the zImage target for us.
+
+This works out of the box with 4.12 so the zImage issue was resolved upsttream
+eventually.
 
 Signed-off-by: Dinar Valeev <dvaleev@suse.com>
 Signed-off-by: Alexander Graf <agraf@suse.de>
@@ -18,8 +21,51 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
  
  # Default to zImage, override when needed
 -all: zImage
-+all: vmlinux 
++all: vmlinux
  
  # With make 3.82 we cannot mix normal and wildcard targets
  BOOT_TARGETS1 := zImage zImage.initrd uImage
 
+diff --git a/arch/powerpc/boot/Makefile b/arch/powerpc/boot/Makefile
+index b45a0e54f14b..075c37b9b5db 100644
+--- a/arch/powerpc/boot/Makefile
++++ b/arch/powerpc/boot/Makefile
+@@ -17,7 +17,7 @@
+ #	CROSS32_COMPILE is setup as a prefix just like CROSS_COMPILE
+ #	in the toplevel makefile.
+ 
+-all: $(obj)/zImage
++all: $(obj)/vmlinux
+ 
+ BOOTCFLAGS    := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+ 		 -fno-strict-aliasing -Os -msoft-float -pipe \
+@@ -213,18 +213,18 @@ quiet_cmd_wrap	= WRAP    $@
+       cmd_wrap	=$(CONFIG_SHELL) $(wrapper) -c -o $@ -p $2 $(CROSSWRAP) \
+ 		$(if $3, -s $3)$(if $4, -d $4)$(if $5, -i $5) vmlinux
+ 
+-image-$(CONFIG_PPC_PSERIES)		+= zImage.pseries
+-image-$(CONFIG_PPC_POWERNV)		+= zImage.pseries
+-image-$(CONFIG_PPC_MAPLE)		+= zImage.maple
+-image-$(CONFIG_PPC_IBM_CELL_BLADE)	+= zImage.pseries
+-image-$(CONFIG_PPC_PS3)			+= dtbImage.ps3
+-image-$(CONFIG_PPC_CELL_QPACE)		+= zImage.pseries
+-image-$(CONFIG_PPC_CHRP)		+= zImage.chrp
+-image-$(CONFIG_PPC_EFIKA)		+= zImage.chrp
+-image-$(CONFIG_PPC_PMAC)		+= zImage.pmac
+-image-$(CONFIG_PPC_HOLLY)		+= dtbImage.holly
++image-$(CONFIG_PPC_PSERIES)		+= 
++image-$(CONFIG_PPC_POWERNV)		+= 
++image-$(CONFIG_PPC_MAPLE)		+= 
++image-$(CONFIG_PPC_IBM_CELL_BLADE)	+= 
++image-$(CONFIG_PPC_PS3)			+= 
++image-$(CONFIG_PPC_CELL_QPACE)		+= 
++image-$(CONFIG_PPC_CHRP)		+= 
++image-$(CONFIG_PPC_EFIKA)		+= 
++image-$(CONFIG_PPC_PMAC)		+= 
++image-$(CONFIG_PPC_HOLLY)		+= 
+ image-$(CONFIG_DEFAULT_UIMAGE)		+= uImage
+-image-$(CONFIG_EPAPR_BOOT)		+= zImage.epapr
++image-$(CONFIG_EPAPR_BOOT)		+= 
+ 
+ #
+ # Targets which embed a device tree blob

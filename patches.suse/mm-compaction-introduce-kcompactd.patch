@@ -96,21 +96,19 @@ Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 Signed-off-by: Mel Gorman <mgorman@suse.de>
 ---
- include/linux/compaction.h        |  16 +++
- include/linux/mmzone.h            |   6 ++
- include/linux/vm_event_item.h     |   1 +
- include/trace/events/compaction.h |  55 ++++++++++
- mm/compaction.c                   | 222 ++++++++++++++++++++++++++++++++++++++
- mm/memory_hotplug.c               |   9 +-
- mm/page_alloc.c                   |   3 +
- mm/vmstat.c                       |   1 +
+ include/linux/compaction.h        |   16 ++
+ include/linux/mmzone.h            |    6 +
+ include/linux/vm_event_item.h     |    1 
+ include/trace/events/compaction.h |   55 +++++++++
+ mm/compaction.c                   |  222 ++++++++++++++++++++++++++++++++++++++
+ mm/memory_hotplug.c               |    9 +
+ mm/page_alloc.c                   |    3 
+ mm/vmstat.c                       |    1 
  8 files changed, 311 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/compaction.h b/include/linux/compaction.h
-index 4cd4ddf64cc7..d7c8de583a23 100644
 --- a/include/linux/compaction.h
 +++ b/include/linux/compaction.h
-@@ -52,6 +52,10 @@ extern void compaction_defer_reset(struct zone *zone, int order,
+@@ -52,6 +52,10 @@ extern void compaction_defer_reset(struc
  				bool alloc_success);
  extern bool compaction_restarting(struct zone *zone, int order);
  
@@ -121,7 +119,7 @@ index 4cd4ddf64cc7..d7c8de583a23 100644
  #else
  static inline unsigned long try_to_compact_pages(gfp_t gfp_mask,
  			unsigned int order, int alloc_flags,
-@@ -84,6 +88,18 @@ static inline bool compaction_deferred(struct zone *zone, int order)
+@@ -84,6 +88,18 @@ static inline bool compaction_deferred(s
  	return true;
  }
  
@@ -140,11 +138,9 @@ index 4cd4ddf64cc7..d7c8de583a23 100644
  #endif /* CONFIG_COMPACTION */
  
  #if defined(CONFIG_COMPACTION) && defined(CONFIG_SYSFS) && defined(CONFIG_NUMA)
-diff --git a/include/linux/mmzone.h b/include/linux/mmzone.h
-index 5a2c3d3d824f..5b557150f83f 100644
 --- a/include/linux/mmzone.h
 +++ b/include/linux/mmzone.h
-@@ -674,6 +674,12 @@ typedef struct pglist_data {
+@@ -669,6 +669,12 @@ typedef struct pglist_data {
  					   mem_hotplug_begin/end() */
  	int kswapd_max_order;
  	enum zone_type classzone_idx;
@@ -157,11 +153,9 @@ index 5a2c3d3d824f..5b557150f83f 100644
  #ifdef CONFIG_NUMA_BALANCING
  	/* Lock serializing the migrate rate limiting window */
  	spinlock_t numabalancing_migrate_lock;
-diff --git a/include/linux/vm_event_item.h b/include/linux/vm_event_item.h
-index e623d392db0c..823a629f9033 100644
 --- a/include/linux/vm_event_item.h
 +++ b/include/linux/vm_event_item.h
-@@ -52,6 +52,7 @@ enum vm_event_item { PGPGIN, PGPGOUT, PSWPIN, PSWPOUT,
+@@ -53,6 +53,7 @@ enum vm_event_item { PGPGIN, PGPGOUT, PS
  		COMPACTMIGRATE_SCANNED, COMPACTFREE_SCANNED,
  		COMPACTISOLATED,
  		COMPACTSTALL, COMPACTFAIL, COMPACTSUCCESS,
@@ -169,11 +163,9 @@ index e623d392db0c..823a629f9033 100644
  #endif
  #ifdef CONFIG_HUGETLB_PAGE
  		HTLB_BUDDY_PGALLOC, HTLB_BUDDY_PGALLOC_FAIL,
-diff --git a/include/trace/events/compaction.h b/include/trace/events/compaction.h
-index c92d1e1cbad9..223450aeb49e 100644
 --- a/include/trace/events/compaction.h
 +++ b/include/trace/events/compaction.h
-@@ -350,6 +350,61 @@ DEFINE_EVENT(mm_compaction_defer_template, mm_compaction_defer_reset,
+@@ -350,6 +350,61 @@ DEFINE_EVENT(mm_compaction_defer_templat
  );
  #endif
  
@@ -235,8 +227,6 @@ index c92d1e1cbad9..223450aeb49e 100644
  #endif /* _TRACE_COMPACTION_H */
  
  /* This part must be outside protection */
-diff --git a/mm/compaction.c b/mm/compaction.c
-index 1ffc62a05d27..da34d4397f1f 100644
 --- a/mm/compaction.c
 +++ b/mm/compaction.c
 @@ -7,6 +7,7 @@
@@ -256,7 +246,7 @@ index 1ffc62a05d27..da34d4397f1f 100644
  #include "internal.h"
  
  #ifdef CONFIG_COMPACTION
-@@ -1732,4 +1735,223 @@ void compaction_unregister_node(struct node *node)
+@@ -1721,4 +1724,223 @@ void compaction_unregister_node(struct n
  }
  #endif /* CONFIG_SYSFS && CONFIG_NUMA */
  
@@ -480,19 +470,17 @@ index 1ffc62a05d27..da34d4397f1f 100644
 +subsys_initcall(kcompactd_init)
 +
  #endif /* CONFIG_COMPACTION */
-diff --git a/mm/memory_hotplug.c b/mm/memory_hotplug.c
-index 6c3c05849484..afca0da46d6b 100644
 --- a/mm/memory_hotplug.c
 +++ b/mm/memory_hotplug.c
-@@ -32,6 +32,7 @@
+@@ -33,6 +33,7 @@
  #include <linux/hugetlb.h>
  #include <linux/memblock.h>
  #include <linux/bootmem.h>
 +#include <linux/compaction.h>
+ #include <linux/rmap.h>
  
  #include <asm/tlbflush.h>
- 
-@@ -1073,8 +1074,10 @@ int __ref online_pages(unsigned long pfn, unsigned long nr_pages, int online_typ
+@@ -1101,8 +1102,10 @@ int __ref online_pages(unsigned long pfn
  
  	init_per_zone_wmark_min();
  
@@ -504,7 +492,7 @@ index 6c3c05849484..afca0da46d6b 100644
  
  	vm_total_pages = nr_free_pagecache_pages();
  
-@@ -1838,8 +1841,10 @@ static int __ref __offline_pages(unsigned long start_pfn,
+@@ -1895,8 +1898,10 @@ repeat:
  		zone_pcp_update(zone);
  
  	node_states_clear_node(node, &arg);
@@ -516,11 +504,9 @@ index 6c3c05849484..afca0da46d6b 100644
  
  	vm_total_pages = nr_free_pagecache_pages();
  	writeback_set_ratelimit();
-diff --git a/mm/page_alloc.c b/mm/page_alloc.c
-index 33974cda62de..2a1031669034 100644
 --- a/mm/page_alloc.c
 +++ b/mm/page_alloc.c
-@@ -5282,6 +5282,9 @@ static void __paginginit free_area_init_core(struct pglist_data *pgdat)
+@@ -5737,6 +5737,9 @@ static void __paginginit free_area_init_
  #endif
  	init_waitqueue_head(&pgdat->kswapd_wait);
  	init_waitqueue_head(&pgdat->pfmemalloc_wait);
@@ -530,11 +516,9 @@ index 33974cda62de..2a1031669034 100644
  	pgdat_page_ext_init(pgdat);
  
  	for (j = 0; j < MAX_NR_ZONES; j++) {
-diff --git a/mm/vmstat.c b/mm/vmstat.c
-index 88011eca5283..d267d426ce3b 100644
 --- a/mm/vmstat.c
 +++ b/mm/vmstat.c
-@@ -825,6 +825,7 @@ const char * const vmstat_text[] = {
+@@ -801,6 +801,7 @@ const char * const vmstat_text[] = {
  	"compact_stall",
  	"compact_fail",
  	"compact_success",

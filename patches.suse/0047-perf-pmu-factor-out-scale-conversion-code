@@ -17,14 +17,12 @@ Link: http://lkml.kernel.org/r/20170103150833.6694-2-andi@firstfloor.org
 [ Keep returning -ENOMEM when strdup() fails in perf_pmu__parse_scale()/convert_scale() ]
 Signed-off-by: Arnaldo Carvalho de Melo <acme@redhat.com>
 ---
- tools/perf/util/pmu.c | 62 ++++++++++++++++++++++++++++-----------------------
+ tools/perf/util/pmu.c |   62 +++++++++++++++++++++++++++-----------------------
  1 file changed, 34 insertions(+), 28 deletions(-)
 
-diff --git a/tools/perf/util/pmu.c b/tools/perf/util/pmu.c
-index dc6ccaa4e927..78b16100567d 100644
 --- a/tools/perf/util/pmu.c
 +++ b/tools/perf/util/pmu.c
-@@ -94,32 +94,10 @@ static int pmu_format(const char *name, struct list_head *format)
+@@ -94,32 +94,10 @@ static int pmu_format(const char *name,
  	return 0;
  }
  
@@ -38,7 +36,7 @@ index dc6ccaa4e927..78b16100567d 100644
 -	char path[PATH_MAX];
  	char *lc;
 -
--	snprintf(path, PATH_MAX, "%s/%s.scale", dir, name);
+-	scnprintf(path, PATH_MAX, "%s/%s.scale", dir, name);
 -
 -	fd = open(path, O_RDONLY);
 -	if (fd == -1)
@@ -59,7 +57,7 @@ index dc6ccaa4e927..78b16100567d 100644
  
  	/*
  	 * save current locale
-@@ -134,7 +112,7 @@ static int perf_pmu__parse_scale(struct perf_pmu_alias *alias, char *dir, char *
+@@ -134,7 +112,7 @@ static int perf_pmu__parse_scale(struct
  	lc = strdup(lc);
  	if (!lc) {
  		ret = -ENOMEM;
@@ -68,7 +66,7 @@ index dc6ccaa4e927..78b16100567d 100644
  	}
  
  	/*
-@@ -144,14 +122,42 @@ static int perf_pmu__parse_scale(struct perf_pmu_alias *alias, char *dir, char *
+@@ -144,14 +122,42 @@ static int perf_pmu__parse_scale(struct
  	 */
  	setlocale(LC_NUMERIC, "C");
  
@@ -91,7 +89,7 @@ index dc6ccaa4e927..78b16100567d 100644
 +	int fd, ret = -1;
 +	char path[PATH_MAX];
 +
-+	snprintf(path, PATH_MAX, "%s/%s.scale", dir, name);
++	scnprintf(path, PATH_MAX, "%s/%s.scale", dir, name);
 +
 +	fd = open(path, O_RDONLY);
 +	if (fd == -1)
@@ -114,4 +112,3 @@ index dc6ccaa4e927..78b16100567d 100644
  error:
  	close(fd);
  	return ret;
-

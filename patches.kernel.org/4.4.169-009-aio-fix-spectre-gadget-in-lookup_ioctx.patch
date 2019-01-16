@@ -1,0 +1,47 @@
+From: Jeff Moyer <jmoyer@redhat.com>
+Date: Tue, 11 Dec 2018 12:37:49 -0500
+Subject: [PATCH] aio: fix spectre gadget in lookup_ioctx
+References: bnc#1012382
+Patch-mainline: 4.4.169
+Git-commit: a538e3ff9dabcdf6c3f477a373c629213d1c3066
+
+commit a538e3ff9dabcdf6c3f477a373c629213d1c3066 upstream.
+
+Matthew pointed out that the ioctx_table is susceptible to spectre v1,
+because the index can be controlled by an attacker.  The below patch
+should mitigate the attack for all of the aio system calls.
+
+Cc: stable@vger.kernel.org
+Reported-by: Matthew Wilcox <willy@infradead.org>
+Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+Signed-off-by: Jeff Moyer <jmoyer@redhat.com>
+Signed-off-by: Jens Axboe <axboe@kernel.dk>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ fs/aio.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/fs/aio.c b/fs/aio.c
+index c283eb03cb38..7187d03aa0bc 100644
+--- a/fs/aio.c
++++ b/fs/aio.c
+@@ -40,6 +40,7 @@
+ #include <linux/ramfs.h>
+ #include <linux/percpu-refcount.h>
+ #include <linux/mount.h>
++#include <linux/nospec.h>
+ 
+ #include <asm/kmap_types.h>
+ #include <asm/uaccess.h>
+@@ -1063,6 +1064,7 @@ static struct kioctx *lookup_ioctx(unsigned long ctx_id)
+ 	if (!table || id >= table->nr)
+ 		goto out;
+ 
++	id = array_index_nospec(id, table->nr);
+ 	ctx = rcu_dereference(table->table[id]);
+ 	if (ctx && ctx->user_id == ctx_id) {
+ 		if (percpu_ref_tryget_live(&ctx->users))
+-- 
+2.20.1
+
