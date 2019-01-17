@@ -1,0 +1,44 @@
+From 0b944d3a4bba6b25f43aed530f4fa85c04d162a6 Mon Sep 17 00:00:00 2001
+From: Christoph Hellwig <hch@lst.de>
+Date: Sun, 30 Oct 2016 11:42:01 -0500
+Subject: [PATCH] aio: hold an extra file reference over AIO read/write
+ operations
+References: bsc#1116027
+Git-commit: 0b944d3a4bba6b25f43aed530f4fa85c04d162a6
+Patch-mainline: v4.9-rc5
+
+Otherwise we might dereference an already freed file and/or inode
+when aio_complete is called before we return from the read_iter or
+write_iter method.
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+Signed-off-by: Thomas Abraham <tabraham@suse.com>
+[tabraham@suse.com: handled backport - minor modification for context]
+---
+ fs/aio.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/fs/aio.c b/fs/aio.c
+index 1157e13a36d6..0aa71d338c04 100644
+--- a/fs/aio.c
++++ b/fs/aio.c
+@@ -1460,6 +1460,7 @@ static ssize_t aio_run_iocb(struct kiocb *req, unsigned opcode,
+ 
+ 		len = ret;
+ 
++		get_file(file);
+ 		if (rw == WRITE)
+ 			file_start_write(file);
+ 
+@@ -1467,6 +1468,7 @@ static ssize_t aio_run_iocb(struct kiocb *req, unsigned opcode,
+ 
+ 		if (rw == WRITE)
+ 			file_end_write(file);
++		fput(file);
+ 		kfree(iovec);
+ 		break;
+ 
+-- 
+2.13.7
+
