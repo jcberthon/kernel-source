@@ -1,0 +1,48 @@
+From: Trond Myklebust <trond.myklebust@primarydata.com>
+Date: Fri, 4 Sep 2015 15:17:53 -0400
+Subject: [PATCH] Revert "NFS: Make close(2) asynchronous when closing NFS
+ O_DIRECT files"
+Git-commit: 4eae50143bcbfda819c650b7ed6739f3b6338ffc
+Patch-mainline: v4.3
+References: git-fixes
+
+This reverts commit f895c53f8ace3c3e49ebf9def90e63fc6d46d2bf.
+
+This commit causes a NFSv4 regression in that close()+unlink() can end
+up failing. The reason is that we no longer have a guarantee that the
+CLOSE has completed on the server, meaning that the subsequent call to
+REMOVE may fail with NFS4ERR_FILE_OPEN if the server implements Windows
+unlink() semantics.
+
+Reported-by: <Olga Kornievskaia <aglo@umich.edu>
+Cc: Chuck Lever <chuck.lever@oracle.com>
+Signed-off-by: Trond Myklebust <trond.myklebust@primarydata.com>
+Acked-by: NeilBrown <neilb@suse.com>
+
+---
+ fs/nfs/inode.c |    7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+--- a/fs/nfs/inode.c
++++ b/fs/nfs/inode.c
+@@ -731,6 +731,11 @@ struct nfs_open_context *nfs_find_open_c
+ 	return ctx;
+ }
+ 
++static void put_nfs_open_context_sync(struct nfs_open_context *ctx)
++{
++	__put_nfs_open_context(ctx, 1);
++}
++
+ static void nfs_file_clear_open_context(struct file *filp)
+ {
+ 	struct inode *inode = filp->f_path.dentry->d_inode;
+@@ -741,7 +746,7 @@ static void nfs_file_clear_open_context(
+ 		spin_lock(&inode->i_lock);
+ 		list_move_tail(&ctx->list, &NFS_I(inode)->open_files);
+ 		spin_unlock(&inode->i_lock);
+-		__put_nfs_open_context(ctx, filp->f_flags & O_DIRECT ? 0 : 1);
++		put_nfs_open_context_sync(ctx);
+ 	}
+ }
+ 

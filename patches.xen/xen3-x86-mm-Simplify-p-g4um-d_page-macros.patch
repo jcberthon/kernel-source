@@ -1,12 +1,11 @@
 From fd7e315988b784509ba3f1b42f539bd0b1fca9bb Mon Sep 17 00:00:00 2001
 From: Tom Lendacky <thomas.lendacky@amd.com>
 Date: Mon, 17 Jul 2017 16:10:06 -0500
-Subject: [PATCH] x86/mm: Simplify p[g4um]d_page() macros
+Subject: [PATCH] x86/mm: Simplify p[g4um]xen: d_page() macros
 Mime-version: 1.0
 Content-type: text/plain; charset=UTF-8
 Content-transfer-encoding: 8bit
-Git-commit: fd7e315988b784509ba3f1b42f539bd0b1fca9bb
-Patch-mainline: 4.14-rc1
+Patch-mainline: Never, SUSE-Xen specific
 References: bnc#1087081, bnc#1104684
 
 mhocko@suse.cz:
@@ -53,9 +52,7 @@ Link: http://lkml.kernel.org/r/e61eb533a6d0aac941db2723d8aa63ef6b882dee.15003192
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Acked-by: Michal Hocko <mhocko@suse.cz>
 
----
- arch/x86/include/mach-xen/asm/pgtable.h |   11 ++++++++---
- 1 file changed, 8 insertions(+), 3 deletions(-)
+Automatically created from "patches.arch/x86-mm-Simplify-p-g4um-d_page-macros.patch" by xen-port-patches.py
 
 --- a/arch/x86/include/mach-xen/asm/pgtable.h
 +++ b/arch/x86/include/mach-xen/asm/pgtable.h

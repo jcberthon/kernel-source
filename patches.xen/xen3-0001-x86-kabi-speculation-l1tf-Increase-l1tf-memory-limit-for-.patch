@@ -1,6 +1,6 @@
 From: Michal Hocko <mhocko@suse.com>
-Subject: kabi: x86/speculation/l1tf: Increase l1tf memory limit for Nehalem+
-Patch-mainline: no, suse specific
+Subject: xen: kabi: x86/speculation/l1tf: Increase l1tf memory limit for Nehalem+
+Patch-mainline: Never, SUSE-Xen specific
 References: bnc#1105536
 
 hide new x86_cache_bits from the kabi checker. Nobody should be touching
@@ -8,18 +8,19 @@ this part of the structure.
 
 Signed-off-by: Michal Hocko <mhocko@suse.com>
 
----
- arch/x86/include/mach-xen/asm/processor.h |    2 ++
- 1 file changed, 2 insertions(+)
+Automatically created from "patches.kabi/0001-x86-kabi-speculation-l1tf-Increase-l1tf-memory-limit-for-.patch" by xen-port-patches.py
 
 --- a/arch/x86/include/mach-xen/asm/processor.h
 +++ b/arch/x86/include/mach-xen/asm/processor.h
-@@ -124,8 +124,10 @@ struct cpuinfo_x86 {
+@@ -124,11 +124,13 @@ struct cpuinfo_x86 {
  #ifndef CONFIG_XEN
  	u32			microcode;
  #endif
 +#ifndef __GENKSYMS__
- 	/* Address space bits used by the cache internally */
+ 	/*
+ 	 * Address space bits used by the cache internally
+ 	 * NOTE: only to be used for l1tf mitigation
+ 	 */
  	u8			x86_cache_bits;
 +#endif
  } __attribute__((__aligned__(SMP_CACHE_BYTES)));

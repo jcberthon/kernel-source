@@ -1,0 +1,61 @@
+From: "Steven Rostedt (Red Hat)" <rostedt@goodmis.org>
+Date: Wed, 26 Feb 2014 13:37:38 -0500
+Subject: tracing: Do not add event files for modules that fail tracepoints
+Git-commit: 45ab2813d40d88fc575e753c38478de242d03f88
+Patch-mainline: v3.14-rc6
+References: bsc#1120086
+
+If a module fails to add its tracepoints due to module tainting, do not
+create the module event infrastructure in the debugfs directory. As the events
+will not work and worse yet, they will silently fail, making the user wonder
+why the events they enable do not display anything.
+
+Having a warning on module load and the events not visible to the users
+will make the cause of the problem much clearer.
+
+Link: http://lkml.kernel.org/r/20140227154923.265882695@goodmis.org
+
+Fixes: 6d723736e472 "tracing/events: add support for modules to TRACE_EVENT"
+Acked-by: Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
+Cc: stable@vger.kernel.org # 2.6.31+
+Cc: Rusty Russell <rusty@rustcorp.com.au>
+Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+Acked-by: Miroslav Benes <mbenes@suse.cz>
+---
+ include/linux/tracepoint.h  |    5 +++++
+ kernel/trace/trace_events.c |   10 ++++++++++
+ 2 files changed, 15 insertions(+)
+
+--- a/include/linux/tracepoint.h
++++ b/include/linux/tracepoint.h
+@@ -56,6 +56,11 @@ extern void tracepoint_probe_update_all(
+ 
+ #ifdef CONFIG_MODULES
+ bool trace_module_has_bad_taint(struct module *mod);
++#else
++static inline bool trace_module_has_bad_taint(struct module *mod)
++{
++	return false;
++}
+ #endif
+ 
+ struct tracepoint_iter {
+--- a/kernel/trace/trace_events.c
++++ b/kernel/trace/trace_events.c
+@@ -1401,6 +1401,16 @@ static void trace_module_add_events(stru
+ 	struct ftrace_module_file_ops *file_ops = NULL;
+ 	struct ftrace_event_call **call, **start, **end;
+ 
++	if (!mod->num_trace_events)
++		return;
++
++	/* Don't add infrastructure for mods without tracepoints */
++	if (trace_module_has_bad_taint(mod)) {
++		pr_err("%s: module has bad taint, not creating trace events\n",
++		       mod->name);
++		return;
++	}
++
+ 	start = mod->trace_events;
+ 	end = mod->trace_events + mod->num_trace_events;
+ 

@@ -1,0 +1,39 @@
+From 9c92ee208b1faa0ef2cc899b85fd0607b6fac7fe Mon Sep 17 00:00:00 2001
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Wed, 25 Oct 2017 16:59:43 -0700
+Subject: [PATCH] xfs: validate sb_logsunit is a multiple of the fs blocksize
+Git-commit: 9c92ee208b1faa0ef2cc899b85fd0607b6fac7fe
+Patch-mainline: v4.15-rc1
+References: bsc#1115038
+
+Make sure the log stripe unit is sane before proceeding with mounting.
+AFAICT this means that logsunit has to be 0, 1, or a multiple of the fs
+block size.  Found this by setting the LSB of logsunit in xfs/350 and
+watching the system crash as soon as we try to write to the log.
+
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+Acked-by: Anthony Iliopoulos <ailiopoulos@suse.com>
+
+---
+ fs/xfs/xfs_log.c |    9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+--- a/fs/xfs/xfs_log.c
++++ b/fs/xfs/xfs_log.c
+@@ -381,6 +381,15 @@
+ 		ASSERT(mp->m_flags & XFS_MOUNT_RDONLY);
+ 	}
+ 
++        if (mp->m_sb.sb_logsunit > 1 &&
++		   mp->m_sb.sb_logsunit % mp->m_sb.sb_blocksize) {
++		xfs_warn(mp,
++		"log stripe unit %u bytes must be a multiple of block size",
++			 mp->m_sb.sb_logsunit);
++		error = EINVAL;
++                goto out;
++        }
++
+ 	mp->m_log = xlog_alloc_log(mp, log_target, blk_offset, num_bblks);
+ 	if (IS_ERR(mp->m_log)) {
+ 		error = -PTR_ERR(mp->m_log);

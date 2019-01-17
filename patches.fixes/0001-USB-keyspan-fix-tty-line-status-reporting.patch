@@ -1,0 +1,86 @@
+From 5d1678a33c731b56e245e888fdae5e88efce0997 Mon Sep 17 00:00:00 2001
+From: Johan Hovold <johan@kernel.org>
+Date: Tue, 18 Nov 2014 11:25:19 +0100
+Subject: [PATCH] USB: keyspan: fix tty line-status reporting
+Git-commit: 5d1678a33c731b56e245e888fdae5e88efce0997
+Patch-mainline: v3.18
+References: bsc#1114672
+
+Fix handling of TTY error flags, which are not bitmasks and must
+specifically not be ORed together as this prevents the line discipline
+from recognising them.
+
+Also insert null characters when reporting overrun errors as these are
+not associated with the received character.
+
+Fixes: 1da177e4c3f4 ("Linux-2.6.12-rc2")
+Cc: stable <stable@vger.kernel.org>
+Signed-off-by: Johan Hovold <johan@kernel.org>
+Signed-off-by: Oliver Neukum <oneukum@suse.com>
+---
+ drivers/usb/serial/keyspan.c |   30 +++++++++++++++---------------
+ 1 file changed, 15 insertions(+), 15 deletions(-)
+
+--- a/drivers/usb/serial/keyspan.c
++++ b/drivers/usb/serial/keyspan.c
+@@ -451,9 +451,9 @@ static void	usa26_indat_callback(struct
+ 				if (stat & RXERROR_OVERRUN)
+ 					flag |= TTY_OVERRUN;
+ 				if (stat & RXERROR_FRAMING)
+-					flag |= TTY_FRAME;
+-				if (stat & RXERROR_PARITY)
+-					flag |= TTY_PARITY;
++					flag = TTY_FRAME;
++				else if (stat & RXERROR_PARITY)
++					flag = TTY_PARITY;
+ 				/* XXX should handle break (0x10) */
+ 				tty_insert_flip_char(tty, data[i+1], flag);
+ 			}
+@@ -834,11 +834,11 @@ static void	usa49_indat_callback(struct
+ 			for (i = 0; i + 1 < urb->actual_length; i += 2) {
+ 				int stat = data[i], flag = 0;
+ 				if (stat & RXERROR_OVERRUN)
+-					flag |= TTY_OVERRUN;
++					tty_insert_flip_char(&port->port, 0, TTY_OVERRUN);
+ 				if (stat & RXERROR_FRAMING)
+-					flag |= TTY_FRAME;
+-				if (stat & RXERROR_PARITY)
+-					flag |= TTY_PARITY;
++					flag = TTY_FRAME;
++				else if (stat & RXERROR_PARITY)
++					flag = TTY_PARITY;
+ 				/* XXX should handle break (0x10) */
+ 				tty_insert_flip_char(tty, data[i+1], flag);
+ 			}
+@@ -902,11 +902,11 @@ static void usa49wg_indat_callback(struc
+ 				for (x = 0; x + 1 < len; x += 2) {
+ 					int stat = data[i], flag = 0;
+ 					if (stat & RXERROR_OVERRUN)
+-						flag |= TTY_OVERRUN;
++						tty_insert_flip_char(&port->port, 0, TTY_OVERRUN);
+ 					if (stat & RXERROR_FRAMING)
+-						flag |= TTY_FRAME;
+-					if (stat & RXERROR_PARITY)
+-						flag |= TTY_PARITY;
++						flag = TTY_FRAME;
++					else if (stat & RXERROR_PARITY)
++						flag = TTY_PARITY;
+ 					/* XXX should handle break (0x10) */
+ 					tty_insert_flip_char(tty,
+ 							data[i+1], flag);
+@@ -980,11 +980,11 @@ static void usa90_indat_callback(struct
+ 				for (i = 0; i + 1 < urb->actual_length; i += 2) {
+ 					int stat = data[i], flag = 0;
+ 					if (stat & RXERROR_OVERRUN)
+-						flag |= TTY_OVERRUN;
++						tty_insert_flip_char(&port->port, 0, TTY_OVERRUN);
+ 					if (stat & RXERROR_FRAMING)
+-						flag |= TTY_FRAME;
+-					if (stat & RXERROR_PARITY)
+-						flag |= TTY_PARITY;
++						flag = TTY_FRAME;
++					else if (stat & RXERROR_PARITY)
++						flag = TTY_PARITY;
+ 					/* XXX should handle break (0x10) */
+ 					tty_insert_flip_char(tty, data[i+1],
+ 									flag);

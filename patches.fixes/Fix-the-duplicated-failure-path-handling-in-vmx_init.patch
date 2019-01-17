@@ -1,0 +1,36 @@
+From: Lin Ma <lma@suse.com>
+Date: Mon, 7 Jan 2019 15:52:32 +0800
+Subject: KVM: x86: Fix the duplicated failure path handling in vmx_init
+Patch-mainline: Never, suse fix only
+References: bsc#1104367
+
+Signed-off-by: Lin Ma <lma@suse.com>
+---
+ arch/x86/kvm/vmx.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/arch/x86/kvm/vmx.c b/arch/x86/kvm/vmx.c
+index 435746f8ad5d..67c55d1441a0 100644
+--- a/arch/x86/kvm/vmx.c
++++ b/arch/x86/kvm/vmx.c
+@@ -8325,7 +8325,7 @@ static int __init vmx_init(void)
+ 		r = vmx_setup_l1d_flush(vmentry_l1d_flush_param);
+ 		if (r) {
+ 			vmx_exit();
+-			goto out8;
++			goto out7;
+ 		}
+ 	}
+  
+@@ -8375,8 +8375,6 @@ static int __init vmx_init(void)
+ 
+ 	return 0;
+ 
+-out8:
+-	vmx_cleanup_l1d_flush();
+ out7:
+ 	free_page((unsigned long)vmx_vmwrite_bitmap);
+ out6:
+-- 
+2.16.2
+

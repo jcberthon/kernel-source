@@ -41,16 +41,16 @@ Automatically created from "patches.suse/03-x86-entry-use-ibrs-on-entry-to-kerne
  	/* no need to do an access_ok check here because r8 has been
  	   32bit zero extended */ 
  	/* hardware stack frame is complete now */	
-@@ -309,6 +316,9 @@ ENTRY(ia32_syscall)
+@@ -307,6 +314,9 @@ ENTRY(ia32_syscall)
+ 	   this could be a problem. */
+ 	SAVE_ARGS 0,0,1
  	GET_THREAD_INFO(%r10)
- 	orl   $TS_COMPAT,TI_status(%r10)
- 	testl $_TIF_WORK_SYSCALL_ENTRY,TI_flags(%r10)
 +
 +	ENABLE_IBRS
 +
+ 	orl   $TS_COMPAT,TI_status(%r10)
+ 	testl $_TIF_WORK_SYSCALL_ENTRY,TI_flags(%r10)
  	jnz ia32_tracesys
- .Lia32_check_call:
- 	cmpl $IA32_NR_syscalls,%eax
 --- a/arch/x86/kernel/entry_64-xen.S
 +++ b/arch/x86/kernel/entry_64-xen.S
 @@ -57,9 +57,9 @@

@@ -12,7 +12,7 @@ This is a mixture of upstream commits:
 It is supposed to add the eager-fpu and make it the default.
 
 Signed-off-by: Jiri Slaby <jslaby@suse.cz>
-Automatically created from "extra/x86-non-upstream-eager-fpu.patch" by xen-port-patches.py
+Automatically created from "patches.suse/x86-non-upstream-eager-fpu.patch" by xen-port-patches.py
 
 --- a/arch/x86/include/mach-xen/asm/i387.h
 +++ b/arch/x86/include/mach-xen/asm/i387.h
@@ -169,7 +169,7 @@ Automatically created from "extra/x86-non-upstream-eager-fpu.patch" by xen-port-
  void
 --- a/arch/x86/kernel/traps-xen.c
 +++ b/arch/x86/kernel/traps-xen.c
-@@ -743,11 +743,12 @@ void math_state_restore(void)
+@@ -743,21 +743,24 @@ void math_state_restore(void)
  	}
  
  	xen_thread_fpu_begin(tsk, NULL);
@@ -183,7 +183,6 @@ Automatically created from "extra/x86-non-upstream-eager-fpu.patch" by xen-port-
  		force_sig(SIGSEGV, tsk);
  		return;
  	}
-@@ -754,10 +755,12 @@ void math_state_restore(void)
  
  	tsk->fpu_counter++;
  }
@@ -198,7 +197,7 @@ Automatically created from "extra/x86-non-upstream-eager-fpu.patch" by xen-port-
  		struct math_emu_info info = { };
 --- a/arch/x86/kernel/xsave.c
 +++ b/arch/x86/kernel/xsave.c
-@@ -511,7 +511,11 @@ void __cpuinit eager_fpu_init(void)
+@@ -516,7 +516,11 @@ void __cpuinit eager_fpu_init(void)
          * not yet patched to use math_state_restore().
          */
         init_fpu(current);

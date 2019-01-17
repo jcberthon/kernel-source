@@ -81,6 +81,11 @@ References: bsc#961658 fate#320200
  
  #define BLK_RING_SIZE __CONST_RING_SIZE(blkif, PAGE_SIZE)
  
+@@ -2149,4 +2179,3 @@ MODULE_DESCRIPTION("Xen virtual block de
+ MODULE_LICENSE("GPL");
+ MODULE_ALIAS_BLOCKDEV_MAJOR(XENVBD_MAJOR);
+ MODULE_ALIAS("xen:vbd");
+-MODULE_ALIAS("xenblk");
 --- a/include/xen/xen.h
 +++ b/include/xen/xen.h
 @@ -11,6 +11,8 @@ enum xen_domain_type {

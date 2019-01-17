@@ -1,0 +1,51 @@
+From: "Steven Rostedt (Red Hat)" <rostedt@goodmis.org>
+Date: Fri, 23 Sep 2016 22:57:13 -0400
+Subject: tracing: Move mutex to protect against resetting of seq data
+Git-commit: 1245800c0f96eb6ebb368593e251d66c01e61022
+Patch-mainline: v4.8-rc8
+References: bsc#1120217
+
+The iter->seq can be reset outside the protection of the mutex. So can
+reading of user data. Move the mutex up to the beginning of the function.
+
+Fixes: d7350c3f45694 ("tracing/core: make the read callbacks reentrants")
+Cc: stable@vger.kernel.org # 2.6.30+
+Reported-by: Al Viro <viro@ZenIV.linux.org.uk>
+Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+Acked-by: Miroslav Benes <mbenes@suse.cz>
+---
+ kernel/trace/trace.c |   15 ++++++++-------
+ 1 file changed, 8 insertions(+), 7 deletions(-)
+
+--- a/kernel/trace/trace.c
++++ b/kernel/trace/trace.c
+@@ -3200,13 +3200,6 @@ tracing_read_pipe(struct file *filp, cha
+ 	static struct tracer *old_tracer;
+ 	ssize_t sret;
+ 
+-	/* return any leftover data */
+-	sret = trace_seq_to_user(&iter->seq, ubuf, cnt);
+-	if (sret != -EBUSY)
+-		return sret;
+-
+-	trace_seq_init(&iter->seq);
+-
+ 	/* copy the tracer to avoid using a global lock all around */
+ 	mutex_lock(&trace_types_lock);
+ 	if (unlikely(old_tracer != current_trace && current_trace)) {
+@@ -3221,6 +3214,14 @@ tracing_read_pipe(struct file *filp, cha
+ 	 * is protected.
+ 	 */
+ 	mutex_lock(&iter->mutex);
++
++	/* return any leftover data */
++	sret = trace_seq_to_user(&iter->seq, ubuf, cnt);
++	if (sret != -EBUSY)
++		goto out;
++
++	trace_seq_init(&iter->seq);
++
+ 	if (iter->trace->read) {
+ 		sret = iter->trace->read(iter, filp, ubuf, cnt, ppos);
+ 		if (sret)
+

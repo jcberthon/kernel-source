@@ -1,0 +1,97 @@
+From b8f95e5d13f5f0191dcb4b9113113d241636e7cb Mon Sep 17 00:00:00 2001
+From: Miklos Szeredi <mszeredi@redhat.com>
+Date: Thu, 26 Jul 2018 16:13:11 +0200
+Subject: [PATCH] fuse: umount should wait for all requests
+Git-commit: b8f95e5d13f5f0191dcb4b9113113d241636e7cb
+Patch-mainline: v4.19-rc1
+References: git-fixes
+
+fuse_abort_conn() does not guarantee that all async requests have actually
+finished aborting (i.e. their ->end() function is called).  This could
+actually result in still used inodes after umount.
+
+Add a helper to wait until all requests are fully done.  This is done by
+looking at the "num_waiting" counter.  When this counter drops to zero, we
+can be sure that no more requests are outstanding.
+
+Fixes: 0d8e84b0432b ("fuse: simplify request abort")
+Cc: <stable@vger.kernel.org> # v4.2
+Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
+Acked-by: Anthony Iliopoulos <ailiopoulos@suse.com>
+Reviewed-by: Anthony Iliopoulos <ailiopoulos@suse.com>
+
+---
+ fs/fuse/dev.c    |   19 +++++++++++++++++--
+ fs/fuse/fuse_i.h |    1 +
+ fs/fuse/inode.c  |    1 +
+ 3 files changed, 19 insertions(+), 2 deletions(-)
+
+--- a/fs/fuse/dev.c
++++ b/fs/fuse/dev.c
+@@ -135,6 +135,16 @@
+ 	return !fc->initialized || (for_background && fc->blocked);
+ }
+ 
++static void fuse_drop_waiting(struct fuse_conn *fc)
++{
++	if (fc->connected) {
++		atomic_dec(&fc->num_waiting);
++	} else if (atomic_dec_and_test(&fc->num_waiting)) {
++		/* wake up aborters */
++		wake_up_all(&fc->blocked_waitq);
++	}
++}
++
+ static struct fuse_req *__fuse_get_req(struct fuse_conn *fc, unsigned npages,
+ 				       bool for_background)
+ {
+@@ -173,7 +183,7 @@
+ 	return req;
+ 
+  out:
+-	atomic_dec(&fc->num_waiting);
++	fuse_drop_waiting(fc);
+ 	return ERR_PTR(err);
+ }
+ 
+@@ -278,7 +288,7 @@
+ 		}
+ 
+ 		if (req->waiting)
+-			atomic_dec(&fc->num_waiting);
++			fuse_drop_waiting(fc);
+ 
+ 		if (req->stolen_file)
+ 			put_reserved_req(fc, req);
+@@ -2059,6 +2069,11 @@
+ }
+ EXPORT_SYMBOL_GPL(fuse_abort_conn);
+ 
++void fuse_wait_aborted(struct fuse_conn *fc)
++{
++	wait_event(fc->blocked_waitq, atomic_read(&fc->num_waiting) == 0);
++}
++
+ int fuse_dev_release(struct inode *inode, struct file *file)
+ {
+ 	struct fuse_conn *fc = fuse_get_conn(file);
+--- a/fs/fuse/fuse_i.h
++++ b/fs/fuse/fuse_i.h
+@@ -759,6 +759,7 @@
+ 
+ /* Abort all requests */
+ void fuse_abort_conn(struct fuse_conn *fc);
++void fuse_wait_aborted(struct fuse_conn *fc);
+ 
+ /**
+  * Invalidate inode attributes
+--- a/fs/fuse/inode.c
++++ b/fs/fuse/inode.c
+@@ -380,6 +380,7 @@
+ 	struct fuse_conn *fc = get_fuse_conn_super(sb);
+ 
+ 	fuse_send_destroy(fc);
++	fuse_wait_aborted(fc);
+ 	fuse_conn_kill(fc);
+ 	fuse_conn_put(fc);
+ }
