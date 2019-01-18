@@ -17,9 +17,9 @@ Reviewed-by: Liu Bo <bo.li.liu@oracle.com>
 Reviewed-by: Josef Bacik <jbacik@fb.com>
 Signed-off-by: David Sterba <dsterba@suse.com>
 ---
- fs/btrfs/ctree.h                |  884 ------------------------------------
- include/uapi/linux/btrfs_tree.h |  966 ++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 967 insertions(+), 883 deletions(-)
+ fs/btrfs/ctree.h                |  885 ------------------------------------
+ include/uapi/linux/btrfs_tree.h |  967 ++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 968 insertions(+), 884 deletions(-)
  create mode 100644 include/uapi/linux/btrfs_tree.h
 
 --- a/fs/btrfs/ctree.h
@@ -31,8 +31,8 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 +#include <linux/btrfs_tree.h>
  #include <linux/workqueue.h>
  #include <linux/security.h>
- #include "extent_io.h"
-@@ -63,92 +64,6 @@ struct btrfs_ordered_sum;
+ #include <linux/sizes.h>
+@@ -64,92 +65,6 @@ struct btrfs_ordered_sum;
  
  #define BTRFS_COMPAT_EXTENT_TREE_V0
  
@@ -125,7 +125,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  /*
   * the max metadata block size.  This limit is somewhat artificial,
   * but the memmove costs go through the roof for larger blocks.
-@@ -168,12 +83,6 @@ struct btrfs_ordered_sum;
+@@ -169,12 +84,6 @@ struct btrfs_ordered_sum;
   */
  #define BTRFS_LINK_MAX 65535U
  
@@ -138,7 +138,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  static int btrfs_csum_sizes[] = { 4 };
  
  /* four bytes for CRC32 */
-@@ -182,17 +91,6 @@ static int btrfs_csum_sizes[] = { 4 };
+@@ -183,17 +92,6 @@ static int btrfs_csum_sizes[] = { 4 };
  /* spefic to btrfs_map_block(), therefore not in include/linux/blk_types.h */
  #define REQ_GET_READ_MIRRORS	(1 << 30)
  
@@ -156,7 +156,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  /* ioprio of readahead is set to idle */
  #define BTRFS_IOPRIO_READA (IOPRIO_PRIO_VALUE(IOPRIO_CLASS_IDLE, 0))
  
-@@ -200,138 +98,10 @@ static int btrfs_csum_sizes[] = { 4 };
+@@ -201,138 +99,10 @@ static int btrfs_csum_sizes[] = { 4 };
  
  #define BTRFS_MAX_EXTENT_SIZE (128 * 1024 * 1024)
  
@@ -295,7 +295,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  static inline unsigned long btrfs_chunk_item_size(int num_stripes)
  {
  	BUG_ON(num_stripes == 0);
-@@ -339,9 +109,6 @@ static inline unsigned long btrfs_chunk_
+@@ -340,9 +110,6 @@ static inline unsigned long btrfs_chunk_
  		sizeof(struct btrfs_stripe) * (num_stripes - 1);
  }
  
@@ -305,7 +305,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  /*
   * File system states
   */
-@@ -350,13 +117,6 @@ static inline unsigned long btrfs_chunk_
+@@ -351,13 +118,6 @@ static inline unsigned long btrfs_chunk_
  #define BTRFS_FS_STATE_TRANS_ABORTED	2
  #define BTRFS_FS_STATE_DEV_REPLACING	3
  
@@ -319,7 +319,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  #define BTRFS_BACKREF_REV_MAX		256
  #define BTRFS_BACKREF_REV_SHIFT		56
  #define BTRFS_BACKREF_REV_MASK		(((u64)BTRFS_BACKREF_REV_MAX - 1) << \
-@@ -588,100 +348,9 @@ struct btrfs_path {
+@@ -589,100 +349,9 @@ struct btrfs_path {
  	unsigned int need_commit_sem:1;
  	unsigned int skip_release_on_error:1;
  };
@@ -420,7 +420,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  enum btrfs_compression_type {
  	BTRFS_COMPRESS_NONE  = 0,
  	BTRFS_COMPRESS_ZLIB  = 1,
-@@ -690,263 +359,6 @@ enum btrfs_compression_type {
+@@ -691,264 +360,6 @@ enum btrfs_compression_type {
  	BTRFS_COMPRESS_LAST  = 3,
  };
  
@@ -608,6 +608,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 -#define BTRFS_FILE_EXTENT_INLINE 0
 -#define BTRFS_FILE_EXTENT_REG 1
 -#define BTRFS_FILE_EXTENT_PREALLOC 2
+-#define BTRFS_FILE_EXTENT_TYPES	2
 -
 -struct btrfs_file_extent_item {
 -	/*
@@ -684,7 +685,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  struct btrfs_dev_replace {
  	u64 replace_state;	/* see #define above */
  	u64 time_started;	/* seconds since 1-Jan-1970 */
-@@ -977,160 +389,6 @@ struct btrfs_dev_replace {
+@@ -979,160 +390,6 @@ struct btrfs_dev_replace {
  	struct btrfs_scrub_progress scrub_progress;
  };
  
@@ -845,7 +846,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  /* For raid type sysfs entries */
  struct raid_kobject {
  	int raid_type;
-@@ -1957,146 +1215,6 @@ struct btrfs_root {
+@@ -1959,146 +1216,6 @@ struct btrfs_root {
  	atomic_t qgroup_meta_rsv;
  };
  
@@ -994,7 +995,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
   *
 --- /dev/null
 +++ b/include/uapi/linux/btrfs_tree.h
-@@ -0,0 +1,966 @@
+@@ -0,0 +1,967 @@
 +#ifndef _BTRFS_CTREE_H_
 +#define _BTRFS_CTREE_H_
 +
@@ -1726,6 +1727,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 +#define BTRFS_FILE_EXTENT_INLINE 0
 +#define BTRFS_FILE_EXTENT_REG 1
 +#define BTRFS_FILE_EXTENT_PREALLOC 2
++#define BTRFS_FILE_EXTENT_TYPES	2
 +
 +struct btrfs_file_extent_item {
 +	/*

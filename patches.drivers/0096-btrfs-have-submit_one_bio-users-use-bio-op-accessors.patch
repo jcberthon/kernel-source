@@ -24,7 +24,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
 
 --- a/fs/btrfs/extent_io.c
 +++ b/fs/btrfs/extent_io.c
-@@ -2392,7 +2392,7 @@ static int bio_readpage_error(struct bio
+@@ -2389,7 +2389,7 @@ static int bio_readpage_error(struct bio
  	int read_mode;
  	int ret;
  
@@ -33,7 +33,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
  	ret = btrfs_get_io_failure_record(inode, start, end, &failrec);
  	if (ret)
-@@ -2418,6 +2418,7 @@ static int bio_readpage_error(struct bio
+@@ -2415,6 +2415,7 @@ static int bio_readpage_error(struct bio
  		free_io_failure(inode, failrec);
  		return -EIO;
  	}
@@ -41,7 +41,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
  	pr_debug("Repair Read Error: submitting new read[%#x] to this_mirror=%d, in_validation=%d\n",
  		 read_mode, failrec->this_mirror, failrec->in_validation);
-@@ -2724,8 +2725,8 @@ struct bio *btrfs_io_bio_alloc(gfp_t gfp
+@@ -2720,8 +2721,8 @@ struct bio *btrfs_io_bio_alloc(gfp_t gfp
  }
  
  
@@ -52,7 +52,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  {
  	int ret = 0;
  	struct bio_vec *bvec = bio->bi_io_vec + bio->bi_vcnt - 1;
-@@ -2736,12 +2737,12 @@ static int __must_check submit_one_bio(i
+@@ -2732,12 +2733,12 @@ static int __must_check submit_one_bio(i
  	start = page_offset(page) + bvec->bv_offset;
  
  	bio->bi_private = NULL;
@@ -68,7 +68,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	else
  		btrfsic_submit_bio(bio);
  
-@@ -2749,20 +2750,20 @@ static int __must_check submit_one_bio(i
+@@ -2745,20 +2746,20 @@ static int __must_check submit_one_bio(i
  	return ret;
  }
  
@@ -93,7 +93,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  			      struct writeback_control *wbc,
  			      struct page *page, sector_t sector,
  			      size_t size, unsigned long offset,
-@@ -2789,10 +2790,9 @@ static int submit_extent_page(int rw, st
+@@ -2786,10 +2787,9 @@ static int submit_extent_page(int rw, st
  
  		if (prev_bio_flags != bio_flags || !contig ||
  		    force_bio_submit ||
@@ -106,7 +106,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  			if (ret < 0) {
  				*bio_ret = NULL;
  				return ret;
-@@ -2813,6 +2813,7 @@ static int submit_extent_page(int rw, st
+@@ -2810,6 +2810,7 @@ static int submit_extent_page(int rw, st
  	bio_add_page(bio, page, page_size, offset);
  	bio->bi_end_io = end_io_func;
  	bio->bi_private = tree;
@@ -114,7 +114,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	if (wbc) {
  		wbc_init_bio(wbc, bio);
  		wbc_account_io(wbc, page, page_size);
-@@ -2821,7 +2822,7 @@ static int submit_extent_page(int rw, st
+@@ -2818,7 +2819,7 @@ static int submit_extent_page(int rw, st
  	if (bio_ret)
  		*bio_ret = bio;
  	else
@@ -123,7 +123,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
  	return ret;
  }
-@@ -2886,7 +2887,7 @@ static int __do_readpage(struct extent_i
+@@ -2882,7 +2883,7 @@ static int __do_readpage(struct extent_i
  			 get_extent_t *get_extent,
  			 struct extent_map **em_cached,
  			 struct bio **bio, int mirror_num,
@@ -132,7 +132,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  			 u64 *prev_em_start)
  {
  	struct inode *inode = page->mapping->host;
-@@ -3069,8 +3070,8 @@ static int __do_readpage(struct extent_i
+@@ -3065,8 +3066,8 @@ static int __do_readpage(struct extent_i
  		}
  
  		pnr -= page->index;
@@ -143,7 +143,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  					 bdev, bio, pnr,
  					 end_bio_extent_readpage, mirror_num,
  					 *bio_flags,
-@@ -3102,7 +3103,7 @@ static inline void __do_contiguous_readp
+@@ -3097,7 +3098,7 @@ static inline void __do_contiguous_readp
  					     get_extent_t *get_extent,
  					     struct extent_map **em_cached,
  					     struct bio **bio, int mirror_num,
@@ -152,7 +152,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  					     u64 *prev_em_start)
  {
  	struct inode *inode;
-@@ -3123,7 +3124,7 @@ static inline void __do_contiguous_readp
+@@ -3118,7 +3119,7 @@ static inline void __do_contiguous_readp
  
  	for (index = 0; index < nr_pages; index++) {
  		__do_readpage(tree, pages[index], get_extent, em_cached, bio,
@@ -161,7 +161,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  		page_cache_release(pages[index]);
  	}
  }
-@@ -3133,7 +3134,7 @@ static void __extent_readpages(struct ex
+@@ -3128,7 +3129,7 @@ static void __extent_readpages(struct ex
  			       int nr_pages, get_extent_t *get_extent,
  			       struct extent_map **em_cached,
  			       struct bio **bio, int mirror_num,
@@ -170,7 +170,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  			       u64 *prev_em_start)
  {
  	u64 start = 0;
-@@ -3155,7 +3156,7 @@ static void __extent_readpages(struct ex
+@@ -3150,7 +3151,7 @@ static void __extent_readpages(struct ex
  						  index - first_index, start,
  						  end, get_extent, em_cached,
  						  bio, mirror_num, bio_flags,
@@ -179,7 +179,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  			start = page_start;
  			end = start + PAGE_CACHE_SIZE - 1;
  			first_index = index;
-@@ -3166,7 +3167,7 @@ static void __extent_readpages(struct ex
+@@ -3161,7 +3162,7 @@ static void __extent_readpages(struct ex
  		__do_contiguous_readpages(tree, &pages[first_index],
  					  index - first_index, start,
  					  end, get_extent, em_cached, bio,
@@ -188,7 +188,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  					  prev_em_start);
  }
  
-@@ -3174,7 +3175,7 @@ static int __extent_read_full_page(struc
+@@ -3169,7 +3170,7 @@ static int __extent_read_full_page(struc
  				   struct page *page,
  				   get_extent_t *get_extent,
  				   struct bio **bio, int mirror_num,
@@ -197,7 +197,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  {
  	struct inode *inode = page->mapping->host;
  	struct btrfs_ordered_extent *ordered;
-@@ -3194,7 +3195,7 @@ static int __extent_read_full_page(struc
+@@ -3189,7 +3190,7 @@ static int __extent_read_full_page(struc
  	}
  
  	ret = __do_readpage(tree, page, get_extent, NULL, bio, mirror_num,
@@ -206,7 +206,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	return ret;
  }
  
-@@ -3206,9 +3207,9 @@ int extent_read_full_page(struct extent_
+@@ -3201,9 +3202,9 @@ int extent_read_full_page(struct extent_
  	int ret;
  
  	ret = __extent_read_full_page(tree, page, get_extent, &bio, mirror_num,
@@ -218,7 +218,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	return ret;
  }
  
-@@ -3444,8 +3445,8 @@ static noinline_for_stack int __extent_w
+@@ -3439,8 +3440,8 @@ static noinline_for_stack int __extent_w
  			       page->index, cur, end);
  		}
  
@@ -229,7 +229,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  					 bdev, &epd->bio, max_nr,
  					 end_bio_extent_writepage,
  					 0, 0, 0, false);
-@@ -3484,13 +3485,11 @@ static int __extent_writepage(struct pag
+@@ -3479,13 +3480,11 @@ static int __extent_writepage(struct pag
  	size_t pg_offset = 0;
  	loff_t i_size = i_size_read(inode);
  	unsigned long end_index = i_size >> PAGE_CACHE_SHIFT;
@@ -244,16 +244,16 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
  	trace___extent_writepage(page, inode, wbc);
  
-@@ -3735,7 +3734,7 @@ static noinline_for_stack int write_one_
- 	u64 offset = eb->start;
+@@ -3731,7 +3730,7 @@ static noinline_for_stack int write_one_
  	unsigned long i, num_pages;
  	unsigned long bio_flags = 0;
+ 	unsigned long start, end;
 -	int rw = (epd->sync_io ? WRITE_SYNC : WRITE) | REQ_META;
 +	int write_flags = (epd->sync_io ? WRITE_SYNC : 0) | REQ_META;
  	int ret = 0;
  
  	clear_bit(EXTENT_BUFFER_WRITE_ERR, &eb->bflags);
-@@ -3766,9 +3765,10 @@ static noinline_for_stack int write_one_
+@@ -3762,9 +3761,10 @@ static noinline_for_stack int write_one_
  
  		clear_page_dirty_for_io(p);
  		set_page_writeback(p);
@@ -267,7 +267,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  					 0, epd->bio_flags, bio_flags, false);
  		epd->bio_flags = bio_flags;
  		if (ret) {
-@@ -4078,13 +4078,12 @@ retry:
+@@ -4074,13 +4074,12 @@ retry:
  static void flush_epd_write_bio(struct extent_page_data *epd)
  {
  	if (epd->bio) {
@@ -284,7 +284,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  		BUG_ON(ret < 0); /* -ENOMEM */
  		epd->bio = NULL;
  	}
-@@ -4211,19 +4210,19 @@ int extent_readpages(struct extent_io_tr
+@@ -4207,19 +4206,19 @@ int extent_readpages(struct extent_io_tr
  		if (nr < ARRAY_SIZE(pagepool))
  			continue;
  		__extent_readpages(tree, pagepool, nr, get_extent, &em_cached,
@@ -307,7 +307,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	return 0;
  }
  
-@@ -5256,7 +5255,7 @@ int read_extent_buffer_pages(struct exte
+@@ -5255,7 +5254,7 @@ int read_extent_buffer_pages(struct exte
  			err = __extent_read_full_page(tree, page,
  						      get_extent, &bio,
  						      mirror_num, &bio_flags,
@@ -316,7 +316,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  			if (err)
  				ret = err;
  		} else {
-@@ -5275,8 +5274,7 @@ int read_extent_buffer_pages(struct exte
+@@ -5264,8 +5263,7 @@ int read_extent_buffer_pages(struct exte
  	}
  
  	if (bio) {

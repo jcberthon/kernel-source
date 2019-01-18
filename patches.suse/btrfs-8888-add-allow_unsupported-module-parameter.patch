@@ -29,15 +29,15 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
 
 --- a/fs/btrfs/ctree.h
 +++ b/fs/btrfs/ctree.h
-@@ -37,6 +37,7 @@
- #include <linux/workqueue.h>
+@@ -38,6 +38,7 @@
  #include <linux/security.h>
+ #include <linux/sizes.h>
  #include <linux/dynamic_debug.h>
 +#include <linux/unsupported-feature.h>
  #include "extent_io.h"
  #include "extent_map.h"
  #include "async-thread.h"
-@@ -3620,4 +3621,11 @@ static inline int btrfs_is_testing(struc
+@@ -3653,4 +3654,11 @@ static inline int btrfs_is_testing(struc
  #endif
          return 0;
  }
@@ -51,7 +51,7 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
  #endif
 --- a/fs/btrfs/disk-io.c
 +++ b/fs/btrfs/disk-io.c
-@@ -2750,6 +2750,14 @@ int open_ctree(struct super_block *sb,
+@@ -2736,6 +2736,14 @@ int open_ctree(struct super_block *sb,
  	if (btrfs_super_flags(disk_super) & BTRFS_SUPER_FLAG_ERROR)
  		set_bit(BTRFS_FS_STATE_ERROR, &fs_info->fs_state);
  
@@ -66,7 +66,7 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
  	/*
  	 * run through our array of backup supers and setup
  	 * our ring pointer to the oldest one
-@@ -2816,6 +2824,13 @@ int open_ctree(struct super_block *sb,
+@@ -2802,6 +2810,13 @@ int open_ctree(struct super_block *sb,
  		goto fail_alloc;
  	}
  
@@ -82,7 +82,7 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
  	 * update the flag.
 --- a/fs/btrfs/ioctl.c
 +++ b/fs/btrfs/ioctl.c
-@@ -5630,6 +5630,7 @@ long btrfs_ioctl(struct file *file, unsi
+@@ -5649,6 +5649,7 @@ long btrfs_ioctl(struct file *file, unsi
  {
  	struct btrfs_root *root = BTRFS_I(file_inode(file))->root;
  	void __user *argp = (void __user *)arg;
@@ -90,7 +90,7 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
  
  	switch (cmd) {
  	case FS_IOC_GETFLAGS:
-@@ -5750,6 +5751,11 @@ long btrfs_ioctl(struct file *file, unsi
+@@ -5769,6 +5770,11 @@ long btrfs_ioctl(struct file *file, unsi
  	case BTRFS_IOC_QUOTA_RESCAN_WAIT:
  		return btrfs_ioctl_quota_rescan_wait(file, argp);
  	case BTRFS_IOC_DEV_REPLACE:
@@ -102,7 +102,7 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
  		return btrfs_ioctl_dev_replace(root, argp);
  	case BTRFS_IOC_GET_FSLABEL:
  		return btrfs_ioctl_get_fslabel(file, argp);
-@@ -5765,7 +5771,7 @@ long btrfs_ioctl(struct file *file, unsi
+@@ -5784,7 +5790,7 @@ long btrfs_ioctl(struct file *file, unsi
  		return btrfs_ioctl_set_features(file, argp);
  	}
  

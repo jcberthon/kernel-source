@@ -43,8 +43,8 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  /*
 --- a/fs/btrfs/extent_io.h
 +++ b/fs/btrfs/extent_io.h
-@@ -340,7 +340,7 @@ int map_private_extent_buffer(struct ext
- 		      unsigned long *map_len);
+@@ -339,7 +339,7 @@ int map_private_extent_buffer(const stru
+ 			      unsigned long *map_len);
  int extent_range_clear_dirty_for_io(struct inode *inode, u64 start, u64 end);
  int extent_range_redirty_for_io(struct inode *inode, u64 start, u64 end);
 -int extent_clear_unlock_delalloc(struct inode *inode, u64 start, u64 end,

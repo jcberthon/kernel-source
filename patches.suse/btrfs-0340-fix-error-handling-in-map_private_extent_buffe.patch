@@ -29,7 +29,7 @@ Signed-off-by: Chris Mason <clm@fb.com>
 
 --- a/fs/btrfs/ctree.c
 +++ b/fs/btrfs/ctree.c
-@@ -1784,10 +1784,12 @@ static noinline int generic_bin_search(s
+@@ -1770,10 +1770,12 @@ static noinline int generic_bin_search(s
  			if (!err) {
  				tmp = (struct btrfs_disk_key *)(kaddr + offset -
  							map_start);
@@ -43,7 +43,7 @@ Signed-off-by: Chris Mason <clm@fb.com>
  			}
  
  		} else {
-@@ -2828,6 +2830,8 @@ cow_done:
+@@ -2820,6 +2822,8 @@ cow_done:
  		}
  
  		ret = key_search(b, key, level, &prev_cmp, &slot);
@@ -54,7 +54,7 @@ Signed-off-by: Chris Mason <clm@fb.com>
  			int dec = 0;
 --- a/fs/btrfs/extent_io.c
 +++ b/fs/btrfs/extent_io.c
-@@ -5341,6 +5341,11 @@ int read_extent_buffer_to_user(struct ex
+@@ -5359,6 +5359,11 @@ int read_extent_buffer_to_user(const str
  	return ret;
  }
  
@@ -63,10 +63,10 @@ Signed-off-by: Chris Mason <clm@fb.com>
 + * return 1 if the item spans two pages.
 + * return -EINVAL otherwise.
 + */
- int map_private_extent_buffer(struct extent_buffer *eb, unsigned long start,
- 			       unsigned long min_len, char **map,
- 			       unsigned long *map_start,
-@@ -5355,7 +5360,7 @@ int map_private_extent_buffer(struct ext
+ int map_private_extent_buffer(const struct extent_buffer *eb,
+ 			      unsigned long start, unsigned long min_len,
+ 			      char **map, unsigned long *map_start,
+@@ -5373,7 +5378,7 @@ int map_private_extent_buffer(const stru
  		PAGE_CACHE_SHIFT;
  
  	if (i != end_i)
