@@ -1,9 +1,9 @@
 From: Peter Oskolkov <posk@google.com>
+Date: Thu, 2 Aug 2018 23:34:37 +0000
 Subject: ip: discard IPv4 datagrams with overlapping segments.
-Git-commit: 7969e5c40dfd04799d4341f1b7cd266b6e47f227
 Patch-mainline: v4.19-rc1
-References: bsc#1103097, CVE-2018-5391
-Acked-by: Jiri Bohac <jbohac@suse.cz>
+Git-commit: 7969e5c40dfd04799d4341f1b7cd266b6e47f227
+References: CVE-2018-5391 bsc#1103097
 
 This behavior is required in IPv6, and there is little need
 to tolerate overlapping fragments in IPv4. This change
@@ -17,12 +17,13 @@ Signed-off-by: Eric Dumazet <edumazet@google.com>
 Cc: Florian Westphal <fw@strlen.de>
 Acked-by: Stephen Hemminger <stephen@networkplumber.org>
 Signed-off-by: David S. Miller <davem@davemloft.net>
+Acked-by: Michal Kubecek <mkubecek@suse.cz>
 
 ---
- include/uapi/linux/snmp.h |    1 
- net/ipv4/ip_fragment.c    |   73 ++++++++++++----------------------------------
- net/ipv4/proc.c           |    1 
- 3 files changed, 22 insertions(+), 53 deletions(-)
+ include/uapi/linux/snmp.h |  1 +
+ net/ipv4/ip_fragment.c    | 69 ++++++++++-----------------------------
+ net/ipv4/proc.c           |  1 +
+ 3 files changed, 20 insertions(+), 51 deletions(-)
 
 --- a/include/uapi/linux/snmp.h
 +++ b/include/uapi/linux/snmp.h
@@ -36,7 +37,7 @@ Signed-off-by: David S. Miller <davem@davemloft.net>
  
 --- a/net/ipv4/ip_fragment.c
 +++ b/net/ipv4/ip_fragment.c
-@@ -333,6 +333,7 @@ static int ip_frag_reinit(struct ipq *qp
+@@ -342,6 +342,7 @@ static int ip_frag_reinit(struct ipq *qp)
  /* Add new segment to existing queue. */
  static int ip_frag_queue(struct ipq *qp, struct sk_buff *skb)
  {
@@ -44,7 +45,7 @@ Signed-off-by: David S. Miller <davem@davemloft.net>
  	struct sk_buff *prev, *next;
  	struct net_device *dev;
  	unsigned int fragsize;
-@@ -413,60 +414,22 @@ static int ip_frag_queue(struct ipq *qp,
+@@ -422,60 +423,22 @@ static int ip_frag_queue(struct ipq *qp, struct sk_buff *skb)
  	}
  
  found:
@@ -76,10 +77,13 @@ Signed-off-by: David S. Miller <davem@davemloft.net>
 -	}
 -
 -	err = -ENOMEM;
--
+ 
 -	while (next && FRAG_CB(next)->offset < end) {
 -		int i = end - FRAG_CB(next)->offset; /* overlap is 'i' bytes */
--
++	/* Is there an overlap with the previous fragment? */
++	if (prev && (FRAG_CB(prev)->offset + prev->len) > offset)
++		goto discard_qp;
+ 
 -		if (i < next->len) {
 -			/* Eat head of the next overlapped fragment
 -			 * and leave the loop. The next ones cannot overlap.
@@ -109,31 +113,26 @@ Signed-off-by: David S. Miller <davem@davemloft.net>
 -			kfree_skb(free_it);
 -		}
 -	}
-+	/* Is there an overlap with the previous fragment? */
-+	if (prev &&
-+	    (FRAG_CB(prev)->offset + prev->len) > offset)
-+		goto discard_qp;
-+
 +	/* Is there an overlap with the next fragment? */
 +	if (next && FRAG_CB(next)->offset < end)
 +		goto discard_qp;
  
  	FRAG_CB(skb)->offset = offset;
  
-@@ -513,6 +476,10 @@ found:
+@@ -522,6 +485,10 @@ found:
  	skb_dst_drop(skb);
  	return -EINPROGRESS;
  
 +discard_qp:
 +	inet_frag_kill(&qp->q, &ip4_frags);
 +	err = -EINVAL;
-+	IP_INC_STATS(net, IPSTATS_MIB_REASM_OVERLAPS);
++	IP_INC_STATS_BH(net, IPSTATS_MIB_REASM_OVERLAPS);
  err:
  	kfree_skb(skb);
  	return err;
 --- a/net/ipv4/proc.c
 +++ b/net/ipv4/proc.c
-@@ -132,6 +132,7 @@ static const struct snmp_mib snmp4_ipext
+@@ -132,6 +132,7 @@ static const struct snmp_mib snmp4_ipextstats_list[] = {
  	SNMP_MIB_ITEM("InECT1Pkts", IPSTATS_MIB_ECT1PKTS),
  	SNMP_MIB_ITEM("InECT0Pkts", IPSTATS_MIB_ECT0PKTS),
  	SNMP_MIB_ITEM("InCEPkts", IPSTATS_MIB_CEPKTS),
