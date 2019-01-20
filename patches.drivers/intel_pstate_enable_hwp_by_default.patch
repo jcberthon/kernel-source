@@ -20,7 +20,7 @@ Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 
 --- a/drivers/cpufreq/intel_pstate.c
 +++ b/drivers/cpufreq/intel_pstate.c
-@@ -1356,6 +1356,11 @@ static inline bool intel_pstate_platform
+@@ -1369,6 +1369,11 @@ static inline bool intel_pstate_platform
  static inline bool intel_pstate_has_acpi_ppc(void) { return false; }
  #endif /* CONFIG_ACPI */
  
@@ -32,7 +32,7 @@ Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
  static int __init intel_pstate_init(void)
  {
  	int cpu, rc = 0;
-@@ -1365,17 +1370,16 @@ static int __init intel_pstate_init(void
+@@ -1381,17 +1386,16 @@ static int __init intel_pstate_init(void
  	if (no_load)
  		return -ENODEV;
  
@@ -56,7 +56,7 @@ Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
  	cpu_def = (struct cpu_defaults *)id->driver_data;
  
  	copy_pid_params(&cpu_def->pid_policy);
-@@ -1384,6 +1388,14 @@ static int __init intel_pstate_init(void
+@@ -1400,6 +1404,14 @@ static int __init intel_pstate_init(void
  	if (intel_pstate_msrs_not_valid())
  		return -ENODEV;
  
@@ -83,7 +83,7 @@ Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
  	if (!hwp_active && hwp_only)
  		goto out;
  
-@@ -1405,6 +1412,9 @@ static int __init intel_pstate_init(void
+@@ -1449,6 +1456,9 @@ static int __init intel_pstate_init(void
  	intel_pstate_debug_expose_params();
  	intel_pstate_sysfs_expose_params();
  
