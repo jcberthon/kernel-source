@@ -33,7 +33,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
 
 --- a/kernel/sched/core.c
 +++ b/kernel/sched/core.c
-@@ -1840,11 +1840,8 @@ ttwu_do_activate(struct rq *rq, struct t
+@@ -1843,11 +1843,8 @@ ttwu_do_activate(struct rq *rq, struct t
  	if (p->sched_contributes_to_load)
  		rq->nr_uninterruptible--;
  
@@ -46,7 +46,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  #endif
  
  	ttwu_activate(rq, p, en_flags);
-@@ -2084,10 +2081,6 @@ try_to_wake_up(struct task_struct *p, un
+@@ -2194,10 +2191,6 @@ try_to_wake_up(struct task_struct *p, un
  	cpu = select_task_rq(p, p->wake_cpu, SD_BALANCE_WAKE, wake_flags);
  	if (task_cpu(p) != cpu) {
  		wake_flags |= WF_MIGRATED;
@@ -59,7 +59,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  #endif /* CONFIG_SMP */
 --- a/kernel/sched/fair.c
 +++ b/kernel/sched/fair.c
-@@ -3210,7 +3210,7 @@ static inline void check_schedstat_requi
+@@ -3241,7 +3241,7 @@ static inline void check_schedstat_requi
   *
   * WAKEUP (remote)
   *
@@ -68,7 +68,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
   *	  vruntime -= min_vruntime
   *
   *	enqueue
-@@ -3229,7 +3229,7 @@ enqueue_entity(struct cfs_rq *cfs_rq, st
+@@ -3260,7 +3260,7 @@ enqueue_entity(struct cfs_rq *cfs_rq, st
  	 * Update the normalized vruntime before updating min_vruntime
  	 * through calling update_curr().
  	 */
@@ -77,7 +77,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  		se->vruntime += cfs_rq->min_vruntime;
  
  	/*
-@@ -4733,33 +4733,6 @@ static unsigned long cpu_avg_load_per_ta
+@@ -4807,33 +4807,6 @@ static unsigned long cpu_avg_load_per_ta
  	return 0;
  }
  
@@ -111,7 +111,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  #ifdef CONFIG_FAIR_GROUP_SCHED
  /*
   * effective_load() calculates the load change as seen from the root_task_group
-@@ -5278,6 +5251,32 @@ select_task_rq_fair(struct task_struct *
+@@ -5361,6 +5334,32 @@ select_task_rq_fair(struct task_struct *
  static void migrate_task_rq_fair(struct task_struct *p)
  {
  	/*
@@ -144,7 +144,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  	 * We are supposed to update the task to "current" time, then its up to date
  	 * and ready to go to new CPU/cfs_rq. But we have difficulty in getting
  	 * what current time is, so simply throw away the out-of-date time. This
-@@ -8575,7 +8574,6 @@ const struct sched_class fair_sched_clas
+@@ -8649,7 +8648,6 @@ const struct sched_class fair_sched_clas
  	.rq_online		= rq_online_fair,
  	.rq_offline		= rq_offline_fair,
  
@@ -154,7 +154,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  #endif
 --- a/kernel/sched/sched.h
 +++ b/kernel/sched/sched.h
-@@ -1168,7 +1168,7 @@ extern const u32 sched_prio_to_wmult[40];
+@@ -1167,7 +1167,7 @@ extern const u32 sched_prio_to_wmult[40]
   *
   * ENQUEUE_HEAD      - place at front of runqueue (tail if not specified)
   * ENQUEUE_REPLENISH - CBS (replenish runtime and postpone deadline)
@@ -163,7 +163,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
   *
   */
  
-@@ -1141,9 +1141,9 @@ extern const u32 sched_prio_to_wmult[40]
+@@ -1182,9 +1182,9 @@ extern const u32 sched_prio_to_wmult[40]
  #define ENQUEUE_HEAD		0x08
  #define ENQUEUE_REPLENISH	0x10
  #ifdef CONFIG_SMP
@@ -175,7 +175,7 @@ Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
  #endif
  
  #define RETRY_TASK		((void *)-1UL)
-@@ -1179,7 +1179,6 @@ struct sched_class {
+@@ -1215,7 +1215,6 @@ struct sched_class {
  	int  (*select_task_rq)(struct task_struct *p, int task_cpu, int sd_flag, int flags);
  	void (*migrate_task_rq)(struct task_struct *p);
  
