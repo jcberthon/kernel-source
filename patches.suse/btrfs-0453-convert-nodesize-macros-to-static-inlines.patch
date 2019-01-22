@@ -11,12 +11,13 @@ size limits to static inlines.  That way we get type checking for free.
 Signed-off-by: Jeff Mahoney <jeffm@suse.com>
 Signed-off-by: David Sterba <dsterba@suse.com>
 ---
- fs/btrfs/ctree.h |   48 +++++++++++++++++++++++++++++++++---------------
- 1 file changed, 33 insertions(+), 15 deletions(-)
+ fs/btrfs/ctree.h        |   48 +++++++++++++++++++++++++++++++++---------------
+ fs/btrfs/tree-checker.c |    4 ++--
+ 2 files changed, 35 insertions(+), 17 deletions(-)
 
 --- a/fs/btrfs/ctree.h
 +++ b/fs/btrfs/ctree.h
-@@ -143,21 +143,6 @@ struct btrfs_header {
+@@ -144,21 +144,6 @@ struct btrfs_header {
  	u8 level;
  } __attribute__ ((__packed__));
  
@@ -38,7 +39,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  /*
   * this is a very generous portion of the super block, giving us
   * room to translate 14 chunks with 3 stripes each.
-@@ -1240,6 +1225,39 @@ struct btrfs_root {
+@@ -1241,6 +1226,39 @@ struct btrfs_root {
  	atomic_t qgroup_meta_rsv;
  };
  
@@ -78,3 +79,23 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  /*
   * Flags for mount options.
   *
+--- a/fs/btrfs/tree-checker.c
++++ b/fs/btrfs/tree-checker.c
+@@ -266,7 +266,7 @@ static int check_dir_item(struct btrfs_r
+ 		}
+ 		if (name_len + data_len > BTRFS_MAX_XATTR_SIZE(root)) {
+ 			dir_item_err(root, leaf, slot,
+-			"dir item name and data len too long, have %u max %zu",
++			"dir item name and data len too long, have %u max %u",
+ 				name_len + data_len,
+ 				BTRFS_MAX_XATTR_SIZE(root));
+ 			return -EUCLEAN;
+@@ -608,7 +608,7 @@ int btrfs_check_node(struct btrfs_root *
+ 	}
+ 	if (nr == 0 || nr > BTRFS_NODEPTRS_PER_BLOCK(root)) {
+ 		btrfs_crit(root->fs_info,
+-"corrupt node: root=%llu block=%llu, nritems too %s, have %lu expect range [1,%zu]",
++"corrupt node: root=%llu block=%llu, nritems too %s, have %lu expect range [1,%u]",
+ 			   root->objectid, node->start,
+ 			   nr == 0 ? "small" : "large", nr,
+ 			   BTRFS_NODEPTRS_PER_BLOCK(root));

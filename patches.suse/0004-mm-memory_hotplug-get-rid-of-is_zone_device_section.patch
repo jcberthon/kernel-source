@@ -45,7 +45,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
 
 --- a/arch/ia64/mm/init.c
 +++ b/arch/ia64/mm/init.c
-@@ -651,7 +651,7 @@ int arch_add_memory(int nid, u64 start,
+@@ -657,7 +657,7 @@ int arch_add_memory(int nid, u64 start,
  
  	zone = pgdat->node_zones +
  		zone_for_memory(nid, start, size, ZONE_NORMAL, for_device);
@@ -56,7 +56,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  		printk("%s: Problem encountered in __add_pages() as ret=%d\n",
 --- a/arch/powerpc/mm/mem.c
 +++ b/arch/powerpc/mm/mem.c
-@@ -122,7 +122,7 @@ int arch_add_memory(int nid, u64 start,
+@@ -130,7 +130,7 @@ int arch_add_memory(int nid, u64 start,
  	zone = pgdata->node_zones +
  		zone_for_memory(nid, start, size, 0, for_device);
  
@@ -67,7 +67,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  #ifdef CONFIG_MEMORY_HOTREMOVE
 --- a/arch/s390/mm/init.c
 +++ b/arch/s390/mm/init.c
-@@ -156,7 +156,7 @@ int arch_add_memory(int nid, u64 start,
+@@ -178,7 +178,7 @@ int arch_add_memory(int nid, u64 start,
  			continue;
  		nr_pages = (start_pfn + size_pages > zone_end_pfn) ?
  			   zone_end_pfn - start_pfn : size_pages;
@@ -78,7 +78,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  		start_pfn += nr_pages;
 --- a/arch/sh/mm/init.c
 +++ b/arch/sh/mm/init.c
-@@ -492,7 +492,7 @@ int arch_add_memory(int nid, u64 start,
+@@ -498,7 +498,7 @@ int arch_add_memory(int nid, u64 start,
  	ret = __add_pages(nid, pgdat->node_zones +
  			zone_for_memory(nid, start, size, ZONE_NORMAL,
  			for_device),
@@ -89,7 +89,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  
 --- a/arch/x86/mm/init_32.c
 +++ b/arch/x86/mm/init_32.c
-@@ -828,7 +828,7 @@ int arch_add_memory(int nid, u64 start,
+@@ -831,7 +831,7 @@ int arch_add_memory(int nid, u64 start,
  	unsigned long start_pfn = start >> PAGE_SHIFT;
  	unsigned long nr_pages = size >> PAGE_SHIFT;
  
@@ -100,7 +100,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  #ifdef CONFIG_MEMORY_HOTREMOVE
 --- a/arch/x86/mm/init_64.c
 +++ b/arch/x86/mm/init_64.c
-@@ -695,7 +695,7 @@ int arch_add_memory(int nid, u64 start,
+@@ -710,7 +710,7 @@ int arch_add_memory(int nid, u64 start,
  
  	init_memory_mapping(start, start + size);
  
@@ -111,7 +111,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  	/* update max_pfn, max_low_pfn and high_memory */
 --- a/drivers/base/memory.c
 +++ b/drivers/base/memory.c
-@@ -662,14 +662,6 @@ static int add_memory_block(int base_sec
+@@ -647,14 +647,6 @@ static int add_memory_block(int base_sec
  	return 0;
  }
  
@@ -126,7 +126,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  /*
   * need an interface for the VM to add new memory regions,
   * but without onlining it.
-@@ -679,9 +671,6 @@ int register_new_memory(int nid, struct
+@@ -664,9 +656,6 @@ int register_new_memory(int nid, struct
  	int ret = 0;
  	struct memory_block *mem;
  
@@ -136,7 +136,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  	mutex_lock(&mem_sysfs_mutex);
  
  	mem = find_memory_block(section);
-@@ -717,11 +706,16 @@ static int remove_memory_block(unsigned
+@@ -702,11 +691,16 @@ static int remove_memory_block(unsigned
  {
  	struct memory_block *mem;
  
@@ -156,7 +156,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  	unregister_mem_sect_under_nodes(mem, __section_nr(section));
  
  	mem->section_count--;
-@@ -724,6 +724,7 @@ static int remove_memory_block(unsigned
+@@ -715,6 +709,7 @@ static int remove_memory_block(unsigned
  	else
  		put_device(&mem->dev);
  
@@ -177,7 +177,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  extern int memory_add_physaddr_to_nid(u64 start);
 --- a/mm/memory_hotplug.c
 +++ b/mm/memory_hotplug.c
-@@ -286,7 +286,7 @@ void register_page_bootmem_info_node(str
+@@ -462,7 +462,7 @@ static int __meminit __add_zone(struct z
  }
  
  static int __meminit __add_section(int nid, struct zone *zone,
@@ -186,7 +186,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  {
  	int ret;
  
-@@ -316,6 +317,9 @@ static int __meminit __add_section(int n
+@@ -479,6 +479,9 @@ static int __meminit __add_section(int n
  	if (ret < 0)
  		return ret;
  
@@ -196,7 +196,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  	return register_new_memory(nid, __pfn_to_section(phys_start_pfn));
  }
  
-@@ -326,7 +330,7 @@ static int __meminit __add_section(int n
+@@ -489,7 +492,7 @@ static int __meminit __add_section(int n
   * add the new pages.
   */
  int __ref __add_pages(int nid, struct zone *zone, unsigned long phys_start_pfn,
@@ -205,7 +205,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  {
  	unsigned long i;
  	int err = 0;
-@@ -337,7 +341,7 @@ int __ref __add_pages(int nid, unsigned
+@@ -516,7 +519,7 @@ int __ref __add_pages(int nid, struct zo
  	}
  
  	for (i = start_sec; i <= end_sec; i++) {

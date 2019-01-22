@@ -337,7 +337,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  }
 --- a/drivers/s390/block/dasd_eckd.c
 +++ b/drivers/s390/block/dasd_eckd.c
-@@ -218,10 +218,9 @@ check_XRC (struct ccw1         *de_ccw,
+@@ -212,10 +212,9 @@ check_XRC (struct ccw1         *de_ccw,
             struct DE_eckd_data *data,
             struct dasd_device  *device)
  {
@@ -349,7 +349,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	if (!private->rdc_data.facilities.XRC_supported)
  		return 0;
  
-@@ -243,13 +242,11 @@ static int
+@@ -237,13 +236,11 @@ static int
  define_extent(struct ccw1 *ccw, struct DE_eckd_data *data, unsigned int trk,
  	      unsigned int totrk, int cmd, struct dasd_device *device)
  {
@@ -364,7 +364,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	ccw->cmd_code = DASD_ECKD_CCW_DEFINE_EXTENT;
  	ccw->flags = 0;
  	ccw->count = 16;
-@@ -331,10 +328,9 @@ define_extent(struct ccw1 *ccw, struct D
+@@ -322,10 +319,9 @@ define_extent(struct ccw1 *ccw, struct D
  static int check_XRC_on_prefix(struct PFX_eckd_data *pfxdata,
  			       struct dasd_device  *device)
  {
@@ -376,7 +376,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	if (!private->rdc_data.facilities.XRC_supported)
  		return 0;
  
-@@ -355,12 +351,10 @@ static void fill_LRE_data(struct LRE_eck
+@@ -346,12 +342,10 @@ static void fill_LRE_data(struct LRE_eck
  			  struct dasd_device *device, unsigned int reclen,
  			  unsigned int tlf)
  {
@@ -390,7 +390,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	memset(data, 0, sizeof(*data));
  	sector = 0;
  	if (rec_on_trk) {
-@@ -497,8 +491,8 @@ static int prefix_LRE(struct ccw1 *ccw,
+@@ -488,8 +482,8 @@ static int prefix_LRE(struct ccw1 *ccw,
  	u16 heads, beghead, endhead;
  	int rc = 0;
  
@@ -401,7 +401,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	dedata = &pfxdata->define_extent;
  	lredata = &pfxdata->locate_record;
  
-@@ -643,12 +637,10 @@ locate_record(struct ccw1 *ccw, struct L
+@@ -633,12 +627,10 @@ locate_record(struct ccw1 *ccw, struct L
  	      unsigned int rec_on_trk, int no_rec, int cmd,
  	      struct dasd_device * device, int reclen)
  {
@@ -415,7 +415,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	DBF_DEV_EVENT(DBF_INFO, device,
  		  "Locate: trk %d, rec %d, no_rec %d, cmd %d, reclen %d",
  		  trk, rec_on_trk, no_rec, cmd, reclen);
-@@ -812,10 +804,9 @@ static void create_uid(struct dasd_eckd_
+@@ -802,10 +794,9 @@ static void create_uid(struct dasd_eckd_
   */
  static int dasd_eckd_generate_uid(struct dasd_device *device)
  {
@@ -427,7 +427,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	if (!private)
  		return -ENODEV;
  	if (!private->ned || !private->gneq)
-@@ -828,11 +819,10 @@ static int dasd_eckd_generate_uid(struct
+@@ -818,11 +809,10 @@ static int dasd_eckd_generate_uid(struct
  
  static int dasd_eckd_get_uid(struct dasd_device *device, struct dasd_uid *uid)
  {
@@ -441,7 +441,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  		spin_lock_irqsave(get_ccwdev_lock(device->cdev), flags);
  		*uid = private->uid;
  		spin_unlock_irqrestore(get_ccwdev_lock(device->cdev), flags);
-@@ -1046,10 +1036,9 @@ static unsigned char dasd_eckd_path_acce
+@@ -1036,10 +1026,9 @@ static unsigned char dasd_eckd_path_acce
  
  static void dasd_eckd_clear_conf_data(struct dasd_device *device)
  {
@@ -453,7 +453,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	private->conf_data = NULL;
  	private->conf_len = 0;
  	for (i = 0; i < 8; i++) {
-@@ -1074,7 +1063,7 @@ static int dasd_eckd_read_conf(struct da
+@@ -1060,7 +1049,7 @@ static int dasd_eckd_read_conf(struct da
  	struct dasd_uid *uid;
  	char print_path_uid[60], print_device_uid[60];
  
@@ -462,7 +462,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	path_data = &device->path_data;
  	opm = ccw_device_get_path_mask(device->cdev);
  	conf_data_saved = 0;
-@@ -1237,11 +1225,10 @@ static u32 get_fcx_max_data(struct dasd_
+@@ -1193,11 +1182,10 @@ static int dasd_eckd_read_conf(struct da
  
  static int verify_fcx_max_data(struct dasd_device *device, __u8 lpm)
  {
@@ -475,7 +475,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	if (private->fcx_max_data) {
  		mdc = ccw_device_get_mdc(device->cdev, lpm);
  		if ((mdc < 0)) {
-@@ -1267,15 +1254,10 @@ static int verify_fcx_max_data(struct da
+@@ -1223,15 +1211,10 @@ static int verify_fcx_max_data(struct da
  static int rebuild_device_uid(struct dasd_device *device,
  			      struct path_verification_work_data *data)
  {
@@ -483,19 +483,19 @@ Acked-by: John Jolly <jjolly@suse.com>
 -	struct dasd_path *path_data;
 -	__u8 lpm, opm;
 -	int rc;
-+	struct dasd_eckd_private *private = device->private;
-+	struct dasd_path *path_data = &device->path_data;
-+	__u8 lpm, opm = path_data->opm;
-+	int rc = -ENODEV;
 -
 -	rc = -ENODEV;
 -	private = (struct dasd_eckd_private *) device->private;
 -	path_data = &device->path_data;
 -	opm = device->path_data.opm;
++	struct dasd_eckd_private *private = device->private;
++	struct dasd_path *path_data = &device->path_data;
++	__u8 lpm, opm = path_data->opm;
++	int rc = -ENODEV;
  
  	for (lpm = 0x80; lpm; lpm >>= 1) {
  		if (!(lpm & opm))
-@@ -1514,14 +1498,13 @@ static void dasd_eckd_reset_path(struct
+@@ -1465,14 +1448,13 @@ static int dasd_eckd_verify_path(struct
  
  static int dasd_eckd_read_features(struct dasd_device *device)
  {
@@ -511,7 +511,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	memset(&private->features, 0, sizeof(struct dasd_rssd_features));
  	cqr = dasd_smalloc_request(DASD_ECKD_MAGIC, 1 /* PSF */	+ 1 /* RSSD */,
  				   (sizeof(struct dasd_psf_prssd_data) +
-@@ -1513,11 +1639,9 @@ dasd_eckd_psf_ssc(struct dasd_device *de
+@@ -1607,11 +1589,9 @@ dasd_eckd_psf_ssc(struct dasd_device *de
  static int dasd_eckd_validate_server(struct dasd_device *device,
  				     unsigned long flags)
  {
@@ -525,7 +525,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	if (private->uid.type == UA_BASE_PAV_ALIAS ||
  	    private->uid.type == UA_HYPER_PAV_ALIAS)
  		return 0;
-@@ -1515,14 +1199,13 @@ static int dasd_eckd_read_conf(struct da
+@@ -1664,14 +1644,13 @@ static void dasd_eckd_kick_validate_serv
  
  static u32 get_fcx_max_data(struct dasd_device *device)
  {
@@ -542,7 +542,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	fcx_in_css = css_general_characteristics.fcx;
  	fcx_in_gneq = private->gneq->reserved2[7] & 0x04;
  	fcx_in_features = private->features.feature[40] & 0x80;
-@@ -1718,7 +1699,7 @@ static void dasd_eckd_kick_validate_serv
+@@ -1696,7 +1675,7 @@ static u32 get_fcx_max_data(struct dasd_
  static int
  dasd_eckd_check_characteristics(struct dasd_device *device)
  {
@@ -551,7 +551,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	struct dasd_block *block;
  	struct dasd_uid temp_uid;
  	int rc, i;
-@@ -1737,7 +1718,6 @@ dasd_eckd_check_characteristics(struct d
+@@ -1715,7 +1694,6 @@ dasd_eckd_check_characteristics(struct d
  		dev_info(&device->cdev->dev,
  			 "The DASD is not operating in multipath mode\n");
  	}
@@ -559,7 +559,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	if (!private) {
  		private = kzalloc(sizeof(*private), GFP_KERNEL | GFP_DMA);
  		if (!private) {
-@@ -1746,7 +1726,7 @@ dasd_eckd_check_characteristics(struct d
+@@ -1724,7 +1702,7 @@ dasd_eckd_check_characteristics(struct d
  				 "failed\n");
  			return -ENOMEM;
  		}
@@ -568,7 +568,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	} else {
  		memset(private, 0, sizeof(*private));
  	}
-@@ -1862,10 +1842,9 @@ out_err1:
+@@ -1839,10 +1817,9 @@ out_err1:
  
  static void dasd_eckd_uncheck_device(struct dasd_device *device)
  {
@@ -580,7 +580,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	dasd_alias_disconnect_device_from_lcu(device);
  	private->ned = NULL;
  	private->sneq = NULL;
-@@ -1891,7 +1870,7 @@ static void dasd_eckd_uncheck_device(str
+@@ -1865,7 +1842,7 @@ static void dasd_eckd_uncheck_device(str
  static struct dasd_ccw_req *
  dasd_eckd_analysis_ccw(struct dasd_device *device)
  {
@@ -589,7 +589,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	struct eckd_count *count_data;
  	struct LO_eckd_data *LO_data;
  	struct dasd_ccw_req *cqr;
-@@ -1899,8 +1878,6 @@ dasd_eckd_analysis_ccw(struct dasd_devic
+@@ -1873,8 +1850,6 @@ dasd_eckd_analysis_ccw(struct dasd_devic
  	int cplength, datasize;
  	int i;
  
@@ -598,7 +598,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	cplength = 8;
  	datasize = sizeof(struct DE_eckd_data) + 2*sizeof(struct LO_eckd_data);
  	cqr = dasd_smalloc_request(DASD_ECKD_MAGIC, cplength, datasize, device);
-@@ -1974,11 +1951,9 @@ static int dasd_eckd_analysis_evaluation
+@@ -1948,11 +1923,9 @@ static int dasd_eckd_analysis_evaluation
  static void dasd_eckd_analysis_callback(struct dasd_ccw_req *init_cqr,
  					void *data)
  {
@@ -612,7 +612,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	private->init_cqr_status = dasd_eckd_analysis_evaluation(init_cqr);
  	dasd_sfree_request(init_cqr, device);
  	dasd_kick_device(device);
-@@ -2005,15 +1980,13 @@ static int dasd_eckd_start_analysis(stru
+@@ -1979,15 +1952,13 @@ static int dasd_eckd_start_analysis(stru
  
  static int dasd_eckd_end_analysis(struct dasd_block *block)
  {
@@ -630,7 +630,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	status = private->init_cqr_status;
  	private->init_cqr_status = -1;
  	if (status == INIT_CQR_ERROR) {
-@@ -2111,9 +2084,8 @@ raw:
+@@ -2085,9 +2056,8 @@ raw:
  
  static int dasd_eckd_do_analysis(struct dasd_block *block)
  {
@@ -641,7 +641,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	if (private->init_cqr_status < 0)
  		return dasd_eckd_start_analysis(block);
  	else
-@@ -2140,9 +2112,8 @@ static int dasd_eckd_basic_to_known(stru
+@@ -2117,9 +2087,8 @@ static int dasd_eckd_basic_to_known(stru
  static int
  dasd_eckd_fill_geometry(struct dasd_block *block, struct hd_geometry *geo)
  {
@@ -652,7 +652,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	if (dasd_check_blocksize(block->bp_block) == 0) {
  		geo->sectors = recs_per_track(&private->rdc_data,
  					      0, block->bp_block);
-@@ -2353,8 +2324,8 @@ dasd_eckd_build_format(struct dasd_devic
+@@ -2156,8 +2125,8 @@ dasd_eckd_build_format(struct dasd_devic
  	if (!startdev)
  		startdev = base;
  
@@ -663,7 +663,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  
  	rpt = recs_per_track(&base_priv->rdc_data, 0, fdata->blksize);
  
-@@ -2619,9 +2590,7 @@ dasd_eckd_format_build_ccw_req(struct da
+@@ -2407,9 +2376,7 @@ dasd_eckd_format_build_ccw_req(struct da
  static int dasd_eckd_format_sanity_checks(struct dasd_device *base,
  					  struct format_data_t *fdata)
  {
@@ -674,7 +674,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  
  	if (fdata->start_unit >=
  	    (private->real_cyl * private->rdc_data.trk_per_cyl)) {
-@@ -2670,16 +2639,14 @@ static int dasd_eckd_format_process_data
+@@ -2447,16 +2414,14 @@ static int dasd_eckd_format_process_data
  					 struct format_data_t *fdata,
  					 int enable_pav)
  {
@@ -692,7 +692,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	rc = dasd_eckd_format_sanity_checks(base, fdata);
  	if (rc)
  		return rc;
-@@ -3049,9 +3017,8 @@ static void dasd_eckd_check_for_device_c
+@@ -2576,9 +2541,8 @@ static void dasd_eckd_check_for_device_c
  {
  	char mask;
  	char *sense = NULL;
@@ -703,7 +703,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	/* first of all check for state change pending interrupt */
  	mask = DEV_STAT_ATTENTION | DEV_STAT_DEV_END | DEV_STAT_UNIT_EXCEP;
  	if ((scsw_dstat(&irb->scsw) & mask) == mask) {
-@@ -3140,7 +3107,7 @@ static struct dasd_ccw_req *dasd_eckd_bu
+@@ -2667,7 +2631,7 @@ static struct dasd_ccw_req *dasd_eckd_bu
  	struct dasd_device *basedev;
  
  	basedev = block->base;
@@ -712,7 +712,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	if (rq_data_dir(req) == READ)
  		cmd = DASD_ECKD_CCW_READ_MT;
  	else if (rq_data_dir(req) == WRITE)
-@@ -3496,8 +3463,8 @@ static int prepare_itcw(struct itcw *itc
+@@ -3023,8 +2987,8 @@ static int prepare_itcw(struct itcw *itc
  
  
  	/* setup prefix data */
@@ -723,7 +723,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	dedata = &pfxdata.define_extent;
  	lredata = &pfxdata.locate_record;
  
-@@ -3800,7 +3767,7 @@ static struct dasd_ccw_req *dasd_eckd_bu
+@@ -3313,7 +3277,7 @@ static struct dasd_ccw_req *dasd_eckd_bu
  	struct dasd_ccw_req *cqr;
  
  	basedev = block->base;
@@ -732,7 +732,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  
  	/* Calculate number of blocks/records per track. */
  	blksize = block->bp_block;
-@@ -4025,7 +3992,7 @@ dasd_eckd_free_cp(struct dasd_ccw_req *c
+@@ -3538,7 +3502,7 @@ dasd_eckd_free_cp(struct dasd_ccw_req *c
  
  	if (!dasd_page_cache)
  		goto out;
@@ -741,7 +741,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	blksize = cqr->block->bp_block;
  	blk_per_trk = recs_per_track(&private->rdc_data, 0, blksize);
  	recid = blk_rq_pos(req) >> cqr->block->s2b_shift;
-@@ -4109,7 +4076,7 @@ static struct dasd_ccw_req *dasd_eckd_bu
+@@ -3622,7 +3586,7 @@ static struct dasd_ccw_req *dasd_eckd_bu
  	startdev = dasd_alias_get_start_dev(base);
  	if (!startdev)
  		startdev = base;
@@ -750,7 +750,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	if (private->count >= DASD_ECKD_CHANQ_MAX_SIZE)
  		return ERR_PTR(-EBUSY);
  
-@@ -4132,7 +4099,7 @@ static int dasd_eckd_free_alias_cp(struc
+@@ -3645,7 +3609,7 @@ static int dasd_eckd_free_alias_cp(struc
  	unsigned long flags;
  
  	spin_lock_irqsave(get_ccwdev_lock(cqr->memdev->cdev), flags);
@@ -759,7 +759,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	private->count--;
  	spin_unlock_irqrestore(get_ccwdev_lock(cqr->memdev->cdev), flags);
  	return dasd_eckd_free_cp(cqr, req);
-@@ -4142,15 +4109,14 @@ static int
+@@ -3655,15 +3619,14 @@ static int
  dasd_eckd_fill_info(struct dasd_device * device,
  		    struct dasd_information2_t * info)
  {
@@ -778,7 +778,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	info->confdata_size = min((unsigned long)private->conf_len,
  				  sizeof(info->configuration_data));
  	memcpy(info->configuration_data, private->conf_data,
-@@ -4463,8 +4429,7 @@ dasd_eckd_performance(struct dasd_device
+@@ -3976,8 +3939,7 @@ dasd_eckd_performance(struct dasd_device
  static int
  dasd_eckd_get_attrib(struct dasd_device *device, void __user *argp)
  {
@@ -788,7 +788,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	struct attrib_data_t attrib = private->attrib;
  	int rc;
  
-@@ -4488,8 +4453,7 @@ dasd_eckd_get_attrib(struct dasd_device
+@@ -4001,8 +3963,7 @@ dasd_eckd_get_attrib(struct dasd_device
  static int
  dasd_eckd_set_attrib(struct dasd_device *device, void __user *argp)
  {
@@ -798,7 +798,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	struct attrib_data_t attrib;
  
  	if (!capable(CAP_SYS_ADMIN))
-@@ -4977,15 +4941,13 @@ static int dasd_eckd_pm_freeze(struct da
+@@ -4465,15 +4426,13 @@ static int dasd_eckd_pm_freeze(struct da
  
  static int dasd_eckd_restore_device(struct dasd_device *device)
  {
@@ -815,7 +815,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	/* Read Configuration Data */
  	rc = dasd_eckd_read_conf(device);
  	if (rc) {
-@@ -5049,14 +5011,12 @@ out_err:
+@@ -4537,14 +4496,12 @@ out_err:
  
  static int dasd_eckd_reload_device(struct dasd_device *device)
  {
@@ -831,7 +831,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	spin_lock_irqsave(get_ccwdev_lock(device->cdev), flags);
  	old_base = private->uid.base_unit_addr;
  	spin_unlock_irqrestore(get_ccwdev_lock(device->cdev), flags);
-@@ -5103,12 +5063,10 @@ static int dasd_eckd_read_message_buffer
+@@ -4591,12 +4548,10 @@ static int dasd_eckd_read_message_buffer
  {
  	struct dasd_rssd_messages *message_buf;
  	struct dasd_psf_prssd_data *prssdp;
@@ -844,7 +844,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	cqr = dasd_smalloc_request(DASD_ECKD_MAGIC, 1 /* PSF */	+ 1 /* RSSD */,
  				   (sizeof(struct dasd_psf_prssd_data) +
  				    sizeof(struct dasd_rssd_messages)),
-@@ -5537,14 +5495,13 @@ static int dasd_eckd_cuir_remove_path(st
+@@ -4864,14 +4819,13 @@ static int dasd_eckd_cuir_quiesce(struct
  				  struct subchannel_id sch_id,
  				  struct dasd_cuir_message *cuir)
  {
@@ -860,7 +860,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  	/* active devices */
  	list_for_each_entry_safe(dev, n, &private->lcu->active_devices,
  				 alias_list) {
-@@ -5599,13 +5556,12 @@ out_err:
+@@ -4927,13 +4881,12 @@ static int dasd_eckd_cuir_resume(struct
  				 struct subchannel_id sch_id,
  				 struct dasd_cuir_message *cuir)
  {
@@ -970,7 +970,7 @@ Acked-by: John Jolly <jjolly@suse.com>
  }
 --- a/drivers/s390/block/dasd_int.h
 +++ b/drivers/s390/block/dasd_int.h
-@@ -476,7 +476,7 @@ struct dasd_device {
+@@ -445,7 +445,7 @@ struct dasd_device {
  	/* Device discipline stuff. */
  	struct dasd_discipline *discipline;
  	struct dasd_discipline *base_discipline;
