@@ -85,7 +85,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
   * Changes MIGRATE_ISOLATE to MIGRATE_MOVABLE.
 --- a/mm/memory_hotplug.c
 +++ b/mm/memory_hotplug.c
-@@ -1735,7 +1735,8 @@ static int __ref __offline_pages(unsigne
+@@ -1751,7 +1751,8 @@ static int __ref __offline_pages(unsigne
  
  	/* set above range as isolated */
  	ret = start_isolate_page_range(start_pfn, end_pfn,
@@ -97,7 +97,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  		goto failed_removal;
 --- a/mm/page_alloc.c
 +++ b/mm/page_alloc.c
-@@ -6987,8 +6987,7 @@ void *__init alloc_large_system_hash(con
+@@ -6958,8 +6958,7 @@ void *__init alloc_large_system_hash(con
   * expect this function should be exact.
   */
  bool has_unmovable_pages(struct zone *zone, struct page *page, int count,
@@ -106,8 +106,8 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 +			 int migratetype, int flags)
  {
  	unsigned long pfn, iter, found;
- 
-@@ -7047,7 +7046,7 @@ bool has_unmovable_pages(struct zone *zo
+ 	int mt;
+@@ -7019,7 +7018,7 @@ bool has_unmovable_pages(struct zone *zo
  		 * The HWPoisoned page may be not in buddy system, and
  		 * page_count() is not 0.
  		 */
@@ -116,7 +116,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  			continue;
  
  		if (!PageLRU(page))
-@@ -7070,7 +7069,8 @@ bool has_unmovable_pages(struct zone *zo
+@@ -7042,7 +7041,8 @@ bool has_unmovable_pages(struct zone *zo
  	}
  	return false;
  unmovable:
@@ -126,7 +126,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  	return true;
  }
  
-@@ -7094,7 +7094,7 @@ bool is_pageblock_removable_nolock(struc
+@@ -7066,7 +7066,7 @@ bool is_pageblock_removable_nolock(struc
  	if (!zone_spans_pfn(zone, pfn))
  		return false;
  
@@ -135,7 +135,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  }
  
  #if (defined(CONFIG_MEMORY_ISOLATION) && defined(CONFIG_COMPACTION)) || defined(CONFIG_CMA)
-@@ -7217,8 +7217,7 @@ int alloc_contig_range(unsigned long sta
+@@ -7189,8 +7189,7 @@ int alloc_contig_range(unsigned long sta
  	 */
  
  	ret = start_isolate_page_range(pfn_max_align_down(start),
