@@ -1,0 +1,40 @@
+From: Ley Foon Tan <lftan@altera.com>
+Date: Tue, 21 Jun 2016 16:53:12 +0800
+Subject: [PATCH] PCI: altera: Check link status before retrain link
+References: bnc#1012382
+Patch-mainline: 4.4.171
+Git-commit: c622032ebc538cb3869c312ae3ad235a99da84b6
+
+commit c622032ebc538cb3869c312ae3ad235a99da84b6 upstream.
+
+Check the link status before retraining.  If the link is not up, don't
+bother trying to retrain it.
+
+[bhelgaas: split code move to separate patch, changelog]
+Signed-off-by: Ley Foon Tan <lftan@altera.com>
+Signed-off-by: Bjorn Helgaas <bhelgaas@google.com>
+Cc: Claudius Heine <claudius.heine.ext@siemens.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/pci/host/pcie-altera.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/pci/host/pcie-altera.c b/drivers/pci/host/pcie-altera.c
+index a1e782263dec..b61025ee07de 100644
+--- a/drivers/pci/host/pcie-altera.c
++++ b/drivers/pci/host/pcie-altera.c
+@@ -100,6 +100,10 @@ static bool altera_pcie_link_is_up(struct altera_pcie *pcie)
+ static void altera_pcie_retrain(struct pci_dev *dev)
+ {
+ 	u16 linkcap, linkstat;
++	struct altera_pcie *pcie = dev->bus->sysdata;
++
++	if (!altera_pcie_link_is_up(pcie))
++		return;
+ 
+ 	/*
+ 	 * Set the retrain bit if the PCIe rootport support > 2.5GB/s, but
+-- 
+2.20.1
+

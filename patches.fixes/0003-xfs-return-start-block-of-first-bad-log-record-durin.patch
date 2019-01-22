@@ -30,7 +30,7 @@ Signed-off-by: Luis R. Rodriguez <mcgrof@suse.com>
 
 --- a/fs/xfs/xfs_log_recover.c
 +++ b/fs/xfs/xfs_log_recover.c
-@@ -4306,10 +4306,12 @@ xlog_do_recovery_pass(
+@@ -4245,10 +4245,12 @@ xlog_do_recovery_pass(
  	struct xlog		*log,
  	xfs_daddr_t		head_blk,
  	xfs_daddr_t		tail_blk,

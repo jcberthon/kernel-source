@@ -22,15 +22,15 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 
 --- a/fs/btrfs/ctree.h
 +++ b/fs/btrfs/ctree.h
-@@ -36,6 +36,7 @@
- #include <linux/btrfs_tree.h>
+@@ -37,6 +37,7 @@
  #include <linux/workqueue.h>
  #include <linux/security.h>
+ #include <linux/sizes.h>
 +#include <linux/dynamic_debug.h>
  #include "extent_io.h"
  #include "extent_map.h"
  #include "async-thread.h"
-@@ -3281,7 +3282,35 @@ void btrfs_printk(const struct btrfs_fs_
+@@ -3301,7 +3302,35 @@ void btrfs_printk(const struct btrfs_fs_
  	btrfs_printk_ratelimited(fs_info, KERN_NOTICE fmt, ##args)
  #define btrfs_info_rl(fs_info, fmt, args...) \
  	btrfs_printk_ratelimited(fs_info, KERN_INFO fmt, ##args)

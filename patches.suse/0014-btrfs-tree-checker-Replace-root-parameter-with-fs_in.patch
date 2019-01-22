@@ -22,14 +22,14 @@ To get the owner, we can only rely on btrfs_header_owner() now.
 Signed-off-by: Qu Wenruo <wqu@suse.com>
 Signed-off-by: David Sterba <dsterba@suse.com>
 ---
- fs/btrfs/disk-io.c      |    6 +-
- fs/btrfs/tree-checker.c |  140 +++++++++++++++++++++++++-----------------------
+ fs/btrfs/disk-io.c      |    6 -
+ fs/btrfs/tree-checker.c |  148 +++++++++++++++++++++++++-----------------------
  fs/btrfs/tree-checker.h |    7 +-
- 3 files changed, 81 insertions(+), 72 deletions(-)
+ 3 files changed, 85 insertions(+), 76 deletions(-)
 
 --- a/fs/btrfs/disk-io.c
 +++ b/fs/btrfs/disk-io.c
-@@ -669,12 +669,12 @@ static int btree_readpage_end_io_hook(st
+@@ -602,12 +602,12 @@ static int btree_readpage_end_io_hook(st
  	 * that we don't try and read the other copies of this block, just
  	 * return -EIO.
  	 */
@@ -44,7 +44,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		ret = -EIO;
  
  	if (!ret)
-@@ -3974,7 +3974,7 @@ void btrfs_mark_buffer_dirty(struct exte
+@@ -3887,7 +3887,7 @@ void btrfs_mark_buffer_dirty(struct exte
  	 * So here we should only check item pointers, not item data.
  	 */
  	if (btrfs_header_level(buf) == 0 &&
@@ -55,16 +55,16 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	}
 --- a/fs/btrfs/tree-checker.c
 +++ b/fs/btrfs/tree-checker.c
-@@ -53,7 +53,7 @@
+@@ -54,7 +54,7 @@
   * Allows callers to customize the output.
   */
  __printf(4, 5)
 -static void generic_err(const struct btrfs_root *root,
 +static void generic_err(const struct btrfs_fs_info *fs_info,
- 			struct extent_buffer *eb, int slot,
+ 			const struct extent_buffer *eb, int slot,
  			const char *fmt, ...)
  {
-@@ -65,10 +65,10 @@ static void generic_err(const struct btr
+@@ -66,10 +66,10 @@ static void generic_err(const struct btr
  	vaf.fmt = fmt;
  	vaf.va = &args;
  
@@ -77,7 +77,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	va_end(args);
  }
  
-@@ -77,8 +77,8 @@ static void generic_err(const struct btr
+@@ -78,8 +78,8 @@ static void generic_err(const struct btr
   * offset has its own meaning.
   */
  __printf(4, 5)
@@ -88,7 +88,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			    const char *fmt, ...)
  {
  	struct btrfs_key key;
-@@ -91,10 +91,11 @@ static void file_extent_err(const struct
+@@ -92,10 +92,11 @@ static void file_extent_err(const struct
  	vaf.fmt = fmt;
  	vaf.va = &args;
  
@@ -103,7 +103,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	va_end(args);
  }
  
-@@ -102,26 +103,27 @@ static void file_extent_err(const struct
+@@ -103,26 +104,27 @@ static void file_extent_err(const struct
   * Return 0 if the btrfs_file_extent_##name is aligned to @alignment
   * Else return 1
   */
@@ -135,7 +135,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  "unaligned file_offset for file extent, have %llu should be aligned to %u",
  			key->offset, sectorsize);
  		return -EUCLEAN;
-@@ -130,7 +132,7 @@ static int check_extent_data_item(struct
+@@ -131,7 +133,7 @@ static int check_extent_data_item(struct
  	fi = btrfs_item_ptr(leaf, slot, struct btrfs_file_extent_item);
  
  	if (btrfs_file_extent_type(leaf, fi) > BTRFS_FILE_EXTENT_TYPES) {
@@ -144,7 +144,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		"invalid type for file extent, have %u expect range [0, %u]",
  			btrfs_file_extent_type(leaf, fi),
  			BTRFS_FILE_EXTENT_TYPES);
-@@ -142,14 +144,14 @@ static int check_extent_data_item(struct
+@@ -143,14 +145,14 @@ static int check_extent_data_item(struct
  	 * and must be caught in open_ctree().
  	 */
  	if (btrfs_file_extent_compression(leaf, fi) > BTRFS_COMPRESS_TYPES) {
@@ -161,7 +161,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			"invalid encryption for file extent, have %u expect 0",
  			btrfs_file_extent_encryption(leaf, fi));
  		return -EUCLEAN;
-@@ -157,7 +159,7 @@ static int check_extent_data_item(struct
+@@ -158,7 +160,7 @@ static int check_extent_data_item(struct
  	if (btrfs_file_extent_type(leaf, fi) == BTRFS_FILE_EXTENT_INLINE) {
  		/* Inline extent must have 0 as key offset */
  		if (key->offset) {
@@ -170,7 +170,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		"invalid file_offset for inline file extent, have %llu expect 0",
  				key->offset);
  			return -EUCLEAN;
-@@ -171,7 +173,7 @@ static int check_extent_data_item(struct
+@@ -172,7 +174,7 @@ static int check_extent_data_item(struct
  		/* Uncompressed inline extent size must match item size */
  		if (item_size != BTRFS_FILE_EXTENT_INLINE_DATA_START +
  		    btrfs_file_extent_ram_bytes(leaf, fi)) {
@@ -179,7 +179,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	"invalid ram_bytes for uncompressed inline extent, have %u expect %llu",
  				item_size, BTRFS_FILE_EXTENT_INLINE_DATA_START +
  				btrfs_file_extent_ram_bytes(leaf, fi));
-@@ -182,40 +184,42 @@ static int check_extent_data_item(struct
+@@ -183,40 +185,42 @@ static int check_extent_data_item(struct
  
  	/* Regular or preallocated extent has fixed item size */
  	if (item_size != sizeof(*fi)) {
@@ -234,7 +234,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	"unaligned item size for csum item, have %u should be aligned to %u",
  			btrfs_item_size_nr(leaf, slot), csumsize);
  		return -EUCLEAN;
-@@ -228,8 +232,8 @@ static int check_csum_item(struct btrfs_
+@@ -229,8 +233,8 @@ static int check_csum_item(struct btrfs_
   * which represents inode number
   */
  __printf(4, 5)
@@ -245,7 +245,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			 const char *fmt, ...)
  {
  	struct btrfs_key key;
-@@ -242,17 +246,19 @@ static void dir_item_err(const struct bt
+@@ -243,17 +247,19 @@ static void dir_item_err(const struct bt
  	vaf.fmt = fmt;
  	vaf.va = &args;
  
@@ -338,7 +338,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		"dir item data crosses item boundary, have %u boundary %u",
  				cur + total_size, item_size);
  			return -EUCLEAN;
-@@ -346,7 +352,7 @@ static int check_dir_item(struct btrfs_r
+@@ -348,7 +354,7 @@ static int check_dir_item(struct btrfs_r
  					(unsigned long)(di + 1), name_len);
  			name_hash = btrfs_name_hash(namebuf, name_len);
  			if (key->offset != name_hash) {
@@ -347,7 +347,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		"name hash mismatch with key, have 0x%016x expect 0x%016llx",
  					name_hash, key->offset);
  				return -EUCLEAN;
-@@ -361,7 +367,7 @@ static int check_dir_item(struct btrfs_r
+@@ -459,7 +465,7 @@ static int check_block_group_item(struct
  /*
   * Common point to switch the item-specific validation.
   */
@@ -356,7 +356,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			   struct extent_buffer *leaf,
  			   struct btrfs_key *key, int slot)
  {
-@@ -369,27 +375,27 @@ static int check_leaf_item(struct btrfs_
+@@ -467,35 +473,35 @@ static int check_leaf_item(struct btrfs_
  
  	switch (key->type) {
  	case BTRFS_EXTENT_DATA_KEY:
@@ -372,6 +372,10 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	case BTRFS_XATTR_ITEM_KEY:
 -		ret = check_dir_item(root, leaf, key, slot);
 +		ret = check_dir_item(fs_info, leaf, key, slot);
+ 		break;
+ 	case BTRFS_BLOCK_GROUP_ITEM_KEY:
+-		ret = check_block_group_item(root->fs_info, leaf, key, slot);
++		ret = check_block_group_item(fs_info, leaf, key, slot);
  		break;
  	}
  	return ret;
@@ -389,7 +393,22 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	u32 nritems = btrfs_header_nritems(leaf);
  	int slot;
  
-@@ -419,7 +425,7 @@ static int check_leaf(struct btrfs_root
+ 	if (btrfs_header_level(leaf) != 0) {
+-		generic_err(root, leaf, 0,
++		generic_err(fs_info, leaf, 0,
+ 			"invalid level for leaf, have %d expect 0",
+ 			btrfs_header_level(leaf));
+ 		return -EUCLEAN;
+@@ -520,7 +526,7 @@ static int check_leaf(struct btrfs_root
+ 		    owner == BTRFS_DEV_TREE_OBJECTID ||
+ 		    owner == BTRFS_FS_TREE_OBJECTID ||
+ 		    owner == BTRFS_DATA_RELOC_TREE_OBJECTID) {
+-			generic_err(root, leaf, 0,
++			generic_err(fs_info, leaf, 0,
+ 			"invalid root, root %llu must never be empty",
+ 				    owner);
+ 			return -EUCLEAN;
+@@ -540,7 +546,7 @@ static int check_leaf(struct btrfs_root
  			eb = btrfs_root_node(check_root);
  			/* if leaf is the root, then it's fine */
  			if (leaf != eb) {
@@ -398,7 +417,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		"invalid nritems, have %u should not be 0 for non-root leaf",
  					nritems);
  				free_extent_buffer(eb);
-@@ -452,7 +458,7 @@ static int check_leaf(struct btrfs_root
+@@ -573,7 +579,7 @@ static int check_leaf(struct btrfs_root
  
  		/* Make sure the keys are in the right order */
  		if (btrfs_comp_cpu_keys(&prev_key, &key) >= 0) {
@@ -407,7 +426,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	"bad key order, prev (%llu %u %llu) current (%llu %u %llu)",
  				prev_key.objectid, prev_key.type,
  				prev_key.offset, key.objectid, key.type,
-@@ -471,7 +477,7 @@ static int check_leaf(struct btrfs_root
+@@ -592,7 +598,7 @@ static int check_leaf(struct btrfs_root
  			item_end_expected = btrfs_item_offset_nr(leaf,
  								 slot - 1);
  		if (btrfs_item_end_nr(leaf, slot) != item_end_expected) {
@@ -416,7 +435,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  				"unexpected item end, have %u expect %u",
  				btrfs_item_end_nr(leaf, slot),
  				item_end_expected);
-@@ -485,7 +491,7 @@ static int check_leaf(struct btrfs_root
+@@ -606,7 +612,7 @@ static int check_leaf(struct btrfs_root
  		 */
  		if (btrfs_item_end_nr(leaf, slot) >
  		    BTRFS_LEAF_DATA_SIZE(root)) {
@@ -425,7 +444,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			"slot end outside of leaf, have %u expect range [0, %u]",
  				btrfs_item_end_nr(leaf, slot),
  				BTRFS_LEAF_DATA_SIZE(root));
-@@ -495,7 +501,7 @@ static int check_leaf(struct btrfs_root
+@@ -616,7 +622,7 @@ static int check_leaf(struct btrfs_root
  		/* Also check if the item pointer overlaps with btrfs item. */
  		if (btrfs_item_nr_offset(slot) + sizeof(struct btrfs_item) >
  		    btrfs_item_ptr_offset(leaf, slot)) {
@@ -434,7 +453,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  		"slot overlaps with its data, item end %lu data start %lu",
  				btrfs_item_nr_offset(slot) +
  				sizeof(struct btrfs_item),
-@@ -508,7 +514,7 @@ static int check_leaf(struct btrfs_root
+@@ -629,7 +635,7 @@ static int check_leaf(struct btrfs_root
  			 * Check if the item size and content meet other
  			 * criteria
  			 */
@@ -443,7 +462,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			if (ret < 0)
  				return ret;
  		}
-@@ -521,29 +527,31 @@ static int check_leaf(struct btrfs_root
+@@ -642,36 +648,38 @@ static int check_leaf(struct btrfs_root
  	return 0;
  }
  
@@ -470,9 +489,17 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  	struct btrfs_key key, next_key;
 +	struct btrfs_root *root = fs_info->tree_root;
  	int slot;
+ 	int level = btrfs_header_level(node);
  	u64 bytenr;
  	int ret = 0;
  
+ 	if (level <= 0 || level >= BTRFS_MAX_LEVEL) {
+-		generic_err(root, node, 0,
++		generic_err(fs_info, node, 0,
+ 			"invalid level for node, have %d expect [1, %d]",
+ 			level, BTRFS_MAX_LEVEL - 1);
+ 		return -EUCLEAN;
+ 	}
  	if (nr == 0 || nr > BTRFS_NODEPTRS_PER_BLOCK(root)) {
 -		btrfs_crit(root->fs_info,
 +		btrfs_crit(fs_info,
@@ -482,7 +509,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			   nr == 0 ? "small" : "large", nr,
  			   BTRFS_NODEPTRS_PER_BLOCK(root));
  		return -EUCLEAN;
-@@ -555,13 +563,13 @@ int btrfs_check_node(struct btrfs_root *
+@@ -683,13 +691,13 @@ int btrfs_check_node(struct btrfs_root *
  		btrfs_node_key_to_cpu(node, &next_key, slot + 1);
  
  		if (!bytenr) {
@@ -498,7 +525,7 @@ Signed-off-by: David Sterba <dsterba@suse.com>
  			"unaligned pointer, have %llu should be aligned to %u",
  				bytenr, root->sectorsize);
  			ret = -EUCLEAN;
-@@ -569,7 +577,7 @@ int btrfs_check_node(struct btrfs_root *
+@@ -697,7 +705,7 @@ int btrfs_check_node(struct btrfs_root *
  		}
  
  		if (btrfs_comp_cpu_keys(&key, &next_key) >= 0) {

@@ -1,0 +1,47 @@
+From: Ley Foon Tan <lftan@altera.com>
+Date: Wed, 2 Mar 2016 17:43:07 +0800
+Subject: [PATCH] PCI: altera: Fix altera_pcie_link_is_up()
+References: bnc#1012382
+Patch-mainline: 4.4.171
+Git-commit: eff31f4002c4e25b9b8c39d0a3a551c6c64c77e8
+
+commit eff31f4002c4e25b9b8c39d0a3a551c6c64c77e8 upstream.
+
+Originally altera_pcie_link_is_up() decided the link was up if any of the
+low four bits of the LTSSM register were set.  But the link is only up if
+the LTSSM state is L0, so check for that exact value.
+
+[bhelgaas: changelog]
+Signed-off-by: Ley Foon Tan <lftan@altera.com>
+Signed-off-by: Bjorn Helgaas <bhelgaas@google.com>
+Cc: Claudius Heine <claudius.heine.ext@siemens.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/pci/host/pcie-altera.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/pci/host/pcie-altera.c b/drivers/pci/host/pcie-altera.c
+index 99da549d5d06..dbac6fb3f0bd 100644
+--- a/drivers/pci/host/pcie-altera.c
++++ b/drivers/pci/host/pcie-altera.c
+@@ -40,6 +40,7 @@
+ #define P2A_INT_ENABLE			0x3070
+ #define P2A_INT_ENA_ALL			0xf
+ #define RP_LTSSM			0x3c64
++#define RP_LTSSM_MASK			0x1f
+ #define LTSSM_L0			0xf
+ 
+ /* TLP configuration type 0 and 1 */
+@@ -140,7 +141,7 @@ static void tlp_write_tx(struct altera_pcie *pcie,
+ 
+ static bool altera_pcie_link_is_up(struct altera_pcie *pcie)
+ {
+-	return !!(cra_readl(pcie, RP_LTSSM) & LTSSM_L0);
++	return !!((cra_readl(pcie, RP_LTSSM) & RP_LTSSM_MASK) == LTSSM_L0);
+ }
+ 
+ static bool altera_pcie_valid_config(struct altera_pcie *pcie,
+-- 
+2.20.1
+
