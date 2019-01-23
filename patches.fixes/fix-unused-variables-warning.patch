@@ -22,8 +22,8 @@ Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
 
 --- a/mm/page_alloc.c
 +++ b/mm/page_alloc.c
-@@ -6929,7 +6929,6 @@ bool has_unmovable_pages(struct zone *zo
- 			 bool skip_hwpoisoned_pages)
+@@ -6990,7 +6990,6 @@ bool has_unmovable_pages(struct zone *zo
+ 			 int migratetype, int flags)
  {
  	unsigned long pfn, iter, found;
 -	int mt;

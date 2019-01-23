@@ -1,0 +1,66 @@
+From dc94902bde1e158cd19c4deab208e5d6eb382a44 Mon Sep 17 00:00:00 2001
+From: Ondrej Kozina <okozina@redhat.com>
+Date: Fri, 12 Jan 2018 16:30:32 +0100
+Subject: [PATCH] dm crypt: wipe kernel key copy after IV initialization
+Git-commit: dc94902bde1e158cd19c4deab208e5d6eb382a44
+Patch-mainline: v4.15-rc9
+References: Git-fixes
+
+Loading key via kernel keyring service erases the internal
+key copy immediately after we pass it in crypto layer. This is
+wrong because IV is initialized later and we use wrong key
+for the initialization (instead of real key there's just zeroed
+block).
+
+The bug may cause data corruption if key is loaded via kernel keyring
+service first and later same crypt device is reactivated using exactly
+same key in hexbyte representation, or vice versa. The bug (and fix)
+affects only ciphers using following IVs: essiv, lmk and tcw.
+
+(Coly Li: remove the part the upgrade version from 1.18.0 to 1.18.1, and
+ keep version in 1.16.0, because we don't have all patches from
+ 1.16.0 to 1.18.1)
+
+Fixes: c538f6ec9f56 ("dm crypt: add ability to use keys from the kernel key retention service")
+Cc: stable@vger.kernel.org # 4.10+
+Signed-off-by: Ondrej Kozina <okozina@redhat.com>
+Reviewed-by: Milan Broz <gmazyland@gmail.com>
+Signed-off-by: Mike Snitzer <snitzer@redhat.com>
+Signed-off-by: Coly Li <colyli@suse.de>
+---
+ drivers/md/dm-crypt.c |   10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+--- a/drivers/md/dm-crypt.c
++++ b/drivers/md/dm-crypt.c
+@@ -2036,9 +2036,6 @@ static int crypt_set_keyring_key(struct
+ 
+ 	ret = crypt_setkey(cc);
+ 
+-	/* wipe the kernel key payload copy in each case */
+-	memset(cc->key, 0, cc->key_size * sizeof(u8));
+-
+ 	if (!ret) {
+ 		set_bit(DM_CRYPT_KEY_VALID, &cc->flags);
+ 		kzfree(cc->key_string);
+@@ -2498,6 +2495,10 @@ static int crypt_ctr_cipher(struct dm_ta
+ 		}
+ 	}
+ 
++	/* wipe the kernel key payload copy */
++	if (cc->key_string)
++		memset(cc->key, 0, cc->key_size * sizeof(u8));
++
+ 	return ret;
+ }
+ 
+@@ -2899,6 +2900,9 @@ static int crypt_message(struct dm_targe
+ 				return ret;
+ 			if (cc->iv_gen_ops && cc->iv_gen_ops->init)
+ 				ret = cc->iv_gen_ops->init(cc);
++			/* wipe the kernel key payload copy */
++			if (cc->key_string)
++				memset(cc->key, 0, cc->key_size * sizeof(u8));
+ 			return ret;
+ 		}
+ 		if (argc == 2 && !strcasecmp(argv[1], "wipe")) {
