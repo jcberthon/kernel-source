@@ -1,0 +1,78 @@
+From 302195c994736b7a2dc3d614293c9deda423c1e7 Mon Sep 17 00:00:00 2001
+From: Breno Leitao <leitao@debian.org>
+Date: Thu, 8 Nov 2018 15:12:42 -0200
+Subject: [PATCH] powerpc/xmon: Fix invocation inside lock region
+
+References: bsc#1122885
+Patch-mainline: v5.0-rc1
+Git-commit: 8d4a862276a9c30a269d368d324fb56529e6d5fd
+
+Currently xmon needs to get devtree_lock (through rtas_token()) during its
+invocation (at crash time). If there is a crash while devtree_lock is being
+held, then xmon tries to get the lock but spins forever and never get into
+the interactive debugger, as in the following case:
+
+	int *ptr = NULL;
+	raw_spin_lock_irqsave(&devtree_lock, flags);
+	*ptr = 0xdeadbeef;
+
+This patch avoids calling rtas_token(), thus trying to get the same lock,
+at crash time. This new mechanism proposes getting the token at
+initialization time (xmon_init()) and just consuming it at crash time.
+
+This would allow xmon to be possible invoked independent of devtree_lock
+being held or not.
+
+Signed-off-by: Breno Leitao <leitao@debian.org>
+Reviewed-by: Thiago Jung Bauermann <bauerman@linux.ibm.com>
+Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/xmon/xmon.c | 16 +++++++++++++---
+ 1 file changed, 13 insertions(+), 3 deletions(-)
+
+diff --git a/arch/powerpc/xmon/xmon.c b/arch/powerpc/xmon/xmon.c
+index 3faa746afc9d..b4e2d5015362 100644
+--- a/arch/powerpc/xmon/xmon.c
++++ b/arch/powerpc/xmon/xmon.c
+@@ -70,6 +70,9 @@ static int xmon_gate;
+ #define xmon_owner 0
+ #endif /* CONFIG_SMP */
+ 
++#ifdef CONFIG_PPC_PSERIES
++static int set_indicator_token = RTAS_UNKNOWN_SERVICE;
++#endif
+ static unsigned long in_xmon __read_mostly = 0;
+ 
+ static unsigned long adrs;
+@@ -330,10 +333,9 @@ static inline void disable_surveillance(void)
+ 	 * If we did try to take rtas.lock there would be a
+ 	 * real possibility of deadlock.
+ 	 */
+-	args.token = rtas_token("set-indicator");
+-	if (args.token == RTAS_UNKNOWN_SERVICE)
++	if (set_indicator_token == RTAS_UNKNOWN_SERVICE)
+ 		return;
+-	args.token = cpu_to_be32(args.token);
++	args.token = cpu_to_be32(set_indicator_token);
+ 	args.nargs = cpu_to_be32(3);
+ 	args.nret = cpu_to_be32(1);
+ 	args.rets = &args.args[3];
+@@ -3084,6 +3086,14 @@ static void xmon_init(int enable)
+ 		__debugger_iabr_match = xmon_iabr_match;
+ 		__debugger_break_match = xmon_break_match;
+ 		__debugger_fault_handler = xmon_fault_handler;
++
++#ifdef CONFIG_PPC_PSERIES
++		/*
++		 * Get the token here to avoid trying to get a lock
++		 * during the crash, causing a deadlock.
++		 */
++		set_indicator_token = rtas_token("set-indicator");
++#endif
+ 	} else {
+ 		__debugger = NULL;
+ 		__debugger_ipi = NULL;
+-- 
+2.19.2
+
