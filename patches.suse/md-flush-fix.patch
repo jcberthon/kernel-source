@@ -1,0 +1,92 @@
+From: NeilBrown <neilb@suse.com>
+Subject: md: batch flush requests.
+References: bsc#1119680
+Patch-mainline: never - different approach was taken.
+
+Currently, if many flush requests are submitted to an md device is quick
+succession, they are serialized and can take a long to process them all.
+We don't really need to call flush all those times - a single flush call
+can satisfy all requests submitted before it started.
+So keep track of when the current flush started, and when it finished,
+allow any pending flush that was requested before the flush started,
+to complete without waiting any more.
+
+Note that upstream has a completely different fix for this issue, but
+I believe it can deadlock under memory pressure.
+
+Signed-off-by: NeilBrown <neilb@suse.com>
+Acked-by: NeilBrown <neilb@suse.com>
+
+---
+ drivers/md/md.c |   27 +++++++++++++++++++++++----
+ drivers/md/md.h |    5 +++++
+ 2 files changed, 28 insertions(+), 4 deletions(-)
+
+--- a/drivers/md/md.c
++++ b/drivers/md/md.c
+@@ -404,6 +404,7 @@ static void submit_flushes(struct work_s
+ 	struct mddev *mddev = container_of(ws, struct mddev, flush_work);
+ 	struct md_rdev *rdev;
+ 
++	mddev->start_flush = ktime_get_boottime();
+ 	INIT_WORK(&mddev->flush_work, md_submit_flush_data);
+ 	atomic_set(&mddev->flush_pending, 1);
+ 	rcu_read_lock();
+@@ -446,21 +447,39 @@ static void md_submit_flush_data(struct
+ 		mddev->pers->make_request(mddev, bio);
+ 	}
+ 
++	mddev->last_flush = mddev->start_flush;
+ 	mddev->flush_bio = NULL;
+ 	wake_up(&mddev->sb_wait);
+ }
+ 
+ void md_flush_request(struct mddev *mddev, struct bio *bio)
+ {
++	ktime_t start = ktime_get_boottime();
+ 	spin_lock_irq(&mddev->lock);
+ 	wait_event_lock_irq(mddev->sb_wait,
+-			    !mddev->flush_bio,
++			    !mddev->flush_bio ||
++			    ktime_after(mddev->last_flush, start),
+ 			    mddev->lock);
+-	mddev->flush_bio = bio;
++	if (!ktime_after(mddev->last_flush, start)) {
++		WARN_ON(mddev->flush_bio);
++		mddev->flush_bio = bio;
++		bio = NULL;
++	}
+ 	spin_unlock_irq(&mddev->lock);
+ 
+-	INIT_WORK(&mddev->flush_work, submit_flushes);
+-	queue_work(md_wq, &mddev->flush_work);
++	if (!bio) {
++		INIT_WORK(&mddev->flush_work, submit_flushes);
++		queue_work(md_wq, &mddev->flush_work);
++	} else {
++		/* flush was performed for some other bio while we waited. */
++		if (bio->bi_iter.bi_size == 0)
++			/* an empty barrier - all done */
++			bio_endio(bio);
++		else {
++			bio->bi_opf &= ~REQ_PREFLUSH;
++			mddev->pers->make_request(mddev, bio);
++		}
++	}
+ }
+ EXPORT_SYMBOL(md_flush_request);
+ 
+--- a/drivers/md/md.h
++++ b/drivers/md/md.h
+@@ -458,6 +458,11 @@ struct mddev {
+ 	void (*sync_super)(struct mddev *mddev, struct md_rdev *rdev);
+ 	struct md_cluster_info		*cluster_info;
+ 	unsigned int			good_device_nr;	/* good device num within cluster raid */
++#ifndef __GENKSYMS__
++	ktime_t start_flush, last_flush; /* last_flush is when the last completed
++					  * flush was started.
++					  */
++#endif
+ };
+ 
+ enum recovery_flags {
