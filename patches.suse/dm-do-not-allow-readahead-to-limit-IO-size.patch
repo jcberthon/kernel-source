@@ -1,0 +1,37 @@
+From 588260c0175b7e7bd0c47d5ea154d9febed205c1 Mon Sep 17 00:00:00 2001
+From: Jaegeuk Kim <jaegeuk@kernel.org>
+Date: Tue, 18 Dec 2018 09:25:37 -0800
+Subject: [PATCH] dm: do not allow readahead to limit IO size
+
+Patch-mainline: v5.0
+Git-commit: c6d6e9b0f6b4201c77f2cea3964dd122697e3543
+References: git fixes (readahead)
+
+Update DM to set the bdi's io_pages.  This fixes reads to be capped at
+the device's max request size (even if user's read IO exceeds the
+established readahead setting).
+
+Fixes: 9491ae4a ("mm: don't cap request size based on read-ahead setting")
+Cc: stable@vger.kernel.org
+Reviewed-by: Jens Axboe <axboe@kernel.dk>
+Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+Signed-off-by: Mike Snitzer <snitzer@redhat.com>
+Signed-off-by: Mel Gorman <mgorman@suse.de>
+---
+ drivers/md/dm-table.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/md/dm-table.c b/drivers/md/dm-table.c
+index db9b17cca4b7..300cf54193da 100644
+--- a/drivers/md/dm-table.c
++++ b/drivers/md/dm-table.c
+@@ -1623,6 +1623,9 @@ void dm_table_set_restrictions(struct dm_table *t, struct request_queue *q,
+ 	if (blk_queue_add_random(q) && dm_table_all_devices_attribute(t, device_is_not_random))
+ 		queue_flag_clear_unlocked(QUEUE_FLAG_ADD_RANDOM, q);
+ 
++	/* Allow reads to exceed readahead limits */
++	q->backing_dev_info->io_pages = limits->max_sectors >> (PAGE_SHIFT - 9);
++
+ 	/*
+ 	 * QUEUE_FLAG_STACKABLE must be set after all queue settings are
+ 	 * visible to other CPUs because, once the flag is set, incoming bios
