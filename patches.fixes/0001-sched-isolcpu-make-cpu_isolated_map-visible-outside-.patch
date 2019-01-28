@@ -1,0 +1,74 @@
+From 687f1bc58c808a877855d9557e755217ac4a7eba Mon Sep 17 00:00:00 2001
+From: Rik van Riel <riel@redhat.com>
+Date: Mon, 9 Mar 2015 12:12:07 -0400
+Subject: [PATCH 1/2] sched, isolcpu: make cpu_isolated_map visible outside
+ scheduler
+References: bsc#1119255
+Patch-mainline: v4.1-rc1
+Git-commit: 3fa0818b3c85e9bb55e3ac96c9523b87e44eab9e
+
+Needed by the next patch. Also makes cpu_isolated_map present
+when compiled without SMP and/or with CONFIG_NR_CPUS=1, like
+the other cpu masks.
+
+At some point we may want to clean things up so cpumasks do
+not exist in UP kernels. Maybe something for the CONFIG_TINY
+crowd.
+
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Clark Williams <williams@redhat.com>
+Cc: Li Zefan <lizefan@huawei.com>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: Luiz Capitulino <lcapitulino@redhat.com>
+Cc: David Rientjes <rientjes@google.com>
+Cc: Mike Galbraith <umgwanakikbuti@gmail.com>
+Cc: cgroups@vger.kernel.org
+Signed-off-by: Rik van Riel <riel@redhat.com>
+Acked-by: Zefan Li <lizefan@huawei.com>
+Signed-off-by: Tejun Heo <tj@kernel.org>
+Signed-off-by: Michal Koutný <mkoutny@suse.com>
+---
+ include/linux/sched.h | 2 ++
+ kernel/sched.c        | 6 +++---
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/include/linux/sched.h b/include/linux/sched.h
+index 5d8cbd2509d0..45c8ca0cfebf 100644
+--- a/include/linux/sched.h
++++ b/include/linux/sched.h
+@@ -273,6 +273,8 @@ extern asmlinkage void schedule_tail(struct task_struct *prev);
+ extern void init_idle(struct task_struct *idle, int cpu);
+ extern void init_idle_bootup_task(struct task_struct *idle);
+ 
++extern cpumask_var_t cpu_isolated_map;
++
+ extern int runqueue_is_locked(int cpu);
+ 
+ extern cpumask_var_t nohz_cpu_mask;
+diff --git a/kernel/sched.c b/kernel/sched.c
+index 85283b15a24b..fecfb661323e 100644
+--- a/kernel/sched.c
++++ b/kernel/sched.c
+@@ -993,6 +993,9 @@ static __read_mostly int scheduler_running;
+  */
+ int sysctl_sched_rt_runtime = 950000;
+ 
++/* cpus with isolated domains */
++cpumask_var_t cpu_isolated_map;
++
+ /*
+  * Bootline option to disable sched_rt_runtime.  Otherwise very large
+  * systems livelock during boot.
+@@ -7461,9 +7464,6 @@ cpu_attach_domain(struct sched_domain *sd, struct root_domain *rd, int cpu)
+ 	update_top_cache_domain(cpu);
+ }
+ 
+-/* cpus with isolated domains */
+-static cpumask_var_t cpu_isolated_map;
+-
+ /* Setup the mask of cpus configured for isolated domains */
+ static int __init isolated_cpu_setup(char *str)
+ {
+-- 
+2.16.4
+
