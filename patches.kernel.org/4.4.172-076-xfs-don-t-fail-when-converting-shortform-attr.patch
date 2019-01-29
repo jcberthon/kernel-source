@@ -2,9 +2,11 @@ From: "Darrick J. Wong" <darrick.wong@oracle.com>
 Date: Tue, 17 Apr 2018 19:10:15 -0700
 Subject: [PATCH] xfs: don't fail when converting shortform attr to long form
  during ATTR_REPLACE
-Patch-mainline: v4.17-rc4
+Patch-mainline: 4.4.172
+References: CVE-2018-18690 bnc#1012382 bsc#1105025
 Git-commit: 7b38460dc8e4eafba06c78f8e37099d3b34d473c
-References: bsc#1105025, CVE-2018-18690
+
+commit 7b38460dc8e4eafba06c78f8e37099d3b34d473c upstream.
 
 Kanda Motohiro reported that expanding a tiny xattr into a large xattr
 fails on XFS because we remove the tiny xattr from a shortform fork and
@@ -20,17 +22,18 @@ Reported-by: kanda.motohiro@gmail.com
 Reviewed-by: Dave Chinner <dchinner@redhat.com>
 Reviewed-by: Christoph Hellwig <hch@lst.de>
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-Acked-by: Anthony Iliopoulos <ailiopoulos@suse.com>
-
+Cc: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  fs/xfs/libxfs/xfs_attr.c | 9 ++++++++-
  1 file changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/fs/xfs/libxfs/xfs_attr.c b/fs/xfs/libxfs/xfs_attr.c
-index ce4a34a2751d..35a124400d60 100644
+index fb9636cc927c..5d8d12746e6e 100644
 --- a/fs/xfs/libxfs/xfs_attr.c
 +++ b/fs/xfs/libxfs/xfs_attr.c
-@@ -511,7 +511,14 @@ xfs_attr_shortform_addname(xfs_da_args_t *args)
+@@ -528,7 +528,14 @@ xfs_attr_shortform_addname(xfs_da_args_t *args)
  		if (args->flags & ATTR_CREATE)
  			return retval;
  		retval = xfs_attr_shortform_remove(args);
@@ -47,5 +50,5 @@ index ce4a34a2751d..35a124400d60 100644
  
  	if (args->namelen >= XFS_ATTR_SF_ENTSIZE_MAX ||
 -- 
-2.16.3
+2.20.1
 

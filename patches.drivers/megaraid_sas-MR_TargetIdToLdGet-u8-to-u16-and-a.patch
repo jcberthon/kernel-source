@@ -39,16 +39,14 @@ Reviewed-by: Tomas Henzl <thenzl@redhat.com>
 Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 Signed-off-by: Hannes Reinecke <hare@suse.de>
 ---
- drivers/scsi/megaraid/megaraid_sas.h        |  2 +-
- drivers/scsi/megaraid/megaraid_sas_fp.c     |  5 +++--
- drivers/scsi/megaraid/megaraid_sas_fusion.c | 25 ++++++++++++++-----------
+ drivers/scsi/megaraid/megaraid_sas.h        |    2 +-
+ drivers/scsi/megaraid/megaraid_sas_fp.c     |    5 +++--
+ drivers/scsi/megaraid/megaraid_sas_fusion.c |   25 ++++++++++++++-----------
  3 files changed, 18 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/scsi/megaraid/megaraid_sas.h b/drivers/scsi/megaraid/megaraid_sas.h
-index 0a20fff..efc01a3 100644
 --- a/drivers/scsi/megaraid/megaraid_sas.h
 +++ b/drivers/scsi/megaraid/megaraid_sas.h
-@@ -2448,7 +2448,7 @@ MR_BuildRaidContext(struct megasas_instance *instance,
+@@ -2448,7 +2448,7 @@ MR_BuildRaidContext(struct megasas_insta
  		    struct IO_REQUEST_INFO *io_info,
  		    struct RAID_CONTEXT *pRAID_Context,
  		    struct MR_DRV_RAID_MAP_ALL *map, u8 **raidLUN);
@@ -57,11 +55,9 @@ index 0a20fff..efc01a3 100644
  struct MR_LD_RAID *MR_LdRaidGet(u32 ld, struct MR_DRV_RAID_MAP_ALL *map);
  u16 MR_ArPdGet(u32 ar, u32 arm, struct MR_DRV_RAID_MAP_ALL *map);
  u16 MR_LdSpanArrayGet(u32 ld, u32 span, struct MR_DRV_RAID_MAP_ALL *map);
-diff --git a/drivers/scsi/megaraid/megaraid_sas_fp.c b/drivers/scsi/megaraid/megaraid_sas_fp.c
-index a0b0e68..9d5d485 100644
 --- a/drivers/scsi/megaraid/megaraid_sas_fp.c
 +++ b/drivers/scsi/megaraid/megaraid_sas_fp.c
-@@ -165,7 +165,7 @@ u16 MR_GetLDTgtId(u32 ld, struct MR_DRV_RAID_MAP_ALL *map)
+@@ -165,7 +165,7 @@ u16 MR_GetLDTgtId(u32 ld, struct MR_DRV_
  	return le16_to_cpu(map->raidMap.ldSpanMap[ld].ldRaid.targetId);
  }
  
@@ -70,7 +66,7 @@ index a0b0e68..9d5d485 100644
  {
  	return map->raidMap.ldTgtIdToLd[ldTgtId];
  }
-@@ -1151,7 +1151,7 @@ MR_BuildRaidContext(struct megasas_instance *instance,
+@@ -1151,7 +1151,7 @@ MR_BuildRaidContext(struct megasas_insta
  {
  	struct fusion_context *fusion;
  	struct MR_LD_RAID  *raid;
@@ -79,7 +75,7 @@ index a0b0e68..9d5d485 100644
  	u64         endLba, endStrip, endRow, start_row, start_strip;
  	u64         regStart;
  	u32         regSize;
-@@ -1163,6 +1163,7 @@ MR_BuildRaidContext(struct megasas_instance *instance,
+@@ -1163,6 +1163,7 @@ MR_BuildRaidContext(struct megasas_insta
  	u8	    retval = 0;
  	u8	    startlba_span = SPAN_INVALID;
  	u64 *pdBlock = &io_info->pdBlock;
@@ -87,11 +83,9 @@ index a0b0e68..9d5d485 100644
  
  	ldStartBlock = io_info->ldStartBlock;
  	numBlocks = io_info->numBlocks;
-diff --git a/drivers/scsi/megaraid/megaraid_sas_fusion.c b/drivers/scsi/megaraid/megaraid_sas_fusion.c
-index 9019b82..4aaf307 100644
 --- a/drivers/scsi/megaraid/megaraid_sas_fusion.c
 +++ b/drivers/scsi/megaraid/megaraid_sas_fusion.c
-@@ -1121,7 +1121,8 @@ megasas_sync_map_info(struct megasas_instance *instance)
+@@ -1121,7 +1121,8 @@ megasas_sync_map_info(struct megasas_ins
  	int i;
  	struct megasas_cmd *cmd;
  	struct megasas_dcmd_frame *dcmd;
@@ -101,7 +95,7 @@ index 9019b82..4aaf307 100644
  	struct fusion_context *fusion;
  	struct MR_LD_TARGET_SYNC *ci = NULL;
  	struct MR_DRV_RAID_MAP_ALL *map;
-@@ -1870,7 +1871,7 @@ megasas_set_pd_lba(struct MPI2_RAID_SCSI_IO_REQUEST *io_request, u8 cdb_len,
+@@ -1870,7 +1871,7 @@ megasas_set_pd_lba(struct MPI2_RAID_SCSI
  		   struct MR_DRV_RAID_MAP_ALL *local_map_ptr, u32 ref_tag)
  {
  	struct MR_LD_RAID *raid;
@@ -110,7 +104,7 @@ index 9019b82..4aaf307 100644
  	u64 start_blk = io_info->pdBlock;
  	u8 *cdb = io_request->CDB.CDB32;
  	u32 num_blocks = io_info->numBlocks;
-@@ -2303,10 +2304,11 @@ megasas_build_ldio_fusion(struct megasas_instance *instance,
+@@ -2303,10 +2304,11 @@ megasas_build_ldio_fusion(struct megasas
  
  	local_map_ptr = fusion->ld_drv_map[(instance->map_id & 1)];
  	ld = MR_TargetIdToLdGet(device_id, local_map_ptr);
@@ -125,7 +119,7 @@ index 9019b82..4aaf307 100644
  		io_request->RaidContext.raid_context.reg_lock_flags  = 0;
  		fp_possible = false;
  	} else {
-@@ -2478,12 +2480,12 @@ static void megasas_build_ld_nonrw_fusion(struct megasas_instance *instance,
+@@ -2478,12 +2480,12 @@ static void megasas_build_ld_nonrw_fusio
  {
  	u32 device_id;
  	struct MPI2_RAID_SCSI_IO_REQUEST *io_request;
@@ -140,9 +134,9 @@ index 9019b82..4aaf307 100644
  	struct MR_LD_RAID                  *raid;
  	struct RAID_CONTEXT                *pRAID_Context;
  	u8 fp_possible = 1;
-@@ -2506,10 +2508,11 @@ static void megasas_build_ld_nonrw_fusion(struct megasas_instance *instance,
+@@ -2506,10 +2508,11 @@ static void megasas_build_ld_nonrw_fusio
  		ld = MR_TargetIdToLdGet(device_id, local_map_ptr);
- 		if (ld >= instance->fw_supported_vd_count)
+ 		if (ld >= instance->fw_supported_vd_count - 1)
  			fp_possible = 0;
 -
 -		raid = MR_LdRaidGet(ld, local_map_ptr);
@@ -156,6 +150,3 @@ index 9019b82..4aaf307 100644
  	} else
  		fp_possible = 0;
  
--- 
-1.8.5.6
-

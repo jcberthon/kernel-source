@@ -18,18 +18,16 @@ Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: Catalin Marinas <catalin.marinas@arm.com>
 Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 ---
- arch/arm64/Kconfig              | 11 +++++++++++
- arch/arm64/Makefile             |  4 ++++
- arch/arm64/include/asm/elf.h    |  2 ++
- arch/arm64/kernel/head.S        | 32 ++++++++++++++++++++++++++++++++
- arch/arm64/kernel/vmlinux.lds.S | 16 ++++++++++++++++
+ arch/arm64/Kconfig              |   11 +++++++++++
+ arch/arm64/Makefile             |    4 ++++
+ arch/arm64/include/asm/elf.h    |    2 ++
+ arch/arm64/kernel/head.S        |   32 ++++++++++++++++++++++++++++++++
+ arch/arm64/kernel/vmlinux.lds.S |   16 ++++++++++++++++
  5 files changed, 65 insertions(+)
 
-diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 8864baf..7dfa8a0 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -801,6 +801,17 @@ config ARM64_MODULE_PLTS
+@@ -759,6 +759,17 @@ config ARM64_MODULE_PLTS
  	select ARM64_MODULE_CMODEL_LARGE
  	select HAVE_MOD_ARCH_SPECIFIC
  
@@ -47,11 +45,9 @@ index 8864baf..7dfa8a0 100644
  endmenu
  
  menu "Boot options"
-diff --git a/arch/arm64/Makefile b/arch/arm64/Makefile
-index 1be8e06..e4b05a2 100644
 --- a/arch/arm64/Makefile
 +++ b/arch/arm64/Makefile
-@@ -15,6 +15,10 @@ CPPFLAGS_vmlinux.lds = -DTEXT_OFFSET=$(TEXT_OFFSET)
+@@ -15,6 +15,10 @@ CPPFLAGS_vmlinux.lds = -DTEXT_OFFSET=$(T
  OBJCOPYFLAGS	:=-O binary -R .note -R .note.gnu.build-id -R .comment -S
  GZFLAGS		:=-9
  
@@ -62,8 +58,6 @@ index 1be8e06..e4b05a2 100644
  KBUILD_DEFCONFIG := defconfig
  
  # Check for binutils support for specific extensions
-diff --git a/arch/arm64/include/asm/elf.h b/arch/arm64/include/asm/elf.h
-index 1abe6eb..a55384f 100644
 --- a/arch/arm64/include/asm/elf.h
 +++ b/arch/arm64/include/asm/elf.h
 @@ -77,6 +77,8 @@
@@ -75,8 +69,6 @@ index 1abe6eb..a55384f 100644
  /*
   * These are used to set parameters in the core dumps.
   */
-diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index fcfb458..95c553f 100644
 --- a/arch/arm64/kernel/head.S
 +++ b/arch/arm64/kernel/head.S
 @@ -29,6 +29,7 @@
@@ -85,8 +77,8 @@ index fcfb458..95c553f 100644
  #include <asm/cputype.h>
 +#include <asm/elf.h>
  #include <asm/kernel-pgtable.h>
+ #include <asm/kvm_arm.h>
  #include <asm/memory.h>
- #include <asm/pgtable-hwdef.h>
 @@ -433,6 +434,37 @@ __mmap_switched:
  	bl	__pi_memset
  	dsb	ishst				// Make zero page visible to PTW
@@ -125,8 +117,6 @@ index fcfb458..95c553f 100644
  	adr_l	sp, initial_sp, x4
  	mov	x4, sp
  	and	x4, x4, #~(THREAD_SIZE - 1)
-diff --git a/arch/arm64/kernel/vmlinux.lds.S b/arch/arm64/kernel/vmlinux.lds.S
-index 2c0d265..126fa53 100644
 --- a/arch/arm64/kernel/vmlinux.lds.S
 +++ b/arch/arm64/kernel/vmlinux.lds.S
 @@ -87,6 +87,7 @@ SECTIONS
@@ -137,7 +127,7 @@ index 2c0d265..126fa53 100644
  	}
  
  	. = KIMAGE_VADDR + TEXT_OFFSET;
-@@ -151,6 +152,21 @@ SECTIONS
+@@ -149,6 +150,21 @@ SECTIONS
  	.altinstr_replacement : {
  		*(.altinstr_replacement)
  	}
@@ -159,6 +149,3 @@ index 2c0d265..126fa53 100644
  
  	. = ALIGN(PAGE_SIZE);
  	__init_end = .;
--- 
-2.11.0
-

@@ -1,0 +1,45 @@
+From: Jaegeuk Kim <jaegeuk@kernel.org>
+Date: Mon, 19 Sep 2016 18:13:54 -0700
+Subject: [PATCH] f2fs: put directory inodes before checkpoint in roll-forward
+ recovery
+References: bnc#1012382
+Patch-mainline: 4.4.172
+Git-commit: 9e1e6df412a28cdbbd2909de5c6189eda4a3383d
+
+commit 9e1e6df412a28cdbbd2909de5c6189eda4a3383d upstream.
+
+Before checkpoint, we'd be better drop any inodes.
+
+Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ fs/f2fs/recovery.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/fs/f2fs/recovery.c b/fs/f2fs/recovery.c
+index b59285f4736c..9b625ca19001 100644
+--- a/fs/f2fs/recovery.c
++++ b/fs/f2fs/recovery.c
+@@ -597,6 +597,9 @@ int recover_fsync_data(struct f2fs_sb_info *sbi, bool check_only)
+ 		set_ckpt_flags(sbi->ckpt, CP_ERROR_FLAG);
+ 	mutex_unlock(&sbi->cp_mutex);
+ 
++	/* let's drop all the directory inodes for clean checkpoint */
++	destroy_fsync_dnodes(&dir_list);
++
+ 	if (!err && need_writecp) {
+ 		struct cp_control cpc = {
+ 			.reason = CP_RECOVERY,
+@@ -604,7 +607,6 @@ int recover_fsync_data(struct f2fs_sb_info *sbi, bool check_only)
+ 		write_checkpoint(sbi, &cpc);
+ 	}
+ 
+-	destroy_fsync_dnodes(&dir_list);
+ 	kmem_cache_destroy(fsync_entry_slab);
+ 	return ret ? ret: err;
+ }
+-- 
+2.20.1
+

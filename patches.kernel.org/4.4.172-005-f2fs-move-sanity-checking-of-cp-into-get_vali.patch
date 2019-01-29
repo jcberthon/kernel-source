@@ -1,0 +1,95 @@
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Date: Wed, 17 Feb 2016 11:26:32 +0800
+Subject: [PATCH] f2fs: move sanity checking of cp into get_valid_checkpoint
+References: bnc#1012382
+Patch-mainline: 4.4.172
+Git-commit: 984ec63c5a82a07ad4490ecc69bebacd23f6fa64
+
+commit 984ec63c5a82a07ad4490ecc69bebacd23f6fa64 upstream.
+
+>From the function name of get_valid_checkpoint, it seems to return
+the valid cp or NULL for caller to check. If no valid one is found,
+f2fs_fill_super will print the err log. But if get_valid_checkpoint
+get one valid(the return value indicate that it's valid, however actually
+it is invalid after sanity checking), then print another similar err
+log. That seems strange. Let's keep sanity checking inside the procedure
+of geting valid cp. Another improvement we gained from this move is
+that even the large volume is supported, we check the cp in advanced
+to skip the following procedure if failing the sanity checking.
+
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ fs/f2fs/checkpoint.c |  4 ++++
+ fs/f2fs/f2fs.h       |  1 +
+ fs/f2fs/super.c      | 10 +---------
+ 3 files changed, 6 insertions(+), 9 deletions(-)
+
+diff --git a/fs/f2fs/checkpoint.c b/fs/f2fs/checkpoint.c
+index f661d80474be..a6221f4fd581 100644
+--- a/fs/f2fs/checkpoint.c
++++ b/fs/f2fs/checkpoint.c
+@@ -696,6 +696,10 @@ int get_valid_checkpoint(struct f2fs_sb_info *sbi)
+ 	cp_block = (struct f2fs_checkpoint *)page_address(cur_page);
+ 	memcpy(sbi->ckpt, cp_block, blk_size);
+ 
++	/* Sanity checking of checkpoint */
++	if (sanity_check_ckpt(sbi))
++		goto fail_no_cp;
++
+ 	if (cp_blks <= 1)
+ 		goto done;
+ 
+diff --git a/fs/f2fs/f2fs.h b/fs/f2fs/f2fs.h
+index 2871576fbca4..b9b9370830b4 100644
+--- a/fs/f2fs/f2fs.h
++++ b/fs/f2fs/f2fs.h
+@@ -1718,6 +1718,7 @@ int f2fs_commit_super(struct f2fs_sb_info *, bool);
+ int f2fs_sync_fs(struct super_block *, int);
+ extern __printf(3, 4)
+ void f2fs_msg(struct super_block *, const char *, const char *, ...);
++int sanity_check_ckpt(struct f2fs_sb_info *sbi);
+ 
+ /*
+  * hash.c
+diff --git a/fs/f2fs/super.c b/fs/f2fs/super.c
+index 2ffc53d0c9c7..88a769d719ca 100644
+--- a/fs/f2fs/super.c
++++ b/fs/f2fs/super.c
+@@ -1073,7 +1073,7 @@ static int sanity_check_raw_super(struct super_block *sb,
+ 	return 0;
+ }
+ 
+-static int sanity_check_ckpt(struct f2fs_sb_info *sbi)
++int sanity_check_ckpt(struct f2fs_sb_info *sbi)
+ {
+ 	unsigned int total, fsmeta;
+ 	struct f2fs_super_block *raw_super = F2FS_RAW_SUPER(sbi);
+@@ -1358,13 +1358,6 @@ static int f2fs_fill_super(struct super_block *sb, void *data, int silent)
+ 		goto free_meta_inode;
+ 	}
+ 
+-	/* sanity checking of checkpoint */
+-	err = -EINVAL;
+-	if (sanity_check_ckpt(sbi)) {
+-		f2fs_msg(sb, KERN_ERR, "Invalid F2FS checkpoint");
+-		goto free_cp;
+-	}
+-
+ 	sbi->total_valid_node_count =
+ 				le32_to_cpu(sbi->ckpt->valid_node_count);
+ 	sbi->total_valid_inode_count =
+@@ -1517,7 +1510,6 @@ static int f2fs_fill_super(struct super_block *sb, void *data, int silent)
+ 	destroy_node_manager(sbi);
+ free_sm:
+ 	destroy_segment_manager(sbi);
+-free_cp:
+ 	kfree(sbi->ckpt);
+ free_meta_inode:
+ 	make_bad_inode(sbi->meta_inode);
+-- 
+2.20.1
+

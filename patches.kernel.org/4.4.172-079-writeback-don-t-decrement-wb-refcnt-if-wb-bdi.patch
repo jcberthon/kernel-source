@@ -1,11 +1,11 @@
-From 3bc0c5a181abe5106a06a2f32bf2878968f7ece5 Mon Sep 17 00:00:00 2001
 From: Anders Roxell <anders.roxell@linaro.org>
 Date: Tue, 30 Oct 2018 12:35:45 +0100
 Subject: [PATCH] writeback: don't decrement wb->refcnt if !wb->bdi
-
-References: git fixes (writeback)
-Patch-mainline: v5.0
+Patch-mainline: 4.4.172
+References: (writeback) bnc#1012382 fixes git
 Git-commit: 347a28b586802d09604a149c1a1f6de5dccbe6fa
+
+[ Upstream commit 347a28b586802d09604a149c1a1f6de5dccbe6fa ]
 
 This happened while running in qemu-system-aarch64, the AMBA PL011 UART
 driver when enabling CONFIG_DEBUG_TEST_DRIVER_REMOVE.
@@ -22,16 +22,17 @@ Co-developed-by: Arnd Bergmann <arnd@arndb.de>
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 Signed-off-by: Anders Roxell <anders.roxell@linaro.org>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Signed-off-by: Mel Gorman <mgorman@suse.de>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
  include/linux/backing-dev-defs.h | 8 ++++++++
  1 file changed, 8 insertions(+)
 
 diff --git a/include/linux/backing-dev-defs.h b/include/linux/backing-dev-defs.h
-index f128b3dc28cd..3b070533dcbe 100644
+index a307c37c2e6c..072501a0ac86 100644
 --- a/include/linux/backing-dev-defs.h
 +++ b/include/linux/backing-dev-defs.h
-@@ -230,6 +230,14 @@ static inline void wb_get(struct bdi_writeback *wb)
+@@ -225,6 +225,14 @@ static inline void wb_get(struct bdi_writeback *wb)
   */
  static inline void wb_put(struct bdi_writeback *wb)
  {
@@ -46,3 +47,6 @@ index f128b3dc28cd..3b070533dcbe 100644
  	if (wb != &wb->bdi->wb)
  		percpu_ref_put(&wb->refcnt);
  }
+-- 
+2.20.1
+
