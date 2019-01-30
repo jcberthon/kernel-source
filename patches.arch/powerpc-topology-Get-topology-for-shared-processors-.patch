@@ -153,10 +153,10 @@ index e1b253b81ddd..9c992a73aeea 100644
  
  #include <asm-generic/topology.h>
 diff --git a/arch/powerpc/kernel/smp.c b/arch/powerpc/kernel/smp.c
-index ec9ec2058d2d..8e8227d02168 100644
+index de45c790ceda..58d3abc9c554 100644
 --- a/arch/powerpc/kernel/smp.c
 +++ b/arch/powerpc/kernel/smp.c
-@@ -781,6 +781,11 @@ void __init smp_cpus_done(unsigned int max_cpus)
+@@ -843,6 +843,11 @@ void __init smp_cpus_done(unsigned int max_cpus)
  	if (smp_ops && smp_ops->bringup_done)
  		smp_ops->bringup_done();
  
@@ -167,7 +167,7 @@ index ec9ec2058d2d..8e8227d02168 100644
 +	shared_proc_topology_init();
  	dump_numa_cpu_topology();
  
- 	set_sched_topology(powerpc_topology);
+ 	/*
 diff --git a/arch/powerpc/mm/numa.c b/arch/powerpc/mm/numa.c
 index 302418aa7ab1..940179e0aaaf 100644
 --- a/arch/powerpc/mm/numa.c
