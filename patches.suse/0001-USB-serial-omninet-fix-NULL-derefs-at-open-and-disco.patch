@@ -1,0 +1,40 @@
+From 56cb30101e7298ac6114a1521f12e52ad6a66247 Mon Sep 17 00:00:00 2001
+From: Oliver Neukum <oneukum@suse.com>
+Date: Wed, 30 Jan 2019 15:54:46 +0100
+Subject: [PATCH] USB: serial: omninet: fix NULL-derefs at open and disconnect
+Patch-mainline: Never (Totally inapplicable upstream security fix)
+REferences: bsc#1114672
+
+The original patch is inapplicable.
+This is a rewrite of:
+
+commit a5bc01949e3b19d8a23b5eabc6fc71bb50dc820e
+Author: Johan Hovold <johan@kernel.org>
+Date:   Tue Jan 3 16:39:58 2017 +0100
+
+    USB: serial: omninet: fix NULL-derefs at open and disconnect
+
+It just introduces the check
+
+Signed-off-by: Oliver Neukum <oneukum@suse.com>
+---
+ drivers/usb/serial/omninet.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/usb/serial/omninet.c b/drivers/usb/serial/omninet.c
+index 718610d..e76f7b4 100644
+--- a/drivers/usb/serial/omninet.c
++++ b/drivers/usb/serial/omninet.c
+@@ -152,6 +152,9 @@ static int omninet_attach(struct usb_serial *serial)
+ 	struct omninet_data *od;
+ 	struct usb_serial_port *port = serial->port[0];
+ 
++	if (serial->num_bulk_out < 2)
++		return -ENODEV;
++
+ 	od = kmalloc(sizeof(struct omninet_data), GFP_KERNEL);
+ 	if (!od) {
+ 		dev_err(&port->dev, "%s- kmalloc(%Zd) failed.\n",
+-- 
+2.16.4
+
