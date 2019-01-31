@@ -1,0 +1,76 @@
+From: Suravee Suthikulpanit <suravee.suthikulpanit@amd.com>
+Date: Thu, 24 Jan 2019 04:16:45 +0000
+Subject: iommu/amd: Fix IOMMU page flush when detach device from a domain
+Git-commit: 9825bd94e3a2baae1f4874767ae3a7d4c049720e
+Patch-mainline: v5.0-rc5
+References: bsc#1106105
+
+When a VM is terminated, the VFIO driver detaches all pass-through
+devices from VFIO domain by clearing domain id and page table root
+pointer from each device table entry (DTE), and then invalidates
+the DTE. Then, the VFIO driver unmap pages and invalidate IOMMU pages.
+
+Currently, the IOMMU driver keeps track of which IOMMU and how many
+devices are attached to the domain. When invalidate IOMMU pages,
+the driver checks if the IOMMU is still attached to the domain before
+issuing the invalidate page command.
+
+However, since VFIO has already detached all devices from the domain,
+the subsequent INVALIDATE_IOMMU_PAGES commands are being skipped as
+there is no IOMMU attached to the domain. This results in data
+corruption and could cause the PCI device to end up in indeterministic
+state.
+
+Fix this by invalidate IOMMU pages when detach a device, and
+before decrementing the per-domain device reference counts.
+
+Cc: Boris Ostrovsky <boris.ostrovsky@oracle.com>
+Suggested-by: Joerg Roedel <joro@8bytes.org>
+Co-developed-by: Brijesh Singh <brijesh.singh@amd.com>
+Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+Signed-off-by: Suravee Suthikulpanit <suravee.suthikulpanit@amd.com>
+Fixes: 6de8ad9b9ee0 ('x86/amd-iommu: Make iommu_flush_pages aware of multiple IOMMUs')
+Signed-off-by: Joerg Roedel <jroedel@suse.de>
+---
+ drivers/iommu/amd_iommu.c | 15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
+
+--- a/arch/x86/kernel/amd_iommu.c
++++ b/arch/x86/kernel/amd_iommu.c
+@@ -1594,6 +1594,7 @@ static void do_attach(struct device *dev
+ 
+ static void do_detach(struct device *dev)
+ {
++	struct protection_domain *domain;
+ 	struct iommu_dev_data *dev_data;
+ 	struct amd_iommu *iommu;
+ 	u16 devid;
+@@ -1601,10 +1602,7 @@ static void do_detach(struct device *dev
+ 	devid    = get_device_id(dev);
+ 	iommu    = amd_iommu_rlookup_table[devid];
+ 	dev_data = get_dev_data(dev);
+-
+-	/* decrease reference counters */
+-	dev_data->domain->dev_iommu[iommu->index] -= 1;
+-	dev_data->domain->dev_cnt                 -= 1;
++	domain   = dev_data->domain;
+ 
+ 	/* Update data structures */
+ 	dev_data->domain = NULL;
+@@ -1613,6 +1611,16 @@ static void do_detach(struct device *dev
+ 
+ 	/* Flush the DTE entry */
+ 	device_flush_dte(dev);
++
++	/* Flush IOTLB */
++	domain_flush_tlb_pde(domain);
++
++	/* Wait for the flushes to finish */
++	domain_flush_complete(domain);
++
++	/* decrease reference counters - needs to happen after the flushes */
++	domain->dev_iommu[iommu->index] -= 1;
++	domain->dev_cnt                 -= 1;
+ }
+ 
+ /*
