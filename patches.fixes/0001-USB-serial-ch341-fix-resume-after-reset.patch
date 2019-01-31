@@ -1,0 +1,53 @@
+From ce5e292828117d1b71cbd3edf9e9137cf31acd30 Mon Sep 17 00:00:00 2001
+From: Johan Hovold <johan@kernel.org>
+Date: Fri, 6 Jan 2017 19:15:14 +0100
+Subject: [PATCH] USB: serial: ch341: fix resume after reset
+Git-commit: ce5e292828117d1b71cbd3edf9e9137cf31acd30
+Patch-mainline: v4.10
+References: bsc#1114672
+
+Fix reset-resume handling which failed to resubmit the read and
+interrupt URBs, thereby leaving a port that was open before suspend in a
+broken state until closed and reopened.
+
+Fixes: 1ded7ea47b88 ("USB: ch341 serial: fix port number changed after
+resume")
+Fixes: 2bfd1c96a9fb ("USB: serial: ch341: remove reset_resume callback")
+Cc: stable <stable@vger.kernel.org>
+Signed-off-by: Johan Hovold <johan@kernel.org>
+Signed-off-by: Oliver Neukum <oneukum@suse.com>
+---
+ drivers/usb/serial/ch341.c |   14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
+
+--- a/drivers/usb/serial/ch341.c
++++ b/drivers/usb/serial/ch341.c
+@@ -612,17 +612,25 @@ static int ch341_reset_resume(struct usb
+ {
+ 	struct usb_device *dev = interface_to_usbdev(intf);
+ 	struct usb_serial *serial = NULL;
+-	struct ch341_private *priv;
+ 
+ 	serial = usb_get_intfdata(intf);
+-	priv = usb_get_serial_port_data(serial->port[0]);
++	struct usb_serial_port *port = serial->port[0];
++	struct ch341_private *priv = usb_get_serial_port_data(port);
++	int ret;
+ 
+ 	/*reconfigure ch341 serial port after bus-reset*/
+ 	ch341_configure(dev, priv);
+ 
+ 	usb_serial_resume(intf);
+ 
+-	return 0;
++	if (port->port.flags & ASYNCB_INITIALIZED) {
++		ret = usb_submit_urb(port->interrupt_in_urb, GFP_NOIO);
++		if (ret) {
++			return ret;
++		}
++	}
++
++	return usb_serial_generic_resume(serial);
+ }
+ 
+ static struct usb_driver ch341_driver = {
