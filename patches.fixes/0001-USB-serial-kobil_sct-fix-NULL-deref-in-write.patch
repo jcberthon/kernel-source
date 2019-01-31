@@ -1,0 +1,35 @@
+From 21ce57840243c7b70fbc1ebd3dceeb70bb6e9e09 Mon Sep 17 00:00:00 2001
+From: Johan Hovold <johan@kernel.org>
+Date: Tue, 3 Jan 2017 16:39:49 +0100
+Subject: [PATCH] USB: serial: kobil_sct: fix NULL-deref in write
+Git-commit: 21ce57840243c7b70fbc1ebd3dceeb70bb6e9e09
+Patch-mainline: v4.10
+References: bsc#1114672
+
+Fix NULL-pointer dereference in write() should the device lack the
+expected interrupt-out endpoint:
+
+Unable to handle kernel NULL pointer dereference at virtual address 00000054
+...
+PC is at kobil_write+0x144/0x2a0 [kobil_sct]
+
+Fixes: 1da177e4c3f4 ("Linux-2.6.12-rc2")
+Cc: stable <stable@vger.kernel.org>
+Signed-off-by: Johan Hovold <johan@kernel.org>
+Signed-off-by: Oliver Neukum <oneukum@suse.com>
+---
+ drivers/usb/serial/kobil_sct.c |    3 +++
+ 1 file changed, 3 insertions(+)
+
+--- a/drivers/usb/serial/kobil_sct.c
++++ b/drivers/usb/serial/kobil_sct.c
+@@ -150,6 +150,9 @@ static int kobil_startup(struct usb_seri
+ 	struct usb_host_interface *altsetting;
+ 	struct usb_host_endpoint *endpoint;
+ 
++	if (serial->num_interrupt_out < serial->num_ports)
++		return -ENODEV;
++
+ 	priv = kmalloc(sizeof(struct kobil_private), GFP_KERNEL);
+ 	if (!priv)
+ 		return -ENOMEM;
