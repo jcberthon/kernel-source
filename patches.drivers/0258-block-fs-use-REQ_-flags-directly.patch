@@ -87,7 +87,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  
 --- a/drivers/block/xen-blkback/blkback.c
 +++ b/drivers/block/xen-blkback/blkback.c
-@@ -1232,14 +1232,14 @@ static int dispatch_rw_block_io(struct x
+@@ -1229,14 +1229,14 @@ static int dispatch_rw_block_io(struct x
  	case BLKIF_OP_WRITE:
  		blkif->st_wr_req++;
  		operation = REQ_OP_WRITE;
@@ -104,7 +104,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		break;
  	default:
  		operation = 0; /* make gcc happy */
-@@ -1251,7 +1251,7 @@ static int dispatch_rw_block_io(struct x
+@@ -1248,7 +1248,7 @@ static int dispatch_rw_block_io(struct x
  	nseg = req->operation == BLKIF_OP_INDIRECT ?
  	       req->u.indirect.nr_segments : req->u.rw.nr_segments;
  
@@ -113,7 +113,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	    unlikely((req->operation != BLKIF_OP_INDIRECT) &&
  		     (nseg > BLKIF_MAX_SEGMENTS_PER_REQUEST)) ||
  	    unlikely((req->operation == BLKIF_OP_INDIRECT) &&
-@@ -1313,7 +1313,7 @@ static int dispatch_rw_block_io(struct x
+@@ -1310,7 +1310,7 @@ static int dispatch_rw_block_io(struct x
  	}
  
  	/* Wait on all outstanding I/O's and once that has been completed
@@ -122,7 +122,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	 */
  	if (drain)
  		xen_blk_drain_io(pending_req->blkif);
-@@ -1359,7 +1359,7 @@ static int dispatch_rw_block_io(struct x
+@@ -1356,7 +1356,7 @@ static int dispatch_rw_block_io(struct x
  
  	/* This will be hit if the operation was a flush or discard. */
  	if (!bio) {
@@ -173,7 +173,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		goto out_put;
 --- a/drivers/md/bcache/request.c
 +++ b/drivers/md/bcache/request.c
-@@ -921,7 +921,7 @@ static void cached_dev_write(struct cach
+@@ -932,7 +932,7 @@ static void cached_dev_write(struct cach
  			flush->bi_bdev	= bio->bi_bdev;
  			flush->bi_end_io = request_endio;
  			flush->bi_private = cl;
@@ -184,7 +184,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		}
 --- a/drivers/md/bcache/super.c
 +++ b/drivers/md/bcache/super.c
-@@ -383,7 +383,7 @@ static char *uuid_read(struct cache_set
+@@ -381,7 +381,7 @@ static char *uuid_read(struct cache_set
  		return "bad uuid pointer";
  
  	bkey_copy(&c->uuid_bucket, k);
@@ -193,7 +193,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  
  	if (j->version < BCACHE_JSET_VERSION_UUIDv1) {
  		struct uuid_entry_v0	*u0 = (void *) c->uuids;
-@@ -602,7 +602,7 @@ static void prio_read(struct cache *ca,
+@@ -600,7 +600,7 @@ static void prio_read(struct cache *ca,
  			ca->prio_last_buckets[bucket_nr] = bucket;
  			bucket_nr++;
  
@@ -204,7 +204,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  				pr_warn("bad csum reading priorities");
 --- a/drivers/md/dm-bufio.c
 +++ b/drivers/md/dm-bufio.c
-@@ -1316,7 +1316,7 @@ int dm_bufio_issue_flush(struct dm_bufio
+@@ -1329,7 +1329,7 @@ int dm_bufio_issue_flush(struct dm_bufio
  {
  	struct dm_io_request io_req = {
  		.bi_op = REQ_OP_WRITE,
@@ -266,7 +266,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  
 --- a/drivers/md/dm.c
 +++ b/drivers/md/dm.c
-@@ -1558,7 +1558,7 @@ static struct mapped_device *alloc_dev(i
+@@ -1586,7 +1586,7 @@ static struct mapped_device *alloc_dev(i
  
  	bio_init(&md->flush_bio);
  	md->flush_bio.bi_bdev = md->bdev;
@@ -277,7 +277,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  
 --- a/drivers/md/md.c
 +++ b/drivers/md/md.c
-@@ -407,7 +407,7 @@ static void submit_flushes(struct work_s
+@@ -394,7 +394,7 @@ static void submit_flushes(struct work_s
  			bi->bi_end_io = md_end_flush;
  			bi->bi_private = rdev;
  			bi->bi_bdev = rdev->bdev;
@@ -286,7 +286,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  			atomic_inc(&mddev->flush_pending);
  			submit_bio(bi);
  			rcu_read_lock();
-@@ -770,7 +770,7 @@ void md_super_write(struct mddev *mddev,
+@@ -743,7 +743,7 @@ void md_super_write(struct mddev *mddev,
  	bio_add_page(bio, page, size, 0);
  	bio->bi_private = rdev;
  	bio->bi_end_io = super_written;
@@ -297,7 +297,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	submit_bio(bio);
 --- a/drivers/md/raid5-cache.c
 +++ b/drivers/md/raid5-cache.c
-@@ -1253,7 +1253,7 @@ void r5l_flush_stripe_to_raid(struct r5l
+@@ -685,7 +685,7 @@ void r5l_flush_stripe_to_raid(struct r5l
  	bio_reset(&log->flush_bio);
  	log->flush_bio.bi_bdev = log->rdev->bdev;
  	log->flush_bio.bi_end_io = r5l_log_flush_endio;
@@ -306,9 +306,9 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	submit_bio(&log->flush_bio);
  }
  
-@@ -1627,7 +1627,7 @@ static int r5l_log_write_empty_meta_bloc
+@@ -1053,7 +1053,7 @@ static int r5l_log_write_empty_meta_bloc
  	mb->checksum = cpu_to_le32(crc);
-
+ 
  	if (!sync_page_io(log->rdev, pos, PAGE_SIZE, page, REQ_OP_WRITE,
 -			  WRITE_FUA, false)) {
 +			  REQ_FUA, false)) {
@@ -317,7 +317,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	}
 --- a/drivers/md/raid5.c
 +++ b/drivers/md/raid5.c
-@@ -997,7 +997,7 @@ static void ops_run_io(struct stripe_hea
+@@ -916,7 +916,7 @@ static void ops_run_io(struct stripe_hea
  		if (test_and_clear_bit(R5_Wantwrite, &sh->dev[i].flags)) {
  			op = REQ_OP_WRITE;
  			if (test_and_clear_bit(R5_WantFUA, &sh->dev[i].flags))
@@ -378,7 +378,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		op = REQ_OP_READ;
 --- a/fs/btrfs/disk-io.c
 +++ b/fs/btrfs/disk-io.c
-@@ -3455,9 +3455,9 @@ static int write_dev_supers(struct btrfs
+@@ -3296,9 +3296,9 @@ static int write_dev_supers(struct btrfs
  		 * to go down lazy.
  		 */
  		if (i == 0)
@@ -390,7 +390,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		if (ret)
  			errors++;
  	}
-@@ -3521,7 +3521,7 @@ static int write_dev_flush(struct btrfs_
+@@ -3362,7 +3362,7 @@ static int write_dev_flush(struct btrfs_
  
  	bio->bi_end_io = btrfs_end_empty_barrier;
  	bio->bi_bdev = device->bdev;
@@ -401,7 +401,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	device->flush_bio = bio;
 --- a/fs/btrfs/extent_io.c
 +++ b/fs/btrfs/extent_io.c
-@@ -126,7 +126,7 @@ struct extent_page_data {
+@@ -127,7 +127,7 @@ struct extent_page_data {
  	 */
  	unsigned int extent_locked:1;
  
@@ -410,7 +410,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	unsigned int sync_io:1;
  };
  
-@@ -2048,7 +2048,7 @@ int repair_io_failure(struct inode *inod
+@@ -2049,7 +2049,7 @@ int repair_io_failure(struct inode *inod
  		return -EIO;
  	}
  	bio->bi_bdev = dev->bdev;
@@ -419,7 +419,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	bio_add_page(bio, page, length, pg_offset);
  
  	if (btrfsic_submit_bio_wait(bio)) {
-@@ -2389,7 +2389,7 @@ static int bio_readpage_error(struct bio
+@@ -2390,7 +2390,7 @@ static int bio_readpage_error(struct bio
  	struct inode *inode = page->mapping->host;
  	struct extent_io_tree *tree = &BTRFS_I(inode)->io_tree;
  	struct bio *bio;
@@ -428,7 +428,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	int ret;
  
  	BUG_ON(bio_op(failed_bio) == REQ_OP_WRITE);
-@@ -2405,9 +2405,7 @@ static int bio_readpage_error(struct bio
+@@ -2406,9 +2406,7 @@ static int bio_readpage_error(struct bio
  	}
  
  	if (failed_bio->bi_vcnt > 1)
@@ -439,7 +439,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  
  	phy_offset >>= inode->i_sb->s_blocksize_bits;
  	bio = btrfs_create_repair_bio(inode, failed_bio, failrec, page,
-@@ -3487,7 +3485,7 @@ static int __extent_writepage(struct pag
+@@ -3488,7 +3486,7 @@ static int __extent_writepage(struct pag
  	unsigned long nr_written = 0;
  
  	if (wbc->sync_mode == WB_SYNC_ALL)
@@ -448,7 +448,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  
  	trace___extent_writepage(page, inode, wbc);
  
-@@ -3732,7 +3730,7 @@ static noinline_for_stack int write_one_
+@@ -3733,7 +3731,7 @@ static noinline_for_stack int write_one_
  	unsigned long i, num_pages;
  	unsigned long bio_flags = 0;
  	unsigned long start, end;
@@ -457,7 +457,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	int ret = 0;
  
  	clear_bit(EXTENT_BUFFER_WRITE_ERR, &eb->bflags);
-@@ -4079,7 +4077,7 @@ static void flush_epd_write_bio(struct e
+@@ -4080,7 +4078,7 @@ static void flush_epd_write_bio(struct e
  		int ret;
  
  		bio_set_op_attrs(epd->bio, REQ_OP_WRITE,
@@ -468,7 +468,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		BUG_ON(ret < 0); /* -ENOMEM */
 --- a/fs/btrfs/inode.c
 +++ b/fs/btrfs/inode.c
-@@ -7873,7 +7873,7 @@ static int dio_read_error(struct inode *
+@@ -7997,7 +7997,7 @@ static int dio_read_error(struct inode *
  	struct io_failure_record *failrec;
  	struct bio *bio;
  	int isector;
@@ -477,7 +477,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	int ret;
  
  	BUG_ON(bio_op(failed_bio) == REQ_OP_WRITE);
-@@ -7892,9 +7892,7 @@ static int dio_read_error(struct inode *
+@@ -8016,9 +8016,7 @@ static int dio_read_error(struct inode *
  	if ((failed_bio->bi_vcnt > 1)
  		|| (failed_bio->bi_io_vec->bv_len
  			> BTRFS_I(inode)->root->sectorsize))
@@ -501,7 +501,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  leave_with_eio:
 --- a/fs/btrfs/volumes.c
 +++ b/fs/btrfs/volumes.c
-@@ -6026,7 +6026,7 @@ static void btrfs_end_bio(struct bio *bi
+@@ -6044,7 +6044,7 @@ static void btrfs_end_bio(struct bio *bi
  				else
  					btrfs_dev_stat_inc(dev,
  						BTRFS_DEV_STAT_READ_ERRS);
@@ -512,7 +512,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  				btrfs_dev_stat_print_on_error(dev);
 --- a/fs/btrfs/volumes.h
 +++ b/fs/btrfs/volumes.h
-@@ -62,7 +62,7 @@ struct btrfs_device {
+@@ -64,7 +64,7 @@ struct btrfs_device {
  	int running_pending;
  	/* regular prio bios */
  	struct btrfs_pending_bios pending_bios;
@@ -561,7 +561,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  
 --- a/fs/direct-io.c
 +++ b/fs/direct-io.c
-@@ -1204,7 +1204,7 @@ do_blockdev_direct_IO(struct kiocb *iocb
+@@ -1207,7 +1207,7 @@ do_blockdev_direct_IO(struct kiocb *iocb
  	dio->inode = inode;
  	if (iov_iter_rw(iter) == WRITE) {
  		dio->op = REQ_OP_WRITE;
@@ -581,7 +581,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
   * faster.
   */
  static int write_mmp_block(struct super_block *sb, struct buffer_head *bh)
-@@ -52,7 +52,7 @@ static int write_mmp_block(struct super_
+@@ -51,7 +51,7 @@ static int write_mmp_block(struct super_
  	lock_buffer(bh);
  	bh->b_end_io = end_buffer_write_sync;
  	get_bh(bh);
@@ -590,7 +590,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	wait_on_buffer(bh);
  	sb_end_write(sb);
  	if (unlikely(!buffer_uptodate(bh)))
-@@ -88,7 +88,7 @@ static int read_mmp_block(struct super_b
+@@ -87,7 +87,7 @@ static int read_mmp_block(struct super_b
  	get_bh(*bh);
  	lock_buffer(*bh);
  	(*bh)->b_end_io = end_buffer_read_sync;
@@ -601,7 +601,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		brelse(*bh);
 --- a/fs/ext4/page-io.c
 +++ b/fs/ext4/page-io.c
-@@ -355,7 +355,7 @@ void ext4_io_submit(struct ext4_io_submi
+@@ -346,7 +346,7 @@ void ext4_io_submit(struct ext4_io_submi
  
  	if (bio) {
  		int io_op_flags = io->io_wbc->sync_mode == WB_SYNC_ALL ?
@@ -612,7 +612,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		submit_bio(io->io_bio);
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
-@@ -4497,7 +4497,7 @@ static int ext4_commit_super(struct supe
+@@ -4540,7 +4540,7 @@ static int ext4_commit_super(struct supe
  	mark_buffer_dirty(sbh);
  	if (sync) {
  		error = __sync_dirty_buffer(sbh,
@@ -631,16 +631,16 @@ Acked-by: Hannes Reinecke <hare@suse.com>
 +		.op_flags = REQ_META | REQ_PRIO,
  		.blk_addr = index,
  		.encrypted_page = NULL,
- 	};
-@@ -151,7 +151,7 @@ int ra_meta_pages(struct f2fs_sb_info *s
+ 		.is_meta = is_meta,
+@@ -167,7 +167,7 @@ int ra_meta_pages(struct f2fs_sb_info *s
  		.sbi = sbi,
  		.type = META,
  		.op = REQ_OP_READ,
 -		.op_flags = sync ? (READ_SYNC | REQ_META | REQ_PRIO) : REQ_RAHEAD,
 +		.op_flags = sync ? (REQ_META | REQ_PRIO) : REQ_RAHEAD,
  		.encrypted_page = NULL,
+ 		.is_meta = (type != META_POR),
  	};
- 
 --- a/fs/f2fs/data.c
 +++ b/fs/f2fs/data.c
 @@ -131,11 +131,9 @@ void f2fs_submit_merged_bio(struct f2fs_
@@ -658,7 +658,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	}
  	__submit_merged_bio(io);
  	up_write(&io->io_rwsem);
-@@ -358,7 +356,7 @@ struct page *find_data_page(struct inode
+@@ -362,7 +360,7 @@ struct page *find_data_page(struct inode
  		return page;
  	f2fs_put_page(page, 0);
  
@@ -667,7 +667,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	if (IS_ERR(page))
  		return page;
  
-@@ -384,7 +382,7 @@ struct page *get_lock_data_page(struct i
+@@ -388,7 +386,7 @@ struct page *get_lock_data_page(struct i
  	struct address_space *mapping = inode->i_mapping;
  	struct page *page;
  repeat:
@@ -676,7 +676,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	if (IS_ERR(page))
  		return page;
  
-@@ -446,7 +444,7 @@ repeat:
+@@ -450,7 +448,7 @@ repeat:
  	} else {
  		f2fs_put_page(page, 1);
  
@@ -685,7 +685,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		if (IS_ERR(page))
  			goto repeat;
  
-@@ -1126,7 +1124,7 @@ static int f2fs_write_data_page(struct p
+@@ -1157,7 +1155,7 @@ static int f2fs_write_data_page(struct p
  		.sbi = sbi,
  		.type = DATA,
  		.op = REQ_OP_WRITE,
@@ -694,18 +694,18 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		.page = page,
  		.encrypted_page = NULL,
  	};
-@@ -1492,7 +1490,7 @@ put_next:
- 			.sbi = sbi,
- 			.type = DATA,
- 			.op = REQ_OP_READ,
--			.op_flags = READ_SYNC,
-+			.op_flags = REQ_SYNC,
- 			.blk_addr = dn.data_blkaddr,
- 			.page = page,
- 			.encrypted_page = NULL,
+@@ -1538,7 +1536,7 @@ put_next:
+ 			goto fail;
+ 		}
+ 
+-		bio_set_op_attrs(bio, REQ_OP_READ, READ_SYNC);
++		bio->bi_opf = REQ_OP_READ;
+ 		submit_bio(bio);
+ 
+ 		lock_page(page);
 --- a/fs/f2fs/gc.c
 +++ b/fs/f2fs/gc.c
-@@ -541,7 +541,7 @@ static void move_encrypted_block(struct
+@@ -543,7 +543,7 @@ static void move_encrypted_block(struct
  		.sbi = F2FS_I_SB(inode),
  		.type = DATA,
  		.op = REQ_OP_READ,
@@ -714,7 +714,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		.encrypted_page = NULL,
  	};
  	struct dnode_of_data dn;
-@@ -609,7 +609,7 @@ static void move_encrypted_block(struct
+@@ -611,7 +611,7 @@ static void move_encrypted_block(struct
  	allocate_data_block(fio.sbi, NULL, fio.blk_addr,
  					&fio.blk_addr, &sum, CURSEG_COLD_DATA);
  	fio.op = REQ_OP_WRITE;
@@ -723,7 +723,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	f2fs_submit_page_mbio(&fio);
  
  	dn.data_blkaddr = fio.blk_addr;
-@@ -644,7 +644,7 @@ static void move_data_page(struct inode
+@@ -646,7 +646,7 @@ static void move_data_page(struct inode
  			.sbi = F2FS_I_SB(inode),
  			.type = DATA,
  			.op = REQ_OP_WRITE,
@@ -783,7 +783,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		.encrypted_page = NULL,
  	};
  	int err = 0;
-@@ -335,7 +335,7 @@ repeat:
+@@ -338,7 +338,7 @@ repeat:
  		fcc->dispatch_list = llist_reverse_order(fcc->dispatch_list);
  
  		bio->bi_bdev = sbi->sb->s_bdev;
@@ -792,7 +792,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		ret = submit_bio_wait(bio);
  
  		llist_for_each_entry_safe(cmd, next,
-@@ -368,7 +368,7 @@ int f2fs_issue_flush(struct f2fs_sb_info
+@@ -371,7 +371,7 @@ int f2fs_issue_flush(struct f2fs_sb_info
  		int ret;
  
  		bio->bi_bdev = sbi->sb->s_bdev;
@@ -801,7 +801,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		ret = submit_bio_wait(bio);
  		bio_put(bio);
  		return ret;
-@@ -1308,7 +1308,7 @@ void write_meta_page(struct f2fs_sb_info
+@@ -1292,7 +1292,7 @@ void write_meta_page(struct f2fs_sb_info
  		.sbi = sbi,
  		.type = META,
  		.op = REQ_OP_WRITE,
@@ -972,7 +972,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		mutex_unlock(&journal->j_checkpoint_mutex);
  	}
  	return jbd2_journal_start_thread(journal);
-@@ -1457,7 +1457,7 @@ void jbd2_journal_update_sb_errno(journa
+@@ -1460,7 +1460,7 @@ void jbd2_journal_update_sb_errno(journa
  	sb->s_errno    = cpu_to_be32(journal->j_errno);
  	read_unlock(&journal->j_state_lock);
  
@@ -981,7 +981,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  }
  EXPORT_SYMBOL(jbd2_journal_update_sb_errno);
  
-@@ -1723,7 +1723,8 @@ int jbd2_journal_destroy(journal_t *jour
+@@ -1726,7 +1726,8 @@ int jbd2_journal_destroy(journal_t *jour
  				++journal->j_transaction_sequence;
  			write_unlock(&journal->j_state_lock);
  
@@ -991,7 +991,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  			mutex_unlock(&journal->j_checkpoint_mutex);
  		} else
  			err = -EIO;
-@@ -1982,7 +1983,7 @@ int jbd2_journal_flush(journal_t *journa
+@@ -1985,7 +1986,7 @@ int jbd2_journal_flush(journal_t *journa
  	 * the magic code for a fully-recovered superblock.  Any future
  	 * commits of data to the journal will restore the current
  	 * s_start value. */
@@ -1000,7 +1000,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  	mutex_unlock(&journal->j_checkpoint_mutex);
  	write_lock(&journal->j_state_lock);
  	J_ASSERT(!journal->j_running_transaction);
-@@ -2028,7 +2029,7 @@ int jbd2_journal_wipe(journal_t *journal
+@@ -2031,7 +2032,7 @@ int jbd2_journal_wipe(journal_t *journal
  	if (write) {
  		/* Lock to make assertions happy... */
  		mutex_lock(&journal->j_checkpoint_mutex);
@@ -1104,7 +1104,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  
 --- a/fs/xfs/xfs_aops.c
 +++ b/fs/xfs/xfs_aops.c
-@@ -385,7 +385,7 @@ xfs_submit_ioend_bio(
+@@ -390,7 +390,7 @@ xfs_submit_ioend_bio(
  	bio->bi_private = ioend;
  	bio->bi_end_io = xfs_end_bio;
  	if (wbc->sync_mode == WB_SYNC_ALL)
@@ -1115,7 +1115,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  }
 --- a/fs/xfs/xfs_buf.c
 +++ b/fs/xfs/xfs_buf.c
-@@ -1308,7 +1308,7 @@ _xfs_buf_ioapply(
+@@ -1309,7 +1309,7 @@ _xfs_buf_ioapply(
  	if (bp->b_flags & XBF_WRITE) {
  		op = REQ_OP_WRITE;
  		if (bp->b_flags & XBF_SYNCIO)
@@ -1126,7 +1126,7 @@ Acked-by: Hannes Reinecke <hare@suse.com>
  		if (bp->b_flags & XBF_FLUSH)
 --- a/include/linux/fs.h
 +++ b/include/linux/fs.h
-@@ -149,58 +149,11 @@ typedef void (dax_iodone_t)(struct buffe
+@@ -150,58 +150,11 @@ typedef int (dio_iodone_t)(struct kiocb
   */
  #define CHECK_IOVEC_ONLY -1
  

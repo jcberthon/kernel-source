@@ -14,28 +14,24 @@ Signed-off-by: Jeremy Linton <jeremy.linton@arm.com>
 Signed-off-by: Will Deacon <will.deacon@arm.com>
 Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 ---
- arch/arm64/kernel/perf_event.c | 2 +-
- include/linux/perf/arm_pmu.h   | 2 ++
+ arch/arm64/kernel/perf_event.c |    2 +-
+ include/linux/perf/arm_pmu.h   |    2 ++
  2 files changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm64/kernel/perf_event.c b/arch/arm64/kernel/perf_event.c
-index b62d0d6d..57ae9d9e 100644
 --- a/arch/arm64/kernel/perf_event.c
 +++ b/arch/arm64/kernel/perf_event.c
-@@ -1103,7 +1103,7 @@ static int armv8_pmu_device_probe(struct platform_device *pdev)
+@@ -1111,7 +1111,7 @@ static int armv8_pmu_device_probe(struct
  
  static struct platform_driver armv8_pmu_driver = {
  	.driver		= {
 -		.name	= "armv8-pmu",
 +		.name	= ARMV8_PMU_PDEV_NAME,
  		.of_match_table = armv8_pmu_of_device_ids,
+ 		.suppress_bind_attrs = true,
  	},
- 	.probe		= armv8_pmu_device_probe,
-diff --git a/include/linux/perf/arm_pmu.h b/include/linux/perf/arm_pmu.h
-index 1047d445..d0f57e95 100644
 --- a/include/linux/perf/arm_pmu.h
 +++ b/include/linux/perf/arm_pmu.h
-@@ -219,6 +219,8 @@ int arm_pmu_device_probe(struct platform_device *pdev,
+@@ -159,6 +159,8 @@ int arm_pmu_device_probe(struct platform
  			 const struct of_device_id *of_table,
  			 const struct pmu_probe_info *probe_table);
  
@@ -44,6 +40,3 @@ index 1047d445..d0f57e95 100644
  #endif /* CONFIG_ARM_PMU */
  
  #endif /* __ARM_PMU_H__ */
--- 
-2.11.0
-

@@ -24,18 +24,16 @@ Signed-off-by: Chao Yu <yuchao0@huawei.com>
 Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
 Acked-by: Nikolay Borisov <nborisov@suse.com>
 ---
- fs/f2fs/debug.c    |  11 +++--
- fs/f2fs/f2fs.h     |  14 ++++--
- fs/f2fs/node.c     | 134 ++++++++++++++++++++++++++++++++---------------------
- fs/f2fs/node.h     |  11 +++--
- fs/f2fs/shrinker.c |   4 +-
- 5 files changed, 107 insertions(+), 67 deletions(-)
+ fs/f2fs/debug.c    |   11 ++--
+ fs/f2fs/f2fs.h     |   14 ++++-
+ fs/f2fs/node.c     |  132 ++++++++++++++++++++++++++++++++---------------------
+ fs/f2fs/node.h     |   11 ++--
+ fs/f2fs/shrinker.c |    4 -
+ 5 files changed, 106 insertions(+), 66 deletions(-)
 
-diff --git a/fs/f2fs/debug.c b/fs/f2fs/debug.c
-index 24d6a51b48d1..4f779e66bf25 100644
 --- a/fs/f2fs/debug.c
 +++ b/fs/f2fs/debug.c
-@@ -67,7 +67,8 @@ static void update_general_status(struct f2fs_sb_info *sbi)
+@@ -67,7 +67,8 @@ static void update_general_status(struct
  	si->dirty_nats = NM_I(sbi)->dirty_nat_cnt;
  	si->sits = MAIN_SEGS(sbi);
  	si->dirty_sits = SIT_I(sbi)->dirty_sentries;
@@ -45,7 +43,7 @@ index 24d6a51b48d1..4f779e66bf25 100644
  	si->bg_gc = sbi->bg_gc;
  	si->util_free = (int)(free_user_blocks(sbi) >> sbi->log_blocks_per_seg)
  		* 100 / (int)(sbi->user_block_count >> sbi->log_blocks_per_seg)
-@@ -184,7 +185,9 @@ static void update_mem_info(struct f2fs_sb_info *sbi)
+@@ -184,7 +185,9 @@ get_cache:
  		si->cache_mem += sizeof(struct flush_cmd_control);
  
  	/* free nids */
@@ -56,7 +54,7 @@ index 24d6a51b48d1..4f779e66bf25 100644
  	si->cache_mem += NM_I(sbi)->nat_cnt * sizeof(struct nat_entry);
  	si->cache_mem += NM_I(sbi)->dirty_nat_cnt *
  					sizeof(struct nat_entry_set);
-@@ -303,8 +306,8 @@ static int stat_show(struct seq_file *s, void *v)
+@@ -303,8 +306,8 @@ static int stat_show(struct seq_file *s,
  			   si->ndirty_meta, si->meta_pages);
  		seq_printf(s, "  - NATs: %9d/%9d\n  - SITs: %9d/%9d\n",
  			   si->dirty_nats, si->nats, si->dirty_sits, si->sits);
@@ -67,11 +65,9 @@ index 24d6a51b48d1..4f779e66bf25 100644
  		seq_puts(s, "\nDistribution of User Blocks:");
  		seq_puts(s, " [ valid | invalid | free ]\n");
  		seq_puts(s, "  [");
-diff --git a/fs/f2fs/f2fs.h b/fs/f2fs/f2fs.h
-index 2871576fbca4..ae10ae54ccc0 100644
 --- a/fs/f2fs/f2fs.h
 +++ b/fs/f2fs/f2fs.h
-@@ -504,6 +504,12 @@ static inline void __try_update_largest_extent(struct extent_tree *et,
+@@ -506,6 +506,12 @@ static inline void __try_update_largest_
  		et->largest = en->ei;
  }
  
@@ -84,7 +80,7 @@ index 2871576fbca4..ae10ae54ccc0 100644
  struct f2fs_nm_info {
  	block_t nat_blkaddr;		/* base disk address of NAT */
  	nid_t max_nid;			/* maximum possible node ids */
-@@ -522,9 +528,9 @@ struct f2fs_nm_info {
+@@ -524,9 +530,9 @@ struct f2fs_nm_info {
  
  	/* free node ids management */
  	struct radix_tree_root free_nid_root;/* root of the free_nid cache */
@@ -97,7 +93,7 @@ index 2871576fbca4..ae10ae54ccc0 100644
  	struct mutex build_lock;	/* lock for build free nids */
  
  	/* for checkpoint */
-@@ -1880,7 +1886,7 @@ struct f2fs_stat_info {
+@@ -1924,7 +1930,7 @@ struct f2fs_stat_info {
  	unsigned long long hit_total, total_ext;
  	int ext_tree, ext_node;
  	int ndirty_node, ndirty_dent, ndirty_dirs, ndirty_meta;
@@ -106,11 +102,9 @@ index 2871576fbca4..ae10ae54ccc0 100644
  	int total_count, utilization;
  	int bg_gc, inmem_pages, wb_pages;
  	int inline_xattr, inline_inode, inline_dir;
-diff --git a/fs/f2fs/node.c b/fs/f2fs/node.c
-index 7bcbc6e9c40d..d0380ae5a99a 100644
 --- a/fs/f2fs/node.c
 +++ b/fs/f2fs/node.c
-@@ -45,8 +45,8 @@ bool available_free_memory(struct f2fs_sb_info *sbi, int type)
+@@ -45,8 +45,8 @@ bool available_free_memory(struct f2fs_s
  	 * give 25%, 25%, 50%, 50%, 50% memory for each components respectively
  	 */
  	if (type == FREE_NIDS) {
@@ -121,7 +115,7 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
  		res = mem_size < ((avail_ram * nm_i->ram_thresh / 100) >> 2);
  	} else if (type == NAT_ENTRIES) {
  		mem_size = (nm_i->nat_cnt * sizeof(struct nat_entry)) >>
-@@ -1420,10 +1420,31 @@ static struct free_nid *__lookup_free_nid_list(struct f2fs_nm_info *nm_i,
+@@ -1428,10 +1428,31 @@ static struct free_nid *__lookup_free_ni
  static void __del_from_free_nid_list(struct f2fs_nm_info *nm_i,
  						struct free_nid *i)
  {
@@ -154,26 +148,30 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
  static int add_free_nid(struct f2fs_sb_info *sbi, nid_t nid, bool build)
  {
  	struct f2fs_nm_info *nm_i = NM_I(sbi);
-@@ -1460,33 +1481,33 @@ static int add_free_nid(struct f2fs_sb_info *sbi, nid_t nid, bool build)
- 		return 0;
- 	}
+@@ -1453,7 +1474,7 @@ static int add_free_nid(struct f2fs_sb_i
+ 	if (radix_tree_preload(GFP_NOFS))
+ 		goto err;
  
 -	spin_lock(&nm_i->free_nid_list_lock);
 +	spin_lock(&nm_i->nid_list_lock);
- 	if (radix_tree_insert(&nm_i->free_nid_root, i->nid, i)) {
--		spin_unlock(&nm_i->free_nid_list_lock);
-+		spin_unlock(&nm_i->nid_list_lock);
- 		radix_tree_preload_end();
- 		kmem_cache_free(free_nid_slab, i);
- 		return 0;
- 	}
+ 
+ 	if (build) {
+ 		/*
+@@ -1489,10 +1510,9 @@ static int add_free_nid(struct f2fs_sb_i
+ 	if (radix_tree_insert(&nm_i->free_nid_root, i->nid, i))
+ 		goto err_out;
+ 	err = 0;
 -	list_add_tail(&i->list, &nm_i->free_nid_list);
 -	nm_i->fcnt++;
--	spin_unlock(&nm_i->free_nid_list_lock);
 +	__insert_nid_to_list(sbi, i, FREE_NID_LIST);
+ err_out:
+-	spin_unlock(&nm_i->free_nid_list_lock);
 +	spin_unlock(&nm_i->nid_list_lock);
  	radix_tree_preload_end();
- 	return 1;
+ err:
+ 	if (err)
+@@ -1500,19 +1520,20 @@ err:
+ 	return !err;
  }
  
 -static void remove_free_nid(struct f2fs_nm_info *nm_i, nid_t nid)
@@ -197,7 +195,7 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
  
  	if (need_free)
  		kmem_cache_free(free_nid_slab, i);
-@@ -1525,7 +1546,7 @@ static void build_free_nids(struct f2fs_sb_info *sbi)
+@@ -1551,7 +1572,7 @@ static void build_free_nids(struct f2fs_
  	nid_t nid = nm_i->next_scan_nid;
  
  	/* Enough entries */
@@ -206,7 +204,7 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
  		return;
  
  	/* readahead nat pages to be scanned */
-@@ -1557,7 +1578,7 @@ static void build_free_nids(struct f2fs_sb_info *sbi)
+@@ -1585,7 +1606,7 @@ static void build_free_nids(struct f2fs_
  		if (addr == NULL_ADDR)
  			add_free_nid(sbi, nid, true);
  		else
@@ -215,7 +213,7 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
  	}
  	mutex_unlock(&curseg->curseg_mutex);
  	up_read(&nm_i->nat_tree_lock);
-@@ -1578,22 +1599,21 @@ bool alloc_nid(struct f2fs_sb_info *sbi, nid_t *nid)
+@@ -1607,22 +1628,21 @@ retry:
  	if (unlikely(sbi->total_valid_node_count + 1 > nm_i->available_nids))
  		return false;
  
@@ -247,7 +245,7 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
  
  		/* check nid is allocated already */
  		get_node_info(sbi, *nid, &ni);
-@@ -1603,7 +1623,7 @@ bool alloc_nid(struct f2fs_sb_info *sbi, nid_t *nid)
+@@ -1632,7 +1652,7 @@ retry:
  		}
  		return true;
  	}
@@ -256,7 +254,7 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
  
  	/* Let's scan nat pages and its caches to get free nids */
  	mutex_lock(&nm_i->build_lock);
-@@ -1620,11 +1640,12 @@ void alloc_nid_done(struct f2fs_sb_info *sbi, nid_t nid)
+@@ -1649,11 +1669,12 @@ void alloc_nid_done(struct f2fs_sb_info
  	struct f2fs_nm_info *nm_i = NM_I(sbi);
  	struct free_nid *i;
  
@@ -272,7 +270,7 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
  
  	kmem_cache_free(free_nid_slab, i);
  }
-@@ -1641,17 +1662,20 @@ void alloc_nid_failed(struct f2fs_sb_info *sbi, nid_t nid)
+@@ -1670,17 +1691,20 @@ void alloc_nid_failed(struct f2fs_sb_inf
  	if (!nid)
  		return;
  
@@ -297,7 +295,7 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
  
  	if (need_free)
  		kmem_cache_free(free_nid_slab, i);
-@@ -1666,18 +1690,20 @@ int try_to_free_nids(struct f2fs_sb_info *sbi, int nr_shrink)
+@@ -1695,18 +1719,20 @@ int try_to_free_nids(struct f2fs_sb_info
  	if (!mutex_trylock(&nm_i->build_lock))
  		return 0;
  
@@ -325,7 +323,7 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
  	mutex_unlock(&nm_i->build_lock);
  
  	return nr - nr_shrink;
-@@ -1733,7 +1759,7 @@ void recover_xattr_data(struct inode *inode, struct page *page, block_t blkaddr)
+@@ -1762,7 +1788,7 @@ recover_xnid:
  	if (unlikely(!inc_valid_node_count(sbi, inode)))
  		f2fs_bug_on(sbi, 1);
  
@@ -334,7 +332,7 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
  	get_node_info(sbi, new_xnid, &ni);
  	ni.ino = inode->i_ino;
  	set_node_addr(sbi, &ni, NEW_ADDR, false);
-@@ -1763,7 +1789,7 @@ int recover_inode_page(struct f2fs_sb_info *sbi, struct page *page)
+@@ -1792,7 +1818,7 @@ int recover_inode_page(struct f2fs_sb_in
  		return -ENOMEM;
  
  	/* Should not use this inode from free nid list */
@@ -343,7 +341,7 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
  
  	SetPageUptodate(ipage);
  	fill_node_footer(ipage, ino, ino, 0, true);
-@@ -2002,19 +2028,21 @@ static int init_node_manager(struct f2fs_sb_info *sbi)
+@@ -2025,19 +2051,21 @@ static int init_node_manager(struct f2fs
  
  	/* not used nids: 0, node, meta, (and root counted as valid node) */
  	nm_i->available_nids = nm_i->max_nid - F2FS_RESERVED_NODE_NUM;
@@ -368,7 +366,7 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
  	init_rwsem(&nm_i->nat_tree_lock);
  
  	nm_i->next_scan_nid = le32_to_cpu(sbi->ckpt->next_free_nid);
-@@ -2059,17 +2087,19 @@ void destroy_node_manager(struct f2fs_sb_info *sbi)
+@@ -2082,17 +2110,19 @@ void destroy_node_manager(struct f2fs_sb
  		return;
  
  	/* destroy free nid list */
@@ -396,11 +394,9 @@ index 7bcbc6e9c40d..d0380ae5a99a 100644
  
  	/* destroy nat cache */
  	down_write(&nm_i->nat_tree_lock);
-diff --git a/fs/f2fs/node.h b/fs/f2fs/node.h
-index e4fffd2d98c4..b495800a1d25 100644
 --- a/fs/f2fs/node.h
 +++ b/fs/f2fs/node.h
-@@ -152,14 +152,15 @@ static inline void next_free_nid(struct f2fs_sb_info *sbi, nid_t *nid)
+@@ -152,14 +152,15 @@ static inline void next_free_nid(struct
  	struct f2fs_nm_info *nm_i = NM_I(sbi);
  	struct free_nid *fnid;
  
@@ -421,11 +417,9 @@ index e4fffd2d98c4..b495800a1d25 100644
  }
  
  /*
-diff --git a/fs/f2fs/shrinker.c b/fs/f2fs/shrinker.c
-index da0d8e0b55a5..bd09b1c8413e 100644
 --- a/fs/f2fs/shrinker.c
 +++ b/fs/f2fs/shrinker.c
-@@ -25,8 +25,8 @@ static unsigned long __count_nat_entries(struct f2fs_sb_info *sbi)
+@@ -25,8 +25,8 @@ static unsigned long __count_nat_entries
  
  static unsigned long __count_free_nids(struct f2fs_sb_info *sbi)
  {
@@ -436,6 +430,3 @@ index da0d8e0b55a5..bd09b1c8413e 100644
  	return 0;
  }
  
--- 
-2.7.4
-
