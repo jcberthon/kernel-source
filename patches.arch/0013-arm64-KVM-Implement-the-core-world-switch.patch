@@ -16,13 +16,11 @@ Signed-off-by: Marc Zyngier <marc.zyngier@arm.com>
 Reviewed-by: Christoffer Dall <christoffer.dall@linaro.org>
 Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 ---
- arch/arm64/kvm/hyp/Makefile |   1 +
- arch/arm64/kvm/hyp/switch.c | 135 ++++++++++++++++++++++++++++++++++++++++++++
+ arch/arm64/kvm/hyp/Makefile |    1 
+ arch/arm64/kvm/hyp/switch.c |  135 ++++++++++++++++++++++++++++++++++++++++++++
  2 files changed, 136 insertions(+)
  create mode 100644 arch/arm64/kvm/hyp/switch.c
 
-diff --git a/arch/arm64/kvm/hyp/Makefile b/arch/arm64/kvm/hyp/Makefile
-index 1e1ff06..9c11b0f 100644
 --- a/arch/arm64/kvm/hyp/Makefile
 +++ b/arch/arm64/kvm/hyp/Makefile
 @@ -8,3 +8,4 @@ obj-$(CONFIG_KVM_ARM_HOST) += timer-sr.o
@@ -30,9 +28,6 @@ index 1e1ff06..9c11b0f 100644
  obj-$(CONFIG_KVM_ARM_HOST) += debug-sr.o
  obj-$(CONFIG_KVM_ARM_HOST) += entry.o
 +obj-$(CONFIG_KVM_ARM_HOST) += switch.o
-diff --git a/arch/arm64/kvm/hyp/switch.c b/arch/arm64/kvm/hyp/switch.c
-new file mode 100644
-index 0000000..79f59c9
 --- /dev/null
 +++ b/arch/arm64/kvm/hyp/switch.c
 @@ -0,0 +1,135 @@
@@ -80,7 +75,7 @@ index 0000000..79f59c9
 +
 +static void __hyp_text __deactivate_traps(struct kvm_vcpu *vcpu)
 +{
-+	write_sysreg(HCR_RW, hcr_el2);
++	write_sysreg(HCR_HOST_NVHE_FLAGS, hcr_el2);
 +	write_sysreg(0, hstr_el2);
 +	write_sysreg(read_sysreg(mdcr_el2) & MDCR_EL2_HPMN_MASK, mdcr_el2);
 +	write_sysreg(0, cptr_el2);
@@ -171,6 +166,3 @@ index 0000000..79f59c9
 +
 +	return exit_code;
 +}
--- 
-2.11.0
-

@@ -2,7 +2,7 @@ From 10d2c0ed19140c8807398aeece937a016b835344 Mon Sep 17 00:00:00 2001
 From: Jeff Mahoney <jeffm@suse.com>
 Date: Tue, 26 Jun 2018 12:40:32 -0500
 Subject: [PATCH] procfs: add tunable for fd/fdinfo dentry retention
-References: bsc#10866542
+References: bsc#1086652
 Patch-mainline: Never, should be https://lkml.org/lkml/2018/4/23/1148
 
 With a test workload of 4096 threads and 16384 files opened, a simple
@@ -33,17 +33,15 @@ tasks can exit without causing undue load on the system.
 Signed-off-by: Jeff Mahoney <jeffm@suse.com>
 Acked-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
 ---
- Documentation/sysctl/fs.txt | 36 ++++++++++++++++++++++++++++++++++++
- fs/proc/fd.c                | 13 ++++++++++++-
- include/linux/proc_fs.h     |  2 ++
- kernel/sysctl.c             |  9 +++++++++
+ Documentation/sysctl/fs.txt |   36 ++++++++++++++++++++++++++++++++++++
+ fs/proc/fd.c                |   13 ++++++++++++-
+ include/linux/proc_fs.h     |    2 ++
+ kernel/sysctl.c             |    9 +++++++++
  4 files changed, 59 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/sysctl/fs.txt b/Documentation/sysctl/fs.txt
-index 35e17f748ca7..01274048df7f 100644
 --- a/Documentation/sysctl/fs.txt
 +++ b/Documentation/sysctl/fs.txt
-@@ -272,6 +272,42 @@ in a mount namespace.
+@@ -308,6 +308,42 @@ in a mount namespace.
  
  ==============================================================
  
@@ -86,11 +84,9 @@ index 35e17f748ca7..01274048df7f 100644
  
  2. /proc/sys/fs/binfmt_misc
  ----------------------------------------------------------
-diff --git a/fs/proc/fd.c b/fs/proc/fd.c
-index 3c2a915c695a..2d0add3a1f74 100644
 --- a/fs/proc/fd.c
 +++ b/fs/proc/fd.c
-@@ -140,9 +140,20 @@ static int tid_fd_revalidate(struct dentry *dentry, unsigned int flags)
+@@ -140,9 +140,20 @@ static int tid_fd_revalidate(struct dent
  	return 0;
  }
  
@@ -112,24 +108,20 @@ index 3c2a915c695a..2d0add3a1f74 100644
  };
  
  static int proc_fd_link(struct dentry *dentry, struct path *path)
-diff --git a/include/linux/proc_fs.h b/include/linux/proc_fs.h
-index b97bf2ef996e..8f718de9940b 100644
 --- a/include/linux/proc_fs.h
 +++ b/include/linux/proc_fs.h
-@@ -82,4 +82,6 @@ static inline struct proc_dir_entry *proc_net_mkdir(
+@@ -82,4 +82,6 @@ static inline struct proc_dir_entry *pro
  	return proc_mkdir_data(name, 0, parent, net);
  }
  
 +extern int procfs_drop_fd_dentries;
 +
  #endif /* _LINUX_PROC_FS_H */
-diff --git a/kernel/sysctl.c b/kernel/sysctl.c
-index f6a0c7f26e58..50cff3815eda 100644
 --- a/kernel/sysctl.c
 +++ b/kernel/sysctl.c
-@@ -1662,6 +1662,15 @@ static struct ctl_table vm_table[] = {
- 		.mode		= 0644,
- 		.proc_handler	= proc_doulongvec_minmax,
+@@ -1870,6 +1870,15 @@ static struct ctl_table fs_table[] = {
+ 		.proc_handler	= proc_dointvec_minmax,
+ 		.extra1		= &one,
  	},
 +	{
 +		.procname	= "procfs-drop-fd-dentries",
@@ -143,6 +135,3 @@ index f6a0c7f26e58..50cff3815eda 100644
  	{ }
  };
  
--- 
-2.16.4
-

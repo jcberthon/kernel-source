@@ -21,6 +21,7 @@ Reviewed-by: Liu Bo <bo.li.liu@oracle.com>
 Signed-off-by: David Sterba <dsterba@suse.cz>
 ---
  fs/btrfs/dev-replace.c  |    4 ++--
+ fs/btrfs/disk-io.c      |    2 +-
  fs/btrfs/extent-tree.c  |   11 +++++++----
  fs/btrfs/ioctl.c        |    2 +-
  fs/btrfs/ordered-data.c |   26 +++++++++++++++++++-------
@@ -28,7 +29,7 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
  fs/btrfs/relocation.c   |    4 +++-
  fs/btrfs/super.c        |    2 +-
  fs/btrfs/transaction.c  |    2 +-
- 8 files changed, 38 insertions(+), 19 deletions(-)
+ 9 files changed, 39 insertions(+), 20 deletions(-)
 
 --- a/fs/btrfs/dev-replace.c
 +++ b/fs/btrfs/dev-replace.c
@@ -50,9 +51,20 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
  
  	trans = btrfs_start_transaction(root, 0);
  	if (IS_ERR(trans)) {
+--- a/fs/btrfs/disk-io.c
++++ b/fs/btrfs/disk-io.c
+@@ -4134,7 +4134,7 @@ static void btrfs_destroy_all_ordered_ex
+ 	 * extents that haven't had their dirty pages IO start writeout yet
+ 	 * actually get run and error out properly.
+ 	 */
+-	btrfs_wait_ordered_roots(fs_info, -1);
++	btrfs_wait_ordered_roots(fs_info, -1, 0, (u64)-1);
+ }
+ 
+ static int btrfs_destroy_delayed_refs(struct btrfs_transaction *trans,
 --- a/fs/btrfs/extent-tree.c
 +++ b/fs/btrfs/extent-tree.c
-@@ -4125,7 +4125,7 @@ commit_trans:
+@@ -4132,7 +4132,7 @@ commit_trans:
  
  			if (need_commit > 0) {
  				btrfs_start_delalloc_roots(fs_info, 0, -1);
@@ -61,7 +73,7 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
  			}
  
  			trans = btrfs_join_transaction(root);
-@@ -4568,7 +4568,8 @@ static void btrfs_writeback_inodes_sb_nr
+@@ -4576,7 +4576,8 @@ static void btrfs_writeback_inodes_sb_nr
  		 */
  		btrfs_start_delalloc_roots(root->fs_info, 0, nr_items);
  		if (!current->journal_info)
@@ -71,7 +83,7 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
  	}
  }
  
-@@ -4617,7 +4618,8 @@ static void shrink_delalloc(struct btrfs
+@@ -4625,7 +4626,8 @@ static void shrink_delalloc(struct btrfs
  		if (trans)
  			return;
  		if (wait_ordered)
@@ -81,7 +93,7 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
  		return;
  	}
  
-@@ -4656,7 +4658,8 @@ skip_async:
+@@ -4664,7 +4666,8 @@ skip_async:
  
  		loops++;
  		if (wait_ordered && !trans) {
@@ -93,7 +105,7 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
  			if (time_left)
 --- a/fs/btrfs/ioctl.c
 +++ b/fs/btrfs/ioctl.c
-@@ -689,7 +689,7 @@ static int create_snapshot(struct btrfs_
+@@ -692,7 +692,7 @@ static int create_snapshot(struct btrfs_
  	if (ret)
  		goto dec_and_free;
  
@@ -185,7 +197,7 @@ Signed-off-by: David Sterba <dsterba@suse.cz>
  			      const loff_t start,
 --- a/fs/btrfs/relocation.c
 +++ b/fs/btrfs/relocation.c
-@@ -4273,7 +4273,9 @@ int btrfs_relocate_block_group(struct bt
+@@ -4274,7 +4274,9 @@ int btrfs_relocate_block_group(struct bt
  		err = ret;
  		goto out;
  	}

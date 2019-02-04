@@ -210,7 +210,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	bio_put(bio);
 --- a/drivers/block/null_blk.c
 +++ b/drivers/block/null_blk.c
-@@ -431,7 +431,7 @@ static int null_lnvm_submit_io(struct nv
+@@ -448,7 +448,7 @@ static int null_lnvm_submit_io(struct nv
  	struct request *rq;
  	struct bio *bio = rqd->bio;
  
@@ -314,7 +314,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	struct dm_bio_details *bd = NULL;
 --- a/drivers/md/dm-snap.c
 +++ b/drivers/md/dm-snap.c
-@@ -1701,7 +1701,8 @@ static int snapshot_map(struct dm_target
+@@ -1718,7 +1718,8 @@ static int snapshot_map(struct dm_target
  	 * to copy an exception */
  	down_write(&s->lock);
  
@@ -324,7 +324,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  		r = -EIO;
  		goto out_unlock;
  	}
-@@ -1718,7 +1719,7 @@ static int snapshot_map(struct dm_target
+@@ -1735,7 +1736,7 @@ static int snapshot_map(struct dm_target
  	 * flags so we should only get this if we are
  	 * writeable.
  	 */
@@ -333,7 +333,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  		pe = __lookup_pending_exception(s, chunk);
  		if (!pe) {
  			up_write(&s->lock);
-@@ -1824,7 +1825,7 @@ static int snapshot_merge_map(struct dm_
+@@ -1841,7 +1842,7 @@ static int snapshot_merge_map(struct dm_
  	e = dm_lookup_exception(&s->complete, chunk);
  	if (e) {
  		/* Queue writes overlapping with chunks being merged */
@@ -342,7 +342,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  		    chunk >= s->first_merging_chunk &&
  		    chunk < (s->first_merging_chunk +
  			     s->num_merging_chunks)) {
-@@ -1836,7 +1837,7 @@ static int snapshot_merge_map(struct dm_
+@@ -1853,7 +1854,7 @@ static int snapshot_merge_map(struct dm_
  
  		remap_exception(s, e, bio, chunk);
  
@@ -351,7 +351,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  			track_chunk(s, bio, chunk);
  		goto out_unlock;
  	}
-@@ -1844,7 +1845,7 @@ static int snapshot_merge_map(struct dm_
+@@ -1861,7 +1862,7 @@ static int snapshot_merge_map(struct dm_
  redirect_to_origin:
  	bio->bi_bdev = s->origin->bdev;
  
@@ -360,7 +360,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  		up_write(&s->lock);
  		return do_origin(s->origin, bio);
  	}
-@@ -2293,7 +2294,7 @@ static int origin_map(struct dm_target *
+@@ -2310,7 +2311,7 @@ static int origin_map(struct dm_target *
  	if (unlikely(bio->bi_rw & REQ_PREFLUSH))
  		return DM_MAPIO_REMAPPED;
  
@@ -399,7 +399,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  	bio_endio(bio);
 --- a/drivers/md/dm.c
 +++ b/drivers/md/dm.c
-@@ -1322,7 +1322,7 @@ static blk_qc_t dm_make_request(struct r
+@@ -1892,7 +1892,7 @@ static blk_qc_t dm_make_request(struct r
  	if (unlikely(test_bit(DMF_BLOCK_IO_FOR_SUSPEND, &md->flags))) {
  		dm_put_live_table(md, srcu_idx);
  
@@ -410,7 +410,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  			bio_io_error(bio);
 --- a/drivers/md/raid5.c
 +++ b/drivers/md/raid5.c
-@@ -5499,7 +5499,7 @@ static void raid5_make_request(struct md
+@@ -5260,7 +5260,7 @@ static void raid5_make_request(struct md
  			(unsigned long long)logical_sector);
  
  		sh = raid5_get_active_stripe(conf, new_sector, previous,
@@ -502,15 +502,15 @@ Acked-by: Hannes Reinecke <hare@suse.de>
   * BH_Lock state bit), any buffer that appears to be clean when doing a write
 --- a/fs/f2fs/checkpoint.c
 +++ b/fs/f2fs/checkpoint.c
-@@ -151,7 +151,7 @@ int ra_meta_pages(struct f2fs_sb_info *s
+@@ -167,7 +167,7 @@ int ra_meta_pages(struct f2fs_sb_info *s
  		.sbi = sbi,
  		.type = META,
  		.op = REQ_OP_READ,
 -		.op_flags = sync ? (READ_SYNC | REQ_META | REQ_PRIO) : READA,
 +		.op_flags = sync ? (READ_SYNC | REQ_META | REQ_PRIO) : REQ_RAHEAD,
  		.encrypted_page = NULL,
+ 		.is_meta = (type != META_POR),
  	};
- 
 --- a/fs/f2fs/gc.c
 +++ b/fs/f2fs/gc.c
 @@ -727,7 +727,8 @@ next_step:
@@ -525,7 +525,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  				continue;
 --- a/fs/f2fs/node.c
 +++ b/fs/f2fs/node.c
-@@ -1048,7 +1048,7 @@ void ra_node_page(struct f2fs_sb_info *s
+@@ -1047,7 +1047,7 @@ void ra_node_page(struct f2fs_sb_info *s
  	if (!apage)
  		return;
  
@@ -603,7 +603,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  			}
 --- a/include/linux/fs.h
 +++ b/include/linux/fs.h
-@@ -176,9 +176,6 @@ typedef void (dax_iodone_t)(struct buffe
+@@ -177,9 +177,6 @@ typedef int (dio_iodone_t)(struct kiocb
   * READ_SYNC		A synchronous read. Device is not plugged, caller can
   *			immediately wait on this read without caring about
   *			unplugging.
@@ -613,7 +613,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
   * WRITE		A normal async write. Device will be plugged.
   * WRITE_SYNC		Synchronous write. Identical to WRITE, but passes down
   *			the hint that someone will be waiting on this IO
-@@ -193,11 +190,9 @@ typedef void (dax_iodone_t)(struct buffe
+@@ -194,11 +191,9 @@ typedef int (dio_iodone_t)(struct kiocb
   *
   */
  #define RW_MASK			REQ_OP_WRITE
@@ -626,7 +626,7 @@ Acked-by: Hannes Reinecke <hare@suse.de>
  
  #define READ_SYNC		REQ_SYNC
  #define WRITE_SYNC		(REQ_SYNC | REQ_NOIDLE)
-@@ -2449,17 +2444,6 @@ static inline bool op_is_write(unsigned
+@@ -2436,17 +2431,6 @@ static inline bool op_is_write(unsigned
  }
  
  /*
