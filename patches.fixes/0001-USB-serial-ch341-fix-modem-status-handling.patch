@@ -1,0 +1,87 @@
+From a0467a967f347842b30739aae636c44980265265 Mon Sep 17 00:00:00 2001
+From: Johan Hovold <johan@kernel.org>
+Date: Fri, 6 Jan 2017 19:15:17 +0100
+Subject: [PATCH] USB: serial: ch341: fix modem-status handling
+Git-commit: a0467a967f347842b30739aae636c44980265265
+Patch-mainline: v4.11
+References: bsc#1114672
+
+The modem-status register was read as part of device configuration at
+port_probe and then again at open (and reset-resume). During open (and
+reset-resume) the MSR was read before submitting the interrupt URB,
+something which could lead to an MSR-change going unnoticed when it
+races with open (reset-resume).
+
+Fix this by dropping the redundant reconfiguration of the port at every
+open, and only read the MSR after the interrupt URB has been submitted.
+
+Fixes: 664d5df92e88 ("USB: usb-serial ch341: support for DTR/RTS/CTS")
+Signed-off-by: Johan Hovold <johan@kernel.org>
+Signed-off-by: Oliver Neukum <oneukum@suse.com>
+---
+ drivers/usb/serial/ch341.c |   26 ++++++++++++--------------
+ 1 file changed, 12 insertions(+), 14 deletions(-)
+
+--- a/drivers/usb/serial/ch341.c
++++ b/drivers/usb/serial/ch341.c
+@@ -234,11 +234,6 @@ static int ch341_configure(struct usb_de
+ 	if (r < 0)
+ 		goto out;
+ 
+-	/* expect 0xff 0xee */
+-	r = ch341_get_status(dev, priv);
+-	if (r < 0)
+-		goto out;
+-
+ 	r = ch341_control_out(dev, 0xa1, 0x501f, 0xd90a);
+ 	if (r < 0)
+ 		goto out;
+@@ -248,11 +243,6 @@ static int ch341_configure(struct usb_de
+ 		goto out;
+ 
+ 	r = ch341_set_handshake(dev, priv->line_control);
+-	if (r < 0)
+-		goto out;
+-
+-	/* expect 0x9f 0xee */
+-	r = ch341_get_status(dev, priv);
+ 
+ out:	kfree(buffer);
+ 	return r;
+@@ -331,10 +321,6 @@ static int ch341_open(struct tty_struct
+ 
+ 	priv->baud_rate = DEFAULT_BAUD_RATE;
+ 
+-	r = ch341_configure(serial->dev, priv);
+-	if (r)
+-		return r;
+-
+ 	r = ch341_set_handshake(serial->dev, priv->line_control);
+ 	if (r)
+ 		return r;
+@@ -353,6 +339,12 @@ static int ch341_open(struct tty_struct
+ 		return -EPROTO;
+ 	}
+ 
++	r = ch341_get_status(port->serial->dev, priv);
++	if (r < 0) {
++		dev_err(&port->dev, "failed to read modem status: %d\n", r);
++		goto err_kill_interrupt_urb;
++	}
++
+ 	r = usb_serial_generic_open(tty, port);
+ 	if (r)
+ 		goto err_kill_interrupt_urb;
+@@ -638,6 +630,12 @@ static int ch341_reset_resume(struct usb
+ 		if (ret) {
+ 			return ret;
+ 		}
++
++		ret = ch341_get_status(port->serial->dev, priv);
++		if (ret < 0) {
++			dev_err(&port->dev, "failed to read modem status: %d\n",
++				ret);
++		}
+ 	}
+ 
+ 	return usb_serial_generic_resume(serial);
