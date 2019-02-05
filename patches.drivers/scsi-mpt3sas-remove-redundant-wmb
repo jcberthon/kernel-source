@@ -1,0 +1,50 @@
+From: Sinan Kaya <okaya@codeaurora.org>
+Date: Fri, 7 Apr 2017 15:06:18 -0400
+Subject: scsi: mpt3sas: remove redundant wmb
+Git-commit: b1391a5bf83a593bbe92d1f9bddaf563be5c7c9d
+Patch-mainline: v4.12-rc1
+References: bsc#1117108
+
+Due to relaxed ordering requirements on multiple architectures, drivers
+are required to use wmb/rmb/mb combinations when they need to guarantee
+observability between the memory and the HW.
+
+The mpt3sas driver is already using wmb() for this purpose.  However, it
+issues a writel following wmb(). writel() function on arm/arm64
+arhictectures have an embedded wmb() call inside.
+
+This results in unnecessary performance loss and code duplication.
+
+writel already guarantees ordering for both cpu and bus. we don't need
+additional wmb()
+
+Signed-off-by: Sinan Kaya <okaya@codeaurora.org>
+Acked-by: Sreekanth Reddy <sreekanth.reddy@broadcom.com>
+Reviewed-by: Brian King <brking@linux.vnet.ibm.com>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+Acked-by: Lee Duncan <lduncan@suse.com>
+---
+
+ drivers/scsi/mpt3sas/mpt3sas_base.c |    2 --
+ 1 file changed, 2 deletions(-)
+
+--- a/drivers/scsi/mpt3sas/mpt3sas_base.c
++++ b/drivers/scsi/mpt3sas/mpt3sas_base.c
+@@ -1025,7 +1025,6 @@ _base_interrupt(int irq, void *bus_id)
+ 				    0 : ioc->reply_free_host_index + 1;
+ 				ioc->reply_free[ioc->reply_free_host_index] =
+ 				    cpu_to_le32(reply);
+-				wmb();
+ 				writel(ioc->reply_free_host_index,
+ 				    &ioc->chip->ReplyFreeHostIndex);
+ 			}
+@@ -1074,7 +1073,6 @@ _base_interrupt(int irq, void *bus_id)
+ 		return IRQ_NONE;
+ 	}
+ 
+-	wmb();
+ 	if (ioc->is_warpdrive) {
+ 		writel(reply_q->reply_post_host_index,
+ 		ioc->reply_post_host_index[msix_index]);
+
+
