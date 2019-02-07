@@ -1,0 +1,41 @@
+From: Chaitra P B <chaitra.basappa@broadcom.com>
+Date: Thu, 31 May 2018 06:34:47 -0400
+Subject: scsi: mpt3sas: Don't abort I/Os issued to NVMe drives while
+ processing Async Broadcast primitive event.
+Git-commit: 999c85134db71599698917775f35fd56ced2dc0a
+Patch-mainline: v4.19-rc1
+References: bsc#1117108
+
+Linux driver when receives Broadcast Asynchronous Event Notification (BAEN)
+from the controller firmware, checks all pending I/Os at the driver level
+and issues query task, abort task TMs. This is done in the driver to handle
+drives which are connected with multiple initiators and undergoing target
+resets. In the BAEN handling code, the I/Os issued to NVMe drives are also
+handled and query task and abort task TMs are issued, which are not
+necessary as there is no multi-initiator and no BAEN concept with NVMe
+drives. Hence when the driver checks for pending I/Os it skips NVMe drives
+at this moment.
+
+Signed-off-by: Chaitra P B <chaitra.basappa@broadcom.com>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+Acked-by: Lee Duncan <lduncan@suse.com>
+---
+
+ drivers/scsi/mpt3sas/mpt3sas_scsih.c |    4 ++++
+ 1 file changed, 4 insertions(+)
+
+--- a/drivers/scsi/mpt3sas/mpt3sas_scsih.c
++++ b/drivers/scsi/mpt3sas/mpt3sas_scsih.c
+@@ -7483,6 +7483,10 @@ _scsih_sas_broadcast_primitive_event(struct MPT3SAS_ADAPTER *ioc,
+ 		if (sas_device_priv_data->sas_target->flags &
+ 		    MPT_TARGET_FLAGS_VOLUME)
+ 			continue;
++		 /* skip PCIe devices */
++		if (sas_device_priv_data->sas_target->flags &
++		    MPT_TARGET_FLAGS_PCIE_DEVICE)
++			continue;
+ 
+ 		handle = sas_device_priv_data->sas_target->handle;
+ 		lun = sas_device_priv_data->lun;
+
+
