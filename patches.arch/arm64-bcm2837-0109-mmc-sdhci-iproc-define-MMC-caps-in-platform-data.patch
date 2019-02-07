@@ -19,11 +19,9 @@ Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 (cherry picked from commit b17b4ab8ce3894744b487e6c880ecea807ed5f86)
 Signed-off-by: Alexander Graf <agraf@suse.de>
 ---
- drivers/mmc/host/sdhci-iproc.c | 5 +++--
+ drivers/mmc/host/sdhci-iproc.c |    5 +++--
  1 file changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-index 55bc348..cdc6c4a 100644
 --- a/drivers/mmc/host/sdhci-iproc.c
 +++ b/drivers/mmc/host/sdhci-iproc.c
 @@ -26,6 +26,7 @@ struct sdhci_iproc_data {
@@ -34,7 +32,7 @@ index 55bc348..cdc6c4a 100644
  };
  
  struct sdhci_iproc_host {
-@@ -165,6 +166,7 @@ static const struct sdhci_iproc_data iproc_data = {
+@@ -186,6 +187,7 @@ static const struct sdhci_iproc_data ipr
  	.pdata = &sdhci_iproc_pltfm_data,
  	.caps = 0x05E90000,
  	.caps1 = 0x00000064,
@@ -42,8 +40,8 @@ index 55bc348..cdc6c4a 100644
  };
  
  static const struct of_device_id sdhci_iproc_of_match[] = {
-@@ -199,8 +201,7 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
- 	mmc_of_parse(host->mmc);
+@@ -223,8 +225,7 @@ static int sdhci_iproc_probe(struct plat
+ 
  	sdhci_get_of_property(pdev);
  
 -	/* Enable EMMC 1/8V DDR capable */
@@ -52,6 +50,3 @@ index 55bc348..cdc6c4a 100644
  
  	pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
  	if (IS_ERR(pltfm_host->clk)) {
--- 
-1.8.5.6
-

@@ -56,7 +56,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 
 --- a/drivers/tty/tty_io.c
 +++ b/drivers/tty/tty_io.c
-@@ -1067,6 +1067,8 @@ static ssize_t tty_read(struct file *fil
+@@ -1076,6 +1076,8 @@ static ssize_t tty_read(struct file *fil
  	/* We want to wait for the line discipline to sort out in this
  	   situation */
  	ld = tty_ldisc_ref_wait(tty);
@@ -65,7 +65,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	if (ld->ops->read)
  		i = ld->ops->read(tty, file, buf, count);
  	else
-@@ -1242,6 +1244,8 @@ static ssize_t tty_write(struct file *fi
+@@ -1251,6 +1253,8 @@ static ssize_t tty_write(struct file *fi
  		printk(KERN_ERR "tty driver %s lacks a write_room method.\n",
  			tty->driver->name);
  	ld = tty_ldisc_ref_wait(tty);
@@ -74,7 +74,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	if (!ld->ops->write)
  		ret = -EIO;
  	else
-@@ -2198,6 +2202,8 @@ static unsigned int tty_poll(struct file
+@@ -2209,6 +2213,8 @@ static unsigned int tty_poll(struct file
  		return 0;
  
  	ld = tty_ldisc_ref_wait(tty);
@@ -83,16 +83,16 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	if (ld->ops->poll)
  		ret = ld->ops->poll(tty, filp, wait);
  	tty_ldisc_deref(ld);
-@@ -2287,6 +2293,8 @@ static int tiocsti(struct tty_struct *tt
+@@ -2298,6 +2304,8 @@ static int tiocsti(struct tty_struct *tt
  		return -EFAULT;
  	tty_audit_tiocsti(tty, ch);
  	ld = tty_ldisc_ref_wait(tty);
 +	if (!ld)
 +		return -EIO;
- 	ld->ops->receive_buf(tty, &ch, &mbz, 1);
+ 	if (ld->ops->receive_buf)
+ 		ld->ops->receive_buf(tty, &ch, &mbz, 1);
  	tty_ldisc_deref(ld);
- 	return 0;
-@@ -2679,6 +2687,8 @@ static int tiocgetd(struct tty_struct *t
+@@ -2691,6 +2699,8 @@ static int tiocgetd(struct tty_struct *t
  	int ret;
  
  	ld = tty_ldisc_ref_wait(tty);
@@ -101,7 +101,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	ret = put_user(ld->ops->num, p);
  	tty_ldisc_deref(ld);
  	return ret;
-@@ -2976,6 +2986,8 @@ long tty_ioctl(struct file *file, unsign
+@@ -2988,6 +2998,8 @@ long tty_ioctl(struct file *file, unsign
  			return retval;
  	}
  	ld = tty_ldisc_ref_wait(tty);
@@ -110,7 +110,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	retval = -EINVAL;
  	if (ld->ops->ioctl) {
  		retval = ld->ops->ioctl(tty, file, cmd, arg);
-@@ -3004,6 +3016,8 @@ static long tty_compat_ioctl(struct file
+@@ -3016,6 +3028,8 @@ static long tty_compat_ioctl(struct file
  	}
  
  	ld = tty_ldisc_ref_wait(tty);
@@ -121,7 +121,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	else
 --- a/drivers/tty/tty_ldisc.c
 +++ b/drivers/tty/tty_ldisc.c
-@@ -255,8 +255,8 @@ const struct file_operations tty_ldiscs_
+@@ -254,8 +254,8 @@ const struct file_operations tty_ldiscs_
   *	against a discipline change, such as an existing ldisc reference
   *	(which we check for)
   *

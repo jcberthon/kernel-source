@@ -1,0 +1,70 @@
+From: Jimmy Durand Wesolowski <jdw@amazon.de>
+Date: Thu, 31 Jan 2019 15:19:39 +0100
+Subject: [PATCH] fs: add the fsnotify call to vfs_iter_write
+References: bnc#1012382
+Patch-mainline: 4.4.173
+Git-commit: fb0c3321e03f14e9c7b0c8ac9e724ae3b59a14a9
+
+A bug has been discovered when redirecting splice output to regular files
+on EXT4 and tmpfs. Other filesystems might be affected.
+This commit fixes the issue for stable series kernel, using one of the
+change introduced during the rewrite and refactoring of vfs_iter_write in
+4.13, specifically in the
+commit abbb65899aec ("fs: implement vfs_iter_write using do_iter_write").
+
+This issue affects v4.4 and v4.9 stable series of kernels.
+
+Without this fix for v4.4 and v4.9 stable, the following upstream commits
+(and their dependencies would need to be backported):
+* commit abbb65899aec ("fs: implement vfs_iter_write using do_iter_write")
+* commit 18e9710ee59c ("fs: implement vfs_iter_read using do_iter_read")
+* commit edab5fe38c2c
+  ("fs: move more code into do_iter_read/do_iter_write")
+* commit 19c735868dd0 ("fs: remove __do_readv_writev")
+* commit 26c87fb7d10d ("fs: remove do_compat_readv_writev")
+* commit 251b42a1dc64 ("fs: remove do_readv_writev")
+
+as well as the following dependencies:
+* commit bb7462b6fd64
+  ("vfs: use helpers for calling f_op->{read,write}_iter()")
+* commit 0f78d06ac1e9
+  ("vfs: pass type instead of fn to do_{loop,iter}_readv_writev()")
+* commit 7687a7a4435f
+  ("vfs: extract common parts of {compat_,}do_readv_writev()")
+
+In order to reduce the changes, this commit uses only the part of
+commit abbb65899aec ("fs: implement vfs_iter_write using do_iter_write")
+that fixes the issue.
+
+This issue and the reproducer can be found on
+https://bugzilla.kernel.org/show_bug.cgi?id=85381
+
+Reported-by: Richard Li <richardpku@gmail.com>
+Reported-by: Chad Miller <millchad@amazon.com>
+Reviewed-by: Stefan Nuernberger <snu@amazon.de>
+Reviewed-by: Frank Becker <becke@amazon.de>
+Signed-off-by: Jimmy Durand Wesolowski <jdw@amazon.de>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ fs/read_write.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/fs/read_write.c b/fs/read_write.c
+index bfd1a5dddf6e..16e554ba885d 100644
+--- a/fs/read_write.c
++++ b/fs/read_write.c
+@@ -363,8 +363,10 @@ ssize_t vfs_iter_write(struct file *file, struct iov_iter *iter, loff_t *ppos)
+ 	iter->type |= WRITE;
+ 	ret = file->f_op->write_iter(&kiocb, iter);
+ 	BUG_ON(ret == -EIOCBQUEUED);
+-	if (ret > 0)
++	if (ret > 0) {
+ 		*ppos = kiocb.ki_pos;
++		fsnotify_modify(file);
++	}
+ 	return ret;
+ }
+ EXPORT_SYMBOL(vfs_iter_write);
+-- 
+2.20.1
+
