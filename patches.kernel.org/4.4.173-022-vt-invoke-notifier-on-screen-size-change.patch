@@ -1,0 +1,35 @@
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
+Date: Tue, 8 Jan 2019 22:55:01 -0500
+Subject: [PATCH] vt: invoke notifier on screen size change
+References: bnc#1012382
+Patch-mainline: 4.4.173
+Git-commit: 0c9b1965faddad7534b6974b5b36c4ad37998f8e
+
+commit 0c9b1965faddad7534b6974b5b36c4ad37998f8e upstream.
+
+User space using poll() on /dev/vcs devices are not awaken when a
+screen size change occurs. Let's fix that.
+
+Signed-off-by: Nicolas Pitre <nico@linaro.org>
+Cc: stable <stable@vger.kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/tty/vt/vt.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/tty/vt/vt.c b/drivers/tty/vt/vt.c
+index ff3286fc22d8..6779f733bb83 100644
+--- a/drivers/tty/vt/vt.c
++++ b/drivers/tty/vt/vt.c
+@@ -958,6 +958,7 @@ static int vc_do_resize(struct tty_struct *tty, struct vc_data *vc,
+ 	if (CON_IS_VISIBLE(vc))
+ 		update_screen(vc);
+ 	vt_event_post(VT_EVENT_RESIZE, vc->vc_num, vc->vc_num);
++	notify_update(vc);
+ 	return err;
+ }
+ 
+-- 
+2.20.1
+
