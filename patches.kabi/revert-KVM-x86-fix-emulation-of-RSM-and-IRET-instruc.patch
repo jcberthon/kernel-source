@@ -18,7 +18,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 
 --- a/arch/x86/include/asm/kvm_emulate.h
 +++ b/arch/x86/include/asm/kvm_emulate.h
-@@ -221,9 +221,6 @@ struct x86_emulate_ops {
+@@ -223,9 +223,6 @@ struct x86_emulate_ops {
  	void (*get_cpuid)(struct x86_emulate_ctxt *ctxt,
  			  u32 *eax, u32 *ebx, u32 *ecx, u32 *edx);
  	void (*set_nmi_mask)(struct x86_emulate_ctxt *ctxt, bool masked);
@@ -28,7 +28,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  };
  
  typedef u32 __attribute__((vector_size(16))) sse128_t;
-@@ -293,6 +290,7 @@ struct x86_emulate_ctxt {
+@@ -295,6 +292,7 @@ struct x86_emulate_ctxt {
  
  	/* interruptibility state, as a result of execution of STI or MOV SS */
  	int interruptibility;
@@ -38,7 +38,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	bool ud;	/* inject an #UD if host doesn't support insn */
 --- a/arch/x86/kvm/emulate.c
 +++ b/arch/x86/kvm/emulate.c
-@@ -2531,7 +2531,7 @@ static int em_rsm(struct x86_emulate_ctx
+@@ -2559,7 +2559,7 @@ static int em_rsm(struct x86_emulate_ctx
  	u64 smbase;
  	int ret;
  
@@ -47,7 +47,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  		return emulate_ud(ctxt);
  
  	/*
-@@ -2580,11 +2580,11 @@ static int em_rsm(struct x86_emulate_ctx
+@@ -2608,11 +2608,11 @@ static int em_rsm(struct x86_emulate_ctx
  		return X86EMUL_UNHANDLEABLE;
  	}
  
@@ -62,7 +62,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	return X86EMUL_CONTINUE;
  }
  
-@@ -5297,7 +5297,6 @@ int x86_emulate_insn(struct x86_emulate_
+@@ -5323,7 +5323,6 @@ int x86_emulate_insn(struct x86_emulate_
  	const struct x86_emulate_ops *ops = ctxt->ops;
  	int rc = X86EMUL_CONTINUE;
  	int saved_dst_type = ctxt->dst.type;
@@ -70,7 +70,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  
  	ctxt->mem_read.pos = 0;
  
-@@ -5312,7 +5311,6 @@ int x86_emulate_insn(struct x86_emulate_
+@@ -5338,7 +5337,6 @@ int x86_emulate_insn(struct x86_emulate_
  		goto done;
  	}
  
@@ -78,7 +78,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	if (unlikely(ctxt->d &
  		     (No64|Undefined|Sse|Mmx|Intercept|CheckPerm|Priv|Prot|String))) {
  		if ((ctxt->mode == X86EMUL_MODE_PROT64 && (ctxt->d & No64)) ||
-@@ -5346,7 +5344,7 @@ int x86_emulate_insn(struct x86_emulate_
+@@ -5372,7 +5370,7 @@ int x86_emulate_insn(struct x86_emulate_
  				fetch_possible_mmx_operand(ctxt, &ctxt->dst);
  		}
  
@@ -87,7 +87,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  			rc = emulator_check_intercept(ctxt, ctxt->intercept,
  						      X86_ICPT_PRE_EXCEPT);
  			if (rc != X86EMUL_CONTINUE)
-@@ -5375,7 +5373,7 @@ int x86_emulate_insn(struct x86_emulate_
+@@ -5401,7 +5399,7 @@ int x86_emulate_insn(struct x86_emulate_
  				goto done;
  		}
  
@@ -96,7 +96,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  			rc = emulator_check_intercept(ctxt, ctxt->intercept,
  						      X86_ICPT_POST_EXCEPT);
  			if (rc != X86EMUL_CONTINUE)
-@@ -5429,7 +5427,7 @@ int x86_emulate_insn(struct x86_emulate_
+@@ -5455,7 +5453,7 @@ int x86_emulate_insn(struct x86_emulate_
  
  special_insn:
  
@@ -107,7 +107,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  		if (rc != X86EMUL_CONTINUE)
 --- a/arch/x86/kvm/x86.c
 +++ b/arch/x86/kvm/x86.c
-@@ -5001,16 +5001,6 @@ static void emulator_set_nmi_mask(struct
+@@ -5031,16 +5031,6 @@ static void emulator_set_nmi_mask(struct
  	kvm_x86_ops->set_nmi_mask(emul_to_vcpu(ctxt), masked);
  }
  
@@ -124,7 +124,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  static const struct x86_emulate_ops emulate_ops = {
  	.read_gpr            = emulator_read_gpr,
  	.write_gpr           = emulator_write_gpr,
-@@ -5050,8 +5040,6 @@ static const struct x86_emulate_ops emul
+@@ -5080,8 +5070,6 @@ static const struct x86_emulate_ops emul
  	.intercept           = emulator_intercept,
  	.get_cpuid           = emulator_get_cpuid,
  	.set_nmi_mask        = emulator_set_nmi_mask,
@@ -133,7 +133,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  };
  
  static void toggle_interruptibility(struct kvm_vcpu *vcpu, u32 mask)
-@@ -5106,6 +5094,7 @@ static void init_emulate_ctxt(struct kvm
+@@ -5136,6 +5124,7 @@ static void init_emulate_ctxt(struct kvm
  	BUILD_BUG_ON(HF_GUEST_MASK != X86EMUL_GUEST_MASK);
  	BUILD_BUG_ON(HF_SMM_MASK != X86EMUL_SMM_MASK);
  	BUILD_BUG_ON(HF_SMM_INSIDE_NMI_MASK != X86EMUL_SMM_INSIDE_NMI_MASK);
@@ -141,12 +141,12 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  
  	init_decode_cache(ctxt);
  	vcpu->arch.emulate_regs_need_sync_from_vcpu = false;
-@@ -5490,6 +5479,8 @@ restart:
+@@ -5523,6 +5512,8 @@ restart:
  		unsigned long rflags = kvm_x86_ops->get_rflags(vcpu);
  		toggle_interruptibility(vcpu, ctxt->interruptibility);
  		vcpu->arch.emulate_regs_need_sync_to_vcpu = false;
 +		if (vcpu->arch.hflags != ctxt->emul_flags)
 +			kvm_set_hflags(vcpu, ctxt->emul_flags);
  		kvm_rip_write(vcpu, ctxt->eip);
- 		if (r == EMULATE_DONE &&
- 		    (ctxt->tf || (vcpu->guest_debug & KVM_GUESTDBG_SINGLESTEP)))
+ 		if (r == EMULATE_DONE && ctxt->tf)
+ 			kvm_vcpu_do_singlestep(vcpu, &r);

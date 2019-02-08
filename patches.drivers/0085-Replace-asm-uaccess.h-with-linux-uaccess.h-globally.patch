@@ -6419,7 +6419,7 @@ Signed-off-by: Coly Li <colyli@suse.de>
 +#include <linux/uaccess.h>
  
  static DEFINE_IDR(loop_index_idr);
- static DEFINE_MUTEX(loop_ctl_mutex);
+ static DEFINE_MUTEX(loop_index_mutex);
 --- a/drivers/block/nbd.c
 +++ b/drivers/block/nbd.c
 @@ -35,7 +35,7 @@
