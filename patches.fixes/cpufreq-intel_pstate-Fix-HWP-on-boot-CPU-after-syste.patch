@@ -1,0 +1,102 @@
+From: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
+Date: Mon, 2 May 2016 02:27:19 +0200
+Subject: cpufreq: intel_pstate: Fix HWP on boot CPU after system resume
+Patch-mainline: v4.6-rc7
+Git-commit: ba41e1bc28bd862089b0fc00e8136aa258a62b21
+References: bsc#1120017
+
+Commit 41cfd64cf49fc "Update frequencies of policy->cpus only from
+->set_policy()" changed the way the intel_pstate driver's ->set_policy
+callback updates the HWP (hardware-managed P-states) settings.
+A side effect of it is that if those settings are modified on the
+boot CPU during system suspend and wakeup, they will never be
+restored during subsequent system resume.
+
+To address this problem, allow cpufreq drivers that don't provide
+->target or ->target_index callbacks to use ->suspend and ->resume
+callbacks and add a ->resume callback to intel_pstate to restore
+the HWP settings on the CPUs that belong to the given policy.
+
+Fixes: 41cfd64cf49fc "Update frequencies of policy->cpus only from ->set_policy()"
+Tested-by: Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>
+Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+Acked-by: Viresh Kumar <viresh.kumar@linaro.org>
+Acked-by: Giovanni Gherdovich <ggherdovich@suse.cz>
+---
+ drivers/cpufreq/cpufreq.c      |   10 +++++-----
+ drivers/cpufreq/intel_pstate.c |   12 ++++++++++--
+ 2 files changed, 15 insertions(+), 7 deletions(-)
+
+--- a/drivers/cpufreq/cpufreq.c
++++ b/drivers/cpufreq/cpufreq.c
+@@ -1595,13 +1595,13 @@ void cpufreq_suspend(void)
+ 	if (!cpufreq_driver)
+ 		return;
+ 
+-	if (!has_target())
++	if (!has_target() && !cpufreq_driver->suspend)
+ 		goto suspend;
+ 
+ 	pr_debug("%s: Suspending Governors\n", __func__);
+ 
+ 	for_each_active_policy(policy) {
+-		if (__cpufreq_governor(policy, CPUFREQ_GOV_STOP))
++		if (has_target() && __cpufreq_governor(policy, CPUFREQ_GOV_STOP))
+ 			pr_err("%s: Failed to stop governor for policy: %p\n",
+ 				__func__, policy);
+ 		else if (cpufreq_driver->suspend
+@@ -1629,7 +1629,7 @@ void cpufreq_resume(void)
+ 
+ 	cpufreq_suspended = false;
+ 
+-	if (!has_target())
++	if (!has_target() && !cpufreq_driver->resume)
+ 		return;
+ 
+ 	pr_debug("%s: Resuming Governors\n", __func__);
+@@ -1638,8 +1638,8 @@ void cpufreq_resume(void)
+ 		if (cpufreq_driver->resume && cpufreq_driver->resume(policy))
+ 			pr_err("%s: Failed to resume driver: %p\n", __func__,
+ 				policy);
+-		else if (__cpufreq_governor(policy, CPUFREQ_GOV_START)
+-		    || __cpufreq_governor(policy, CPUFREQ_GOV_LIMITS))
++		else if (has_target() && (__cpufreq_governor(policy, CPUFREQ_GOV_START)
++					|| __cpufreq_governor(policy, CPUFREQ_GOV_LIMITS)))
+ 			pr_err("%s: Failed to start governor for policy: %p\n",
+ 				__func__, policy);
+ 	}
+--- a/drivers/cpufreq/intel_pstate.c
++++ b/drivers/cpufreq/intel_pstate.c
+@@ -312,6 +312,14 @@ static void intel_pstate_hwp_set(const s
+ 	}
+ }
+ 
++static int intel_pstate_hwp_set_policy(struct cpufreq_policy *policy)
++{
++	if (hwp_active)
++		intel_pstate_hwp_set(policy->cpus);
++
++	return 0;
++}
++
+ static void intel_pstate_hwp_set_online_cpus(void)
+ {
+ 	get_online_cpus();
+@@ -1182,8 +1190,7 @@ static int intel_pstate_set_policy(struc
+ 	limits->max_perf = div_fp(int_tofp(limits->max_perf_pct),
+ 				  int_tofp(100));
+ 
+-	if (hwp_active)
+-		intel_pstate_hwp_set(policy->cpus);
++	intel_pstate_hwp_set_policy(policy);
+ 
+ 	return 0;
+ }
+@@ -1246,6 +1253,7 @@ static struct cpufreq_driver intel_pstat
+ 	.flags		= CPUFREQ_CONST_LOOPS,
+ 	.verify		= intel_pstate_verify_policy,
+ 	.setpolicy	= intel_pstate_set_policy,
++	.resume		= intel_pstate_hwp_set_policy,
+ 	.get		= intel_pstate_get,
+ 	.init		= intel_pstate_cpu_init,
+ 	.stop_cpu	= intel_pstate_stop_cpu,
