@@ -14,14 +14,12 @@ Signed-off-by: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
 Signed-off-by: Davidlohr Bueso <dbueso@suse.de>
 
 ---
- kernel/rcu/tree.c | 24 +++++++++++++++++++++---
+ kernel/rcu/tree.c |   24 +++++++++++++++++++++---
  1 file changed, 21 insertions(+), 3 deletions(-)
 
-diff --git a/kernel/rcu/tree.c b/kernel/rcu/tree.c
-index bc6b79716a86..6a652d1f3d7f 100644
 --- a/kernel/rcu/tree.c
 +++ b/kernel/rcu/tree.c
-@@ -3745,6 +3745,7 @@ static void synchronize_sched_expedited_wait(struct rcu_state *rsp)
+@@ -3757,6 +3757,7 @@ static void synchronize_sched_expedited_
  	unsigned long jiffies_stall;
  	unsigned long jiffies_start;
  	unsigned long mask;
@@ -29,7 +27,7 @@ index bc6b79716a86..6a652d1f3d7f 100644
  	struct rcu_node *rnp;
  	struct rcu_node *rnp_root = rcu_get_root(rsp);
  	int ret;
-@@ -3767,14 +3768,16 @@ static void synchronize_sched_expedited_wait(struct rcu_state *rsp)
+@@ -3779,14 +3780,16 @@ static void synchronize_sched_expedited_
  		}
  		pr_err("INFO: %s detected expedited stalls on CPUs/tasks: {",
  		       rsp->name);
@@ -46,8 +44,8 @@ index bc6b79716a86..6a652d1f3d7f 100644
 +				ndetected++;
  				rdp = per_cpu_ptr(rsp->rda, cpu);
  				pr_cont(" %d-%c%c%c", cpu,
- 					"O."[cpu_online(cpu)],
-@@ -3783,8 +3786,23 @@ static void synchronize_sched_expedited_wait(struct rcu_state *rsp)
+ 					"O."[!!cpu_online(cpu)],
+@@ -3795,8 +3798,23 @@ static void synchronize_sched_expedited_
  			}
  			mask <<= 1;
  		}
@@ -73,6 +71,3 @@ index bc6b79716a86..6a652d1f3d7f 100644
  		rcu_for_each_leaf_node(rsp, rnp) {
  			mask = 1;
  			for (cpu = rnp->grplo; cpu <= rnp->grphi; cpu++, mask <<= 1) {
--- 
-2.1.4
-
