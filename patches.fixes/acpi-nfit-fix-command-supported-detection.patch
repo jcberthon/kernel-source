@@ -64,7 +64,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  int acpi_nfit_ctl(struct nvdimm_bus_descriptor *nd_desc, struct nvdimm *nvdimm,
  		unsigned int cmd, void *buf, unsigned int buf_len, int *cmd_rc)
  {
-@@ -206,16 +232,10 @@ int acpi_nfit_ctl(struct nvdimm_bus_desc
+@@ -206,17 +232,11 @@ int acpi_nfit_ctl(struct nvdimm_bus_desc
  	unsigned long cmd_mask, dsm_mask;
  	u32 offset, fw_status = 0;
  	acpi_handle handle;
@@ -73,7 +73,8 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 -	int rc, i;
 +	int func, rc, i;
  
- 	*cmd_rc = -EINVAL;
+ 	if (cmd_rc)
+ 		*cmd_rc = -EINVAL;
 -	func = cmd;
 -	if (cmd == ND_CMD_CALL) {
 -		call_pkg = buf;
@@ -82,7 +83,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  
  	if (nvdimm) {
  		struct nfit_mem *nfit_mem = nvdimm_provider_data(nvdimm);
-@@ -223,9 +243,12 @@ int acpi_nfit_ctl(struct nvdimm_bus_desc
+@@ -224,9 +244,12 @@ int acpi_nfit_ctl(struct nvdimm_bus_desc
  
  		if (!adev)
  			return -ENOTTY;
@@ -97,7 +98,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  		dimm_name = nvdimm_name(nvdimm);
  		cmd_name = nvdimm_cmd_name(cmd);
  		cmd_mask = nvdimm_cmd_mask(nvdimm);
-@@ -236,6 +259,7 @@ int acpi_nfit_ctl(struct nvdimm_bus_desc
+@@ -237,6 +260,7 @@ int acpi_nfit_ctl(struct nvdimm_bus_desc
  	} else {
  		struct acpi_device *adev = to_acpi_dev(acpi_desc);
  
@@ -105,7 +106,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  		cmd_name = nvdimm_bus_cmd_name(cmd);
  		cmd_mask = nd_desc->cmd_mask;
  		dsm_mask = cmd_mask;
-@@ -248,7 +272,13 @@ int acpi_nfit_ctl(struct nvdimm_bus_desc
+@@ -249,7 +273,13 @@ int acpi_nfit_ctl(struct nvdimm_bus_desc
  	if (!desc || (cmd && (desc->out_num + desc->in_num == 0)))
  		return -ENOTTY;
  
