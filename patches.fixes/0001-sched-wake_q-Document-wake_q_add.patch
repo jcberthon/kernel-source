@@ -1,0 +1,81 @@
+From 33a2c192f7e9f9869c4bfb246d5befef544bb3b9 Mon Sep 17 00:00:00 2001
+From: Peter Zijlstra <peterz@infradead.org>
+Date: Mon, 18 Feb 2019 09:09:22 -0800
+Subject: [PATCH 1/2] sched/wake_q: Document wake_q_add()
+Git-commit: e6018c0f5c996e61639adce6a0697391a2861916
+Patch-mainline: v5.0-rc4
+References: bsc#1050549
+
+The only guarantee provided by wake_q_add() is that a wakeup will
+happen after it, it does _NOT_ guarantee the wakeup will be delayed
+until the matching wake_up_q().
+
+If wake_q_add() fails the cmpxchg() a concurrent wakeup is pending and
+that can happen at any time after the cmpxchg(). This means we should
+not rely on the wakeup happening at wake_q_up(), but should be ready
+for wake_q_add() to issue the wakeup.
+
+The delay; if provided (most likely); should only result in more efficient
+behaviour.
+
+Reported-by: Yongji Xie <elohimes@gmail.com>
+Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+Cc: Davidlohr Bueso <dave@stgolabs.net>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Waiman Long <longman@redhat.com>
+Cc: Will Deacon <will.deacon@arm.com>
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Davidlohr Bueso <dbueso@suse.de>
+
+---
+ include/linux/sched.h |  6 +++++-
+ kernel/sched/core.c   | 12 ++++++++++++
+ 2 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/include/linux/sched.h b/include/linux/sched.h
+index 690ecc765880..ebe1aa236fba 100644
+--- a/include/linux/sched.h
++++ b/include/linux/sched.h
+@@ -982,9 +982,13 @@ enum cpu_idle_type {
+  * called near the end of a function, where the fact that the queue is
+  * not used again will be easy to see by inspection.
+  *
+- * Note that this can cause spurious wakeups. schedule() callers
++ * NOTE that this can cause spurious wakeups. schedule() callers
+  * must ensure the call is done inside a loop, confirming that the
+  * wakeup condition has in fact occurred.
++ *
++ * NOTE that there is no guarantee the wakeup will happen any later than the
++ * wake_q_add() location. Therefore task must be ready to be woken at the
++ * location of the wake_q_add().
+  */
+ struct wake_q_node {
+ 	struct wake_q_node *next;
+diff --git a/kernel/sched/core.c b/kernel/sched/core.c
+index e1ddab401dc9..5f68564cf53d 100644
+--- a/kernel/sched/core.c
++++ b/kernel/sched/core.c
+@@ -588,6 +588,18 @@ static bool set_nr_if_polling(struct task_struct *p)
+ #endif
+ #endif
+ 
++/**
++ * wake_q_add() - queue a wakeup for 'later' waking.
++ * @head: the wake_q_head to add @task to
++ * @task: the task to queue for 'later' wakeup
++ *
++ * Queue a task for later wakeup, most likely by the wake_up_q() call in the
++ * same context, _HOWEVER_ this is not guaranteed, the wakeup can come
++ * instantly.
++ *
++ * This function must be used as-if it were wake_up_process(); IOW the task
++ * must be ready to be woken at this location.
++ */
+ void wake_q_add(struct wake_q_head *head, struct task_struct *task)
+ {
+ 	struct wake_q_node *node = &task->wake_q;
+-- 
+2.16.4
+
