@@ -4,7 +4,7 @@ Date: Tue, 8 Nov 2016 12:54:14 +1100
 Subject: [PATCH] xfs: don't BUG() on mixed direct and mapped I/O
 Git-commit: 04197b341f23b908193308b8d63d17ff23232598
 Patch-mainline: v4.10-rc1
-References: bsc#1114920
+References: bsc#1114920, CVE-2016-10741
 
 We've had reports of generic/095 causing XFS to BUG() in
 __xfs_get_blocks() due to the existence of delalloc blocks on a
