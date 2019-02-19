@@ -1,0 +1,74 @@
+From ed38aca0de5c67d0ecb3df669ef9eeb1e2b67791 Mon Sep 17 00:00:00 2001
+From: Kees Cook <keescook@chromium.org>
+Date: Thu, 17 Mar 2016 14:22:57 -0700
+Subject: [PATCH] lib: add "on"/"off" support to strtobool
+
+References: bsc#1125931
+Patch-mainline: v4.6-rc1
+Git-commit: a81a5a17d44b26521fb1199f8ccf27f4af337a67
+
+Add support for "on" and "off" when converting to boolean.
+
+[note: inverse return/break between kstrtobool and strtobool]
+
+Signed-off-by: Kees Cook <keescook@chromium.org>
+Cc: Amitkumar Karwar <akarwar@marvell.com>
+Cc: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Daniel Borkmann <daniel@iogearbox.net>
+Cc: Heiko Carstens <heiko.carstens@de.ibm.com>
+Cc: Joe Perches <joe@perches.com>
+Cc: Kalle Valo <kvalo@codeaurora.org>
+Cc: Martin Schwidefsky <schwidefsky@de.ibm.com>
+Cc: Michael Ellerman <mpe@ellerman.id.au>
+Cc: Nishant Sarmukadam <nishants@marvell.com>
+Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+Cc: Steve French <sfrench@samba.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ lib/string.c | 21 ++++++++++++++++++---
+ 1 file changed, 18 insertions(+), 3 deletions(-)
+
+diff --git a/lib/string.c b/lib/string.c
+index 11d921074988..ae8f6260d2cf 100644
+--- a/lib/string.c
++++ b/lib/string.c
+@@ -539,9 +539,9 @@ EXPORT_SYMBOL(sysfs_streq);
+  * @s: input string
+  * @res: result
+  *
+- * This routine returns 0 iff the first character is one of 'Yy1Nn0'.
+- * Otherwise it will return -EINVAL.  Value pointed to by res is
+- * updated upon finding a match.
++ * This routine returns 0 iff the first character is one of 'Yy1Nn0', or
++ * [oO][NnFf] for "on" and "off". Otherwise it will return -EINVAL.  Value
++ * pointed to by res is updated upon finding a match.
+  */
+ int strtobool(const char *s, bool *res)
+ {
+@@ -556,6 +556,21 @@ int strtobool(const char *s, bool *res)
+ 	case '0':
+ 		*res = false;
+ 		break;
++	case 'o':
++	case 'O':
++		switch (s[1]) {
++		case 'n':
++		case 'N':
++			*res = true;
++			break;
++		case 'f':
++		case 'F':
++			*res = false;
++			break;
++		default:
++			return -EINVAL;
++		}
++		break;
+ 	default:
+ 		return -EINVAL;
+ 	}
+-- 
+2.20.1
+
