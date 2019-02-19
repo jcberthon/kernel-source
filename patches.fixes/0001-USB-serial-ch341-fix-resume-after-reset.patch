@@ -17,19 +17,21 @@ Cc: stable <stable@vger.kernel.org>
 Signed-off-by: Johan Hovold <johan@kernel.org>
 Signed-off-by: Oliver Neukum <oneukum@suse.com>
 ---
- drivers/usb/serial/ch341.c |   14 +++++++++++---
- 1 file changed, 11 insertions(+), 3 deletions(-)
+ drivers/usb/serial/ch341.c |   18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
 
 --- a/drivers/usb/serial/ch341.c
 +++ b/drivers/usb/serial/ch341.c
-@@ -612,17 +612,25 @@ static int ch341_reset_resume(struct usb
+@@ -611,18 +611,24 @@ static int ch341_tiocmget(struct tty_str
+ static int ch341_reset_resume(struct usb_interface *intf)
  {
  	struct usb_device *dev = interface_to_usbdev(intf);
- 	struct usb_serial *serial = NULL;
+-	struct usb_serial *serial = NULL;
 -	struct ch341_private *priv;
- 
- 	serial = usb_get_intfdata(intf);
+-
+-	serial = usb_get_intfdata(intf);
 -	priv = usb_get_serial_port_data(serial->port[0]);
++	struct usb_serial *serial = usb_get_intfdata(intf);
 +	struct usb_serial_port *port = serial->port[0];
 +	struct ch341_private *priv = usb_get_serial_port_data(port);
 +	int ret;
