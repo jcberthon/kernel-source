@@ -1,0 +1,42 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: kABI: protect linux/kfifo.h include in hid-debug
+Patch-mainline: never, kabi
+References: kabi
+
+In 4.4.175, commit b661fff5f8a0f19824df91cc3905ba2c5b54dc87 (HID:
+debug: fix the ring buffer implementation), upstream commit
+13054abbaa4f1fd4e6f3b4b63439ec033b4c8035 added linux/kfifo.h include
+to hid-debug.c and it made some of the symbols defined.
+
+Protect the include by __GENKSYMS__ to satisfy the kABI checker.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/hid/hid-debug.c   |    2 ++
+ include/linux/hid-debug.h |    2 ++
+ 2 files changed, 4 insertions(+)
+
+--- a/drivers/hid/hid-debug.c
++++ b/drivers/hid/hid-debug.c
+@@ -30,7 +30,9 @@
+ 
+ #include <linux/debugfs.h>
+ #include <linux/seq_file.h>
++#ifndef __GENKSYMS__
+ #include <linux/kfifo.h>
++#endif
+ #include <linux/sched.h>
+ #include <linux/export.h>
+ #include <linux/slab.h>
+--- a/include/linux/hid-debug.h
++++ b/include/linux/hid-debug.h
+@@ -24,7 +24,9 @@
+ 
+ #ifdef CONFIG_DEBUG_FS
+ 
++#ifndef __GENKSYMS__
+ #include <linux/kfifo.h>
++#endif
+ 
+ #define HID_DEBUG_BUFSIZE 512
+ #define HID_DEBUG_FIFOSIZE 512
