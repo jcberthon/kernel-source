@@ -33,15 +33,15 @@ Link: http://lkml.kernel.org/r/20160429215405.329827545@asylum.americas.sgi.com
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Acked-by: Joerg Roedel <jroedel@suse.de>
 ---
- arch/x86/include/asm/uv/bios.h  | 59 +++++++++++++++++++++++++++++++++++++++--
- arch/x86/platform/uv/bios_uv.c  | 48 ++++++++++++++++-----------------
- arch/x86/platform/uv/uv_sysfs.c |  2 +-
+ arch/x86/include/asm/uv/bios.h  |   59 ++++++++++++++++++++++++++++++++++++++--
+ arch/x86/platform/uv/bios_uv.c  |   48 +++++++++++++++-----------------
+ arch/x86/platform/uv/uv_sysfs.c |    2 -
  3 files changed, 81 insertions(+), 28 deletions(-)
 
 --- a/arch/x86/include/asm/uv/bios.h
 +++ b/arch/x86/include/asm/uv/bios.h
-@@ -51,15 +51,66 @@ enum {
- 	BIOS_STATUS_UNAVAIL		= -EBUSY
+@@ -52,15 +52,66 @@ enum {
+ 	BIOS_STATUS_ABORT		= -EINTR,
  };
  
 +/* Address map parameters */
@@ -108,7 +108,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
  enum {
  	BIOS_FREQ_BASE_PLATFORM = 0,
-@@ -99,7 +150,11 @@ extern s64 uv_bios_change_memprotect(u64
+@@ -100,7 +151,11 @@ extern s64 uv_bios_change_memprotect(u64
  extern s64 uv_bios_reserved_page_pa(u64, u64 *, u64 *, u64 *);
  extern int uv_bios_set_legacy_vga_target(bool decode, int domain, int bus);
  
@@ -120,7 +120,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
  extern unsigned long sn_rtc_cycles_per_second;
  extern int uv_type;
-@@ -107,7 +162,7 @@ extern long sn_partition_id;
+@@ -108,7 +163,7 @@ extern long sn_partition_id;
  extern long sn_coherency_id;
  extern long sn_region_size;
  extern long system_serial_number;
@@ -131,7 +131,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  
 --- a/arch/x86/platform/uv/bios_uv.c
 +++ b/arch/x86/platform/uv/bios_uv.c
-@@ -21,19 +21,20 @@
+@@ -21,20 +21,21 @@
  
  #include <linux/efi.h>
  #include <linux/export.h>
@@ -144,7 +144,8 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
 -static struct uv_systab uv_systab;
 +struct uv_systab *uv_systab;
  
- s64 uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3, u64 a4, u64 a5)
+ static s64 __uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3,
+ 			u64 a4, u64 a5)
  {
 -	struct uv_systab *tab = &uv_systab;
 +	struct uv_systab *tab = uv_systab;
@@ -155,7 +156,7 @@ Acked-by: Joerg Roedel <jroedel@suse.de>
  		/*
  		 * BIOS does not support UV systab
  		 */
-@@ -183,34 +184,31 @@ int uv_bios_set_legacy_vga_target(bool d
+@@ -202,34 +203,31 @@ int uv_bios_set_legacy_vga_target(bool d
  }
  EXPORT_SYMBOL_GPL(uv_bios_set_legacy_vga_target);
  

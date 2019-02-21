@@ -25,22 +25,22 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 
 ---
  arch/arm/kvm/Makefile     |    7 
- arch/arm/kvm/arm.c        | 1483 ----------------------------------
- arch/arm/kvm/mmio.c       |  217 ----
+ arch/arm/kvm/arm.c        | 1476 ---------------------------------
+ arch/arm/kvm/mmio.c       |  218 -----
  arch/arm/kvm/mmu.c        | 2001 ----------------------------------------------
  arch/arm/kvm/perf.c       |   68 -
  arch/arm/kvm/psci.c       |  332 -------
  arch/arm/kvm/trace.h      |  247 -----
  arch/arm64/kvm/Makefile   |    5 
- virt/kvm/arm/arm.c        | 1483 ++++++++++++++++++++++++++++++++++
- virt/kvm/arm/mmio.c       |  217 ++++
+ virt/kvm/arm/arm.c        | 1476 +++++++++++++++++++++++++++++++++
+ virt/kvm/arm/mmio.c       |  218 +++++
  virt/kvm/arm/mmu.c        | 2001 ++++++++++++++++++++++++++++++++++++++++++++++
  virt/kvm/arm/perf.c       |   68 +
  virt/kvm/arm/psci.c       |  332 +++++++
  virt/kvm/arm/trace.h      |  246 +++++
  virt/kvm/arm/vgic/trace.h |   37 
  virt/kvm/arm/vgic/vgic.c  |    2 
- 16 files changed, 4381 insertions(+), 4365 deletions(-)
+ 16 files changed, 4375 insertions(+), 4359 deletions(-)
  delete mode 100644 arch/arm/kvm/arm.c
  delete mode 100644 arch/arm/kvm/mmio.c
  delete mode 100644 arch/arm/kvm/mmu.c
@@ -1551,7 +1551,7 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 -module_init(arm_init);
 --- a/arch/arm/kvm/mmio.c
 +++ /dev/null
-@@ -1,217 +0,0 @@
+@@ -1,218 +0,0 @@
 -/*
 - * Copyright (C) 2012 - Virtual Open Systems and Columbia University
 - * Author: Christoffer Dall <c.dall@virtualopensystems.com>
@@ -1671,6 +1671,12 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 -		vcpu_set_reg(vcpu, vcpu->arch.mmio_decode.rt, data);
 -	}
 -
+-	/*
+-	 * The MMIO instruction is emulated and should not be re-executed
+-	 * in the guest.
+-	 */
+-	kvm_skip_instr(vcpu, kvm_vcpu_trap_il_is32bit(vcpu));
+-
 -	return 0;
 -}
 -
@@ -1698,11 +1704,6 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 -	vcpu->arch.mmio_decode.sign_extend = sign_extend;
 -	vcpu->arch.mmio_decode.rt = rt;
 -
--	/*
--	 * The MMIO instruction is emulated and should not be re-executed
--	 * in the guest.
--	 */
--	kvm_skip_instr(vcpu, kvm_vcpu_trap_il_is32bit(vcpu));
 -	return 0;
 -}
 -
@@ -5949,7 +5950,7 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 +module_init(arm_init);
 --- /dev/null
 +++ b/virt/kvm/arm/mmio.c
-@@ -0,0 +1,217 @@
+@@ -0,0 +1,218 @@
 +/*
 + * Copyright (C) 2012 - Virtual Open Systems and Columbia University
 + * Author: Christoffer Dall <c.dall@virtualopensystems.com>
@@ -6069,6 +6070,12 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 +		vcpu_set_reg(vcpu, vcpu->arch.mmio_decode.rt, data);
 +	}
 +
++	/*
++	 * The MMIO instruction is emulated and should not be re-executed
++	 * in the guest.
++	 */
++	kvm_skip_instr(vcpu, kvm_vcpu_trap_il_is32bit(vcpu));
++
 +	return 0;
 +}
 +
@@ -6096,11 +6103,6 @@ Signed-off-by: Alexander Graf <agraf@suse.de>
 +	vcpu->arch.mmio_decode.sign_extend = sign_extend;
 +	vcpu->arch.mmio_decode.rt = rt;
 +
-+	/*
-+	 * The MMIO instruction is emulated and should not be re-executed
-+	 * in the guest.
-+	 */
-+	kvm_skip_instr(vcpu, kvm_vcpu_trap_il_is32bit(vcpu));
 +	return 0;
 +}
 +

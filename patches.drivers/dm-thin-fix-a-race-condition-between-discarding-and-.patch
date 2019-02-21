@@ -28,16 +28,14 @@ Signed-off-by: Joe Thornber <ejt@redhat.com>
 Signed-off-by: Mike Snitzer <snitzer@redhat.com>
 Acked-by: Hannes Reinecke <hare@suse.de>
 ---
- drivers/md/dm-thin-metadata.c |  30 +++++++++++++
- drivers/md/dm-thin-metadata.h |   3 ++
- drivers/md/dm-thin.c          | 102 +++++++++++++++++++++++++++++++++++++-----
+ drivers/md/dm-thin-metadata.c |   30 ++++++++++++
+ drivers/md/dm-thin-metadata.h |    3 +
+ drivers/md/dm-thin.c          |  102 +++++++++++++++++++++++++++++++++++++-----
  3 files changed, 124 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/md/dm-thin-metadata.c b/drivers/md/dm-thin-metadata.c
-index 43824d7..a15091a 100644
 --- a/drivers/md/dm-thin-metadata.c
 +++ b/drivers/md/dm-thin-metadata.c
-@@ -1677,6 +1677,36 @@ int dm_pool_block_is_used(struct dm_pool_metadata *pmd, dm_block_t b, bool *resu
+@@ -1703,6 +1703,36 @@ int dm_pool_block_is_used(struct dm_pool
  	return r;
  }
  
@@ -74,11 +72,9 @@ index 43824d7..a15091a 100644
  bool dm_thin_changed_this_transaction(struct dm_thin_device *td)
  {
  	int r;
-diff --git a/drivers/md/dm-thin-metadata.h b/drivers/md/dm-thin-metadata.h
-index a938bab..35e954e 100644
 --- a/drivers/md/dm-thin-metadata.h
 +++ b/drivers/md/dm-thin-metadata.h
-@@ -197,6 +197,9 @@ int dm_pool_get_data_dev_size(struct dm_pool_metadata *pmd, dm_block_t *result);
+@@ -197,6 +197,9 @@ int dm_pool_get_data_dev_size(struct dm_
  
  int dm_pool_block_is_used(struct dm_pool_metadata *pmd, dm_block_t b, bool *result);
  
@@ -88,19 +84,17 @@ index a938bab..35e954e 100644
  /*
   * Returns -ENOSPC if the new size is too small and already allocated
   * blocks would be lost.
-diff --git a/drivers/md/dm-thin.c b/drivers/md/dm-thin.c
-index 5f9e3d7..197ea20 100644
 --- a/drivers/md/dm-thin.c
 +++ b/drivers/md/dm-thin.c
-@@ -253,6 +253,7 @@ struct pool {
- 	struct bio_list deferred_flush_bios;
+@@ -260,6 +260,7 @@ struct pool {
+ 	struct bio_list deferred_flush_completions;
  	struct list_head prepared_mappings;
  	struct list_head prepared_discards;
 +	struct list_head prepared_discards_pt2;
  	struct list_head active_thins;
  
  	struct dm_deferred_set *shared_read_ds;
-@@ -269,6 +270,7 @@ struct pool {
+@@ -276,6 +277,7 @@ struct pool {
  
  	process_mapping_fn process_prepared_mapping;
  	process_mapping_fn process_prepared_discard;
@@ -108,7 +102,7 @@ index 5f9e3d7..197ea20 100644
  
  	struct dm_bio_prison_cell **cell_sort_array;
  };
-@@ -1001,7 +1003,8 @@ static void process_prepared_discard_no_passdown(struct dm_thin_new_mapping *m)
+@@ -1041,7 +1043,8 @@ static void process_prepared_discard_no_
  
  /*----------------------------------------------------------------*/
  
@@ -118,7 +112,7 @@ index 5f9e3d7..197ea20 100644
  {
  	/*
  	 * We've already unmapped this range of blocks, but before we
-@@ -1014,7 +1017,7 @@ static void passdown_double_checking_shared_status(struct dm_thin_new_mapping *m
+@@ -1054,7 +1057,7 @@ static void passdown_double_checking_sha
  	dm_block_t b = m->data_block, e, end = m->data_block + m->virt_end - m->virt_begin;
  	struct discard_op op;
  
@@ -127,7 +121,7 @@ index 5f9e3d7..197ea20 100644
  	while (b != end) {
  		/* find start of unmapped run */
  		for (; b < end; b++) {
-@@ -1049,28 +1052,101 @@ out:
+@@ -1089,28 +1092,101 @@ out:
  	end_discard(&op, r);
  }
  
@@ -237,7 +231,7 @@ index 5f9e3d7..197ea20 100644
  	cell_defer_no_holder(tc, m->cell);
  	mempool_free(m, pool->mapping_pool);
  }
-@@ -2215,6 +2291,8 @@ static void do_worker(struct work_struct *ws)
+@@ -2316,6 +2392,8 @@ static void do_worker(struct work_struct
  	throttle_work_update(&pool->throttle);
  	process_prepared(pool, &pool->prepared_discards, &pool->process_prepared_discard);
  	throttle_work_update(&pool->throttle);
@@ -246,7 +240,7 @@ index 5f9e3d7..197ea20 100644
  	process_deferred_bios(pool);
  	throttle_work_complete(&pool->throttle);
  }
-@@ -2343,7 +2421,8 @@ static void set_discard_callbacks(struct pool *pool)
+@@ -2444,7 +2522,8 @@ static void set_discard_callbacks(struct
  
  	if (passdown_enabled(pt)) {
  		pool->process_discard_cell = process_discard_cell_passdown;
@@ -256,14 +250,11 @@ index 5f9e3d7..197ea20 100644
  	} else {
  		pool->process_discard_cell = process_discard_cell_no_passdown;
  		pool->process_prepared_discard = process_prepared_discard_no_passdown;
-@@ -2830,6 +2909,7 @@ static struct pool *pool_create(struct mapped_device *pool_md,
- 	bio_list_init(&pool->deferred_flush_bios);
+@@ -2933,6 +3012,7 @@ static struct pool *pool_create(struct m
+ 	bio_list_init(&pool->deferred_flush_completions);
  	INIT_LIST_HEAD(&pool->prepared_mappings);
  	INIT_LIST_HEAD(&pool->prepared_discards);
 +	INIT_LIST_HEAD(&pool->prepared_discards_pt2);
  	INIT_LIST_HEAD(&pool->active_thins);
  	pool->low_water_triggered = false;
  	pool->suspended = true;
--- 
-1.8.5.6
-

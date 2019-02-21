@@ -74,7 +74,7 @@ Signed-off-by: Tony Jones <tonyj@suse.de>
 +		err = pci_read_config_dword(ubox_dev, nodeid_loc, &config);
  		if (err)
  			break;
- 		nodeid = config;
+ 		nodeid = config & NODE_ID_MASK;
  		/* get the Node ID mapping */
 -		err = pci_read_config_dword(ubox_dev, 0x54, &config);
 +		err = pci_read_config_dword(ubox_dev, idmap_loc, &config);
@@ -125,7 +125,7 @@ Signed-off-by: Tony Jones <tonyj@suse.de>
  	if (ret)
  		return ret;
  	uncore_pci_uncores = ivbep_pci_uncores;
-@@ -2901,7 +2914,7 @@ static struct pci_driver hswep_uncore_pc
+@@ -2899,7 +2912,7 @@ static struct pci_driver hswep_uncore_pc
  
  int hswep_uncore_pci_init(void)
  {
@@ -134,7 +134,7 @@ Signed-off-by: Tony Jones <tonyj@suse.de>
  	if (ret)
  		return ret;
  	uncore_pci_uncores = hswep_pci_uncores;
-@@ -3205,7 +3218,7 @@ static struct pci_driver bdx_uncore_pci_
+@@ -3188,7 +3201,7 @@ static struct pci_driver bdx_uncore_pci_
  
  int bdx_uncore_pci_init(void)
  {
