@@ -16,13 +16,14 @@ Signed-off-by: Ray Jui <ray.jui@broadcom.com>
 Signed-off-by: Selvin Xavier <selvin.xavier@broadcom.com>
 Signed-off-by: Doug Ledford <dledford@redhat.com>
 Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
+Acked-by: Denis Kirjanov <dkirjanov@suse.com>
 ---
  drivers/infiniband/hw/bnxt_re/bnxt_re.h  |    5 -
  drivers/infiniband/hw/bnxt_re/ib_verbs.c |   17 +++-
- drivers/infiniband/hw/bnxt_re/main.c     |  108 +++++++++++++++++++------------
+ drivers/infiniband/hw/bnxt_re/main.c     |  107 +++++++++++++++++++------------
  drivers/infiniband/hw/bnxt_re/qplib_fp.c |   21 +++++-
  drivers/infiniband/hw/bnxt_re/qplib_fp.h |    4 -
- 5 files changed, 105 insertions(+), 50 deletions(-)
+ 5 files changed, 104 insertions(+), 50 deletions(-)
 
 --- a/drivers/infiniband/hw/bnxt_re/bnxt_re.h
 +++ b/drivers/infiniband/hw/bnxt_re/bnxt_re.h
@@ -35,7 +36,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  #define BNXT_RE_AEQ_IDX			0
  #define BNXT_RE_NQ_IDX			1
  
-@@ -111,7 +111,7 @@ struct bnxt_re_dev {
+@@ -113,7 +113,7 @@ struct bnxt_re_dev {
  	struct bnxt_qplib_rcfw		rcfw;
  
  	/* NQ */
@@ -44,17 +45,17 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  
  	/* Device Resources */
  	struct bnxt_qplib_dev_attr	dev_attr;
-@@ -135,6 +135,7 @@ struct bnxt_re_dev {
+@@ -137,6 +137,7 @@ struct bnxt_re_dev {
  	struct bnxt_re_qp		*qp1_sqp;
  	struct bnxt_re_ah		*sqp_ah;
  	struct bnxt_re_sqp_entries sqp_tbl[1024];
-+	atomic_t nq_alloc_cnt;
++	atomic_t			nq_alloc_cnt;
  };
  
  #define to_bnxt_re_dev(ptr, member)	\
 --- a/drivers/infiniband/hw/bnxt_re/ib_verbs.c
 +++ b/drivers/infiniband/hw/bnxt_re/ib_verbs.c
-@@ -2346,6 +2346,7 @@ int bnxt_re_destroy_cq(struct ib_cq *ib_
+@@ -2319,6 +2319,7 @@ int bnxt_re_destroy_cq(struct ib_cq *ib_
  	struct bnxt_re_cq *cq = container_of(ib_cq, struct bnxt_re_cq, ib_cq);
  	struct bnxt_re_dev *rdev = cq->rdev;
  	int rc;
@@ -62,7 +63,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  
  	rc = bnxt_qplib_destroy_cq(&rdev->qplib_res, &cq->qplib_cq);
  	if (rc) {
-@@ -2360,7 +2361,7 @@ int bnxt_re_destroy_cq(struct ib_cq *ib_
+@@ -2333,7 +2334,7 @@ int bnxt_re_destroy_cq(struct ib_cq *ib_
  		kfree(cq);
  	}
  	atomic_dec(&rdev->cq_count);
@@ -71,7 +72,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  	return 0;
  }
  
-@@ -2374,6 +2375,8 @@ struct ib_cq *bnxt_re_create_cq(struct i
+@@ -2347,6 +2348,8 @@ struct ib_cq *bnxt_re_create_cq(struct i
  	struct bnxt_re_cq *cq = NULL;
  	int rc, entries;
  	int cqe = attr->cqe;
@@ -80,7 +81,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  
  	/* Validate CQ fields */
  	if (cqe < 1 || cqe > dev_attr->max_cq_wqes) {
-@@ -2425,9 +2428,15 @@ struct ib_cq *bnxt_re_create_cq(struct i
+@@ -2398,9 +2401,15 @@ struct ib_cq *bnxt_re_create_cq(struct i
  		cq->qplib_cq.sghead = NULL;
  		cq->qplib_cq.nmap = 0;
  	}
@@ -92,13 +93,13 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 +	nq = &rdev->nq[nq_alloc_cnt % (rdev->num_msix - 1)];
  	cq->qplib_cq.max_wqe = entries;
 -	cq->qplib_cq.cnq_hw_ring_id = rdev->nq.ring_id;
--	cq->qplib_cq.nq	= &rdev->nq;
+-	cq->qplib_cq.nq = &rdev->nq;
 +	cq->qplib_cq.cnq_hw_ring_id = nq->ring_id;
-+	cq->qplib_cq.nq	= nq;
++	cq->qplib_cq.nq = nq;
  
  	rc = bnxt_qplib_create_cq(&rdev->qplib_res, &cq->qplib_cq);
  	if (rc) {
-@@ -2437,7 +2446,7 @@ struct ib_cq *bnxt_re_create_cq(struct i
+@@ -2410,7 +2419,7 @@ struct ib_cq *bnxt_re_create_cq(struct i
  
  	cq->ib_cq.cqe = entries;
  	cq->cq_period = cq->qplib_cq.period;
@@ -142,7 +143,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  
  	if (rdev->qplib_res.rcfw)
  		bnxt_qplib_cleanup_res(&rdev->qplib_res);
-@@ -666,31 +672,41 @@ static void bnxt_re_cleanup_res(struct b
+@@ -666,31 +672,40 @@ static void bnxt_re_cleanup_res(struct b
  
  static int bnxt_re_init_res(struct bnxt_re_dev *rdev)
  {
@@ -161,13 +162,12 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 -				  NULL);
 +	for (i = 1; i < rdev->num_msix ; i++) {
 +		rc = bnxt_qplib_enable_nq(rdev->en_dev->pdev, &rdev->nq[i - 1],
-+					  i - 1, rdev->msix_entries[i].vector,
-+					  rdev->msix_entries[i].db_offset,
-+					  &bnxt_re_cqn_handler, NULL);
-+
++				i - 1, rdev->msix_entries[i].vector,
++				rdev->msix_entries[i].db_offset,
++				&bnxt_re_cqn_handler, NULL);
 +		if (rc) {
 +			dev_err(rdev_to_dev(rdev),
-+				"Failed to enable NQ with rc = 0x%x", rc);
++					"Failed to enable NQ with rc = 0x%x", rc);
 +			goto fail;
 +		}
 +	}
@@ -200,7 +200,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  	if (rdev->qplib_res.dpi_tbl.max) {
  		bnxt_qplib_dealloc_dpi(&rdev->qplib_res,
  				       &rdev->qplib_res.dpi_tbl,
-@@ -704,7 +720,7 @@ static void bnxt_re_free_res(struct bnxt
+@@ -704,7 +719,7 @@ static void bnxt_re_free_res(struct bnxt
  
  static int bnxt_re_alloc_res(struct bnxt_re_dev *rdev)
  {
@@ -209,7 +209,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  
  	/* Configure and allocate resources for qplib */
  	rdev->qplib_res.rcfw = &rdev->rcfw;
-@@ -721,30 +737,42 @@ static int bnxt_re_alloc_res(struct bnxt
+@@ -721,30 +736,42 @@ static int bnxt_re_alloc_res(struct bnxt
  				  &rdev->dpi_privileged,
  				  rdev);
  	if (rc)
@@ -240,7 +240,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 +		rc = bnxt_qplib_alloc_nq(rdev->en_dev->pdev, &rdev->nq[i]);
 +		if (rc) {
 +			dev_err(rdev_to_dev(rdev), "Alloc Failed NQ%d rc:%#x",
-+				i, rc);
++					i, rc);
 +			goto dealloc_dpi;
 +		}
 +		rc = bnxt_re_net_ring_alloc
@@ -252,8 +252,8 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 +			 &rdev->nq[i].ring_id);
 +		if (rc) {
 +			dev_err(rdev_to_dev(rdev),
-+				"Failed to allocate NQ fw id with rc = 0x%x",
-+				rc);
++					"Failed to allocate NQ fw id with rc = 0x%x",
++					rc);
 +			goto free_nq;
 +		}
  	}
@@ -264,8 +264,8 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 +		bnxt_qplib_free_nq(&rdev->nq[i]);
 +dealloc_dpi:
 +	bnxt_qplib_dealloc_dpi(&rdev->qplib_res,
-+			       &rdev->qplib_res.dpi_tbl,
-+			       &rdev->dpi_privileged);
++			&rdev->qplib_res.dpi_tbl,
++			&rdev->dpi_privileged);
 +dealloc_res:
 +	bnxt_qplib_free_res(&rdev->qplib_res);
 +
@@ -274,7 +274,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  	return rc;
 --- a/drivers/infiniband/hw/bnxt_re/qplib_fp.c
 +++ b/drivers/infiniband/hw/bnxt_re/qplib_fp.c
-@@ -311,6 +311,7 @@ void bnxt_qplib_disable_nq(struct bnxt_q
+@@ -365,6 +365,7 @@ void bnxt_qplib_disable_nq(struct bnxt_q
  	tasklet_kill(&nq->worker);
  
  	if (nq->requested) {
@@ -282,7 +282,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  		free_irq(nq->vector, nq);
  		nq->requested = false;
  	}
-@@ -324,7 +325,7 @@ void bnxt_qplib_disable_nq(struct bnxt_q
+@@ -378,7 +379,7 @@ void bnxt_qplib_disable_nq(struct bnxt_q
  }
  
  int bnxt_qplib_enable_nq(struct pci_dev *pdev, struct bnxt_qplib_nq *nq,
@@ -291,7 +291,7 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  			 int (*cqn_handler)(struct bnxt_qplib_nq *nq,
  					    struct bnxt_qplib_cq *),
  			 int (*srqn_handler)(struct bnxt_qplib_nq *nq,
-@@ -348,13 +349,25 @@ int bnxt_qplib_enable_nq(struct pci_dev
+@@ -402,13 +403,25 @@ int bnxt_qplib_enable_nq(struct pci_dev
  		goto fail;
  
  	nq->requested = false;
@@ -311,14 +311,14 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
 +	rc = irq_set_affinity_hint(nq->vector, &nq->mask);
 +	if (rc) {
 +		dev_warn(&nq->pdev->dev,
-+			 "QPLIB: set affinity failed; vector: %d nq_idx: %d\n",
-+			 nq->vector, nq_idx);
++				"QPLIB: set affinity failed; vector: %d nq_idx: %d\n",
++				nq->vector, nq_idx);
 +	}
 +
  	nq->requested = true;
  	nq->bar_reg = NQ_CONS_PCI_BAR_REGION;
  	nq->bar_reg_off = bar_reg_offset;
-@@ -378,8 +391,10 @@ fail:
+@@ -432,8 +445,10 @@ fail:
  
  void bnxt_qplib_free_nq(struct bnxt_qplib_nq *nq)
  {
@@ -332,23 +332,23 @@ Acked-by: Johannes Thumshirn <jthumshirn@suse.de>
  int bnxt_qplib_alloc_nq(struct pci_dev *pdev, struct bnxt_qplib_nq *nq)
 --- a/drivers/infiniband/hw/bnxt_re/qplib_fp.h
 +++ b/drivers/infiniband/hw/bnxt_re/qplib_fp.h
-@@ -408,6 +408,7 @@ struct bnxt_qplib_nq {
+@@ -407,6 +407,7 @@ struct bnxt_qplib_nq {
  	struct pci_dev			*pdev;
  
  	int				vector;
-+	cpumask_t			mask;
++	cpumask_t		mask;
  	int				budget;
  	bool				requested;
  	struct tasklet_struct		worker;
-@@ -426,6 +427,7 @@ struct bnxt_qplib_nq {
+@@ -425,6 +426,7 @@ struct bnxt_qplib_nq {
  						 void *srq,
  						 u8 event);
- 	struct workqueue_struct         *cqn_wq;
-+	char                            name[32];
+ 	struct workqueue_struct	*cqn_wq;
++	char				name[32];
  };
  
  struct bnxt_qplib_nq_work {
-@@ -436,7 +438,7 @@ struct bnxt_qplib_nq_work {
+@@ -435,7 +437,7 @@ struct bnxt_qplib_nq_work {
  
  void bnxt_qplib_disable_nq(struct bnxt_qplib_nq *nq);
  int bnxt_qplib_enable_nq(struct pci_dev *pdev, struct bnxt_qplib_nq *nq,
