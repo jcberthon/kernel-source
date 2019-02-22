@@ -1,0 +1,64 @@
+From 2accbcf7ccb4b723dea9b57858097eeff601f6f2 Mon Sep 17 00:00:00 2001
+From: David Chang <dchang@suse.com>
+Date: Wed, 4 May 2016 19:11:06 +0800
+Subject: [PATCH] igb: don't unmap NULL hw_addr (bsc#969471 FATE#319813
+ bsc#969473 FATE#319815).
+References: bsc#1123702
+Git-commit: 73bf8048d7c86a20a59d427e55deb1a778e94df7
+Patch-mainline: v4.5-rc1
+
+suse-commit: 7689e56e48c48b0a6c2b5ceb4729afd978ebb4b8
+---
+ drivers/net/ethernet/intel/igb/igb.h      |  2 ++
+ drivers/net/ethernet/intel/igb/igb_main.c | 10 ++++++----
+ 2 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/net/ethernet/intel/igb/igb.h b/drivers/net/ethernet/intel/igb/igb.h
+index 1a2f1cc44b28..e3cb93bdb21a 100644
+--- a/drivers/net/ethernet/intel/igb/igb.h
++++ b/drivers/net/ethernet/intel/igb/igb.h
+@@ -389,6 +389,8 @@ struct igb_adapter {
+ 	u16 link_speed;
+ 	u16 link_duplex;
+ 
++	u8 __iomem *io_addr; /* Mainly for iounmap use */
++
+ 	struct work_struct reset_task;
+ 	struct work_struct watchdog_task;
+ 	bool fc_autoneg;
+diff --git a/drivers/net/ethernet/intel/igb/igb_main.c b/drivers/net/ethernet/intel/igb/igb_main.c
+index 0acfc16c831d..e3f10bd75db5 100644
+--- a/drivers/net/ethernet/intel/igb/igb_main.c
++++ b/drivers/net/ethernet/intel/igb/igb_main.c
+@@ -1915,9 +1915,11 @@ static int igb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
+ 	adapter->msg_enable = netif_msg_init(debug, DEFAULT_MSG_ENABLE);
+ 
+ 	err = -EIO;
+-	hw->hw_addr = pci_iomap(pdev, 0, 0);
+-	if (!hw->hw_addr)
++	adapter->io_addr = pci_iomap(pdev, 0, 0);
++	if (!adapter->io_addr)
+ 		goto err_ioremap;
++	/* hw->hw_addr can be altered, we'll use adapter->io_addr for unmap */
++	hw->hw_addr = adapter->io_addr;
+ 
+ 	netdev->netdev_ops = &igb_netdev_ops;
+ 	igb_set_ethtool_ops(netdev);
+@@ -2188,7 +2190,7 @@ err_eeprom:
+ 		iounmap(hw->flash_address);
+ err_sw_init:
+ 	igb_clear_interrupt_scheme(adapter);
+-	pci_iounmap(pdev, hw->hw_addr);
++	pci_iounmap(pdev, adapter->io_addr);
+ err_ioremap:
+ 	free_netdev(netdev);
+ err_alloc_etherdev:
+@@ -2266,7 +2268,7 @@ static void igb_remove(struct pci_dev *pdev)
+ 	}
+ #endif
+ 
+-	pci_iounmap(pdev, hw->hw_addr);
++	pci_iounmap(pdev, adapter->io_addr);
+ 	if (hw->flash_address)
+ 		iounmap(hw->flash_address);
+ 	pci_release_selected_regions(pdev,

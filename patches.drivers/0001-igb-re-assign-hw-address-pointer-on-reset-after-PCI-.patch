@@ -1,0 +1,33 @@
+From 687c8b824d9217a9e03d556ee46a7a1c57fd3cbb Mon Sep 17 00:00:00 2001
+From: Jiri Slaby <jslaby@suse.cz>
+Date: Tue, 10 Oct 2017 09:39:55 +0200
+Subject: [PATCH] igb: re-assign hw address pointer on reset after PCI error
+ (bnc#1012382).
+References: bsc#1123702
+Git-commit: 69b97cf6dbce7403845a28bbc75d57f5be7b12ac
+Patch-mainline: v4.11-rc1
+
+suse-commit: 1ae2856182bfdb98d88749ecc646e987a5816b43
+---
+ drivers/net/ethernet/intel/igb/igb_main.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/net/ethernet/intel/igb/igb_main.c b/drivers/net/ethernet/intel/igb/igb_main.c
+index a53ee49bbd26..86813b780cf5 100644
+--- a/drivers/net/ethernet/intel/igb/igb_main.c
++++ b/drivers/net/ethernet/intel/igb/igb_main.c
+@@ -7795,6 +7795,11 @@ static pci_ers_result_t igb_io_slot_reset(struct pci_dev *pdev)
+ 		pci_enable_wake(pdev, PCI_D3hot, 0);
+ 		pci_enable_wake(pdev, PCI_D3cold, 0);
+ 
++		/* In case of PCI error, adapter lose its HW address
++		 * so we should re-assign it here.
++		 */
++		hw->hw_addr = adapter->io_addr;
++
+ 		igb_reset(adapter);
+ 		wr32(E1000_WUS, ~0);
+ 		result = PCI_ERS_RESULT_RECOVERED;
+-- 
+2.13.7
+
