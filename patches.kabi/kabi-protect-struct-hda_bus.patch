@@ -1,0 +1,30 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: kABI: protect struct hda_bus
+Patch-mainline: never, kabi
+References: kabi
+
+In 4.4.175, commit 71ce2e8957ff6eed31953f54a02fc3bd083f0d26 (ALSA: hda
+- Serialize codec registrations), upstream commit
+305a0ade180981686eec1f92aa6252a7c6ebb1cf added a bit to struct
+hda_bus. It made the kABI checker to complain.
+
+Given this is only an HDA's internal header, just hide the change from
+the kABI checker.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ sound/pci/hda/hda_codec.h |    2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/sound/pci/hda/hda_codec.h
++++ b/sound/pci/hda/hda_codec.h
+@@ -68,7 +68,9 @@ struct hda_bus {
+ 	unsigned int response_reset:1;	/* controller was reset */
+ 	unsigned int in_reset:1;	/* during reset operation */
+ 	unsigned int no_response_fallback:1; /* don't fallback at RIRB error */
++#ifndef __GENKSYMS__
+ 	unsigned int bus_probing :1;	/* during probing process */
++#endif
+ 
+ 	int primary_dig_out_type;	/* primary digital out PCM type */
+ 	unsigned int mixer_assigned;	/* codec addr for mixer name */

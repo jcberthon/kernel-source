@@ -1,0 +1,51 @@
+From 4265b6f6e5f5e2bba956e36f74aeb1411c3bffb4 Mon Sep 17 00:00:00 2001
+From: Joerg Roedel <jroedel@suse.de>
+Date: Thu, 21 Feb 2019 13:43:19 +0100
+Subject: [PATCH] KVM: VMX: Fix x2apic check in vmx_msr_bitmap_mode()
+Patch-mainline: No, submitted for inclusion to stable-4.4.y
+References: bsc#1124166
+
+The stable backport of upstream commit
+
+	904e14fb7cb96 KVM: VMX: make MSR bitmaps per-VCPU
+
+has a bug in vmx_msr_bitmap_mode(). It enables the x2apic
+MSR-bitmap when the kernel emulates x2apic for the guest in
+software. The upstream version of the commit checkes whether
+the hardware has virtualization enabled for x2apic
+emulation.
+
+Since KVM emulates x2apic for guests even when the host does
+not support x2apic in hardware, this causes the intercept of
+at least the X2APIC_TASKPRI MSR to be disabled on machines
+not supporting that MSR. The result is undefined behavior,
+on some machines (Intel Westmere based) it causes a crash of
+the guest kernel when it tries to access that MSR.
+
+Change the check in vmx_msr_bitmap_mode() to match the upstream
+code. This fixes the guest crashes observed with stable
+kernels starting with v4.4.168 through v4.4.175.
+
+Signed-off-by: Joerg Roedel <jroedel@suse.de>
+---
+ arch/x86/kvm/vmx.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/arch/x86/kvm/vmx.c b/arch/x86/kvm/vmx.c
+index aee2886a387c..14553f6c03a6 100644
+--- a/arch/x86/kvm/vmx.c
++++ b/arch/x86/kvm/vmx.c
+@@ -4628,7 +4628,9 @@ static u8 vmx_msr_bitmap_mode(struct kvm_vcpu *vcpu)
+ {
+ 	u8 mode = 0;
+ 
+-	if (irqchip_in_kernel(vcpu->kvm) && apic_x2apic_mode(vcpu->arch.apic)) {
++	if (cpu_has_secondary_exec_ctrls() &&
++	    (vmcs_read32(SECONDARY_VM_EXEC_CONTROL) &
++	     SECONDARY_EXEC_VIRTUALIZE_X2APIC_MODE)) {
+ 		mode |= MSR_BITMAP_MODE_X2APIC;
+ 		if (enable_apicv)
+ 			mode |= MSR_BITMAP_MODE_X2APIC_APICV;
+-- 
+2.16.3
+
