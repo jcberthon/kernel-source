@@ -21,7 +21,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 
 --- a/include/linux/netdev_features.h
 +++ b/include/linux/netdev_features.h
-@@ -67,6 +67,8 @@ enum {
+@@ -69,6 +69,8 @@ enum {
  	NETIF_F_HW_L2FW_DOFFLOAD_BIT,	/* Allow L2 Forwarding in Hardware */
  	NETIF_F_BUSY_POLL_BIT,		/* Busy poll */
  
@@ -30,14 +30,14 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  	/*
  	 * Add your fresh new feature above and remember to update
  	 * netdev_features_strings[] in net/core/ethtool.c and maybe
-@@ -124,6 +126,7 @@ enum {
+@@ -126,6 +128,7 @@ enum {
  #define NETIF_F_HW_VLAN_STAG_TX	__NETIF_F(HW_VLAN_STAG_TX)
  #define NETIF_F_HW_L2FW_DOFFLOAD	__NETIF_F(HW_L2FW_DOFFLOAD)
  #define NETIF_F_BUSY_POLL	__NETIF_F(BUSY_POLL)
 +#define NETIF_F_HW_TC		__NETIF_F(HW_TC)
  
- #define for_each_netdev_feature(mask_addr, bit)	\
- 	for_each_set_bit(bit, (unsigned long *)mask_addr, NETDEV_FEATURE_COUNT)
+ /* Finds the next feature with the highest number of the range of start till 0.
+  */
 --- a/net/core/ethtool.c
 +++ b/net/core/ethtool.c
 @@ -98,6 +98,7 @@ static const char netdev_features_string
