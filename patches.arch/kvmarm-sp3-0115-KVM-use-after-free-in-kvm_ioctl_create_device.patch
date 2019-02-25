@@ -20,17 +20,15 @@ Signed-off-by: Radim Krčmář <rkrcmar@redhat.com>
 Signed-off-by: Alexander Graf <agraf@suse.de>
 
 ---
- virt/kvm/kvm_main.c | 2 +-
+ virt/kvm/kvm_main.c |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/virt/kvm/kvm_main.c b/virt/kvm/kvm_main.c
-index 55a0a62..f2d609c 100644
 --- a/virt/kvm/kvm_main.c
 +++ b/virt/kvm/kvm_main.c
-@@ -2781,10 +2781,10 @@ static int kvm_ioctl_create_device(struct kvm *kvm,
- 
+@@ -2786,10 +2786,10 @@ static int kvm_ioctl_create_device(struc
  	ret = anon_inode_getfd(ops->name, &kvm_device_fops, dev, O_RDWR | O_CLOEXEC);
  	if (ret < 0) {
+ 		kvm_put_kvm(kvm);
 -		ops->destroy(dev);
  		mutex_lock(&kvm->lock);
  		list_del(&dev->vm_node);
@@ -39,6 +37,3 @@ index 55a0a62..f2d609c 100644
  		return ret;
  	}
  
--- 
-1.8.5.6
-
