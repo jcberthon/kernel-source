@@ -1,9 +1,12 @@
 From: Jann Horn <jannh@google.com>
 Date: Sat, 26 Jan 2019 01:54:33 +0100
-Subject: kvm: fix kvm_ioctl_create_device() reference counting (CVE-2019-6974)
+Subject: [PATCH] kvm: fix kvm_ioctl_create_device() reference counting
+ (CVE-2019-6974)
+Patch-mainline: 4.4.176
+References: CVE-2019-6974 bnc#1012382 bsc#1124728
 Git-commit: cfa39381173d5f969daf43582c95ad679189cbc9
-Patch-mainline: v5.0-rc6
-References: CVE-2019-6974 bsc#1124728
+
+commit cfa39381173d5f969daf43582c95ad679189cbc9 upstream.
 
 kvm_ioctl_create_device() does the following:
 
@@ -26,29 +29,33 @@ Fixes: 852b6d57dc7f ("kvm: add device control API")
 Cc: stable@kernel.org
 Signed-off-by: Jann Horn <jannh@google.com>
 Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
-Acked-by: Joerg Roedel <jroedel@suse.de>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- virt/kvm/kvm_main.c |    3 ++-
+ virt/kvm/kvm_main.c | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
 
+diff --git a/virt/kvm/kvm_main.c b/virt/kvm/kvm_main.c
+index e4be695eb789..fce48d11ae07 100644
 --- a/virt/kvm/kvm_main.c
 +++ b/virt/kvm/kvm_main.c
-@@ -2789,8 +2789,10 @@ static int kvm_ioctl_create_device(struc
- 	list_add(&dev->vm_node, &kvm->devices);
- 	mutex_unlock(&kvm->lock);
+@@ -2711,14 +2711,15 @@ static int kvm_ioctl_create_device(struct kvm *kvm,
+ 		return ret;
+ 	}
  
 +	kvm_get_kvm(kvm);
  	ret = anon_inode_getfd(ops->name, &kvm_device_fops, dev, O_RDWR | O_CLOEXEC);
  	if (ret < 0) {
 +		kvm_put_kvm(kvm);
- 		mutex_lock(&kvm->lock);
- 		list_del(&dev->vm_node);
- 		mutex_unlock(&kvm->lock);
-@@ -2798,7 +2800,6 @@ static int kvm_ioctl_create_device(struc
+ 		ops->destroy(dev);
  		return ret;
  	}
  
+ 	list_add(&dev->vm_node, &kvm->devices);
 -	kvm_get_kvm(kvm);
  	cd->fd = ret;
  	return 0;
  }
+-- 
+2.20.1
+
