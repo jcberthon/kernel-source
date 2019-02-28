@@ -1,0 +1,70 @@
+From: Julia Lawall <Julia.Lawall@lip6.fr>
+Date: Sun Dec 23 09:57:14 2018 +0100
+Subject: net/mlx4_core: drop useless LIST_HEAD
+Git-commit: 61988bd281c9b08e0cc084f0b2da3b109c4c39c8
+Patch-mainline: v5.0-rc1
+References: git-fixes
+
+Drop LIST_HEAD where the variable it declares has never
+been used.
+
+The semantic patch that fixes this problem is as follows:
+(http://coccinelle.lip6.fr/)
+    
+// <smpl>
+@@
+identifier x;
+@@
+- LIST_HEAD(x);
+ ... when != x
+// </smpl>
+    
+Fixes: c82e9aa0a8bc ("mlx4_core: resource tracking for HCA resources used by guests")
+Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: Denis Kirjanov <dkirjanov@suse.com>
+---
+ drivers/net/ethernet/mellanox/mlx4/resource_tracker.c |    5 -----
+ 1 file changed, 5 deletions(-)
+--- a/drivers/net/ethernet/mellanox/mlx4/resource_tracker.c
++++ b/drivers/net/ethernet/mellanox/mlx4/resource_tracker.c
+@@ -4728,7 +4728,6 @@ static void rem_slave_srqs(struct mlx4_d
+ 	struct res_srq *tmp;
+ 	int state;
+ 	u64 in_param;
+-	LIST_HEAD(tlist);
+ 	int srqn;
+ 	int err;
+ 
+@@ -4794,7 +4793,6 @@ static void rem_slave_cqs(struct mlx4_de
+ 	struct res_cq *tmp;
+ 	int state;
+ 	u64 in_param;
+-	LIST_HEAD(tlist);
+ 	int cqn;
+ 	int err;
+ 
+@@ -4857,7 +4855,6 @@ static void rem_slave_mrs(struct mlx4_de
+ 	struct res_mpt *tmp;
+ 	int state;
+ 	u64 in_param;
+-	LIST_HEAD(tlist);
+ 	int mptn;
+ 	int err;
+ 
+@@ -4925,7 +4922,6 @@ static void rem_slave_mtts(struct mlx4_d
+ 	struct res_mtt *mtt;
+ 	struct res_mtt *tmp;
+ 	int state;
+-	LIST_HEAD(tlist);
+ 	int base;
+ 	int err;
+ 
+@@ -5114,7 +5110,6 @@ static void rem_slave_eqs(struct mlx4_de
+ 	struct res_eq *tmp;
+ 	int err;
+ 	int state;
+-	LIST_HEAD(tlist);
+ 	int eqn;
+ 
+ 	err = move_all_busy(dev, slave, RES_EQ);
