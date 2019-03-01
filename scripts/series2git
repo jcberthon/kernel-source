@@ -200,7 +200,7 @@ apply_patch()
 		GIT_AUTHOR_EMAIL=
 		;;
 	esac
-	local subject=$(ex_hdr Subject "$patch")
+	local subject=$(ex_hdr Subject "$patch" | sed -es'/\[[^]]*\] //')
 	GIT_AUTHOR_DATE=$(ex_hdr Date "$patch")
 	GIT_AUTHOR_DATE=$(ex_hdr Date "$patch" \
 	    | perl -p -e 's/(\d\d:\d\d:\d\d) (\d{4})/$2 $1/;s/:$//')
@@ -221,7 +221,7 @@ scripts/guards $EXTRA_SYMBOLS < series.conf | while read patch; do
 	case "$patch" in
 	patches.kernel.org/patch-2.6.*.*-rc*)
 		;;
-	patches.kernel.org/patch-[2-9].*.*)
+	patches.kernel.org/*)
 		if $skip; then
 			echo "skipping $patch"
 			continue
