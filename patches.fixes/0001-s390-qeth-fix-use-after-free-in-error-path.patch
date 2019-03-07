@@ -1,0 +1,52 @@
+From: Julian Wiedmann <jwi@linux.ibm.com>
+Subject: s390/qeth: fix use-after-free in error path
+Patch-mainline: v5.0-rc6
+Git-commit: afa0c5904ba16d59b0454f7ee4c807dae350f432
+References: LTC#175048, bsc#1127376, bsc#1127534
+
+Description:   qeth: fix use-after-free in error path
+Symptom:       Undefined behaviour after failed allocation.
+Problem:       The error path in qeth_alloc_qdio_buffers() that takes care of
+               cleaning up the Output Queues is buggy. It first frees the
+               queue, but then calls qeth_clear_outq_buffers() with that very
+               queue struct.
+Solution:      Make the call to qeth_clear_outq_buffers() part of the free
+               action (in the correct order).
+Reproduction:  - 
+
+Upstream-Description:
+
+              s390/qeth: fix use-after-free in error path
+
+              The error path in qeth_alloc_qdio_buffers() that takes care of
+              cleaning up the Output Queues is buggy. It first frees the queue, but
+              then calls qeth_clear_outq_buffers() with that very queue struct.
+
+              Make the call to qeth_clear_outq_buffers() part of the free action
+              (in the correct order), and while at it fix the naming of the helper.
+
+              Fixes: 0da9581ddb0f ("qeth: exploit asynchronous delivery of storage blocks")
+              Signed-off-by: Julian Wiedmann <jwi@linux.ibm.com>
+              Reviewed-by: Alexandra Winter <wintera@linux.ibm.com>
+              Signed-off-by: David S. Miller <davem@davemloft.net>
+
+
+Signed-off-by: Julian Wiedmann <jwi@linux.ibm.com>
+Acked-by: Denis Kirjanov <dkirjanov@suse.com>
+---
+ drivers/s390/net/qeth_core_main.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+--- a/drivers/s390/net/qeth_core_main.c
++++ b/drivers/s390/net/qeth_core_main.c
+@@ -2480,8 +2480,8 @@ out_freeoutqbufs:
+ 	}
+ out_freeoutq:
+ 	while (i > 0) {
+-		kfree(card->qdio.out_qs[--i]);
+-		qeth_clear_outq_buffers(card->qdio.out_qs[i], 1);
++		qeth_clear_outq_buffers(card->qdio.out_qs[--i], 1);
++		kfree(card->qdio.out_qs[i]);
+ 	}
+ 	kfree(card->qdio.out_qs);
+ 	card->qdio.out_qs = NULL;
