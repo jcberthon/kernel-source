@@ -1,0 +1,61 @@
+From: Julian Wiedmann <jwi@linux.ibm.com>
+Subject: s390/qeth: handle failure on workqueue creation
+Patch-mainline: v4.17-rc3
+Git-commit: a936b1ef37ce1e996533878f4b23944f9444dcdf
+References: LTC#175048, bsc#1127376
+
+Description:   qeth: handle failure on workqueue creation
+Symptom:       Undefined behaviour whenever qeth uses its internal
+               workqueue. This will primarily occur when a device
+               is notified by HW that the connected switch port no longer
+               supports VEPA mode.
+Problem:       Allocation of driver-internal workqueue is not checked for
+               failure.
+Solution:      Check for allocation failure, and handle it.
+Reproduction:  -
+
+Upstream-Description:
+
+              s390/qeth: handle failure on workqueue creation
+
+              Creating the global workqueue during driver init may fail, deal with it.
+              Also, destroy the created workqueue on any subsequent error.
+
+              Fixes: 0f54761d167f ("qeth: Support VEPA mode")
+              Signed-off-by: Julian Wiedmann <jwi@linux.ibm.com>
+              Signed-off-by: David S. Miller <davem@davemloft.net>
+
+
+Signed-off-by: Julian Wiedmann <jwi@linux.ibm.com>
+Acked-by: Denis Kirjanov <dkirjanov@suse.com>
+---
+ drivers/s390/net/qeth_core_main.c |    8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+--- a/drivers/s390/net/qeth_core_main.c
++++ b/drivers/s390/net/qeth_core_main.c
+@@ -5548,10 +5548,14 @@ static int __init qeth_core_init(void)
+ 	mutex_init(&qeth_mod_mutex);
+ 
+ 	qeth_wq = create_singlethread_workqueue("qeth_wq");
++	if (!qeth_wq) {
++		rc = -ENOMEM;
++		goto out_err;
++	}
+ 
+ 	rc = qeth_register_dbf_views();
+ 	if (rc)
+-		goto out_err;
++		goto dbf_err;
+ 	rc = ccw_driver_register(&qeth_ccw_driver);
+ 	if (rc)
+ 		goto ccw_err;
+@@ -5596,6 +5600,8 @@ ccwgroup_err:
+ ccw_err:
+ 	QETH_DBF_MESSAGE(2, "Initialization failed with code %d\n", rc);
+ 	qeth_unregister_dbf_views();
++dbf_err:
++	destroy_workqueue(qeth_wq);
+ out_err:
+ 	pr_err("Initializing the qeth device driver failed\n");
+ 	return rc;
