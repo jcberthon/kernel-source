@@ -1,11 +1,13 @@
-From 2d8c462d28b31328434094a0140b639194e0e7d5 Mon Sep 17 00:00:00 2001
+From fd12527a1da42dcb906b694e01794e8d438f7d10 Mon Sep 17 00:00:00 2001
 From: Nathan Fontenot <nfont@linux.vnet.ibm.com>
 Date: Mon, 10 Sep 2018 09:57:07 -0500
-Subject: [PATCH 2/2] powerpc/pseries: Remove unneeded uses of dlpar work queue
+Subject: [PATCH] powerpc/pseries: Remove unneeded uses of dlpar work queue
 
 References: bsc#1102495, bsc#1109337
 Patch-mainline: v4.20-rc1
 Git-commit: fd12527a1da42dcb906b694e01794e8d438f7d10
+
+[Note: removed patching ras code added in b7d9eb397b8764c1f1c53d504aa70f85ce0e212f ]
 
 There are three instances in which dlpar hotplug events are invoked;
 handling a hotplug interrupt (in a kvm guest), handling a dlpar
@@ -22,16 +24,17 @@ Signed-off-by: Nathan Fontenot <nfont@linux.vnet.ibm.com>
 Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
 Acked-by: Michal Suchanek <msuchanek@suse.de>
 ---
- arch/powerpc/platforms/pseries/dlpar.c    | 37 ++++++++-----------------------
- arch/powerpc/platforms/pseries/mobility.c | 18 +++++----------
- arch/powerpc/platforms/pseries/pseries.h  |  5 +++--
- 3 files changed, 18 insertions(+), 42 deletions(-)
+ arch/powerpc/platforms/pseries/dlpar.c    | 37 ++++++-----------------
+ arch/powerpc/platforms/pseries/mobility.c | 18 ++++-------
+ arch/powerpc/platforms/pseries/pseries.h  |  5 +--
+ arch/powerpc/platforms/pseries/ras.c      |  2 +-
+ 4 files changed, 19 insertions(+), 43 deletions(-)
 
 diff --git a/arch/powerpc/platforms/pseries/dlpar.c b/arch/powerpc/platforms/pseries/dlpar.c
-index e117db8f9df2..67667173da18 100644
+index a0b20c03f078..052c4f2ba0a0 100644
 --- a/arch/powerpc/platforms/pseries/dlpar.c
 +++ b/arch/powerpc/platforms/pseries/dlpar.c
-@@ -33,8 +33,6 @@ struct workqueue_struct *pseries_hp_wq;
+@@ -32,8 +32,6 @@ static struct workqueue_struct *pseries_hp_wq;
  struct pseries_hp_work {
  	struct work_struct work;
  	struct pseries_hp_errorlog *errlog;
@@ -40,16 +43,16 @@ index e117db8f9df2..67667173da18 100644
  };
  
  struct cc_workarea {
-@@ -564,7 +562,7 @@ static ssize_t dlpar_cpu_release(const char *buf, size_t count)
- 
- #endif /* CONFIG_ARCH_CPU_PROBE_RELEASE */
+@@ -329,7 +327,7 @@ int dlpar_release_drc(u32 drc_index)
+ 	return 0;
+ }
  
 -static int handle_dlpar_errorlog(struct pseries_hp_errorlog *hp_elog)
 +int handle_dlpar_errorlog(struct pseries_hp_errorlog *hp_elog)
  {
  	int rc;
  
-@@ -603,20 +601,13 @@ void pseries_hp_work_fn(struct work_struct *work)
+@@ -371,20 +369,13 @@ static void pseries_hp_work_fn(struct work_struct *work)
  	struct pseries_hp_work *hp_work =
  			container_of(work, struct pseries_hp_work, work);
  
@@ -72,7 +75,7 @@ index e117db8f9df2..67667173da18 100644
  {
  	struct pseries_hp_work *work;
  	struct pseries_hp_errorlog *hp_errlog_copy;
-@@ -629,13 +620,9 @@ void queue_hotplug_event(struct pseries_hp_errorlog *hp_errlog,
+@@ -397,13 +388,9 @@ void queue_hotplug_event(struct pseries_hp_errorlog *hp_errlog,
  	if (work) {
  		INIT_WORK((struct work_struct *)work, pseries_hp_work_fn);
  		work->errlog = hp_errlog_copy;
@@ -86,7 +89,7 @@ index e117db8f9df2..67667173da18 100644
  	}
  }
  
-@@ -752,18 +739,15 @@ static int dlpar_parse_id_type(char **cmd, struct pseries_hp_errorlog *hp_elog)
+@@ -521,18 +508,15 @@ static int dlpar_parse_id_type(char **cmd, struct pseries_hp_errorlog *hp_elog)
  static ssize_t dlpar_store(struct class *class, struct class_attribute *attr,
  			   const char *buf, size_t count)
  {
@@ -107,7 +110,7 @@ index e117db8f9df2..67667173da18 100644
  		return -ENOMEM;
  	}
  
-@@ -771,25 +755,22 @@ static ssize_t dlpar_store(struct class *class, struct class_attribute *attr,
+@@ -540,25 +524,22 @@ static ssize_t dlpar_store(struct class *class, struct class_attribute *attr,
  	 * Parse out the request from the user, this will be in the form:
  	 * <resource> <action> <id_type> <id>
  	 */
@@ -138,10 +141,10 @@ index e117db8f9df2..67667173da18 100644
  	if (rc)
  		pr_err("Could not handle DLPAR request \"%s\"\n", buf);
 diff --git a/arch/powerpc/platforms/pseries/mobility.c b/arch/powerpc/platforms/pseries/mobility.c
-index 873e49b93f76..b967514e4490 100644
+index f0e30dc94988..6f27d00505cf 100644
 --- a/arch/powerpc/platforms/pseries/mobility.c
 +++ b/arch/powerpc/platforms/pseries/mobility.c
-@@ -241,7 +241,7 @@ static int add_dt_node(__be32 parent_phandle, __be32 drc_index)
+@@ -242,7 +242,7 @@ static int add_dt_node(__be32 parent_phandle, __be32 drc_index)
  
  static void prrn_update_node(__be32 phandle)
  {
@@ -150,7 +153,7 @@ index 873e49b93f76..b967514e4490 100644
  	struct device_node *dn;
  
  	/*
-@@ -254,18 +254,12 @@ static void prrn_update_node(__be32 phandle)
+@@ -255,18 +255,12 @@ static void prrn_update_node(__be32 phandle)
  		return;
  	}
  
@@ -175,10 +178,10 @@ index 873e49b93f76..b967514e4490 100644
  
  int pseries_devicetree_update(s32 scope)
 diff --git a/arch/powerpc/platforms/pseries/pseries.h b/arch/powerpc/platforms/pseries/pseries.h
-index 0e43352c5430..ada23e393d2e 100644
+index 619f8f3fa173..72c0b8986536 100644
 --- a/arch/powerpc/platforms/pseries/pseries.h
 +++ b/arch/powerpc/platforms/pseries/pseries.h
-@@ -65,8 +65,9 @@ extern int dlpar_detach_node(struct device_node *);
+@@ -60,8 +60,9 @@ extern int dlpar_detach_node(struct device_node *);
  extern int dlpar_acquire_drc(u32 drc_index);
  extern int dlpar_release_drc(u32 drc_index);
  
@@ -190,6 +193,3 @@ index 0e43352c5430..ada23e393d2e 100644
  #ifdef CONFIG_MEMORY_HOTPLUG
  int dlpar_memory(struct pseries_hp_errorlog *hp_elog);
  #else
--- 
-2.13.7
-

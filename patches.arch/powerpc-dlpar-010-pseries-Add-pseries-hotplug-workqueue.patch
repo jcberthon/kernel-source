@@ -1,4 +1,4 @@
-From 5a1749f65a20a6f94c091c9790ac7a9301158487 Mon Sep 17 00:00:00 2001
+From 9054619ef54a3a832863ae25d15ac410ae3df146 Mon Sep 17 00:00:00 2001
 From: John Allen <jallen@linux.vnet.ibm.com>
 Date: Thu, 7 Jul 2016 10:00:34 -0500
 Subject: [PATCH] powerpc/pseries: Add pseries hotplug workqueue
@@ -13,19 +13,21 @@ We will also take advantage of the queue on PowerVM to ensure hotplug
 events initiated from different sources (HMC and PRRN events) are handled
 and serialized properly.
 
+[Note: added queue_hotplug_event prototype from b7d9eb397b8764c1f1c53d504aa70f85ce0e212f ]
+
 Signed-off-by: John Allen <jallen@linux.vnet.ibm.com>
 Reviewed-by: Nathan Fontenot <nfont@linux.vnet.ibm.com>
 Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
 Acked-by: Michal Suchanek <msuchanek@suse.de>
 ---
- arch/powerpc/platforms/pseries/dlpar.c | 58 +++++++++++++++++++++++++++++++---
- 1 file changed, 53 insertions(+), 5 deletions(-)
+ arch/powerpc/platforms/pseries/dlpar.c | 52 ++++++++++++++++++++++++++
+ 1 file changed, 52 insertions(+)
 
 diff --git a/arch/powerpc/platforms/pseries/dlpar.c b/arch/powerpc/platforms/pseries/dlpar.c
-index 9a459721bc8d..244463679128 100644
+index 2b93ae8d557a..66a77d7a7e4c 100644
 --- a/arch/powerpc/platforms/pseries/dlpar.c
 +++ b/arch/powerpc/platforms/pseries/dlpar.c
-@@ -28,6 +28,15 @@
+@@ -27,6 +27,15 @@
  #include <asm/uaccess.h>
  #include <asm/rtas.h>
  
@@ -41,7 +43,7 @@ index 9a459721bc8d..244463679128 100644
  struct cc_workarea {
  	__be32	drc_index;
  	__be32	zero;
-@@ -579,10 +588,51 @@ static int handle_dlpar_errorlog(struct pseries_hp_errorlog *hp_elog)
+@@ -368,10 +377,51 @@ static int handle_dlpar_errorlog(struct pseries_hp_errorlog *hp_elog)
  	return rc;
  }
  
@@ -93,23 +95,13 @@ index 9a459721bc8d..244463679128 100644
  	const char *arg;
  	int rc;
  
-@@ -658,16 +708,14 @@ static CLASS_ATTR(dlpar, S_IWUSR, NULL, dlpar_store);
+@@ -450,6 +500,8 @@ static CLASS_ATTR(dlpar, S_IWUSR, NULL, dlpar_store);
  
  static int __init pseries_dlpar_init(void)
  {
--	int rc;
--
- #ifdef CONFIG_ARCH_CPU_PROBE_RELEASE
- 	ppc_md.cpu_probe = dlpar_cpu_probe;
- 	ppc_md.cpu_release = dlpar_cpu_release;
- #endif /* CONFIG_ARCH_CPU_PROBE_RELEASE */
- 
--	rc = sysfs_create_file(kernel_kobj, &class_attr_dlpar.attr);
--
--	return rc;
 +	pseries_hp_wq = alloc_workqueue("pseries hotplug workqueue",
 +					WQ_UNBOUND, 1);
-+	return sysfs_create_file(kernel_kobj, &class_attr_dlpar.attr);
+ 	return sysfs_create_file(kernel_kobj, &class_attr_dlpar.attr);
  }
  machine_device_initcall(pseries, pseries_dlpar_init);
  
@@ -127,5 +119,5 @@ index ddb9aa51aad6..bba32853c468 100644
  int dlpar_memory(struct pseries_hp_errorlog *hp_elog);
  #else
 -- 
-2.10.2
+2.20.1
 
