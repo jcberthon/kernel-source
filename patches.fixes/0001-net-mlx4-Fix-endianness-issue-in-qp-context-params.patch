@@ -1,0 +1,27 @@
+From: Tariq Toukan <tariqt@mellanox.com>
+Subject: net/mlx4: Fix endianness issue in qp context params
+Patch-mainline: v4.15-rc1
+Git-commit: bb428a5c4df5f50acdce89449e476faa0b295e95
+References: git-fixes
+
+Should take care of the endianness before assigning to params2 field.
+
+Fixes: 53f33ae295a5 ("net/mlx4_core: Port aggregation upper layer interface")
+Signed-off-by: Tariq Toukan <tariqt@mellanox.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Acked-by: Denis Kirjanov <dkirjanov@suse.com>
+---
+ drivers/net/ethernet/mellanox/mlx4/en_resources.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/drivers/net/ethernet/mellanox/mlx4/en_resources.c
++++ b/drivers/net/ethernet/mellanox/mlx4/en_resources.c
+@@ -53,7 +53,7 @@ void mlx4_en_fill_qp_context(struct mlx4
+ 	if (is_tx) {
+ 		context->sq_size_stride = ilog2(size) << 3 | (ilog2(stride) - 4);
+ 		if (mdev->dev->caps.flags2 & MLX4_DEV_CAP_FLAG2_PORT_REMAP)
+-			context->params2 |= MLX4_QP_BIT_FPP;
++			context->params2 |= cpu_to_be32(MLX4_QP_BIT_FPP);
+ 
+ 	} else {
+ 		context->sq_size_stride = ilog2(TXBB_SIZE) - 4;
