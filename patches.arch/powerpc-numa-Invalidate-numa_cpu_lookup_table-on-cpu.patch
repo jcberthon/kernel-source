@@ -1,10 +1,10 @@
-From f476451567e8a59406dc587d10652e093956a48b Mon Sep 17 00:00:00 2001
+From 1d9a090783bef19fe8cdec878620d22f05191316 Mon Sep 17 00:00:00 2001
 From: Nathan Fontenot <nfont@linux.vnet.ibm.com>
 Date: Fri, 26 Jan 2018 13:41:59 -0600
 Subject: [PATCH] powerpc/numa: Invalidate numa_cpu_lookup_table on cpu remove
 
 References: bsc#1081512
-Patch-mainline: 4.16-rc3
+Patch-mainline: v4.16-rc2
 Git-commit: 1d9a090783bef19fe8cdec878620d22f05191316
 
 When DLPAR removing a CPU, the unmapping of the cpu from a node in
@@ -35,11 +35,9 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  arch/powerpc/platforms/pseries/hotplug-cpu.c | 2 ++
  3 files changed, 7 insertions(+), 5 deletions(-)
 
-diff --git a/arch/powerpc/include/asm/topology.h b/arch/powerpc/include/asm/topology.h
-index 5c84163bfb5b..392c379bedd7 100644
 --- a/arch/powerpc/include/asm/topology.h
 +++ b/arch/powerpc/include/asm/topology.h
-@@ -44,6 +44,11 @@ extern void __init dump_numa_cpu_topology(void);
+@@ -44,6 +44,11 @@ extern void __init dump_numa_cpu_topolog
  extern int sysfs_add_device_to_node(struct device *dev, int nid);
  extern void sysfs_remove_device_from_node(struct device *dev, int nid);
  
@@ -51,11 +49,9 @@ index 5c84163bfb5b..392c379bedd7 100644
  #else
  
  static inline void dump_numa_cpu_topology(void) {}
-diff --git a/arch/powerpc/mm/numa.c b/arch/powerpc/mm/numa.c
-index 12bad1db73b6..1b12113ec1db 100644
 --- a/arch/powerpc/mm/numa.c
 +++ b/arch/powerpc/mm/numa.c
-@@ -142,11 +142,6 @@ static void reset_numa_cpu_lookup_table(void)
+@@ -142,11 +142,6 @@ static void reset_numa_cpu_lookup_table(
  		numa_cpu_lookup_table[cpu] = -1;
  }
  
@@ -67,8 +63,6 @@ index 12bad1db73b6..1b12113ec1db 100644
  static void map_cpu_to_node(int cpu, int node)
  {
  	update_numa_cpu_lookup_table(cpu, node);
-diff --git a/arch/powerpc/platforms/pseries/hotplug-cpu.c b/arch/powerpc/platforms/pseries/hotplug-cpu.c
-index 62475440fd45..fc437cc1c6aa 100644
 --- a/arch/powerpc/platforms/pseries/hotplug-cpu.c
 +++ b/arch/powerpc/platforms/pseries/hotplug-cpu.c
 @@ -31,6 +31,7 @@
@@ -77,9 +71,9 @@ index 62475440fd45..fc437cc1c6aa 100644
  #include <asm/plpar_wrappers.h>
 +#include <asm/topology.h>
  
+ #include "pseries.h"
  #include "offline_states.h"
- 
-@@ -330,6 +331,7 @@ static void pseries_remove_processor(struct device_node *np)
+@@ -331,6 +332,7 @@ static void pseries_remove_processor(str
  			BUG_ON(cpu_online(cpu));
  			set_cpu_present(cpu, false);
  			set_hard_smp_processor_id(cpu, -1);
@@ -87,6 +81,3 @@ index 62475440fd45..fc437cc1c6aa 100644
  			break;
  		}
  		if (cpu >= nr_cpu_ids)
--- 
-2.13.6
-
