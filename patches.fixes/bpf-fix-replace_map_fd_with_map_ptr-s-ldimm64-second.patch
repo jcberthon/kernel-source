@@ -20,8 +20,8 @@ Acked-by: Song Liu <songliubraving@fb.com>
 Signed-off-by: Alexei Starovoitov <ast@kernel.org>
 Acked-by: Gary Lin <glin@suse.com>
 ---
- kernel/bpf/verifier.c |    9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+ kernel/bpf/verifier.c |    7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
 --- a/kernel/bpf/verifier.c
 +++ b/kernel/bpf/verifier.c
@@ -30,10 +30,9 @@ Acked-by: Gary Lin <glin@suse.com>
  				goto next_insn;
  
 -			if (insn->src_reg != BPF_PSEUDO_MAP_FD) {
--				verbose("unrecognized bpf_ld_imm64 insn\n");
 +			if (insn[0].src_reg != BPF_PSEUDO_MAP_FD ||
 +			    insn[1].imm != 0) {
-+				verbose(env, "unrecognized bpf_ld_imm64 insn\n");
+ 				verbose("unrecognized bpf_ld_imm64 insn\n");
  				return -EINVAL;
  			}
  
