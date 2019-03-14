@@ -26,7 +26,16 @@ sub new {
 	}
 	$self->{url} = URI->new($api_url);
 
-	my $cfgfile = "$ENV{HOME}/.oscrc";
+	my $cfgfile;
+	foreach ("$ENV{HOME}/.oscrc", "$ENV{HOME}/.config/osc/oscrc") {
+		if (-f) {
+			$cfgfile = $_;
+			last;
+		}
+	}
+
+	defined $cfgfile or die "oscrc not found";
+
 	# replace name: value with name= value that Config::IniFiles can parse
 	open(my $fh, '<', $cfgfile) or die "$cfgfile: $!\n";
 	my $data = "";
@@ -326,6 +335,10 @@ sub create_project {
 				$seen_archs{$arch} = 1;
 				push(@archs, $arch);
 			}
+			if (!@archs) {
+				# this repository is not needed
+				next;
+			}
 			$writer->startTag("repository", @attrs);
 			$writer->emptyTag("path", repository => $r,
 				project => $base);
@@ -563,6 +576,14 @@ sub get_logfile {
 	$repository ||= "standard";
 	return $self->get("/build/$project/$repository/$arch/$package/_log?nostream=1");
 }
+
+sub get_make_stderr {
+	my ($self, $project, $package, $repository, $arch) = @_;
+
+	$repository ||= "standard";
+	return $self->get("/build/$project/$repository/$arch/$package/make-stderr.log");
+}
+
 
 sub get_kernel_commit {
 	my ($self, $project, $package, $revision) = @_;
