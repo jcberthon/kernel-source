@@ -1,0 +1,246 @@
+From: Alan Stern <stern@rowland.harvard.edu>
+Date: Wed, 11 Jul 2012 11:22:53 -0400
+Subject: USB: EHCI: use hrtimer for unlinking empty async QHs
+Git-commit: 32830f207691176234b4c4dd17f0d7ab6d87d94b
+Patch-mainline: v3.6-rc1
+References: bsc#1117515
+
+This patch (as1583) changes ehci-hcd to use an hrtimer event for
+unlinking empty (unused) async QHs instead of using a kernel timer.
+
+The check for empty QHs is moved to a new routine, where it doesn't
+require going through an entire scan of both the async and periodic
+schedules.  And it can unlink multiple QHs at once, unlike the current
+code.
+
+Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/usb/host/ehci-hcd.c   |   16 --------
+ drivers/usb/host/ehci-hub.c   |    1 
+ drivers/usb/host/ehci-q.c     |   78 ++++++++++++++++++++++++++++--------------
+ drivers/usb/host/ehci-timer.c |    2 +
+ drivers/usb/host/ehci.h       |    4 +-
+ 5 files changed, 59 insertions(+), 42 deletions(-)
+
+--- a/drivers/usb/host/ehci-hcd.c
++++ b/drivers/usb/host/ehci-hcd.c
+@@ -91,8 +91,6 @@ static const char	hcd_name [] = "ehci_hc
+ #define	EHCI_TUNE_FLS		1	/* (medium) 512-frame schedule */
+ 
+ #define EHCI_IO_JIFFIES		(HZ/10)		/* io watchdog > irq_thresh */
+-#define EHCI_SHRINK_JIFFIES	(DIV_ROUND_UP(HZ, 200) + 1)
+-						/* 5-ms async qh unlink delay */
+ 
+ /* Initial IRQ latency:  faster than hw default */
+ static int log2_irq_thresh = 0;		// 0 to 6
+@@ -127,15 +125,6 @@ MODULE_PARM_DESC(hird, "host initiated r
+ static void
+ timer_action(struct ehci_hcd *ehci, enum ehci_timer_action action)
+ {
+-	/* Don't override timeouts which shrink or (later) disable
+-	 * the async ring; just the I/O watchdog.  Note that if a
+-	 * SHRINK were pending, OFF would never be requested.
+-	 */
+-	if (timer_pending(&ehci->watchdog)
+-			&& (BIT(TIMER_ASYNC_SHRINK)
+-				& ehci->actions))
+-		return;
+-
+ 	if (!test_and_set_bit(action, &ehci->actions)) {
+ 		unsigned long t;
+ 
+@@ -145,10 +134,6 @@ timer_action(struct ehci_hcd *ehci, enum
+ 				return;
+ 			t = EHCI_IO_JIFFIES;
+ 			break;
+-		/* case TIMER_ASYNC_SHRINK: */
+-		default:
+-			t = EHCI_SHRINK_JIFFIES;
+-			break;
+ 		}
+ 		mod_timer(&ehci->watchdog, t + jiffies);
+ 	}
+@@ -302,6 +287,7 @@ static void ehci_quiesce (struct ehci_hc
+ /*-------------------------------------------------------------------------*/
+ 
+ static void end_unlink_async(struct ehci_hcd *ehci);
++static void unlink_empty_async(struct ehci_hcd *ehci);
+ static void ehci_work(struct ehci_hcd *ehci);
+ static void start_unlink_intr(struct ehci_hcd *ehci, struct ehci_qh *qh);
+ static void end_unlink_intr(struct ehci_hcd *ehci, struct ehci_qh *qh);
+--- a/drivers/usb/host/ehci-hub.c
++++ b/drivers/usb/host/ehci-hub.c
+@@ -312,6 +312,7 @@ static int ehci_bus_suspend (struct usb_
+ 	ehci->rh_state = EHCI_RH_SUSPENDED;
+ 
+ 	end_unlink_async(ehci);
++	unlink_empty_async(ehci);
+ 	ehci_handle_intr_unlinks(ehci);
+ 	end_free_itds(ehci);
+ 
+--- a/drivers/usb/host/ehci-q.c
++++ b/drivers/usb/host/ehci-q.c
+@@ -1201,7 +1201,7 @@ static void start_iaa_cycle(struct ehci_
+ 			end_unlink_async(ehci);
+ 
+ 	/* Otherwise start a new IAA cycle */
+-	} else {
++	} else if (likely(ehci->rh_state == EHCI_RH_RUNNING)) {
+ 		/* Make sure the unlinks are all visible to the hardware */
+ 		wmb();
+ 
+@@ -1249,6 +1249,39 @@ static void end_unlink_async(struct ehci
+ 	}
+ }
+ 
++static void unlink_empty_async(struct ehci_hcd *ehci)
++{
++	struct ehci_qh		*qh, *next;
++	bool			stopped = (ehci->rh_state < EHCI_RH_RUNNING);
++	bool			check_unlinks_later = false;
++
++	/* Unlink all the async QHs that have been empty for a timer cycle */
++	next = ehci->async->qh_next.qh;
++	while (next) {
++		qh = next;
++		next = qh->qh_next.qh;
++
++		if (list_empty(&qh->qtd_list) &&
++				qh->qh_state == QH_STATE_LINKED) {
++			if (!stopped && qh->unlink_cycle ==
++					ehci->async_unlink_cycle)
++				check_unlinks_later = true;
++			else
++				single_unlink_async(ehci, qh);
++		}
++	}
++
++	/* Start a new IAA cycle if any QHs are waiting for it */
++	if (ehci->async_unlink)
++		start_iaa_cycle(ehci, false);
++
++	/* QHs that haven't been empty for long enough will be handled later */
++	if (check_unlinks_later) {
++		ehci_enable_event(ehci, EHCI_HRTIMER_ASYNC_UNLINKS, true);
++		++ehci->async_unlink_cycle;
++	}
++}
++
+ /* makes sure the async qh will become idle */
+ /* caller must own ehci->lock */
+ 
+@@ -1273,12 +1306,8 @@ static void start_unlink_async(struct eh
+ 
+ static void scan_async (struct ehci_hcd *ehci)
+ {
+-	bool			stopped;
+ 	struct ehci_qh		*qh;
+-	enum ehci_timer_action	action = TIMER_IO_WATCHDOG;
+-
+-	timer_action_done (ehci, TIMER_ASYNC_SHRINK);
+-	stopped = (ehci->rh_state < EHCI_RH_RUNNING);
++	bool			check_unlinks_later = false;
+ 
+ 	ehci->qh_scan_next = ehci->async->qh_next.qh;
+ 	while (ehci->qh_scan_next) {
+@@ -1297,28 +1326,27 @@ static void scan_async (struct ehci_hcd
+ 			 * in single_unlink_async().
+ 			 */
+ 			temp = qh_completions(ehci, qh);
+-			if (qh->needs_rescan)
++			if (qh->needs_rescan) {
+ 				start_unlink_async(ehci, qh);
+-			qh->unlink_time = jiffies + EHCI_SHRINK_JIFFIES;
+-			if (temp != 0)
++			} else if (list_empty(&qh->qtd_list)
++					&& qh->qh_state == QH_STATE_LINKED) {
++				qh->unlink_cycle = ehci->async_unlink_cycle;
++				check_unlinks_later = true;
++			} else if (temp != 0)
+ 				goto rescan;
+ 		}
++	}
+ 
+-		/* unlink idle entries, reducing DMA usage as well
+-		 * as HCD schedule-scanning costs.  delay for any qh
+-		 * we just scanned, there's a not-unusual case that it
+-		 * doesn't stay idle for long.
+-		 * (plus, avoids some kind of re-activation race.)
+-		 */
+-		if (list_empty(&qh->qtd_list)
+-				&& qh->qh_state == QH_STATE_LINKED) {
+-			if (!ehci->async_unlink && (stopped ||
+-					time_after_eq(jiffies, qh->unlink_time)))
+-				start_unlink_async(ehci, qh);
+-			else
+-				action = TIMER_ASYNC_SHRINK;
+-		}
++	/*
++	 * Unlink empty entries, reducing DMA usage as well
++	 * as HCD schedule-scanning costs.  Delay for any qh
++	 * we just scanned, there's a not-unusual case that it
++	 * doesn't stay idle for long.
++	 */
++	if (check_unlinks_later && ehci->rh_state == EHCI_RH_RUNNING &&
++			!(ehci->enabled_hrtimer_events &
++				BIT(EHCI_HRTIMER_ASYNC_UNLINKS))) {
++		ehci_enable_event(ehci, EHCI_HRTIMER_ASYNC_UNLINKS, true);
++		++ehci->async_unlink_cycle;
+ 	}
+-	if (action == TIMER_ASYNC_SHRINK)
+-		timer_action (ehci, TIMER_ASYNC_SHRINK);
+ }
+--- a/drivers/usb/host/ehci-timer.c
++++ b/drivers/usb/host/ehci-timer.c
+@@ -72,6 +72,7 @@ static unsigned event_delays_ns[] = {
+ 	1 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_POLL_DEAD */
+ 	1125 * NSEC_PER_USEC,	/* EHCI_HRTIMER_UNLINK_INTR */
+ 	2 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_FREE_ITDS */
++	6 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_ASYNC_UNLINKS */
+ 	10 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_IAA_WATCHDOG */
+ 	10 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_DISABLE_PERIODIC */
+ 	15 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_DISABLE_ASYNC */
+@@ -347,6 +348,7 @@ static void (*event_handlers[])(struct e
+ 	ehci_handle_controller_death,	/* EHCI_HRTIMER_POLL_DEAD */
+ 	ehci_handle_intr_unlinks,	/* EHCI_HRTIMER_UNLINK_INTR */
+ 	end_free_itds,			/* EHCI_HRTIMER_FREE_ITDS */
++	unlink_empty_async,		/* EHCI_HRTIMER_ASYNC_UNLINKS */
+ 	ehci_iaa_watchdog,		/* EHCI_HRTIMER_IAA_WATCHDOG */
+ 	ehci_disable_PSE,		/* EHCI_HRTIMER_DISABLE_PERIODIC */
+ 	ehci_disable_ASE,		/* EHCI_HRTIMER_DISABLE_ASYNC */
+--- a/drivers/usb/host/ehci.h
++++ b/drivers/usb/host/ehci.h
+@@ -84,6 +84,7 @@ enum ehci_hrtimer_event {
+ 	EHCI_HRTIMER_POLL_DEAD,		/* Wait for dead controller to stop */
+ 	EHCI_HRTIMER_UNLINK_INTR,	/* Wait for interrupt QH unlink */
+ 	EHCI_HRTIMER_FREE_ITDS,		/* Wait for unused iTDs and siTDs */
++	EHCI_HRTIMER_ASYNC_UNLINKS,	/* Unlink empty async QHs */
+ 	EHCI_HRTIMER_IAA_WATCHDOG,	/* Handle lost IAA interrupts */
+ 	EHCI_HRTIMER_DISABLE_PERIODIC,	/* Wait to disable periodic sched */
+ 	EHCI_HRTIMER_DISABLE_ASYNC,	/* Wait to disable async sched */
+@@ -123,6 +124,7 @@ struct ehci_hcd {			/* one per controlle
+ 	struct ehci_qh		*async_unlink_last;
+ 	struct ehci_qh		*async_iaa;
+ 	struct ehci_qh		*qh_scan_next;
++	unsigned		async_unlink_cycle;
+ 	unsigned		async_count;	/* async activity count */
+ 
+ 	/* periodic schedule support */
+@@ -232,7 +234,6 @@ static inline struct usb_hcd *ehci_to_hc
+ 
+ enum ehci_timer_action {
+ 	TIMER_IO_WATCHDOG,
+-	TIMER_ASYNC_SHRINK,
+ };
+ 
+ static inline void
+@@ -382,7 +383,6 @@ struct ehci_qh {
+ 	struct ehci_qtd		*dummy;
+ 	struct ehci_qh		*unlink_next;	/* next on unlink list */
+ 
+-	unsigned long		unlink_time;
+ 	unsigned		unlink_cycle;
+ 	unsigned		stamp;
+ 

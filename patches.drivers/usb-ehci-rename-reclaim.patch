@@ -1,0 +1,296 @@
+From: Alan Stern <stern@rowland.harvard.edu>
+Date: Wed, 11 Jul 2012 11:21:38 -0400
+Subject: USB: EHCI: rename "reclaim"
+Git-commit: 99ac5b1e9536f142461681fa6143a947d66b4279
+Patch-mainline: v3.6-rc1
+References: bsc#1117515
+
+This patch (as1569) renames the ehci->reclaim list in ehci-hcd.  The
+word "reclaim" is used in the EHCI specification to mean something
+quite different, and "unlink_next" is more descriptive of the list's
+purpose anyway.
+
+Similarly, the "reclaim" field in the ehci_stats structure is renamed
+"iaa", which is more meaningful (to experts, anyway) and is a better
+match for the "lost_iaa" field.
+
+Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/usb/host/ehci-dbg.c |   16 +++++++++-------
+ drivers/usb/host/ehci-hcd.c |   25 ++++++++++++-------------
+ drivers/usb/host/ehci-hub.c |    2 +-
+ drivers/usb/host/ehci-pci.c |    2 +-
+ drivers/usb/host/ehci-q.c   |   22 +++++++++++-----------
+ drivers/usb/host/ehci.h     |   10 +++++-----
+ 6 files changed, 39 insertions(+), 38 deletions(-)
+
+--- a/drivers/usb/host/ehci-dbg.c
++++ b/drivers/usb/host/ehci-dbg.c
+@@ -539,12 +539,13 @@ static ssize_t fill_async_buffer(struct
+ 	spin_lock_irqsave (&ehci->lock, flags);
+ 	for (qh = ehci->async->qh_next.qh; size > 0 && qh; qh = qh->qh_next.qh)
+ 		qh_lines (ehci, qh, &next, &size);
+-	if (ehci->reclaim && size > 0) {
+-		temp = scnprintf (next, size, "\nreclaim =\n");
++	if (ehci->async_unlink && size > 0) {
++		temp = scnprintf(next, size, "\nunlink =\n");
+ 		size -= temp;
+ 		next += temp;
+ 
+-		for (qh = ehci->reclaim; size > 0 && qh; qh = qh->reclaim)
++		for (qh = ehci->async_unlink; size > 0 && qh;
++				qh = qh->unlink_next)
+ 			qh_lines (ehci, qh, &next, &size);
+ 	}
+ 	spin_unlock_irqrestore (&ehci->lock, flags);
+@@ -842,16 +843,17 @@ static ssize_t fill_registers_buffer(str
+ 		}
+ 	}
+ 
+-	if (ehci->reclaim) {
+-		temp = scnprintf(next, size, "reclaim qh %p\n", ehci->reclaim);
++	if (ehci->async_unlink) {
++		temp = scnprintf(next, size, "async unlink qh %p\n",
++				ehci->async_unlink);
+ 		size -= temp;
+ 		next += temp;
+ 	}
+ 
+ #ifdef EHCI_STATS
+ 	temp = scnprintf (next, size,
+-		"irq normal %ld err %ld reclaim %ld (lost %ld)\n",
+-		ehci->stats.normal, ehci->stats.error, ehci->stats.reclaim,
++		"irq normal %ld err %ld iaa %ld (lost %ld)\n",
++		ehci->stats.normal, ehci->stats.error, ehci->stats.iaa,
+ 		ehci->stats.lost_iaa);
+ 	size -= temp;
+ 	next += temp;
+--- a/drivers/usb/host/ehci-hcd.c
++++ b/drivers/usb/host/ehci-hcd.c
+@@ -354,7 +354,7 @@ static void ehci_iaa_watchdog(unsigned l
+ 	 * (a) SMP races against real IAA firing and retriggering, and
+ 	 * (b) clean HC shutdown, when IAA watchdog was pending.
+ 	 */
+-	if (ehci->reclaim
++	if (ehci->async_unlink
+ 			&& !timer_pending(&ehci->iaa_watchdog)
+ 			&& ehci->rh_state == EHCI_RH_RUNNING) {
+ 		u32 cmd, status;
+@@ -537,8 +537,8 @@ static void ehci_stop (struct usb_hcd *h
+ 		usb_amd_dev_put();
+ 
+ #ifdef	EHCI_STATS
+-	ehci_dbg (ehci, "irq normal %ld err %ld reclaim %ld (lost %ld)\n",
+-		ehci->stats.normal, ehci->stats.error, ehci->stats.reclaim,
++	ehci_dbg(ehci, "irq normal %ld err %ld iaa %ld (lost %ld)\n",
++		ehci->stats.normal, ehci->stats.error, ehci->stats.iaa,
+ 		ehci->stats.lost_iaa);
+ 	ehci_dbg (ehci, "complete %ld unlink %ld\n",
+ 		ehci->stats.complete, ehci->stats.unlink);
+@@ -599,7 +599,6 @@ static int ehci_init(struct usb_hcd *hcd
+ 	else					// N microframes cached
+ 		ehci->i_thresh = 2 + HCC_ISOC_THRES(hcc_params);
+ 
+-	ehci->reclaim = NULL;
+ 	ehci->next_uframe = -1;
+ 	ehci->clock_frame = -1;
+ 
+@@ -850,11 +849,11 @@ static irqreturn_t ehci_irq (struct usb_
+ 					&ehci->regs->command);
+ 			ehci_dbg(ehci, "IAA with IAAD still set?\n");
+ 		}
+-		if (ehci->reclaim) {
+-			COUNT(ehci->stats.reclaim);
++		if (ehci->async_unlink) {
++			COUNT(ehci->stats.iaa);
+ 			end_unlink_async(ehci);
+ 		} else
+-			ehci_dbg(ehci, "IAA with nothing to reclaim?\n");
++			ehci_dbg(ehci, "IAA with nothing to async_unlink?\n");
+ 	}
+ 
+ 	/* remote wakeup [4.3.1] */
+@@ -980,7 +979,7 @@ static int ehci_urb_enqueue (
+ static void unlink_async (struct ehci_hcd *ehci, struct ehci_qh *qh)
+ {
+ 	/* failfast */
+-	if (ehci->rh_state != EHCI_RH_RUNNING && ehci->reclaim)
++	if (ehci->rh_state != EHCI_RH_RUNNING && ehci->async_unlink)
+ 		end_unlink_async(ehci);
+ 
+ 	/* If the QH isn't linked then there's nothing we can do
+@@ -994,15 +993,15 @@ static void unlink_async (struct ehci_hc
+ 	}
+ 
+ 	/* defer till later if busy */
+-	if (ehci->reclaim) {
++	if (ehci->async_unlink) {
+ 		struct ehci_qh		*last;
+ 
+-		for (last = ehci->reclaim;
+-				last->reclaim;
+-				last = last->reclaim)
++		for (last = ehci->async_unlink;
++				last->unlink_next;
++				last = last->unlink_next)
+ 			continue;
+ 		qh->qh_state = QH_STATE_UNLINK_WAIT;
+-		last->reclaim = qh;
++		last->unlink_next = qh;
+ 
+ 	/* start IAA cycle */
+ 	} else
+--- a/drivers/usb/host/ehci-hub.c
++++ b/drivers/usb/host/ehci-hub.c
+@@ -313,7 +313,7 @@ static int ehci_bus_suspend (struct usb_
+ 	ehci_halt (ehci);
+ 	ehci->rh_state = EHCI_RH_SUSPENDED;
+ 
+-	if (ehci->reclaim)
++	if (ehci->async_unlink)
+ 		end_unlink_async(ehci);
+ 
+ 	/* allow remote wakeup */
+--- a/drivers/usb/host/ehci-q.c
++++ b/drivers/usb/host/ehci-q.c
+@@ -1151,11 +1151,11 @@ submit_async (
+ 
+ /*-------------------------------------------------------------------------*/
+ 
+-/* the async qh for the qtds being reclaimed are now unlinked from the HC */
++/* the async qh for the qtds being unlinked are now gone from the HC */
+ 
+ static void end_unlink_async (struct ehci_hcd *ehci)
+ {
+-	struct ehci_qh		*qh = ehci->reclaim;
++	struct ehci_qh		*qh = ehci->async_unlink;
+ 	struct ehci_qh		*next;
+ 
+ 	iaa_watchdog_done(ehci);
+@@ -1165,9 +1165,9 @@ static void end_unlink_async (struct ehc
+ 	qh->qh_next.qh = NULL;
+ 
+ 	/* other unlink(s) may be pending (in QH_STATE_UNLINK_WAIT) */
+-	next = qh->reclaim;
+-	ehci->reclaim = next;
+-	qh->reclaim = NULL;
++	next = qh->unlink_next;
++	ehci->async_unlink = next;
++	qh->unlink_next = NULL;
+ 
+ 	qh_completions (ehci, qh);
+ 
+@@ -1183,7 +1183,7 @@ static void end_unlink_async (struct ehc
+ 	}
+ 
+ 	if (next) {
+-		ehci->reclaim = NULL;
++		ehci->async_unlink = NULL;
+ 		start_unlink_async (ehci, next);
+ 	}
+ 
+@@ -1202,7 +1202,7 @@ static void start_unlink_async (struct e
+ 
+ #ifdef DEBUG
+ 	assert_spin_locked(&ehci->lock);
+-	if (ehci->reclaim
++	if (ehci->async_unlink
+ 			|| (qh->qh_state != QH_STATE_LINKED
+ 				&& qh->qh_state != QH_STATE_UNLINK_WAIT)
+ 			)
+@@ -1213,7 +1213,7 @@ static void start_unlink_async (struct e
+ 	if (unlikely (qh == ehci->async)) {
+ 		/* can't get here without STS_ASS set */
+ 		if (ehci->rh_state != EHCI_RH_HALTED
+-				&& !ehci->reclaim) {
++				&& !ehci->async_unlink) {
+ 			/* ... and CMD_IAAD clear */
+ 			ehci_writel(ehci, cmd & ~CMD_ASE,
+ 				    &ehci->regs->command);
+@@ -1225,7 +1225,7 @@ static void start_unlink_async (struct e
+ 	}
+ 
+ 	qh->qh_state = QH_STATE_UNLINK;
+-	ehci->reclaim = qh;
++	ehci->async_unlink = qh;
+ 
+ 	prev = ehci->async;
+ 	while (prev->qh_next.qh != qh)
+@@ -1239,7 +1239,7 @@ static void start_unlink_async (struct e
+ 
+ 	/* If the controller isn't running, we don't have to wait for it */
+ 	if (unlikely(ehci->rh_state != EHCI_RH_RUNNING)) {
+-		/* if (unlikely (qh->reclaim != 0))
++		/* if (unlikely (qh->unlink_next != 0))
+ 		 *	this will recurse, probably not much
+ 		 */
+ 		end_unlink_async (ehci);
+@@ -1295,7 +1295,7 @@ static void scan_async (struct ehci_hcd
+ 		 */
+ 		if (list_empty(&qh->qtd_list)
+ 				&& qh->qh_state == QH_STATE_LINKED) {
+-			if (!ehci->reclaim && (stopped ||
++			if (!ehci->async_unlink && (stopped ||
+ 					time_after_eq(jiffies, qh->unlink_time)))
+ 				start_unlink_async(ehci, qh);
+ 			else
+--- a/drivers/usb/host/ehci.h
++++ b/drivers/usb/host/ehci.h
+@@ -42,7 +42,7 @@ struct ehci_stats {
+ 	/* irq usage */
+ 	unsigned long		normal;
+ 	unsigned long		error;
+-	unsigned long		reclaim;
++	unsigned long		iaa;
+ 	unsigned long		lost_iaa;
+ 
+ 	/* termination of urbs from core */
+@@ -51,7 +51,7 @@ struct ehci_stats {
+ };
+ 
+ /* ehci_hcd->lock guards shared data against other CPUs:
+- *   ehci_hcd:	async, reclaim, periodic (and shadow), ...
++ *   ehci_hcd:	async, unlink, periodic (and shadow), ...
+  *   usb_host_endpoint: hcpriv
+  *   ehci_qh:	qh_next, qtd_list
+  *   ehci_qtd:	qtd_list
+@@ -81,7 +81,7 @@ struct ehci_hcd {			/* one per controlle
+ 	/* async schedule support */
+ 	struct ehci_qh		*async;
+ 	struct ehci_qh		*dummy;		/* For AMD quirk use */
+-	struct ehci_qh		*reclaim;
++	struct ehci_qh		*async_unlink;
+ 	struct ehci_qh		*qh_scan_next;
+ 	unsigned		scanning : 1;
+ 
+@@ -354,7 +354,7 @@ struct ehci_qh {
+ 	union ehci_shadow	qh_next;	/* ptr to qh; or periodic */
+ 	struct list_head	qtd_list;	/* sw qtd list */
+ 	struct ehci_qtd		*dummy;
+-	struct ehci_qh		*reclaim;	/* next to reclaim */
++	struct ehci_qh		*unlink_next;	/* next on unlink list */
+ 
+ 	unsigned long		unlink_time;
+ 	unsigned		stamp;
+@@ -364,7 +364,7 @@ struct ehci_qh {
+ #define	QH_STATE_LINKED		1		/* HC sees this */
+ #define	QH_STATE_UNLINK		2		/* HC may still see this */
+ #define	QH_STATE_IDLE		3		/* HC doesn't see this */
+-#define	QH_STATE_UNLINK_WAIT	4		/* LINKED and on reclaim q */
++#define	QH_STATE_UNLINK_WAIT	4		/* LINKED and on unlink q */
+ #define	QH_STATE_COMPLETING	5		/* don't touch token.HALT */
+ 
+ 	u8			xacterrs;	/* XactErr retry counter */
+--- a/drivers/usb/host/ehci-pci.c
++++ b/drivers/usb/host/ehci-pci.c
+@@ -401,7 +401,7 @@ static int ehci_pci_resume(struct usb_hc
+ 
+ 	/* emptying the schedule aborts any urbs */
+ 	spin_lock_irq(&ehci->lock);
+-	if (ehci->reclaim)
++	if (ehci->async_unlink)
+ 		end_unlink_async(ehci);
+ 	ehci_work(ehci);
+ 	spin_unlock_irq(&ehci->lock);

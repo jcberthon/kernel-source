@@ -1,0 +1,411 @@
+From: Alan Stern <stern@rowland.harvard.edu>
+Date: Wed, 11 Jul 2012 11:22:35 -0400
+Subject: USB: EHCI: use hrtimer for (s)iTD deallocation
+Git-commit: 55934eb3b9fa52eb53b9d7342267fc73c38206aa
+Patch-mainline: v3.6-rc1
+References: bsc#1117515
+
+This patch (as1579) adds an hrtimer event to handle deallocation of
+iTDs and siTDs in ehci-hcd.
+
+Because of the frame-oriented approach used by the EHCI periodic
+schedule, the hardware can continue to access the Transfer Descriptor
+for isochronous (or split-isochronous) transactions for up to a
+millisecond after the transaction completes.  The iTD (or siTD) must
+not be reused before then.
+
+The strategy currently used involves putting completed iTDs on a list
+of cached entries and every so often returning them to the endpoint's
+free list.  The new strategy reduces overhead by putting completed
+iTDs back on the free list immediately, although they are not reused
+until it is safe to do so.
+
+When the isochronous endpoint stops (its queue becomes empty), the
+iTDs on its free list get moved to a global list, from which they will
+be deallocated after a minimum of 2 ms.  This delay is what the new
+hrtimer event is for.
+
+Overall this may not be a tremendous improvement over the current
+code, but to me it seems a lot more clear and logical.  In addition,
+it removes the need for each iTD to keep a reference to the
+ehci_iso_stream it belongs to, since the iTD never needs to be moved
+back to the stream's free list from the global list.
+
+Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/usb/host/ehci-hcd.c   |   1 +
+ drivers/usb/host/ehci-hub.c   |   1 +
+ drivers/usb/host/ehci-mem.c   |   1 -
+ drivers/usb/host/ehci-sched.c | 137 ++++++++++++------------------------------
+ drivers/usb/host/ehci-timer.c |  50 +++++++++++++--
+ drivers/usb/host/ehci.h       |   5 +-
+ 6 files changed, 90 insertions(+), 105 deletions(-)
+
+diff --git a/drivers/usb/host/ehci-hcd.c b/drivers/usb/host/ehci-hcd.c
+index 1676c66b8530..98b945840c9e 100644
+--- a/drivers/usb/host/ehci-hcd.c
++++ b/drivers/usb/host/ehci-hcd.c
+@@ -509,6 +509,7 @@ static void ehci_stop (struct usb_hcd *hcd)
+ 	spin_lock_irq (&ehci->lock);
+ 	if (ehci->async)
+ 		ehci_work (ehci);
++	end_free_itds(ehci);
+ 	spin_unlock_irq (&ehci->lock);
+ 	ehci_mem_cleanup (ehci);
+ 
+diff --git a/drivers/usb/host/ehci-hub.c b/drivers/usb/host/ehci-hub.c
+index 8aa740dc510d..6ad806bbe468 100644
+--- a/drivers/usb/host/ehci-hub.c
++++ b/drivers/usb/host/ehci-hub.c
+@@ -303,6 +303,7 @@ static int ehci_bus_suspend (struct usb_hcd *hcd)
+ 	if (ehci->async_unlink)
+ 		end_unlink_async(ehci);
+ 	ehci_handle_intr_unlinks(ehci);
++	end_free_itds(ehci);
+ 
+ 	/* allow remote wakeup */
+ 	mask = INTR_MASK;
+diff --git a/drivers/usb/host/ehci-mem.c b/drivers/usb/host/ehci-mem.c
+index 93132d8ad360..ef2c3a1eca4b 100644
+--- a/drivers/usb/host/ehci-mem.c
++++ b/drivers/usb/host/ehci-mem.c
+@@ -118,7 +118,6 @@ static struct ehci_qh *ehci_qh_alloc (struct ehci_hcd *ehci, gfp_t flags)
+ 
+ static void ehci_mem_cleanup (struct ehci_hcd *ehci)
+ {
+-	free_cached_lists(ehci);
+ 	if (ehci->async)
+ 		qh_destroy(ehci, ehci->async);
+ 	ehci->async = NULL;
+diff --git a/drivers/usb/host/ehci-sched.c b/drivers/usb/host/ehci-sched.c
+index eec8446f8ded..1e4f13c11b6a 100644
+--- a/drivers/usb/host/ehci-sched.c
++++ b/drivers/usb/host/ehci-sched.c
+@@ -1045,31 +1045,6 @@ iso_stream_put(struct ehci_hcd *ehci, struct ehci_iso_stream *stream)
+ 	if (stream->refcount == 1) {
+ 		// BUG_ON (!list_empty(&stream->td_list));
+ 
+-		while (!list_empty (&stream->free_list)) {
+-			struct list_head	*entry;
+-
+-			entry = stream->free_list.next;
+-			list_del (entry);
+-
+-			/* knows about ITD vs SITD */
+-			if (stream->highspeed) {
+-				struct ehci_itd		*itd;
+-
+-				itd = list_entry (entry, struct ehci_itd,
+-						itd_list);
+-				dma_pool_free (ehci->itd_pool, itd,
+-						itd->itd_dma);
+-			} else {
+-				struct ehci_sitd	*sitd;
+-
+-				sitd = list_entry (entry, struct ehci_sitd,
+-						sitd_list);
+-				dma_pool_free (ehci->sitd_pool, sitd,
+-						sitd->sitd_dma);
+-			}
+-		}
+-
+-		stream->bEndpointAddress &= 0x0f;
+ 		if (stream->ep)
+ 			stream->ep->hcpriv = NULL;
+ 
+@@ -1230,17 +1205,19 @@ itd_urb_transaction (
+ 	spin_lock_irqsave (&ehci->lock, flags);
+ 	for (i = 0; i < num_itds; i++) {
+ 
+-		/* free_list.next might be cache-hot ... but maybe
+-		 * the HC caches it too. avoid that issue for now.
++		/*
++		 * Use iTDs from the free list, but not iTDs that may
++		 * still be in use by the hardware.
+ 		 */
+-
+-		/* prefer previously-allocated itds */
+-		if (likely (!list_empty(&stream->free_list))) {
+-			itd = list_entry (stream->free_list.prev,
++		if (likely(!list_empty(&stream->free_list))) {
++			itd = list_first_entry(&stream->free_list,
+ 					struct ehci_itd, itd_list);
++			if (itd->frame == ehci->clock_frame)
++				goto alloc_itd;
+ 			list_del (&itd->itd_list);
+ 			itd_dma = itd->itd_dma;
+ 		} else {
++ alloc_itd:
+ 			spin_unlock_irqrestore (&ehci->lock, flags);
+ 			itd = dma_pool_alloc (ehci->itd_pool, mem_flags,
+ 					&itd_dma);
+@@ -1762,24 +1739,18 @@ itd_complete (
+ 
+ done:
+ 	itd->urb = NULL;
+-	if (ehci->clock_frame != itd->frame || itd->index[7] != -1) {
+-		/* OK to recycle this ITD now. */
+-		itd->stream = NULL;
+-		list_move(&itd->itd_list, &stream->free_list);
+-		iso_stream_put(ehci, stream);
+-	} else {
+-		/* HW might remember this ITD, so we can't recycle it yet.
+-		 * Move it to a safe place until a new frame starts.
+-		 */
+-		list_move(&itd->itd_list, &ehci->cached_itd_list);
+-		if (stream->refcount == 2) {
+-			/* If iso_stream_put() were called here, stream
+-			 * would be freed.  Instead, just prevent reuse.
+-			 */
+-			stream->ep->hcpriv = NULL;
+-			stream->ep = NULL;
+-		}
++
++	/* Add to the end of the free list for later reuse */
++	list_move_tail(&itd->itd_list, &stream->free_list);
++
++	/* Recycle the iTDs when the pipeline is empty (ep no longer in use) */
++	if (list_empty(&stream->td_list)) {
++		list_splice_tail_init(&stream->free_list,
++				&ehci->cached_itd_list);
++		start_free_itds(ehci);
+ 	}
++
++	iso_stream_put(ehci, stream);
+ 	return retval;
+ }
+ 
+@@ -1930,17 +1901,19 @@ sitd_urb_transaction (
+ 		 * means we never need two sitds for full speed packets.
+ 		 */
+ 
+-		/* free_list.next might be cache-hot ... but maybe
+-		 * the HC caches it too. avoid that issue for now.
++		/*
++		 * Use siTDs from the free list, but not siTDs that may
++		 * still be in use by the hardware.
+ 		 */
+-
+-		/* prefer previously-allocated sitds */
+-		if (!list_empty(&stream->free_list)) {
+-			sitd = list_entry (stream->free_list.prev,
++		if (likely(!list_empty(&stream->free_list))) {
++			sitd = list_first_entry(&stream->free_list,
+ 					 struct ehci_sitd, sitd_list);
++			if (sitd->frame == ehci->clock_frame)
++				goto alloc_sitd;
+ 			list_del (&sitd->sitd_list);
+ 			sitd_dma = sitd->sitd_dma;
+ 		} else {
++ alloc_sitd:
+ 			spin_unlock_irqrestore (&ehci->lock, flags);
+ 			sitd = dma_pool_alloc (ehci->sitd_pool, mem_flags,
+ 					&sitd_dma);
+@@ -2157,24 +2130,18 @@ sitd_complete (
+ 
+ done:
+ 	sitd->urb = NULL;
+-	if (ehci->clock_frame != sitd->frame) {
+-		/* OK to recycle this SITD now. */
+-		sitd->stream = NULL;
+-		list_move(&sitd->sitd_list, &stream->free_list);
+-		iso_stream_put(ehci, stream);
+-	} else {
+-		/* HW might remember this SITD, so we can't recycle it yet.
+-		 * Move it to a safe place until a new frame starts.
+-		 */
+-		list_move(&sitd->sitd_list, &ehci->cached_sitd_list);
+-		if (stream->refcount == 2) {
+-			/* If iso_stream_put() were called here, stream
+-			 * would be freed.  Instead, just prevent reuse.
+-			 */
+-			stream->ep->hcpriv = NULL;
+-			stream->ep = NULL;
+-		}
++
++	/* Add to the end of the free list for later reuse */
++	list_move_tail(&sitd->sitd_list, &stream->free_list);
++
++	/* Recycle the siTDs when the pipeline is empty (ep no longer in use) */
++	if (list_empty(&stream->td_list)) {
++		list_splice_tail_init(&stream->free_list,
++				&ehci->cached_sitd_list);
++		start_free_itds(ehci);
+ 	}
++
++	iso_stream_put(ehci, stream);
+ 	return retval;
+ }
+ 
+@@ -2239,28 +2206,6 @@ static int sitd_submit (struct ehci_hcd *ehci, struct urb *urb,
+ 
+ /*-------------------------------------------------------------------------*/
+ 
+-static void free_cached_lists(struct ehci_hcd *ehci)
+-{
+-	struct ehci_itd *itd, *n;
+-	struct ehci_sitd *sitd, *sn;
+-
+-	list_for_each_entry_safe(itd, n, &ehci->cached_itd_list, itd_list) {
+-		struct ehci_iso_stream	*stream = itd->stream;
+-		itd->stream = NULL;
+-		list_move(&itd->itd_list, &stream->free_list);
+-		iso_stream_put(ehci, stream);
+-	}
+-
+-	list_for_each_entry_safe(sitd, sn, &ehci->cached_sitd_list, sitd_list) {
+-		struct ehci_iso_stream	*stream = sitd->stream;
+-		sitd->stream = NULL;
+-		list_move(&sitd->sitd_list, &stream->free_list);
+-		iso_stream_put(ehci, stream);
+-	}
+-}
+-
+-/*-------------------------------------------------------------------------*/
+-
+ static void
+ scan_periodic (struct ehci_hcd *ehci)
+ {
+@@ -2282,10 +2227,7 @@ scan_periodic (struct ehci_hcd *ehci)
+ 		clock = now_uframe + mod - 1;
+ 		clock_frame = -1;
+ 	}
+-	if (ehci->clock_frame != clock_frame) {
+-		free_cached_lists(ehci);
+-		ehci->clock_frame = clock_frame;
+-	}
++	ehci->clock_frame = clock_frame;
+ 	clock &= mod - 1;
+ 	clock_frame = clock >> 3;
+ 	++ehci->periodic_stamp;
+@@ -2463,7 +2405,6 @@ scan_periodic (struct ehci_hcd *ehci)
+ 			clock = now;
+ 			clock_frame = clock >> 3;
+ 			if (ehci->clock_frame != clock_frame) {
+-				free_cached_lists(ehci);
+ 				ehci->clock_frame = clock_frame;
+ 				++ehci->periodic_stamp;
+ 			}
+diff --git a/drivers/usb/host/ehci-timer.c b/drivers/usb/host/ehci-timer.c
+index 0c5326a8883c..8feb60ff4228 100644
+--- a/drivers/usb/host/ehci-timer.c
++++ b/drivers/usb/host/ehci-timer.c
+@@ -71,6 +71,7 @@ static unsigned event_delays_ns[] = {
+ 	1 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_POLL_PSS */
+ 	1 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_POLL_DEAD */
+ 	1125 * NSEC_PER_USEC,	/* EHCI_HRTIMER_UNLINK_INTR */
++	2 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_FREE_ITDS */
+ 	10 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_DISABLE_PERIODIC */
+ 	15 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_DISABLE_ASYNC */
+ };
+@@ -165,7 +166,6 @@ static void ehci_poll_PSS(struct ehci_hcd *ehci)
+ 
+ 	/* The status is up-to-date; restart or stop the schedule as needed */
+ 	if (want == 0) {	/* Stopped */
+-		free_cached_lists(ehci);
+ 		if (ehci->periodic_count > 0) {
+ 
+ 			/* make sure ehci_work scans these */
+@@ -188,9 +188,6 @@ static void ehci_poll_PSS(struct ehci_hcd *ehci)
+ static void ehci_disable_PSE(struct ehci_hcd *ehci)
+ {
+ 	ehci_clear_command_bit(ehci, CMD_PSE);
+-
+-	/* Poll to see when it actually stops */
+-	ehci_enable_event(ehci, EHCI_HRTIMER_POLL_PSS, true);
+ }
+ 
+ 
+@@ -250,6 +247,50 @@ static void ehci_handle_intr_unlinks(struct ehci_hcd *ehci)
+ }
+ 
+ 
++/* Start another free-iTDs/siTDs cycle */
++static void start_free_itds(struct ehci_hcd *ehci)
++{
++	if (!(ehci->enabled_hrtimer_events & BIT(EHCI_HRTIMER_FREE_ITDS))) {
++		ehci->last_itd_to_free = list_entry(
++				ehci->cached_itd_list.prev,
++				struct ehci_itd, itd_list);
++		ehci->last_sitd_to_free = list_entry(
++				ehci->cached_sitd_list.prev,
++				struct ehci_sitd, sitd_list);
++		ehci_enable_event(ehci, EHCI_HRTIMER_FREE_ITDS, true);
++	}
++}
++
++/* Wait for controller to stop using old iTDs and siTDs */
++static void end_free_itds(struct ehci_hcd *ehci)
++{
++	struct ehci_itd		*itd, *n;
++	struct ehci_sitd	*sitd, *sn;
++
++	if (ehci->rh_state < EHCI_RH_RUNNING) {
++		ehci->last_itd_to_free = NULL;
++		ehci->last_sitd_to_free = NULL;
++	}
++
++	list_for_each_entry_safe(itd, n, &ehci->cached_itd_list, itd_list) {
++		list_del(&itd->itd_list);
++		dma_pool_free(ehci->itd_pool, itd, itd->itd_dma);
++		if (itd == ehci->last_itd_to_free)
++			break;
++	}
++	list_for_each_entry_safe(sitd, sn, &ehci->cached_sitd_list, sitd_list) {
++		list_del(&sitd->sitd_list);
++		dma_pool_free(ehci->sitd_pool, sitd, sitd->sitd_dma);
++		if (sitd == ehci->last_sitd_to_free)
++			break;
++	}
++
++	if (!list_empty(&ehci->cached_itd_list) ||
++			!list_empty(&ehci->cached_sitd_list))
++		start_free_itds(ehci);
++}
++
++
+ /*
+  * Handler functions for the hrtimer event types.
+  * Keep this array in the same order as the event types indexed by
+@@ -260,6 +301,7 @@ static void (*event_handlers[])(struct ehci_hcd *) = {
+ 	ehci_poll_PSS,			/* EHCI_HRTIMER_POLL_PSS */
+ 	ehci_handle_controller_death,	/* EHCI_HRTIMER_POLL_DEAD */
+ 	ehci_handle_intr_unlinks,	/* EHCI_HRTIMER_UNLINK_INTR */
++	end_free_itds,			/* EHCI_HRTIMER_FREE_ITDS */
+ 	ehci_disable_PSE,		/* EHCI_HRTIMER_DISABLE_PERIODIC */
+ 	ehci_disable_ASE,		/* EHCI_HRTIMER_DISABLE_ASYNC */
+ };
+diff --git a/drivers/usb/host/ehci.h b/drivers/usb/host/ehci.h
+index 6874d89b0b64..bcfbb175e2b4 100644
+--- a/drivers/usb/host/ehci.h
++++ b/drivers/usb/host/ehci.h
+@@ -83,6 +83,7 @@ enum ehci_hrtimer_event {
+ 	EHCI_HRTIMER_POLL_PSS,		/* Poll for periodic schedule off */
+ 	EHCI_HRTIMER_POLL_DEAD,		/* Wait for dead controller to stop */
+ 	EHCI_HRTIMER_UNLINK_INTR,	/* Wait for interrupt QH unlink */
++	EHCI_HRTIMER_FREE_ITDS,		/* Wait for unused iTDs and siTDs */
+ 	EHCI_HRTIMER_DISABLE_PERIODIC,	/* Wait to disable periodic sched */
+ 	EHCI_HRTIMER_DISABLE_ASYNC,	/* Wait to disable async sched */
+ 	EHCI_HRTIMER_NUM_EVENTS		/* Must come last */
+@@ -139,7 +140,9 @@ struct ehci_hcd {			/* one per controller */
+ 
+ 	/* list of itds & sitds completed while clock_frame was still active */
+ 	struct list_head	cached_itd_list;
++	struct ehci_itd		*last_itd_to_free;
+ 	struct list_head	cached_sitd_list;
++	struct ehci_sitd	*last_sitd_to_free;
+ 	unsigned		clock_frame;
+ 
+ 	/* per root hub port */
+@@ -250,8 +253,6 @@ timer_action_done (struct ehci_hcd *ehci, enum ehci_timer_action action)
+ 	clear_bit (action, &ehci->actions);
+ }
+ 
+-static void free_cached_lists(struct ehci_hcd *ehci);
+-
+ /*-------------------------------------------------------------------------*/
+ 
+ #include <linux/usb/ehci_def.h>
+

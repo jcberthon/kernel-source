@@ -1,0 +1,368 @@
+From: Alan Stern <stern@rowland.harvard.edu>
+Date: Wed, 11 Jul 2012 11:22:49 -0400
+Subject: USB: EHCI: unlink multiple async QHs together
+Git-commit: 3c273a056bf46167f0a1309c2ba72282a17d2541
+Patch-mainline: v3.6-rc1
+References: bsc#1117515
+
+This patch (as1582) changes ehci-hcd's strategy for unlinking async
+QHs.  Currently the driver never unlinks more than one QH at a time.
+This can be inefficient and cause unnecessary delays, since a QH
+cannot be reused while it is waiting to be unlinked.
+
+The new strategy unlinks all the waiting QHs at once.  In practice the
+improvement won't be very big, because it's somewhat uncommon to have
+two or more QHs waiting to be unlinked at any time.  But it does
+happen, and in any case, doing things this way makes more sense IMO.
+
+The change requires the async unlinking code to be refactored
+slightly.  Now in addition to the routines for starting and ending an
+unlink, there are new routines for unlinking a single QH and starting
+an IAA cycle.  This approach is needed because there are two separate
+paths for unlinking async QHs:
+
+	When a transfer error occurs or an URB is cancelled, the QH
+	must be unlinked right away;
+
+	When a QH has been idle sufficiently long, it is unlinked
+	to avoid consuming DMA bandwidth uselessly.
+
+In the first case we want the unlink to proceed as quickly as
+possible, whereas in the second case we can afford to batch several
+QHs together and unlink them all at once.  Hence the division of
+labor.
+
+Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/usb/host/ehci-hcd.c   |   35 +--------
+ drivers/usb/host/ehci-hub.c   |    3
+ drivers/usb/host/ehci-q.c     |  159 ++++++++++++++++++++++++------------------
+ drivers/usb/host/ehci-timer.c |    3
+ drivers/usb/host/ehci.h       |    2
+ drivers/usb/host/ehci-hcd.c   |   35 +--------
+ drivers/usb/host/ehci-hub.c   |    3 
+ drivers/usb/host/ehci-q.c     |  151 ++++++++++++++++++++++++------------------
+ drivers/usb/host/ehci-timer.c |    3 
+ drivers/usb/host/ehci.h       |    2 
+ 5 files changed, 98 insertions(+), 96 deletions(-)
+
+--- a/drivers/usb/host/ehci-hcd.c
++++ b/drivers/usb/host/ehci-hcd.c
+@@ -790,7 +790,7 @@ static irqreturn_t ehci_irq (struct usb_
+ 					&ehci->regs->command);
+ 			ehci_dbg(ehci, "IAA with IAAD still set?\n");
+ 		}
+-		if (ehci->async_unlink) {
++		if (ehci->async_iaa) {
+ 			COUNT(ehci->stats.iaa);
+ 			end_unlink_async(ehci);
+ 		} else
+@@ -920,33 +920,6 @@ static int ehci_urb_enqueue (
+ 	}
+ }
+ 
+-static void unlink_async (struct ehci_hcd *ehci, struct ehci_qh *qh)
+-{
+-	/* failfast */
+-	if (ehci->rh_state < EHCI_RH_RUNNING && ehci->async_unlink)
+-		end_unlink_async(ehci);
+-
+-	/* If the QH isn't linked then there's nothing we can do
+-	 * unless we were called during a giveback, in which case
+-	 * qh_completions() has to deal with it.
+-	 */
+-	if (qh->qh_state != QH_STATE_LINKED) {
+-		if (qh->qh_state == QH_STATE_COMPLETING)
+-			qh->needs_rescan = 1;
+-		return;
+-	}
+-
+-	/* defer till later if busy */
+-	if (ehci->async_unlink) {
+-		qh->qh_state = QH_STATE_UNLINK_WAIT;
+-		ehci->async_unlink_last->unlink_next = qh;
+-		ehci->async_unlink_last = qh;
+-
+-	/* start IAA cycle */
+-	} else
+-		start_unlink_async (ehci, qh);
+-}
+-
+ /* remove from hardware lists
+  * completions normally happen asynchronously
+  */
+@@ -973,7 +946,7 @@ static int ehci_urb_dequeue(struct usb_h
+ 		switch (qh->qh_state) {
+ 		case QH_STATE_LINKED:
+ 		case QH_STATE_COMPLETING:
+-			unlink_async(ehci, qh);
++			start_unlink_async(ehci, qh);
+ 			break;
+ 		case QH_STATE_UNLINK:
+ 		case QH_STATE_UNLINK_WAIT:
+@@ -1064,7 +1037,7 @@ rescan:
+ 		 * may already be unlinked.
+ 		 */
+ 		if (tmp)
+-			unlink_async(ehci, qh);
++			start_unlink_async(ehci, qh);
+ 		/* FALL THROUGH */
+ 	case QH_STATE_UNLINK:		/* wait for hw to finish? */
+ 	case QH_STATE_UNLINK_WAIT:
+@@ -1127,7 +1100,7 @@ ehci_endpoint_reset(struct usb_hcd *hcd,
+ 			 * re-linking will call qh_refresh().
+ 			 */
+ 			if (eptype == USB_ENDPOINT_XFER_BULK)
+-				unlink_async(ehci, qh);
++				start_unlink_async(ehci, qh);
+ 			else
+ 				start_unlink_intr(ehci, qh);
+ 		}
+--- a/drivers/usb/host/ehci-hub.c
++++ b/drivers/usb/host/ehci-hub.c
+@@ -311,8 +311,7 @@ static int ehci_bus_suspend (struct usb_
+ 	ehci_halt (ehci);
+ 	ehci->rh_state = EHCI_RH_SUSPENDED;
+ 
+-	if (ehci->async_unlink)
+-		end_unlink_async(ehci);
++	end_unlink_async(ehci);
+ 	ehci_handle_intr_unlinks(ehci);
+ 	end_free_itds(ehci);
+ 
+--- a/drivers/usb/host/ehci-q.c
++++ b/drivers/usb/host/ehci-q.c
+@@ -301,9 +301,6 @@ __acquires(ehci->lock)
+ 	spin_lock (&ehci->lock);
+ }
+ 
+-static void start_unlink_async (struct ehci_hcd *ehci, struct ehci_qh *qh);
+-static void unlink_async (struct ehci_hcd *ehci, struct ehci_qh *qh);
+-
+ static int qh_schedule (struct ehci_hcd *ehci, struct ehci_qh *qh);
+ 
+ /*
+@@ -1162,84 +1159,114 @@ submit_async (
+ 
+ /*-------------------------------------------------------------------------*/
+ 
+-/* the async qh for the qtds being unlinked are now gone from the HC */
++static void single_unlink_async(struct ehci_hcd *ehci, struct ehci_qh *qh)
++ {
++	struct ehci_qh		*prev;
++
++	/* Add to the end of the list of QHs waiting for the next IAAD */
++	qh->qh_state = QH_STATE_UNLINK;
++	if (ehci->async_unlink)
++		ehci->async_unlink_last->unlink_next = qh;
++	else
++		ehci->async_unlink = qh;
++	ehci->async_unlink_last = qh;
+ 
+-static void end_unlink_async (struct ehci_hcd *ehci)
++	/* Unlink it from the schedule */
++	prev = ehci->async;
++	while (prev->qh_next.qh != qh)
++		prev = prev->qh_next.qh;
++
++	prev->hw->hw_next = qh->hw->hw_next;
++	prev->qh_next = qh->qh_next;
++	if (ehci->qh_scan_next == qh)
++		ehci->qh_scan_next = qh->qh_next.qh;
++}
++
++static void start_iaa_cycle(struct ehci_hcd *ehci, bool nested)
+ {
+-	struct ehci_qh		*qh = ehci->async_unlink;
+-	struct ehci_qh		*next;
++	/*
++	 * Do nothing if an IAA cycle is already running or
++	 * if one will be started shortly.
++	 */
++	if (ehci->async_iaa || ehci->async_unlinking)
++		return;
+ 
+-	// qh->hw_next = cpu_to_hc32(qh->qh_dma);
+-	qh->qh_state = QH_STATE_IDLE;
+-	qh->qh_next.qh = NULL;
++	/* Do all the waiting QHs at once */
++	ehci->async_iaa = ehci->async_unlink;
++	ehci->async_unlink = NULL;
+ 
+-	/* other unlink(s) may be pending (in QH_STATE_UNLINK_WAIT) */
+-	next = qh->unlink_next;
+-	ehci->async_unlink = next;
+-	qh->unlink_next = NULL;
++	/* If the controller isn't running, we don't have to wait for it */
++	if (unlikely(ehci->rh_state < EHCI_RH_RUNNING)) {
++		if (!nested)		/* Avoid recursion */
++			end_unlink_async(ehci);
+ 
+-	qh_completions (ehci, qh);
++	/* Otherwise start a new IAA cycle */
++	} else {
++		/* Make sure the unlinks are all visible to the hardware */
++		wmb();
+ 
+-	if (!list_empty(&qh->qtd_list) && ehci->rh_state == EHCI_RH_RUNNING)
+-		qh_link_async (ehci, qh);
++		ehci_writel(ehci, ehci->command | CMD_IAAD,
++				&ehci->regs->command);
++		ehci_readl(ehci, &ehci->regs->command);
++		ehci_enable_event(ehci, EHCI_HRTIMER_IAA_WATCHDOG, true);
++ 	}
++}
+ 
+-	disable_async(ehci);
++/* the async qh for the qtds being unlinked are now gone from the HC */
+ 
+-	if (next) {
+-		ehci->async_unlink = NULL;
+-		start_unlink_async (ehci, next);
+-	}
++static void end_unlink_async(struct ehci_hcd *ehci)
++{
++	struct ehci_qh		*qh;
+ 
+ 	if (ehci->has_synopsys_hc_bug)
+ 		ehci_writel(ehci, (u32) ehci->async->qh_dma,
+ 			    &ehci->regs->async_next);
++
++	/* Process the idle QHs */
++ restart:
++	ehci->async_unlinking = true;
++	while (ehci->async_iaa) {
++		qh = ehci->async_iaa;
++		ehci->async_iaa = qh->unlink_next;
++		qh->unlink_next = NULL;
++
++		qh->qh_state = QH_STATE_IDLE;
++		qh->qh_next.qh = NULL;
++
++		qh_completions(ehci, qh);
++		if (!list_empty(&qh->qtd_list) &&
++				ehci->rh_state == EHCI_RH_RUNNING)
++			qh_link_async(ehci, qh);
++		disable_async(ehci);
++	}
++	ehci->async_unlinking = false;
++
++	/* Start a new IAA cycle if any QHs are waiting for it */
++	if (ehci->async_unlink) {
++		start_iaa_cycle(ehci, true);
++		if (unlikely(ehci->rh_state < EHCI_RH_RUNNING))
++			goto restart;
++	}
+ }
+ 
+ /* makes sure the async qh will become idle */
+ /* caller must own ehci->lock */
+ 
+-static void start_unlink_async (struct ehci_hcd *ehci, struct ehci_qh *qh)
++static void start_unlink_async(struct ehci_hcd *ehci, struct ehci_qh *qh)
+ {
+-	int		cmd = ehci_readl(ehci, &ehci->regs->command);
+-	struct ehci_qh	*prev;
+-
+-#ifdef DEBUG
+-	assert_spin_locked(&ehci->lock);
+-	if (ehci->async_unlink
+-			|| (qh->qh_state != QH_STATE_LINKED
+-				&& qh->qh_state != QH_STATE_UNLINK_WAIT)
+-			)
+-		BUG ();
+-#endif
+-
+-	qh->qh_state = QH_STATE_UNLINK;
+-	ehci->async_unlink = qh;
+-	if (!qh->unlink_next)
+-		ehci->async_unlink_last = qh;
+-
+-	prev = ehci->async;
+-	while (prev->qh_next.qh != qh)
+-		prev = prev->qh_next.qh;
+-
+-	prev->hw->hw_next = qh->hw->hw_next;
+-	prev->qh_next = qh->qh_next;
+-	if (ehci->qh_scan_next == qh)
+-		ehci->qh_scan_next = qh->qh_next.qh;
+-	wmb ();
+-
+-	/* If the controller isn't running, we don't have to wait for it */
+-	if (unlikely(ehci->rh_state < EHCI_RH_RUNNING)) {
+-		/* if (unlikely (qh->unlink_next != 0))
+-		 *	this will recurse, probably not much
+-		 */
+-		end_unlink_async (ehci);
++	/*
++	 * If the QH isn't linked then there's nothing we can do
++	 * unless we were called during a giveback, in which case
++	 * qh_completions() has to deal with it.
++	 */
++	if (qh->qh_state != QH_STATE_LINKED) {
++		if (qh->qh_state == QH_STATE_COMPLETING)
++			qh->needs_rescan = 1;
+ 		return;
+ 	}
+ 
+-	cmd |= CMD_IAAD;
+-	ehci_writel(ehci, cmd, &ehci->regs->command);
+-	(void)ehci_readl(ehci, &ehci->regs->command);
+-	ehci_enable_event(ehci, EHCI_HRTIMER_IAA_WATCHDOG, true);
++	single_unlink_async(ehci, qh);
++	start_iaa_cycle(ehci, false);
+ }
+ 
+ /*-------------------------------------------------------------------------*/
+@@ -1267,11 +1294,11 @@ static void scan_async (struct ehci_hcd
+ 			 * drops the lock.  That's why ehci->qh_scan_next
+ 			 * always holds the next qh to scan; if the next qh
+ 			 * gets unlinked then ehci->qh_scan_next is adjusted
+-			 * in start_unlink_async().
++			 * in single_unlink_async().
+ 			 */
+ 			temp = qh_completions(ehci, qh);
+ 			if (qh->needs_rescan)
+-				unlink_async(ehci, qh);
++				start_unlink_async(ehci, qh);
+ 			qh->unlink_time = jiffies + EHCI_SHRINK_JIFFIES;
+ 			if (temp != 0)
+ 				goto rescan;
+--- a/drivers/usb/host/ehci-timer.c
++++ b/drivers/usb/host/ehci-timer.c
+@@ -211,6 +211,7 @@ static void ehci_handle_controller_death
+ 	ehci_writel(ehci, 0, &ehci->regs->configured_flag);
+ 	ehci_writel(ehci, 0, &ehci->regs->intr_enable);
+ 	ehci_work(ehci);
++	end_unlink_async(ehci);
+ 
+ 	/* Not in process context, so don't try to reset the controller */
+ }
+@@ -304,7 +305,7 @@ static void ehci_iaa_watchdog(struct ehc
+ 	 * (a) SMP races against real IAA firing and retriggering, and
+ 	 * (b) clean HC shutdown, when IAA watchdog was pending.
+ 	 */
+-	if (ehci->async_unlink) {
++	if (ehci->async_iaa) {
+ 		u32 cmd, status;
+ 
+ 		/* If we get here, IAA is *REALLY* late.  It's barely
+--- a/drivers/usb/host/ehci.h
++++ b/drivers/usb/host/ehci.h
+@@ -114,12 +114,14 @@ struct ehci_hcd {			/* one per controlle
+ 	/* general schedule support */
+ 	unsigned		scanning:1;
+ 	bool			intr_unlinking:1;
++	bool			async_unlinking:1;
+ 
+ 	/* async schedule support */
+ 	struct ehci_qh		*async;
+ 	struct ehci_qh		*dummy;		/* For AMD quirk use */
+ 	struct ehci_qh		*async_unlink;
+ 	struct ehci_qh		*async_unlink_last;
++	struct ehci_qh		*async_iaa;
+ 	struct ehci_qh		*qh_scan_next;
+ 	unsigned		async_count;	/* async activity count */
+ 

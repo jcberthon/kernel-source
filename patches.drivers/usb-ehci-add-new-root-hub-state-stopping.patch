@@ -1,0 +1,205 @@
+From: Alan Stern <stern@rowland.harvard.edu>
+Date: Wed, 11 Jul 2012 11:21:48 -0400
+Subject: USB: EHCI: add new root-hub state: STOPPING
+Git-commit: c0c53dbc32ea05a1e1dd9dba4772327da9a11750
+Patch-mainline: v3.6-rc1
+References: bsc#1117515
+
+This patch (as1571) adds a new state for ehci-hcd's root hubs:
+EHCI_RH_STOPPING.  This value is used at times when the root hub is
+being stopped and we don't know whether or not the hardware has
+finished all its DMA yet.
+
+Although the purpose may not be apparent, this distinction will come
+in useful later on.  Future patches will avoid actions that depend on
+the root hub being operational (like turning on the async or periodic
+schedules) when they see the state is EHCI_RH_STOPPING.
+
+Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/usb/host/ehci-dbg.c   |    2 ++
+ drivers/usb/host/ehci-hcd.c   |   13 ++++++-------
+ drivers/usb/host/ehci-hub.c   |    3 +--
+ drivers/usb/host/ehci-q.c     |    8 ++++----
+ drivers/usb/host/ehci-sched.c |    8 ++++----
+ drivers/usb/host/ehci.h       |    7 ++++++-
+ 6 files changed, 23 insertions(+), 18 deletions(-)
+
+--- a/drivers/usb/host/ehci-dbg.c
++++ b/drivers/usb/host/ehci-dbg.c
+@@ -707,6 +707,8 @@ static const char *rh_state_string(struc
+ 		return "suspended";
+ 	case EHCI_RH_RUNNING:
+ 		return "running";
++	case EHCI_RH_STOPPING:
++		return "stopping";
+ 	}
+ 	return "?";
+ }
+--- a/drivers/usb/host/ehci-hcd.c
++++ b/drivers/usb/host/ehci-hcd.c
+@@ -306,10 +306,8 @@ static void ehci_quiesce (struct ehci_hc
+ {
+ 	u32	temp;
+ 
+-#ifdef DEBUG
+ 	if (ehci->rh_state != EHCI_RH_RUNNING)
+-		BUG ();
+-#endif
++		return;
+ 
+ 	/* wait for any schedule enables/disables to take effect */
+ 	temp = ehci_readl(ehci, &ehci->regs->command) << 10;
+@@ -448,6 +446,7 @@ static void ehci_shutdown(struct usb_hcd
+ 	del_timer_sync(&ehci->iaa_watchdog);
+ 
+ 	spin_lock_irq(&ehci->lock);
++	ehci->rh_state = EHCI_RH_STOPPING;
+ 	ehci_silence_controller(ehci);
+ 	spin_unlock_irq(&ehci->lock);
+ }
+@@ -516,8 +515,7 @@ static void ehci_stop (struct usb_hcd *h
+ 	del_timer_sync(&ehci->iaa_watchdog);
+ 
+ 	spin_lock_irq(&ehci->lock);
+-	if (ehci->rh_state == EHCI_RH_RUNNING)
+-		ehci_quiesce (ehci);
++	ehci_quiesce(ehci);
+ 
+ 	ehci_silence_controller(ehci);
+ 	ehci_reset (ehci);
+@@ -904,6 +902,7 @@ static irqreturn_t ehci_irq (struct usb_
+ 	/* PCI errors [4.15.2.4] */
+ 	if (unlikely ((status & STS_FATAL) != 0)) {
+ 		ehci_err(ehci, "fatal error\n");
++		ehci->rh_state = EHCI_RH_STOPPING;
+ 		dbg_cmd(ehci, "fatal", cmd);
+ 		dbg_status(ehci, "fatal", status);
+ 		ehci_halt(ehci);
+@@ -979,7 +978,7 @@ static int ehci_urb_enqueue (
+ static void unlink_async (struct ehci_hcd *ehci, struct ehci_qh *qh)
+ {
+ 	/* failfast */
+-	if (ehci->rh_state != EHCI_RH_RUNNING && ehci->async_unlink)
++	if (ehci->rh_state < EHCI_RH_RUNNING && ehci->async_unlink)
+ 		end_unlink_async(ehci);
+ 
+ 	/* If the QH isn't linked then there's nothing we can do
+@@ -1101,7 +1100,7 @@ rescan:
+ 		goto idle_timeout;
+ 	}
+ 
+-	if (ehci->rh_state != EHCI_RH_RUNNING)
++	if (ehci->rh_state < EHCI_RH_RUNNING)
+ 		qh->qh_state = QH_STATE_IDLE;
+ 	switch (qh->qh_state) {
+ 	case QH_STATE_LINKED:
+--- a/drivers/usb/host/ehci-hub.c
++++ b/drivers/usb/host/ehci-hub.c
+@@ -236,8 +236,7 @@ static int ehci_bus_suspend (struct usb_
+ 	}
+ 
+ 	/* stop schedules, clean any completed work */
+-	if (ehci->rh_state == EHCI_RH_RUNNING)
+-		ehci_quiesce (ehci);
++	ehci_quiesce (ehci);
+ 	ehci->command = ehci_readl(ehci, &ehci->regs->command);
+ 	ehci_work(ehci);
+ 
+--- a/drivers/usb/host/ehci-q.c
++++ b/drivers/usb/host/ehci-q.c
+@@ -430,7 +430,7 @@ qh_completions (struct ehci_hcd *ehci, s
+ 
+ 		/* stop scanning when we reach qtds the hc is using */
+ 		} else if (likely (!stopped
+-				&& ehci->rh_state == EHCI_RH_RUNNING)) {
++				&& ehci->rh_state >= EHCI_RH_RUNNING)) {
+ 			break;
+ 
+ 		/* scan the whole queue for unlinks whenever it stops */
+@@ -438,7 +438,7 @@ qh_completions (struct ehci_hcd *ehci, s
+ 			stopped = 1;
+ 
+ 			/* cancel everything if we halt, suspend, etc */
+-			if (ehci->rh_state != EHCI_RH_RUNNING)
++			if (ehci->rh_state < EHCI_RH_RUNNING)
+ 				last_status = -ESHUTDOWN;
+ 
+ 			/* this qtd is active; skip it unless a previous qtd
+@@ -1240,7 +1240,7 @@ static void start_unlink_async (struct e
+ 	wmb ();
+ 
+ 	/* If the controller isn't running, we don't have to wait for it */
+-	if (unlikely(ehci->rh_state != EHCI_RH_RUNNING)) {
++	if (unlikely(ehci->rh_state < EHCI_RH_RUNNING)) {
+ 		/* if (unlikely (qh->unlink_next != 0))
+ 		 *	this will recurse, probably not much
+ 		 */
+@@ -1263,7 +1263,7 @@ static void scan_async (struct ehci_hcd
+ 	enum ehci_timer_action	action = TIMER_IO_WATCHDOG;
+ 
+ 	timer_action_done (ehci, TIMER_ASYNC_SHRINK);
+-	stopped = (ehci->rh_state != EHCI_RH_RUNNING);
++	stopped = (ehci->rh_state < EHCI_RH_RUNNING);
+ 
+ 	ehci->qh_scan_next = ehci->async->qh_next.qh;
+ 	while (ehci->qh_scan_next) {
+--- a/drivers/usb/host/ehci-sched.c
++++ b/drivers/usb/host/ehci-sched.c
+@@ -2302,7 +2302,7 @@ scan_periodic (struct ehci_hcd *ehci)
+ 	 * Touches as few pages as possible:  cache-friendly.
+ 	 */
+ 	now_uframe = ehci->next_uframe;
+-	if (ehci->rh_state == EHCI_RH_RUNNING) {
++	if (ehci->rh_state >= EHCI_RH_RUNNING) {
+ 		clock = ehci_read_frame_index(ehci);
+ 		clock_frame = (clock >> 3) & (ehci->periodic_size - 1);
+ 	} else  {
+@@ -2337,7 +2337,7 @@ restart:
+ 			union ehci_shadow	temp;
+ 			int			live;
+ 
+-			live = (ehci->rh_state == EHCI_RH_RUNNING);
++			live = (ehci->rh_state >= EHCI_RH_RUNNING);
+ 			switch (hc32_to_cpu(ehci, type)) {
+ 			case Q_TYPE_QH:
+ 				/* handle any completions */
+@@ -2461,7 +2461,7 @@ restart:
+ 		 * We can't advance our scan without collecting the ISO
+ 		 * transfers that are still pending in this frame.
+ 		 */
+-		if (incomplete && ehci->rh_state == EHCI_RH_RUNNING) {
++		if (incomplete && ehci->rh_state >= EHCI_RH_RUNNING) {
+ 			ehci->next_uframe = now_uframe;
+ 			break;
+ 		}
+@@ -2477,7 +2477,7 @@ restart:
+ 		if (now_uframe == clock) {
+ 			unsigned	now;
+ 
+-			if (ehci->rh_state != EHCI_RH_RUNNING
++			if (ehci->rh_state < EHCI_RH_RUNNING
+ 					|| ehci->periodic_sched == 0)
+ 				break;
+ 			ehci->next_uframe = now_uframe;
+--- a/drivers/usb/host/ehci.h
++++ b/drivers/usb/host/ehci.h
+@@ -62,10 +62,15 @@ struct ehci_stats {
+ 
+ #define	EHCI_MAX_ROOT_PORTS	15		/* see HCS_N_PORTS */
+ 
++/*
++ * ehci_rh_state values of EHCI_RH_RUNNING or above mean that the
++ * controller may be doing DMA.  Lower values mean there's no DMA.
++ */
+ enum ehci_rh_state {
+ 	EHCI_RH_HALTED,
+ 	EHCI_RH_SUSPENDED,
+-	EHCI_RH_RUNNING
++	EHCI_RH_RUNNING,
++	EHCI_RH_STOPPING
+ };
+ 
+ struct ehci_hcd {			/* one per controller */

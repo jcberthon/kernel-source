@@ -9,6 +9,125 @@ Automatically created from "patches.kernel.org/patch-2.6.32" by xen-port-patches
 
 2.6.34/drivers/staging/vt6656/ttype.h (VOID no longer used)
 
+---
+ arch/x86/ia32/ia32entry-xen.S                    |  101 --
+ arch/x86/include/asm/nmi.h                       |    3 
+ arch/x86/include/asm/uv/uv_hub.h                 |    2 
+ arch/x86/include/mach-xen/asm/agp.h              |    5 
+ arch/x86/include/mach-xen/asm/desc.h             |   15 
+ arch/x86/include/mach-xen/asm/dma-mapping.h      |   19 
+ arch/x86/include/mach-xen/asm/fixmap.h           |    3 
+ arch/x86/include/mach-xen/asm/hypervisor.h       |    3 
+ arch/x86/include/mach-xen/asm/irqflags.h         |    2 
+ arch/x86/include/mach-xen/asm/mmu_context.h      |    6 
+ arch/x86/include/mach-xen/asm/pci.h              |    6 
+ arch/x86/include/mach-xen/asm/pgtable.h          |   28 
+ arch/x86/include/mach-xen/asm/pgtable_types.h    |    9 
+ arch/x86/include/mach-xen/asm/processor.h        |   62 +
+ arch/x86/include/mach-xen/asm/setup.h            |    8 
+ arch/x86/include/mach-xen/asm/smp-processor-id.h |   36 +
+ arch/x86/include/mach-xen/asm/smp.h              |   25 
+ arch/x86/include/mach-xen/asm/system.h           |   29 
+ arch/x86/include/mach-xen/asm/time.h             |    1 
+ arch/x86/include/mach-xen/asm/tlbflush.h         |    6 
+ arch/x86/kernel/Makefile                         |    2 
+ arch/x86/kernel/apic/hw_nmi.c                    |    8 
+ arch/x86/kernel/apic/io_apic-xen.c               |  396 ++++++-----
+ arch/x86/kernel/apic/ipi-xen.c                   |   10 
+ arch/x86/kernel/cpu/Makefile                     |    2 
+ arch/x86/kernel/cpu/amd.c                        |   10 
+ arch/x86/kernel/cpu/common-xen.c                 |   73 +-
+ arch/x86/kernel/cpu/mcheck/mce-inject.c          |    2 
+ arch/x86/kernel/cpu/mtrr/main-xen.c              |   34 
+ arch/x86/kernel/e820-xen.c                       |   61 -
+ arch/x86/kernel/early_printk-xen.c               |  791 +----------------------
+ arch/x86/kernel/entry_64-xen.S                   |   29 
+ arch/x86/kernel/head-xen.c                       |    6 
+ arch/x86/kernel/head32-xen.c                     |   28 
+ arch/x86/kernel/head64-xen.c                     |    3 
+ arch/x86/kernel/head_32-xen.S                    |    5 
+ arch/x86/kernel/head_64-xen.S                    |    6 
+ arch/x86/kernel/irq-xen.c                        |    8 
+ arch/x86/kernel/ldt-xen.c                        |    4 
+ arch/x86/kernel/microcode_core-xen.c             |    6 
+ arch/x86/kernel/mpparse-xen.c                    |   97 +-
+ arch/x86/kernel/pci-dma-xen.c                    |   29 
+ arch/x86/kernel/pci-nommu-xen.c                  |   33 
+ arch/x86/kernel/process-xen.c                    |   31 
+ arch/x86/kernel/process_32-xen.c                 |   52 -
+ arch/x86/kernel/process_64-xen.c                 |   46 -
+ arch/x86/kernel/setup-xen.c                      |  143 +---
+ arch/x86/kernel/time-xen.c                       |  120 +--
+ arch/x86/kernel/traps-xen.c                      |   69 --
+ arch/x86/kernel/vsyscall_64-xen.c                |   11 
+ arch/x86/kernel/x86_init-xen.c                   |   70 ++
+ arch/x86/mm/fault-xen.c                          |   80 +-
+ arch/x86/mm/highmem_32-xen.c                     |    4 
+ arch/x86/mm/hypervisor.c                         |   12 
+ arch/x86/mm/init-xen.c                           |   63 -
+ arch/x86/mm/init_32-xen.c                        |   12 
+ arch/x86/mm/init_64-xen.c                        |   12 
+ arch/x86/mm/iomap_32-xen.c                       |   27 
+ arch/x86/mm/ioremap-xen.c                        |  118 ---
+ arch/x86/mm/pageattr-xen.c                       |   30 
+ arch/x86/mm/pat-xen.c                            |  365 +++++++---
+ arch/x86/mm/pgtable-xen.c                        |    3 
+ arch/x86/mm/physaddr.c                           |    4 
+ arch/x86/oprofile/xenoprof.c                     |    6 
+ arch/x86/platform/sfi/sfi.c                      |    7 
+ drivers/acpi/acpi_pad-xen.c                      |  240 ++++++
+ drivers/acpi/processor_driver.c                  |    2 
+ drivers/char/agp/agp.h                           |    4 
+ drivers/char/agp/amd-k7-agp.c                    |    4 
+ drivers/char/agp/amd64-agp.c                     |    4 
+ drivers/char/agp/ati-agp.c                       |    4 
+ drivers/char/agp/efficeon-agp.c                  |    2 
+ drivers/char/agp/generic.c                       |    4 
+ drivers/char/agp/intel-gtt.c                     |    2 
+ drivers/char/agp/sworks-agp.c                    |    6 
+ drivers/dma/ioat/dma.h                           |    2 
+ drivers/dma/ioat/dma_v2.h                        |    6 
+ drivers/dma/ioat/hw.h                            |    4 
+ drivers/gpu/drm/radeon/radeon_device.c           |   12 
+ drivers/hv/Kconfig                               |    2 
+ drivers/hwmon/coretemp-xen.c                     |   57 +
+ drivers/net/Kconfig                              |    2 
+ drivers/pci/msi-xen.c                            |   27 
+ drivers/pci/probe.c                              |   11 
+ drivers/sfi/sfi_core.c                           |    5 
+ drivers/usb/early/ehci-dbgp.c                    |   17 
+ drivers/usb/host/ehci-hcd.c                      |    4 
+ drivers/usb/host/ehci-hub.c                      |    4 
+ drivers/xen/Kconfig                              |    5 
+ drivers/xen/Makefile                             |    8 
+ drivers/xen/balloon/balloon.c                    |   29 
+ drivers/xen/blkfront/vbd.c                       |    2 
+ drivers/xen/blktap/blktap.c                      |    6 
+ drivers/xen/blktap2-new/ring.c                   |   22 
+ drivers/xen/blktap2/control.c                    |    2 
+ drivers/xen/blktap2/device.c                     |    6 
+ drivers/xen/blktap2/sysfs.c                      |    4 
+ drivers/xen/core/evtchn.c                        |    4 
+ drivers/xen/core/reboot.c                        |    2 
+ drivers/xen/dbgp.c                               |   52 +
+ drivers/xen/evtchn.c                             |    2 
+ drivers/xen/gntdev/gntdev.c                      |    2 
+ drivers/xen/netback/interface.c                  |    2 
+ drivers/xen/netback/loopback.c                   |    6 
+ drivers/xen/netback/netback.c                    |    4 
+ drivers/xen/netfront/netfront.c                  |    8 
+ drivers/xen/sfc_netback/accel_fwd.c              |   15 
+ drivers/xen/sfc_netback/accel_msg.c              |    3 
+ drivers/xen/sfc_netfront/accel_msg.c             |    6 
+ drivers/xen/sfc_netfront/accel_vi.c              |   10 
+ drivers/xen/xenbus/xenbus_dev.c                  |    1 
+ drivers/xen/xenbus/xenbus_probe.c                |    1 
+ fs/proc/kcore.c                                  |    6 
+ include/linux/nmi.h                              |    3 
+ include/linux/usb/ehci_def.h                     |   29 
+ lib/swiotlb-xen.c                                |  139 +---
+ 116 files changed, 1914 insertions(+), 2187 deletions(-)
+
 --- a/arch/x86/ia32/ia32entry-xen.S
 +++ b/arch/x86/ia32/ia32entry-xen.S
 @@ -20,18 +20,15 @@
@@ -760,7 +879,7 @@ Automatically created from "patches.kernel.org/patch-2.6.32" by xen-port-patches
  
 --- a/arch/x86/kernel/Makefile
 +++ b/arch/x86/kernel/Makefile
-@@ -130,8 +130,6 @@ ifeq ($(CONFIG_X86_64),y)
+@@ -132,8 +132,6 @@ ifeq ($(CONFIG_X86_64),y)
  
  	obj-$(CONFIG_PCI_MMCONFIG)	+= mmconf-fam10h_64.o
  	obj-y				+= vsmp_64.o
@@ -1616,7 +1735,7 @@ Automatically created from "patches.kernel.org/patch-2.6.32" by xen-port-patches
        cmd_mkcapflags = $(PERL) $(srctree)/$(src)/mkcapflags.pl $< $@
 --- a/arch/x86/kernel/cpu/amd.c
 +++ b/arch/x86/kernel/cpu/amd.c
-@@ -332,7 +332,7 @@ static void __cpuinit amd_detect_cmp(str
+@@ -340,7 +340,7 @@ static void __cpuinit amd_detect_cmp(str
  int amd_get_nb_id(int cpu)
  {
  	int id = 0;
@@ -1625,7 +1744,7 @@ Automatically created from "patches.kernel.org/patch-2.6.32" by xen-port-patches
  	id = per_cpu(cpu_llc_id, cpu);
  #endif
  	return id;
-@@ -528,18 +528,26 @@ static void __cpuinit init_amd(struct cp
+@@ -565,18 +565,26 @@ static void __cpuinit init_amd(struct cp
  			u64 val;
  
  			clear_cpu_cap(c, X86_FEATURE_LAHF_LM);
@@ -6632,7 +6751,7 @@ Automatically created from "patches.kernel.org/patch-2.6.32" by xen-port-patches
  		return 0;
 --- a/drivers/usb/host/ehci-hcd.c
 +++ b/drivers/usb/host/ehci-hcd.c
-@@ -272,7 +272,7 @@ static int ehci_reset (struct ehci_hcd *
+@@ -224,7 +224,7 @@ static int ehci_reset (struct ehci_hcd *
  
  	/* If the EHCI debug controller is active, special care must be
  	 * taken before and after a host controller reset */
@@ -6641,7 +6760,7 @@ Automatically created from "patches.kernel.org/patch-2.6.32" by xen-port-patches
  		ehci->debug = NULL;
  
  	command |= CMD_RESET;
-@@ -296,7 +296,7 @@ static int ehci_reset (struct ehci_hcd *
+@@ -248,7 +248,7 @@ static int ehci_reset (struct ehci_hcd *
  		tdi_reset (ehci);
  
  	if (ehci->debug)
@@ -6652,8 +6771,8 @@ Automatically created from "patches.kernel.org/patch-2.6.32" by xen-port-patches
  }
 --- a/drivers/usb/host/ehci-hub.c
 +++ b/drivers/usb/host/ehci-hub.c
-@@ -352,10 +352,10 @@ static int ehci_bus_resume (struct usb_h
- 	}
+@@ -364,10 +364,10 @@ static int ehci_bus_resume (struct usb_h
+ 		goto shutdown;
  
  	if (unlikely(ehci->debug)) {
 -		if (!dbgp_reset_prep())
@@ -6749,7 +6868,7 @@ Automatically created from "patches.kernel.org/patch-2.6.32" by xen-port-patches
  static void balloon_alarm(unsigned long unused)
  {
  	schedule_work(&balloon_worker);
-@@ -311,7 +329,7 @@ static int increase_reservation(unsigned
+@@ -316,7 +334,7 @@ static int increase_reservation(unsigned
  	totalram_pages = bs.current_pages - totalram_bias;
  
   out:
@@ -6758,7 +6877,7 @@ Automatically created from "patches.kernel.org/patch-2.6.32" by xen-port-patches
  
  #ifndef MODULE
  	setup_per_zone_wmarks();
-@@ -548,6 +566,7 @@ static int __init balloon_init(void)
+@@ -553,6 +571,7 @@ static int __init balloon_init(void)
  	IPRINTK("Initialising balloon driver.\n");
  
  #ifdef CONFIG_XEN
@@ -6766,7 +6885,7 @@ Automatically created from "patches.kernel.org/patch-2.6.32" by xen-port-patches
  	bs.current_pages = min(xen_start_info->nr_pages, max_pfn);
  	totalram_pages   = bs.current_pages;
  #else 
-@@ -699,8 +718,8 @@ struct page **alloc_empty_pages_and_page
+@@ -704,8 +723,8 @@ struct page **alloc_empty_pages_and_page
  		}
  
  		if (ret != 0) {
@@ -6805,7 +6924,7 @@ Automatically created from "patches.kernel.org/patch-2.6.32" by xen-port-patches
  };
  
  /******************************************************************
-@@ -1750,7 +1750,7 @@ static int __init blkif_init(void)
+@@ -1749,7 +1749,7 @@ static int __init blkif_init(void)
  	tap_blkif_xenbus_init();
  
  	/* Dynamically allocate a major for this device */
@@ -6836,7 +6955,7 @@ Automatically created from "patches.kernel.org/patch-2.6.32" by xen-port-patches
  	.owner     = THIS_MODULE,
  	.open      = blktap_device_open,
  	.release   = blktap_device_release,
-@@ -1069,7 +1069,7 @@ blktap_device_destroy(struct blktap *tap
+@@ -1073,7 +1073,7 @@ blktap_device_destroy(struct blktap *tap
  	return 0;
  }
  
@@ -6845,7 +6964,7 @@ Automatically created from "patches.kernel.org/patch-2.6.32" by xen-port-patches
  {
  	return kasprintf(GFP_KERNEL, BLKTAP2_DEV_DIR "tapdev%u",
  			 gd->first_minor);
-@@ -1111,7 +1111,7 @@ blktap_device_create(struct blktap *tap)
+@@ -1115,7 +1115,7 @@ blktap_device_create(struct blktap *tap)
  
  	gd->major = blktap_device_major;
  	gd->first_minor = minor;

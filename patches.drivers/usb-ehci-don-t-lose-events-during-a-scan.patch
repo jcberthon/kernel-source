@@ -1,0 +1,77 @@
+From: Alan Stern <stern@rowland.harvard.edu>
+Date: Wed, 11 Jul 2012 11:22:57 -0400
+Subject: USB: EHCI: don't lose events during a scan
+Git-commit: 361aabf395e4a23cf554cf4ec0c0c6963b8beb01
+Patch-mainline: v3.6-rc1
+References: bsc#1117515
+
+This patch (as1584) fixes a minor bug that has been present in
+ehci-hcd since the beginning.
+
+Scanning the schedules for URB completions is single-threaded.  If a
+completion interrupt occurs while an URB is being given back, the
+interrupt handler realizes that a scan is in progress on another CPU
+and avoids starting a new one.
+
+This means that completion events can be lost.  If an URB completes
+after it has been scanned but while a scan is still in progress, the
+driver won't notice and won't rescan the completed URB.
+
+The patch fixes the problem by adding a new flag to indicate that
+another scan is needed after the current scan is done.  The flag gets
+set whenever a completion interrupt occurs while a scan is in
+progress.  The rescan will see the completion, thus preventing it from
+getting lost.
+
+Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/usb/host/ehci-hcd.c | 13 ++++++++++---
+ drivers/usb/host/ehci.h     |  3 ++-
+ 2 files changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/usb/host/ehci-hcd.c b/drivers/usb/host/ehci-hcd.c
+index 74ffd20edff8..f6cf1d178107 100644
+--- a/drivers/usb/host/ehci-hcd.c
++++ b/drivers/usb/host/ehci-hcd.c
+@@ -400,14 +400,21 @@ static void ehci_work (struct ehci_hcd *ehci)
+ 	 * it reports urb completions.  this flag guards against bogus
+ 	 * attempts at re-entrant schedule scanning.
+ 	 */
+-	if (ehci->scanning)
++	if (ehci->scanning) {
++		ehci->need_rescan = true;
+ 		return;
+-	ehci->scanning = 1;
++	}
++	ehci->scanning = true;
++
++ rescan:
++	ehci->need_rescan = false;
+ 	if (ehci->async_count)
+ 		scan_async(ehci);
+ 	if (ehci->next_uframe != -1)
+ 		scan_periodic (ehci);
+-	ehci->scanning = 0;
++	if (ehci->need_rescan)
++		goto rescan;
++	ehci->scanning = false;
+ 
+ 	/* the IO watchdog guards against hardware or driver bugs that
+ 	 * misplace IRQs, and should let us run completely without IRQs.
+diff --git a/drivers/usb/host/ehci.h b/drivers/usb/host/ehci.h
+index 303c36cc99c9..c462d52ac575 100644
+--- a/drivers/usb/host/ehci.h
++++ b/drivers/usb/host/ehci.h
+@@ -113,7 +113,8 @@ struct ehci_hcd {			/* one per controller */
+ 	enum ehci_rh_state	rh_state;
+ 
+ 	/* general schedule support */
+-	unsigned		scanning:1;
++	bool			scanning:1;
++	bool			need_rescan:1;
+ 	bool			intr_unlinking:1;
+ 	bool			async_unlinking:1;
+ 
+

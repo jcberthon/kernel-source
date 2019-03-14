@@ -1,0 +1,271 @@
+From: Alan Stern <stern@rowland.harvard.edu>
+Date: Wed, 11 Jul 2012 11:23:04 -0400
+Subject: USB: EHCI: use hrtimer for the I/O watchdog
+Git-commit: 18aafe64d75d0e27dae206cacf4171e4e485d285
+Patch-mainline: v3.6-rc1
+References: bsc#1117515
+
+This patch (as1586) replaces the kernel timer used by ehci-hcd as an
+I/O watchdog with an hrtimer event.
+
+Unlike in the current code, the watchdog event is now always enabled
+whenever any isochronous URBs are active.  This will prevent bugs
+caused by the periodic schedule wrapping around with no completion
+interrupts; the watchdog handler is guaranteed to scan the isochronous
+transfers at least once during each iteration of the schedule.  The
+extra overhead will be negligible: one timer interrupt every 100 ms.
+
+Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/usb/host/ehci-hcd.c   |   47 ------------------------------------------
+ drivers/usb/host/ehci-hub.c   |    5 ----
+ drivers/usb/host/ehci-q.c     |    1 
+ drivers/usb/host/ehci-sched.c |    3 --
+ drivers/usb/host/ehci-timer.c |   21 ++++++++++++++++++
+ drivers/usb/host/ehci.h       |   13 -----------
+ 6 files changed, 25 insertions(+), 65 deletions(-)
+
+--- a/drivers/usb/host/ehci-hcd.c
++++ b/drivers/usb/host/ehci-hcd.c
+@@ -90,8 +90,6 @@ static const char	hcd_name [] = "ehci_hc
+  */
+ #define	EHCI_TUNE_FLS		1	/* (medium) 512-frame schedule */
+ 
+-#define EHCI_IO_JIFFIES		(HZ/10)		/* io watchdog > irq_thresh */
+-
+ /* Initial IRQ latency:  faster than hw default */
+ static int log2_irq_thresh = 0;		// 0 to 6
+ module_param (log2_irq_thresh, int, S_IRUGO);
+@@ -122,25 +120,6 @@ MODULE_PARM_DESC(hird, "host initiated r
+ 
+ /*-------------------------------------------------------------------------*/
+ 
+-static void
+-timer_action(struct ehci_hcd *ehci, enum ehci_timer_action action)
+-{
+-	if (!test_and_set_bit(action, &ehci->actions)) {
+-		unsigned long t;
+-
+-		switch (action) {
+-		case TIMER_IO_WATCHDOG:
+-			if (!ehci->need_io_watchdog)
+-				return;
+-			t = EHCI_IO_JIFFIES;
+-			break;
+-		}
+-		mod_timer(&ehci->watchdog, t + jiffies);
+-	}
+-}
+-
+-/*-------------------------------------------------------------------------*/
+-
+ /*
+  * handshake - spin reading hc until handshake completes or fails
+  * @ptr: address of hc register to be read
+@@ -302,19 +281,6 @@ static void end_unlink_intr(struct ehci_
+ 
+ /*-------------------------------------------------------------------------*/
+ 
+-static void ehci_watchdog(unsigned long param)
+-{
+-	struct ehci_hcd		*ehci = (struct ehci_hcd *) param;
+-	unsigned long		flags;
+-
+-	spin_lock_irqsave(&ehci->lock, flags);
+-
+-	/* ehci could run by timer, without IRQs ... */
+-	ehci_work (ehci);
+-
+-	spin_unlock_irqrestore (&ehci->lock, flags);
+-}
+-
+ /* On some systems, leaving remote wakeup enabled prevents system shutdown.
+  * The firmware seems to think that powering off is a wakeup event!
+  * This routine turns off remote wakeup and everything else, on all ports.
+@@ -352,8 +318,6 @@ static void ehci_shutdown(struct usb_hcd
+ {
+ 	struct ehci_hcd	*ehci = hcd_to_ehci(hcd);
+ 
+-	del_timer_sync(&ehci->watchdog);
+-
+ 	spin_lock_irq(&ehci->lock);
+ 	ehci->rh_state = EHCI_RH_STOPPING;
+ 	ehci_silence_controller(ehci);
+@@ -389,8 +353,6 @@ static void ehci_port_power (struct ehci
+  */
+ static void ehci_work (struct ehci_hcd *ehci)
+ {
+-	timer_action_done (ehci, TIMER_IO_WATCHDOG);
+-
+ 	/* another CPU may drop ehci->lock during a schedule scan while
+ 	 * it reports urb completions.  this flag guards against bogus
+ 	 * attempts at re-entrant schedule scanning.
+@@ -417,10 +379,7 @@ static void ehci_work (struct ehci_hcd *
+ 	 * misplace IRQs, and should let us run completely without IRQs.
+ 	 * such lossage has been observed on both VT6202 and VT8235.
+ 	 */
+-	if (ehci->rh_state == EHCI_RH_RUNNING &&
+-			(ehci->async->qh_next.ptr != NULL ||
+-			 ehci->periodic_count != 0))
+-		timer_action (ehci, TIMER_IO_WATCHDOG);
++	turn_on_io_watchdog(ehci);
+ }
+ 
+ /*
+@@ -433,7 +392,6 @@ static void ehci_stop (struct usb_hcd *h
+ 	ehci_dbg (ehci, "stop\n");
+ 
+ 	/* no more interrupts ... */
+-	del_timer_sync (&ehci->watchdog);
+ 
+ 	spin_lock_irq(&ehci->lock);
+ 	ehci->enabled_hrtimer_events = 0;
+@@ -485,9 +443,6 @@ static int ehci_init(struct usb_hcd *hcd
+ 	 * keep io watchdog by default, those good HCDs could turn off it later
+ 	 */
+ 	ehci->need_io_watchdog = 1;
+-	init_timer(&ehci->watchdog);
+-	ehci->watchdog.function = ehci_watchdog;
+-	ehci->watchdog.data = (unsigned long) ehci;
+ 
+ 	hrtimer_init(&ehci->hrtimer, CLOCK_MONOTONIC, HRTIMER_MODE_ABS);
+ 	ehci->hrtimer.function = ehci_hrtimer_func;
+--- a/drivers/usb/host/ehci-hub.c
++++ b/drivers/usb/host/ehci-hub.c
+@@ -212,7 +212,6 @@ static int ehci_bus_suspend (struct usb_
+ 
+ 	if (time_before (jiffies, ehci->next_statechange))
+ 		msleep(5);
+-	del_timer_sync(&ehci->watchdog);
+ 
+ 	spin_lock_irq (&ehci->lock);
+ 
+@@ -328,10 +327,6 @@ static int ehci_bus_suspend (struct usb_
+ 	ehci->next_hrtimer_event = EHCI_HRTIMER_NO_EVENT;
+ 	spin_unlock_irq (&ehci->lock);
+ 
+-	/* ehci_work() may have re-enabled the watchdog timer, which we do not
+-	 * want, and so we must delete any pending watchdog timer events.
+-	 */
+-	del_timer_sync(&ehci->watchdog);
+ 	hrtimer_cancel(&ehci->hrtimer);
+ 	return 0;
+ }
+--- a/drivers/usb/host/ehci-q.c
++++ b/drivers/usb/host/ehci-q.c
+@@ -966,6 +966,7 @@ static void enable_async(struct ehci_hcd
+ 
+ 	/* Don't start the schedule until ASS is 0 */
+ 	ehci_poll_ASS(ehci);
++	turn_on_io_watchdog(ehci);
+ }
+ 
+ static void disable_async(struct ehci_hcd *ehci)
+--- a/drivers/usb/host/ehci-sched.c
++++ b/drivers/usb/host/ehci-sched.c
+@@ -489,6 +489,7 @@ static void enable_periodic(struct ehci_
+ 
+ 	/* Don't start the schedule until PSS is 0 */
+ 	ehci_poll_PSS(ehci);
++	turn_on_io_watchdog(ehci);
+ }
+ 
+ static void disable_periodic(struct ehci_hcd *ehci)
+@@ -1650,7 +1651,6 @@ static void itd_link_urb(
+ 	iso_sched_free (stream, iso_sched);
+ 	urb->hcpriv = NULL;
+ 
+-	timer_action (ehci, TIMER_IO_WATCHDOG);
+ 	++ehci->isoc_count;
+ 	enable_periodic(ehci);
+ }
+@@ -2053,7 +2053,6 @@ static void sitd_link_urb(
+ 	iso_sched_free (stream, sched);
+ 	urb->hcpriv = NULL;
+ 
+-	timer_action (ehci, TIMER_IO_WATCHDOG);
+ 	++ehci->isoc_count;
+ 	enable_periodic(ehci);
+ }
+--- a/drivers/usb/host/ehci-timer.c
++++ b/drivers/usb/host/ehci-timer.c
+@@ -76,6 +76,7 @@ static unsigned event_delays_ns[] = {
+ 	10 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_IAA_WATCHDOG */
+ 	10 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_DISABLE_PERIODIC */
+ 	15 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_DISABLE_ASYNC */
++	100 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_IO_WATCHDOG */
+ };
+ 
+ /* Enable a pending hrtimer event */
+@@ -332,6 +333,25 @@ static void ehci_iaa_watchdog(struct ehc
+ }
+ 
+ 
++/* Enable the I/O watchdog, if appropriate */
++static void turn_on_io_watchdog(struct ehci_hcd *ehci)
++{
++	/* Not needed if the controller isn't running or it's already enabled */
++	if (ehci->rh_state != EHCI_RH_RUNNING ||
++			(ehci->enabled_hrtimer_events &
++				BIT(EHCI_HRTIMER_IO_WATCHDOG)))
++		return;
++
++	/*
++	 * Isochronous transfers always need the watchdog.
++	 * For other sorts we use it only if the flag is set.
++	 */
++	if (ehci->isoc_count > 0 || (ehci->need_io_watchdog &&
++			ehci->async_count + ehci->intr_count > 0))
++		ehci_enable_event(ehci, EHCI_HRTIMER_IO_WATCHDOG, true);
++}
++
++
+ /*
+  * Handler functions for the hrtimer event types.
+  * Keep this array in the same order as the event types indexed by
+@@ -347,6 +367,7 @@ static void (*event_handlers[])(struct e
+ 	ehci_iaa_watchdog,		/* EHCI_HRTIMER_IAA_WATCHDOG */
+ 	ehci_disable_PSE,		/* EHCI_HRTIMER_DISABLE_PERIODIC */
+ 	ehci_disable_ASE,		/* EHCI_HRTIMER_DISABLE_ASYNC */
++	ehci_work,			/* EHCI_HRTIMER_IO_WATCHDOG */
+ };
+ 
+ static enum hrtimer_restart ehci_hrtimer_func(struct hrtimer *t)
+--- a/drivers/usb/host/ehci.h
++++ b/drivers/usb/host/ehci.h
+@@ -88,6 +88,7 @@ enum ehci_hrtimer_event {
+ 	EHCI_HRTIMER_IAA_WATCHDOG,	/* Handle lost IAA interrupts */
+ 	EHCI_HRTIMER_DISABLE_PERIODIC,	/* Wait to disable periodic sched */
+ 	EHCI_HRTIMER_DISABLE_ASYNC,	/* Wait to disable async sched */
++	EHCI_HRTIMER_IO_WATCHDOG,	/* Check for missing IRQs */
+ 	EHCI_HRTIMER_NUM_EVENTS		/* Must come last */
+ };
+ #define EHCI_HRTIMER_NO_EVENT	99
+@@ -173,8 +174,6 @@ struct ehci_hcd {			/* one per controlle
+ 	struct dma_pool		*itd_pool;	/* itd per iso urb */
+ 	struct dma_pool		*sitd_pool;	/* sitd per split iso urb */
+ 
+-	struct timer_list	watchdog;
+-	unsigned long		actions;
+ 	unsigned		random_frame;
+ 	unsigned long		next_statechange;
+ 	ktime_t			last_periodic_enable;
+@@ -235,16 +234,6 @@ static inline struct usb_hcd *ehci_to_hc
+ 	return container_of ((void *) ehci, struct usb_hcd, hcd_priv);
+ }
+ 
+-enum ehci_timer_action {
+-	TIMER_IO_WATCHDOG,
+-};
+-
+-static inline void
+-timer_action_done (struct ehci_hcd *ehci, enum ehci_timer_action action)
+-{
+-	clear_bit (action, &ehci->actions);
+-}
+-
+ /*-------------------------------------------------------------------------*/
+ 
+ #include <linux/usb/ehci_def.h>

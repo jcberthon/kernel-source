@@ -1,0 +1,307 @@
+From: Alan Stern <stern@rowland.harvard.edu>
+Date: Wed, 11 Jul 2012 11:22:21 -0400
+Subject: USB: EHCI: use hrtimer for async schedule
+Git-commit: 314466101c6ae14f6f5db8a86eda1509ba2c02a8
+Patch-mainline: v3.6-rc1
+References: bsc#1117515
+
+This patch (as1576) adds hrtimer support for managing ehci-hcd's
+async schedule.  Just as with the earlier change to the periodic
+schedule management, two new hrtimer events take care of everything.
+
+One event polls at 1-ms intervals to see when the Asynchronous
+Schedule Status (ASS) flag matches the Asynchronous Schedule Enable
+(ASE) value; the schedule's state must not be changed until it does.
+The other event delays for 15 ms after the async schedule becomes
+empty before turning it off.
+
+The new events replace a busy-wait poll and a kernel timer usage.
+They also replace the rather illogical method currently used for
+indicating the async schedule should be turned off: attempting to
+unlink the dedicated QH at the head of the async list.
+
+Signed-off-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Acked-by: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+---
+ drivers/usb/host/ehci-hcd.c   |   13 +------
+ drivers/usb/host/ehci-q.c     |   70 ++++++++++++++++++------------------------
+ drivers/usb/host/ehci-timer.c |   49 +++++++++++++++++++++++++++++
+ drivers/usb/host/ehci.h       |    5 ++-
+ 4 files changed, 86 insertions(+), 51 deletions(-)
+
+--- a/drivers/usb/host/ehci-hcd.c
++++ b/drivers/usb/host/ehci-hcd.c
+@@ -92,7 +92,6 @@ static const char	hcd_name [] = "ehci_hc
+ 
+ #define EHCI_IAA_MSECS		10		/* arbitrary */
+ #define EHCI_IO_JIFFIES		(HZ/10)		/* io watchdog > irq_thresh */
+-#define EHCI_ASYNC_JIFFIES	(HZ/20)		/* async idle timeout */
+ #define EHCI_SHRINK_JIFFIES	(DIV_ROUND_UP(HZ, 200) + 1)
+ 						/* 5-ms async qh unlink delay */
+ 
+@@ -134,7 +133,7 @@ timer_action(struct ehci_hcd *ehci, enum
+ 	 * SHRINK were pending, OFF would never be requested.
+ 	 */
+ 	if (timer_pending(&ehci->watchdog)
+-			&& ((BIT(TIMER_ASYNC_SHRINK) | BIT(TIMER_ASYNC_OFF))
++			&& (BIT(TIMER_ASYNC_SHRINK)
+ 				& ehci->actions))
+ 		return;
+ 
+@@ -147,9 +146,6 @@ timer_action(struct ehci_hcd *ehci, enum
+ 				return;
+ 			t = EHCI_IO_JIFFIES;
+ 			break;
+-		case TIMER_ASYNC_OFF:
+-			t = EHCI_ASYNC_JIFFIES;
+-			break;
+ 		/* case TIMER_ASYNC_SHRINK: */
+ 		default:
+ 			t = EHCI_SHRINK_JIFFIES;
+@@ -374,10 +370,6 @@ static void ehci_watchdog(unsigned long
+ 
+ 	spin_lock_irqsave(&ehci->lock, flags);
+ 
+-	/* stop async processing after it's idled a bit */
+-	if (test_bit (TIMER_ASYNC_OFF, &ehci->actions))
+-		start_unlink_async (ehci, ehci->async);
+-
+ 	/* ehci could run by timer, without IRQs ... */
+ 	ehci_work (ehci);
+ 
+@@ -468,7 +460,8 @@ static void ehci_work (struct ehci_hcd *
+ 	if (ehci->scanning)
+ 		return;
+ 	ehci->scanning = 1;
+-	scan_async (ehci);
++	if (ehci->async_count)
++		scan_async(ehci);
+ 	if (ehci->next_uframe != -1)
+ 		scan_periodic (ehci);
+ 	ehci->scanning = 0;
+--- a/drivers/usb/host/ehci-q.c
++++ b/drivers/usb/host/ehci-q.c
+@@ -960,6 +960,30 @@ done:
+ 
+ /*-------------------------------------------------------------------------*/
+ 
++static void enable_async(struct ehci_hcd *ehci)
++{
++	if (ehci->async_count++)
++		return;
++
++	/* Stop waiting to turn off the async schedule */
++	ehci->enabled_hrtimer_events &= ~BIT(EHCI_HRTIMER_DISABLE_ASYNC);
++
++	/* Don't start the schedule until ASS is 0 */
++	ehci_poll_ASS(ehci);
++}
++
++static void disable_async(struct ehci_hcd *ehci)
++{
++	if (--ehci->async_count)
++		return;
++
++	/* The async schedule and async_unlink list are supposed to be empty */
++	WARN_ON(ehci->async->qh_next.qh || ehci->async_unlink);
++
++	/* Don't turn off the schedule until ASS is 1 */
++	ehci_poll_ASS(ehci);
++}
++
+ /* move qh (and its qtds) onto async queue; maybe enable queue.  */
+ 
+ static void qh_link_async (struct ehci_hcd *ehci, struct ehci_qh *qh)
+@@ -973,26 +997,11 @@ static void qh_link_async (struct ehci_h
+ 
+ 	WARN_ON(qh->qh_state != QH_STATE_IDLE);
+ 
+-	/* (re)start the async schedule? */
+-	head = ehci->async;
+-	timer_action_done (ehci, TIMER_ASYNC_OFF);
+-	if (!head->qh_next.qh) {
+-		u32	cmd = ehci_readl(ehci, &ehci->regs->command);
+-
+-		if (!(cmd & CMD_ASE)) {
+-			/* in case a clear of CMD_ASE didn't take yet */
+-			(void)handshake(ehci, &ehci->regs->status,
+-					STS_ASS, 0, 150);
+-			cmd |= CMD_ASE;
+-			ehci_writel(ehci, cmd, &ehci->regs->command);
+-			/* posted write need not be known to HC yet ... */
+-		}
+-	}
+-
+ 	/* clear halt and/or toggle; and maybe recover from silicon quirk */
+ 	qh_refresh(ehci, qh);
+ 
+ 	/* splice right after start */
++	head = ehci->async;
+ 	qh->qh_next = head->qh_next;
+ 	qh->hw->hw_next = head->hw->hw_next;
+ 	wmb ();
+@@ -1003,6 +1012,8 @@ static void qh_link_async (struct ehci_h
+ 	qh->xacterrs = 0;
+ 	qh->qh_state = QH_STATE_LINKED;
+ 	/* qtd completions reported later by interrupt */
++
++	enable_async(ehci);
+ }
+ 
+ /*-------------------------------------------------------------------------*/
+@@ -1171,16 +1182,10 @@ static void end_unlink_async (struct ehc
+ 
+ 	qh_completions (ehci, qh);
+ 
+-	if (!list_empty(&qh->qtd_list) && ehci->rh_state == EHCI_RH_RUNNING) {
++	if (!list_empty(&qh->qtd_list) && ehci->rh_state == EHCI_RH_RUNNING)
+ 		qh_link_async (ehci, qh);
+-	} else {
+-		/* it's not free to turn the async schedule on/off; leave it
+-		 * active but idle for a while once it empties.
+-		 */
+-		if (ehci->rh_state == EHCI_RH_RUNNING
+-				&& ehci->async->qh_next.qh == NULL)
+-			timer_action (ehci, TIMER_ASYNC_OFF);
+-	}
++
++	disable_async(ehci);
+ 
+ 	if (next) {
+ 		ehci->async_unlink = NULL;
+@@ -1209,21 +1214,6 @@ static void start_unlink_async (struct e
+ 		BUG ();
+ #endif
+ 
+-	/* stop async schedule right now? */
+-	if (unlikely (qh == ehci->async)) {
+-		/* can't get here without STS_ASS set */
+-		if (ehci->rh_state != EHCI_RH_HALTED
+-				&& !ehci->async_unlink) {
+-			/* ... and CMD_IAAD clear */
+-			ehci_writel(ehci, cmd & ~CMD_ASE,
+-				    &ehci->regs->command);
+-			wmb ();
+-			// handshake later, if we need to
+-			timer_action_done (ehci, TIMER_ASYNC_OFF);
+-		}
+-		return;
+-	}
+-
+ 	qh->qh_state = QH_STATE_UNLINK;
+ 	ehci->async_unlink = qh;
+ 	if (!qh->unlink_next)
+--- a/drivers/usb/host/ehci-timer.c
++++ b/drivers/usb/host/ehci-timer.c
+@@ -67,8 +67,10 @@ static void ehci_clear_command_bit(struc
+  * the event types indexed by enum ehci_hrtimer_event in ehci.h.
+  */
+ static unsigned event_delays_ns[] = {
++	1 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_POLL_ASS */
+ 	1 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_POLL_PSS */
+ 	10 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_DISABLE_PERIODIC */
++	15 * NSEC_PER_MSEC,	/* EHCI_HRTIMER_DISABLE_ASYNC */
+ };
+ 
+ /* Enable a pending hrtimer event */
+@@ -91,6 +93,51 @@ static void ehci_enable_event(struct ehc
+ }
+ 
+ 
++/* Poll the STS_ASS status bit; see when it agrees with CMD_ASE */
++static void ehci_poll_ASS(struct ehci_hcd *ehci)
++{
++	unsigned	actual, want;
++
++	/* Don't enable anything if the controller isn't running (e.g., died) */
++	if (ehci->rh_state != EHCI_RH_RUNNING)
++		return;
++
++	want = (ehci->command & CMD_ASE) ? STS_ASS : 0;
++	actual = ehci_readl(ehci, &ehci->regs->status) & STS_ASS;
++
++	if (want != actual) {
++
++		/* Poll again later, but give up after about 20 ms */
++		if (ehci->ASS_poll_count++ < 20) {
++			ehci_enable_event(ehci, EHCI_HRTIMER_POLL_ASS, true);
++			return;
++		}
++		ehci_warn(ehci, "Waited too long for the async schedule status, giving up\n");
++	}
++	ehci->ASS_poll_count = 0;
++
++	/* The status is up-to-date; restart or stop the schedule as needed */
++	if (want == 0) {	/* Stopped */
++		if (ehci->async_count > 0)
++			ehci_set_command_bit(ehci, CMD_ASE);
++
++	} else {		/* Running */
++		if (ehci->async_count == 0) {
++
++			/* Turn off the schedule after a while */
++			ehci_enable_event(ehci, EHCI_HRTIMER_DISABLE_ASYNC,
++					true);
++		}
++	}
++}
++
++/* Turn off the async schedule after a brief delay */
++static void ehci_disable_ASE(struct ehci_hcd *ehci)
++{
++	ehci_clear_command_bit(ehci, CMD_ASE);
++}
++
++
+ /* Poll the STS_PSS status bit; see when it agrees with CMD_PSE */
+ static void ehci_poll_PSS(struct ehci_hcd *ehci)
+ {
+@@ -151,8 +198,10 @@ static void ehci_disable_PSE(struct ehci
+  * enum ehci_hrtimer_event in ehci.h.
+  */
+ static void (*event_handlers[])(struct ehci_hcd *) = {
++	ehci_poll_ASS,			/* EHCI_HRTIMER_POLL_ASS */
+ 	ehci_poll_PSS,			/* EHCI_HRTIMER_POLL_PSS */
+ 	ehci_disable_PSE,		/* EHCI_HRTIMER_DISABLE_PERIODIC */
++	ehci_disable_ASE,		/* EHCI_HRTIMER_DISABLE_ASYNC */
+ };
+ 
+ static enum hrtimer_restart ehci_hrtimer_func(struct hrtimer *t)
+--- a/drivers/usb/host/ehci.h
++++ b/drivers/usb/host/ehci.h
+@@ -79,8 +79,10 @@ enum ehci_rh_state {
+  * ehci-timer.c) in parallel with this list.
+  */
+ enum ehci_hrtimer_event {
++	EHCI_HRTIMER_POLL_ASS,		/* Poll for async schedule off */
+ 	EHCI_HRTIMER_POLL_PSS,		/* Poll for periodic schedule off */
+ 	EHCI_HRTIMER_DISABLE_PERIODIC,	/* Wait to disable periodic sched */
++	EHCI_HRTIMER_DISABLE_ASYNC,	/* Wait to disable async sched */
+ 	EHCI_HRTIMER_NUM_EVENTS		/* Must come last */
+ };
+ #define EHCI_HRTIMER_NO_EVENT	99
+@@ -93,6 +95,7 @@ struct ehci_hcd {			/* one per controlle
+ 	struct hrtimer		hrtimer;
+ 
+ 	int			PSS_poll_count;
++	int			ASS_poll_count;
+ 
+ 	/* glue to PCI and HCD framework */
+ 	struct ehci_caps __iomem *caps;
+@@ -110,6 +113,7 @@ struct ehci_hcd {			/* one per controlle
+ 	struct ehci_qh		*async_unlink_last;
+ 	struct ehci_qh		*qh_scan_next;
+ 	unsigned		scanning : 1;
++	unsigned		async_count;	/* async activity count */
+ 
+ 	/* periodic schedule support */
+ #define	DEFAULT_I_TDPS		1024		/* some HCs can do less */
+@@ -229,7 +233,6 @@ static inline void iaa_watchdog_done(str
+ enum ehci_timer_action {
+ 	TIMER_IO_WATCHDOG,
+ 	TIMER_ASYNC_SHRINK,
+-	TIMER_ASYNC_OFF,
+ };
+ 
+ static inline void
