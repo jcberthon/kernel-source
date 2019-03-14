@@ -1,0 +1,51 @@
+From: Ulrich Obergfell <uobergfe@redhat.com>
+Date: Mon, 13 Oct 2014 15:55:37 -0700
+Subject: [PATCH] kvm: ensure hard lockup detection is disabled by default
+Git-commit: 9919e39a17381058dd0cdef2f78dbf5619e26474
+Patch-mainline: v3.18-rc1
+References: bsc#1110436
+
+Use watchdog_enable_hardlockup_detector() to set hard lockup detection's
+default value to false.  It's risky to run this detection in a guest, as
+false positives are easy to trigger, especially if the host is
+overcommitted.
+
+Signed-off-by: Ulrich Obergfell <uobergfe@redhat.com>
+Signed-off-by: Andrew Jones <drjones@redhat.com>
+Signed-off-by: Don Zickus <dzickus@redhat.com>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Vasilis Liaskovitis <vliaskovitis@suse.com>
+---
+ arch/x86/kernel/kvm.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/x86/kernel/kvm.c b/arch/x86/kernel/kvm.c
+index 36bf3fe14fe2..3c4ba6e69ce6 100644
+--- a/arch/x86/kernel/kvm.c
++++ b/arch/x86/kernel/kvm.c
+@@ -33,6 +33,7 @@
+ #include <linux/sched.h>
+ #include <linux/slab.h>
+ #include <linux/kprobes.h>
++#include <linux/nmi.h>
+ #include <asm/timer.h>
+ #include <asm/cpu.h>
+ #include <asm/traps.h>
+@@ -575,6 +576,13 @@ void __init kvm_guest_init(void)
+ #else
+ 	kvm_guest_cpu_init();
+ #endif
++
++	/*
++	 * Hard lockup detection is enabled by default. Disable it, as guests
++	 * can get false positives too easily, for example if the host is
++	 * overcommitted.
++	 */
++	watchdog_enable_hardlockup_detector(false);
+ }
+ 
+ static bool __init kvm_detect(void)
+-- 
+2.19.0
+
