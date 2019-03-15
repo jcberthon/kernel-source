@@ -1,7 +1,7 @@
 From: Matthias Schwarzott <zzam@gentoo.org>
 Date: Mon, 30 Oct 2017 06:07:29 -0400
 Subject: [PATCH] media: em28xx: Fix use-after-free when disconnecting
-References: bnc#1012382
+References: bnc#1012382, CVE-2019-2024, bsc#1129179
 Patch-mainline: 4.4.167
 Git-commit: 910b0797fa9e8af09c44a3fa36cb310ba7a7218d
 
