@@ -1,12 +1,11 @@
 From: "Peter Zijlstra (Intel)" <peterz@infradead.org>
 Subject: x86: Add TSX Force Abort CPUID/MSR
 Date: Tue, 5 Mar 2019 22:23:17 +0100
-Patch-mainline: Not yet, embargoed
+Git-commit: 52f64909409c17adf54fcf5f9751e0544ca3a6b4
+Patch-mainline: v5.1-rc1
 References: bsc#1121805
 Signed-off-by: Tony Jones <tonyj@suse.de>
 X-Info: rework X86_FEATURE_TSX_FORCE_ABORT into scattered (no 95ca0ee86360)
-
-#Git-commit: 52f64909409c17adf54fcf5f9751e0544ca3a6b4
 
 Skylake systems will receive a microcode update to address a TSX
 errata. This microcode will (by default) clobber PMC3 when TSX
