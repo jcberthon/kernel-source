@@ -1,11 +1,10 @@
 From: "Peter Zijlstra (Intel)" <peterz@infradead.org>
 Subject: perf/x86/intel: Make cpuc allocations consistent
 Date: Tue, 5 Mar 2019 22:23:15 +0100
-Patch-mainline: Not yet, embargoed
+Git-commit: d01b1f96a82e5dd7841a1d39db3abfdaf95f70ab
+Patch-mainline: v5.1-rc1
 References: bsc#1121805
 Signed-off-by: Tony Jones <tonyj@suse.de>
-
-#Git-commit: d01b1f96a82e5dd7841a1d39db3abfdaf95f70ab
 
 The cpuc data structure allocation is different between fake and real
 cpuc's; use the same code to init/free both.
