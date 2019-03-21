@@ -1,0 +1,40 @@
+From: Hannes Reinecke <hare@suse.de>
+Date: Wed, 20 Mar 2019 08:58:07 +0100
+Subject: [PATCH] block_dev: fix crash on chained bios with O_DIRECT
+Patch-Mainline: submitted to linux-block 2019/03/20
+References: bsc#1090435
+
+__blkdev_direct_IO_simple() is allocating a bio on the stack.
+When that bio needs to be split bio_chain_endio() invokes bio_put()
+on this bio, causing the kernel to crash in mempool_free() as the
+bio was never allocated from a mempool in the first place.
+So call bio_get() before submitting to avoid this problem.
+
+Signed-off-by: Hannes Reinecke <hare@suse.com>
+---
+ fs/block_dev.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/fs/block_dev.c b/fs/block_dev.c
+index a7cd93ab8969..8ba36eecca36 100644
+--- a/fs/block_dev.c
++++ b/fs/block_dev.c
+@@ -243,6 +243,7 @@ __blkdev_direct_IO_simple(struct kiocb *iocb, struct iov_iter *iter,
+ 	if (file->f_flags & O_NONBLOCK)
+ 		bio.bi_opf |= REQ_FAILFAST_DEV;
+ 
++	bio_get(&bio);
+ 	qc = submit_bio(&bio);
+ 	for (;;) {
+ 		set_current_state(TASK_UNINTERRUPTIBLE);
+@@ -262,6 +263,7 @@ __blkdev_direct_IO_simple(struct kiocb *iocb, struct iov_iter *iter,
+ 
+ 	if (unlikely(bio.bi_error))
+ 		ret = bio.bi_error;
++	bio_put(&bio);
+ 
+ out:
+ 	if (vecs != inline_vecs)
+-- 
+2.16.4
+

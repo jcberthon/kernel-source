@@ -1,11 +1,10 @@
 From: "Peter Zijlstra (Intel)" <peterz@infradead.org>
 Subject: perf/x86/intel: Generalize dynamic constraint creation
 Date: Tue, 5 Mar 2019 22:23:16 +0100
-Patch-mainline: Not yet, embargoed
+Git-commit: 11f8b2d65ca9029591c8df26bb6bd063c312b7fe
+Patch-mainline: v5.1-rc1
 References: bsc#1121805
 Signed-off-by: Tony Jones <tonyj@suse.de>
-
-#Git-commit: 11f8b2d65ca9029591c8df26bb6bd063c312b7fe
 
 Such that we can re-use it.
 
