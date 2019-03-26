@@ -1,0 +1,44 @@
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: NFC: nci: memory leak in nci_core_conn_create()
+Patch-mainline: v4.5-rc1
+Git-commit: c6dc65d885b98898bf287aaf44e020077b41769f
+References: git-fixes
+
+I've moved the check for "number_destination_params" forward
+a few lines to avoid leaking "cmd".
+
+Fixes: caa575a86ec1 ('NFC: nci: fix possible crash in nci_core_conn_create')
+
+Acked-by: Christophe Ricard <christophe-h.ricard@st.com>
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+Signed-off-by: Samuel Ortiz <sameo@linux.intel.com>
+Acked-by: Denis Kirjanov <dkirjanov@suse.com>
+---
+ net/nfc/nci/core.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/net/nfc/nci/core.c b/net/nfc/nci/core.c
+index 10c99a578421..fbb7a2b57b44 100644
+--- a/net/nfc/nci/core.c
++++ b/net/nfc/nci/core.c
+@@ -610,14 +610,14 @@ int nci_core_conn_create(struct nci_dev *ndev, u8 destination_type,
+ 	struct nci_core_conn_create_cmd *cmd;
+ 	struct core_conn_create_data data;
+ 
++	if (!number_destination_params)
++		return -EINVAL;
++
+ 	data.length = params_len + sizeof(struct nci_core_conn_create_cmd);
+ 	cmd = kzalloc(data.length, GFP_KERNEL);
+ 	if (!cmd)
+ 		return -ENOMEM;
+ 
+-	if (!number_destination_params)
+-		return -EINVAL;
+-
+ 	cmd->destination_type = destination_type;
+ 	cmd->number_destination_params = number_destination_params;
+ 	memcpy(cmd->params, params, params_len);
+-- 
+2.12.3
+
