@@ -1,0 +1,29 @@
+From 307b00c5e695857ca92fc6a4b8ab6c48f988a1b1 Mon Sep 17 00:00:00 2001
+From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Date: Mon, 22 Oct 2018 13:51:03 +0200
+Subject: [PATCH] rtl8xxxu: Fix missing break in switch
+Git-commit: 307b00c5e695857ca92fc6a4b8ab6c48f988a1b1
+Patch-mainline: v5.0
+References: bsc#1120902
+
+Add missing break statement in order to prevent the code from falling
+through to the default case.
+
+Fixes: 26f1fad29ad9 ("New driver: rtl8xxxu (mac80211)")
+Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+Signed-off-by: Kalle Valo <kvalo@codeaurora.org>
+Signed-off-by: Oliver Neukum <oneukum@suse.com>
+---
+ drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu.c |    1 +
+ 1 file changed, 1 insertion(+)
+
+--- a/drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu.c
++++ b/drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu.c
+@@ -5331,6 +5331,7 @@ static int rtl8xxxu_set_key(struct ieee8
+ 		break;
+ 	case WLAN_CIPHER_SUITE_TKIP:
+ 		key->flags |= IEEE80211_KEY_FLAG_GENERATE_MMIC;
++		break;
+ 	default:
+ 		return -EOPNOTSUPP;
+ 	}

@@ -1,0 +1,52 @@
+From: Pablo Neira Ayuso <pablo@netfilter.org>
+Subject: netfilter: nfnetlink: use original skbuff when acking batches
+Patch-mainline: v4.5-rc6
+Git-commit: 7c7bdf35991bb8f7cfaeaf22ea3a2f2d1967c166
+References: git-fixes
+
+Since bd678e09dc17 ("netfilter: nfnetlink: fix splat due to incorrect
+socket memory accounting in skbuff clones"), we don't manually attach
+the sk to the skbuff clone anymore, so we have to use the original
+skbuff from netlink_ack() which needs to access the sk pointer.
+
+Fixes: bd678e09dc17 ("netfilter: nfnetlink: fix splat due to incorrect socket memory accounting in skbuff clones")
+Reported-by: Dmitry Vyukov <dvyukov@google.com>
+Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+Acked-by: Denis Kirjanov <dkirjanov@suse.com>
+---
+ net/netfilter/nfnetlink.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/net/netfilter/nfnetlink.c b/net/netfilter/nfnetlink.c
+index a7ba23353dab..62e92af2384a 100644
+--- a/net/netfilter/nfnetlink.c
++++ b/net/netfilter/nfnetlink.c
+@@ -311,14 +311,14 @@ static void nfnetlink_rcv_batch(struct sk_buff *skb, struct nlmsghdr *nlh,
+ #endif
+ 		{
+ 			nfnl_unlock(subsys_id);
+-			netlink_ack(skb, nlh, -EOPNOTSUPP);
++			netlink_ack(oskb, nlh, -EOPNOTSUPP);
+ 			return kfree_skb(skb);
+ 		}
+ 	}
+ 
+ 	if (!ss->commit || !ss->abort) {
+ 		nfnl_unlock(subsys_id);
+-		netlink_ack(skb, nlh, -EOPNOTSUPP);
++		netlink_ack(oskb, nlh, -EOPNOTSUPP);
+ 		return kfree_skb(skb);
+ 	}
+ 
+@@ -406,7 +406,7 @@ static void nfnetlink_rcv_batch(struct sk_buff *skb, struct nlmsghdr *nlh,
+ 				 * pointing to the batch header.
+ 				 */
+ 				nfnl_err_reset(&err_list);
+-				netlink_ack(skb, nlmsg_hdr(oskb), -ENOMEM);
++				netlink_ack(oskb, nlmsg_hdr(oskb), -ENOMEM);
+ 				status |= NFNL_BATCH_FAILURE;
+ 				goto done;
+ 			}
+-- 
+2.12.3
+
