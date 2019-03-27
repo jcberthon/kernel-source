@@ -1,0 +1,43 @@
+From 6508497cbdc70b92130fbca57402af6a94e05d20 Mon Sep 17 00:00:00 2001
+From: Colin Ian King <colin.king@canonical.com>
+Date: Fri, 8 Sep 2017 16:24:52 +0100
+Subject: [PATCH] rsi: fix a dereference on adapter before it has been null
+ checked
+Git-commit: 6508497cbdc70b92130fbca57402af6a94e05d20
+Patch-mainline: v4.15
+References: bsc#1085539
+
+The assignment of dev is dereferencing adapter before adapter has
+been null checked, potentially leading to a null pointer dereference.
+Fix this by simply moving the assignment of dev to a later point
+after the sanity null check of adapter.
+
+Detected by CoverityScan CID#1398383 ("Dereference before null check")
+
+Fixes: dad0d04fa7ba ("rsi: Add RS9113 wireless driver")
+Signed-off-by: Colin Ian King <colin.king@canonical.com>
+Signed-off-by: Kalle Valo <kvalo@codeaurora.org>
+Signed-off-by: Oliver Neukum <oneukum@suse.com>
+---
+ drivers/net/wireless/rsi/rsi_91x_usb.c |   10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+--- a/drivers/net/wireless/rsi/rsi_91x_usb.c
++++ b/drivers/net/wireless/rsi/rsi_91x_usb.c
+@@ -67,8 +67,14 @@ static int rsi_write_multiple(struct rsi
+ 			      u8 *data,
+ 			      u32 count)
+ {
+-	struct rsi_91x_usbdev *dev = (struct rsi_91x_usbdev *)adapter->rsi_dev;
+-	u8 *seg = dev->tx_buffer;
++	struct rsi_91x_usbdev *dev;
++	u8 *seg;
++
++	if (!adapter)
++		return -ENODEV;
++
++	dev = (struct rsi_91x_usbdev *)adapter->rsi_dev;
++	seg = dev->tx_buffer;
+ 
+ 	if (dev->write_fail)
+ 		return 0;
