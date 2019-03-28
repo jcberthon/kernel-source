@@ -1,0 +1,33 @@
+From: Luis de Bethencourt <luisbg@osg.samsung.com>
+Subject: net: add description for len argument of
+ dev_get_phys_port_name
+Patch-mainline: v4.6-rc1
+Git-commit: ed49e650371008b0e00c8004cc2ca93055740f78
+References: git-fixes
+
+When the function dev_get_phys_port_name was added it missed a description
+for it's len argument. Adding it.
+
+Fixes: db24a9044ee1 ("net: add support for phys_port_name")
+Signed-off-by: Luis de Bethencourt <luisbg@osg.samsung.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Acked-by: Denis Kirjanov <dkirjanov@suse.com>
+---
+ net/core/dev.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/net/core/dev.c b/net/core/dev.c
+index 43c74cad25bc..b9bcbe77d913 100644
+--- a/net/core/dev.c
++++ b/net/core/dev.c
+@@ -6445,6 +6445,7 @@ EXPORT_SYMBOL(dev_get_phys_port_id);
+  *	dev_get_phys_port_name - Get device physical port name
+  *	@dev: device
+  *	@name: port name
++ *	@len: limit of bytes to copy to name
+  *
+  *	Get device physical port name
+  */
+-- 
+2.12.3
+
