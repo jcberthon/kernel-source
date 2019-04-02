@@ -3,7 +3,7 @@ Date: Wed, 6 Apr 2016 11:32:52 -0400
 Subject: [PATCH] SUNRPC: init xdr_stream for zero iov_len, page_len
 Git-commit: 06ef26a0e35199cc0445d7d5708533a12af8ff5b
 Patch-mainline: v4.7
-References: bsc#11303356
+References: bsc#1130356
 
 An xdr_buf with head[0].iov_len = 0 and page_len = 0 will cause
 xdr_init_decode() to incorrectly setup the xdr_stream.  Specifically,
