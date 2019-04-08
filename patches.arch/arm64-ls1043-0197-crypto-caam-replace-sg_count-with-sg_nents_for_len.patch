@@ -24,15 +24,13 @@ Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
 Signed-off-by: Alexander Graf <agraf@suse.de>
 
 ---
- drivers/crypto/caam/caamalg.c    | 189 ++++++++++++++++++---------------------
- drivers/crypto/caam/sg_sw_sec4.h |  11 ---
+ drivers/crypto/caam/caamalg.c    |  189 ++++++++++++++++++---------------------
+ drivers/crypto/caam/sg_sw_sec4.h |   11 --
  2 files changed, 88 insertions(+), 112 deletions(-)
 
-diff --git a/drivers/crypto/caam/caamalg.c b/drivers/crypto/caam/caamalg.c
-index ed8a044..14b7dc8 100644
 --- a/drivers/crypto/caam/caamalg.c
 +++ b/drivers/crypto/caam/caamalg.c
-@@ -887,8 +887,8 @@ static int xts_ablkcipher_setkey(struct crypto_ablkcipher *ablkcipher,
+@@ -887,8 +887,8 @@ static int xts_ablkcipher_setkey(struct
  
  /*
   * aead_edesc - s/w-extended aead descriptor
@@ -54,7 +52,7 @@ index ed8a044..14b7dc8 100644
   * @iv_dma: dma address of iv for checking continuity and link table
   * @sec4_sg_bytes: length of dma mapped sec4_sg space
   * @sec4_sg_dma: bus physical mapped address of h/w link table
-@@ -930,10 +930,11 @@ static void caam_unmap(struct device *dev, struct scatterlist *src,
+@@ -930,10 +930,11 @@ static void caam_unmap(struct device *de
  		       int sec4_sg_bytes)
  {
  	if (dst != src) {
@@ -69,7 +67,7 @@ index ed8a044..14b7dc8 100644
  	}
  
  	if (iv_dma)
-@@ -1102,7 +1103,7 @@ static void init_aead_job(struct aead_request *req,
+@@ -1102,7 +1103,7 @@ static void init_aead_job(struct aead_re
  	init_job_desc_shared(desc, ptr, len, HDR_SHARE_DEFER | HDR_REVERSE);
  
  	if (all_contig) {
@@ -78,16 +76,16 @@ index ed8a044..14b7dc8 100644
  		in_options = 0;
  	} else {
  		src_dma = edesc->sec4_sg_dma;
-@@ -1117,7 +1118,7 @@ static void init_aead_job(struct aead_request *req,
+@@ -1117,7 +1118,7 @@ static void init_aead_job(struct aead_re
  	out_options = in_options;
  
  	if (unlikely(req->src != req->dst)) {
 -		if (!edesc->dst_nents) {
 +		if (edesc->dst_nents == 1) {
  			dst_dma = sg_dma_address(req->dst);
+ 			out_options = 0;
  		} else {
- 			dst_dma = edesc->sec4_sg_dma +
-@@ -1227,10 +1228,11 @@ static void init_ablkcipher_job(u32 *sh_desc, dma_addr_t ptr,
+@@ -1228,10 +1229,11 @@ static void init_ablkcipher_job(u32 *sh_
  	print_hex_dump(KERN_ERR, "presciv@"__stringify(__LINE__)": ",
  		       DUMP_PREFIX_ADDRESS, 16, 4, req->info,
  		       ivsize, 1);
@@ -101,7 +99,7 @@ index ed8a044..14b7dc8 100644
  #endif
  
  	len = desc_len(sh_desc);
-@@ -1247,7 +1249,7 @@ static void init_ablkcipher_job(u32 *sh_desc, dma_addr_t ptr,
+@@ -1248,7 +1250,7 @@ static void init_ablkcipher_job(u32 *sh_
  	append_seq_in_ptr(desc, src_dma, req->nbytes + ivsize, in_options);
  
  	if (likely(req->src == req->dst)) {
@@ -110,7 +108,7 @@ index ed8a044..14b7dc8 100644
  			dst_dma = sg_dma_address(req->src);
  		} else {
  			dst_dma = edesc->sec4_sg_dma +
-@@ -1255,7 +1257,7 @@ static void init_ablkcipher_job(u32 *sh_desc, dma_addr_t ptr,
+@@ -1256,7 +1258,7 @@ static void init_ablkcipher_job(u32 *sh_
  			out_options = LDST_SGF;
  		}
  	} else {
@@ -119,7 +117,7 @@ index ed8a044..14b7dc8 100644
  			dst_dma = sg_dma_address(req->dst);
  		} else {
  			dst_dma = edesc->sec4_sg_dma +
-@@ -1287,13 +1289,13 @@ static void init_ablkcipher_giv_job(u32 *sh_desc, dma_addr_t ptr,
+@@ -1288,13 +1290,13 @@ static void init_ablkcipher_giv_job(u32
  		       ivsize, 1);
  	dbg_dump_sg(KERN_ERR, "src    @" __stringify(__LINE__) ": ",
  		    DUMP_PREFIX_ADDRESS, 16, 4, req->src,
@@ -135,7 +133,7 @@ index ed8a044..14b7dc8 100644
  		src_dma = sg_dma_address(req->src);
  		in_options = 0;
  	} else {
-@@ -1329,21 +1331,22 @@ static struct aead_edesc *aead_edesc_alloc(struct aead_request *req,
+@@ -1330,21 +1332,22 @@ static struct aead_edesc *aead_edesc_all
  	int src_nents, dst_nents = 0;
  	struct aead_edesc *edesc;
  	int sgc;
@@ -164,7 +162,7 @@ index ed8a044..14b7dc8 100644
  		if (unlikely(dst_nents < 0)) {
  			dev_err(jrdev, "Insufficient bytes (%d) in dst S/G\n",
  				req->assoclen + req->cryptlen +
-@@ -1351,9 +1354,9 @@ static struct aead_edesc *aead_edesc_alloc(struct aead_request *req,
+@@ -1352,9 +1355,9 @@ static struct aead_edesc *aead_edesc_all
  			return ERR_PTR(dst_nents);
  		}
  	} else {
@@ -177,7 +175,7 @@ index ed8a044..14b7dc8 100644
  		if (unlikely(src_nents < 0)) {
  			dev_err(jrdev, "Insufficient bytes (%d) in src S/G\n",
  				req->assoclen + req->cryptlen +
-@@ -1362,13 +1365,8 @@ static struct aead_edesc *aead_edesc_alloc(struct aead_request *req,
+@@ -1363,13 +1366,8 @@ static struct aead_edesc *aead_edesc_all
  		}
  	}
  
@@ -193,7 +191,7 @@ index ed8a044..14b7dc8 100644
  	sec4_sg_bytes = sec4_sg_len * sizeof(struct sec4_sg_entry);
  
  	/* allocate space for base edesc and hw desc commands, link tables */
-@@ -1380,28 +1378,28 @@ static struct aead_edesc *aead_edesc_alloc(struct aead_request *req,
+@@ -1381,28 +1379,28 @@ static struct aead_edesc *aead_edesc_all
  	}
  
  	if (likely(req->src == req->dst)) {
@@ -234,7 +232,7 @@ index ed8a044..14b7dc8 100644
  			kfree(edesc);
  			return ERR_PTR(-ENOMEM);
  		}
-@@ -1411,15 +1409,15 @@ static struct aead_edesc *aead_edesc_alloc(struct aead_request *req,
+@@ -1412,15 +1410,15 @@ static struct aead_edesc *aead_edesc_all
  	edesc->dst_nents = dst_nents;
  	edesc->sec4_sg = (void *)edesc + sizeof(struct aead_edesc) +
  			 desc_bytes;
@@ -253,7 +251,7 @@ index ed8a044..14b7dc8 100644
  		sg_to_sec4_sg_last(req->dst, dst_nents,
  				   edesc->sec4_sg + sec4_sg_index, 0);
  	}
-@@ -1621,12 +1619,12 @@ static struct ablkcipher_edesc *ablkcipher_edesc_alloc(struct ablkcipher_request
+@@ -1622,12 +1620,12 @@ static struct ablkcipher_edesc *ablkciph
  	int src_nents, dst_nents = 0, sec4_sg_bytes;
  	struct ablkcipher_edesc *edesc;
  	dma_addr_t iv_dma = 0;
@@ -269,7 +267,7 @@ index ed8a044..14b7dc8 100644
  	if (unlikely(src_nents < 0)) {
  		dev_err(jrdev, "Insufficient bytes (%d) in src S/G\n",
  			req->nbytes);
-@@ -1634,7 +1632,7 @@ static struct ablkcipher_edesc *ablkcipher_edesc_alloc(struct ablkcipher_request
+@@ -1635,7 +1633,7 @@ static struct ablkcipher_edesc *ablkciph
  	}
  
  	if (req->dst != req->src) {
@@ -278,7 +276,7 @@ index ed8a044..14b7dc8 100644
  		if (unlikely(dst_nents < 0)) {
  			dev_err(jrdev, "Insufficient bytes (%d) in dst S/G\n",
  				req->nbytes);
-@@ -1643,26 +1641,22 @@ static struct ablkcipher_edesc *ablkcipher_edesc_alloc(struct ablkcipher_request
+@@ -1644,26 +1642,22 @@ static struct ablkcipher_edesc *ablkciph
  	}
  
  	if (likely(req->src == req->dst)) {
@@ -309,7 +307,7 @@ index ed8a044..14b7dc8 100644
  			return ERR_PTR(-ENOMEM);
  		}
  	}
-@@ -1675,16 +1669,16 @@ static struct ablkcipher_edesc *ablkcipher_edesc_alloc(struct ablkcipher_request
+@@ -1676,16 +1670,16 @@ static struct ablkcipher_edesc *ablkciph
  		return ERR_PTR(-ENOMEM);
  	}
  
@@ -336,7 +334,7 @@ index ed8a044..14b7dc8 100644
  
  	/* allocate space for base edesc and hw desc commands, link tables */
  	edesc = kzalloc(sizeof(*edesc) + desc_bytes + sec4_sg_bytes,
-@@ -1702,17 +1696,15 @@ static struct ablkcipher_edesc *ablkcipher_edesc_alloc(struct ablkcipher_request
+@@ -1703,17 +1697,15 @@ static struct ablkcipher_edesc *ablkciph
  	edesc->sec4_sg = (void *)edesc + sizeof(struct ablkcipher_edesc) +
  			 desc_bytes;
  
@@ -357,7 +355,7 @@ index ed8a044..14b7dc8 100644
  	}
  
  	edesc->sec4_sg_dma = dma_map_single(jrdev, edesc->sec4_sg,
-@@ -1733,7 +1725,7 @@ static struct ablkcipher_edesc *ablkcipher_edesc_alloc(struct ablkcipher_request
+@@ -1734,7 +1726,7 @@ static struct ablkcipher_edesc *ablkciph
  		       sec4_sg_bytes, 1);
  #endif
  
@@ -366,7 +364,7 @@ index ed8a044..14b7dc8 100644
  	return edesc;
  }
  
-@@ -1830,12 +1822,12 @@ static struct ablkcipher_edesc *ablkcipher_giv_edesc_alloc(
+@@ -1831,12 +1823,12 @@ static struct ablkcipher_edesc *ablkciph
  	int src_nents, dst_nents, sec4_sg_bytes;
  	struct ablkcipher_edesc *edesc;
  	dma_addr_t iv_dma = 0;
@@ -382,7 +380,7 @@ index ed8a044..14b7dc8 100644
  	if (unlikely(src_nents < 0)) {
  		dev_err(jrdev, "Insufficient bytes (%d) in src S/G\n",
  			req->nbytes);
-@@ -1843,8 +1835,7 @@ static struct ablkcipher_edesc *ablkcipher_giv_edesc_alloc(
+@@ -1844,8 +1836,7 @@ static struct ablkcipher_edesc *ablkciph
  	}
  
  	if (likely(req->src == req->dst)) {
@@ -392,7 +390,7 @@ index ed8a044..14b7dc8 100644
  		if (unlikely(!sgc)) {
  			dev_err(jrdev, "unable to map source\n");
  			return ERR_PTR(-ENOMEM);
-@@ -1852,26 +1843,23 @@ static struct ablkcipher_edesc *ablkcipher_giv_edesc_alloc(
+@@ -1853,26 +1844,23 @@ static struct ablkcipher_edesc *ablkciph
  
  		dst_nents = src_nents;
  	} else {
@@ -423,7 +421,7 @@ index ed8a044..14b7dc8 100644
  			return ERR_PTR(-ENOMEM);
  		}
  	}
-@@ -1888,14 +1876,17 @@ static struct ablkcipher_edesc *ablkcipher_giv_edesc_alloc(
+@@ -1889,14 +1877,17 @@ static struct ablkcipher_edesc *ablkciph
  		return ERR_PTR(-ENOMEM);
  	}
  
@@ -447,7 +445,7 @@ index ed8a044..14b7dc8 100644
  	edesc = kzalloc(sizeof(*edesc) + desc_bytes + sec4_sg_bytes,
  			GFP_DMA | flags);
  	if (!edesc) {
-@@ -1911,18 +1902,14 @@ static struct ablkcipher_edesc *ablkcipher_giv_edesc_alloc(
+@@ -1912,18 +1903,14 @@ static struct ablkcipher_edesc *ablkciph
  	edesc->sec4_sg = (void *)edesc + sizeof(struct ablkcipher_edesc) +
  			 desc_bytes;
  
@@ -470,7 +468,7 @@ index ed8a044..14b7dc8 100644
  	}
  
  	edesc->sec4_sg_dma = dma_map_single(jrdev, edesc->sec4_sg,
-@@ -1943,7 +1930,7 @@ static struct ablkcipher_edesc *ablkcipher_giv_edesc_alloc(
+@@ -1944,7 +1931,7 @@ static struct ablkcipher_edesc *ablkciph
  		       sec4_sg_bytes, 1);
  #endif
  
@@ -479,11 +477,9 @@ index ed8a044..14b7dc8 100644
  	return edesc;
  }
  
-diff --git a/drivers/crypto/caam/sg_sw_sec4.h b/drivers/crypto/caam/sg_sw_sec4.h
-index 6afa20c..c6adad0 100644
 --- a/drivers/crypto/caam/sg_sw_sec4.h
 +++ b/drivers/crypto/caam/sg_sw_sec4.h
-@@ -73,14 +73,3 @@ static inline struct sec4_sg_entry *sg_to_sec4_sg_len(
+@@ -73,14 +73,3 @@ static inline struct sec4_sg_entry *sg_t
  	} while (total);
  	return sec4_sg_ptr - 1;
  }
@@ -498,6 +494,3 @@ index 6afa20c..c6adad0 100644
 -
 -	return sg_nents;
 -}
--- 
-1.8.5.6
-
