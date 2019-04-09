@@ -19,14 +19,6 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
 
 --- a/arch/powerpc/mm/slice.c
 +++ b/arch/powerpc/mm/slice.c
-@@ -31,6 +31,7 @@
- #include <linux/spinlock.h>
- #include <linux/export.h>
- #include <linux/hugetlb.h>
-+#include <linux/security.h>
- #include <asm/mman.h>
- #include <asm/mmu.h>
- #include <asm/copro.h>
 @@ -96,7 +97,7 @@ static int slice_area_is_free(struct mm_
  {
  	struct vm_area_struct *vma;
