@@ -43,8 +43,8 @@ cond_resched into shrink_dentry_list from its callers.
 
 Acked-by: Nikolay Borisov <nborisov@suse.com>
 ---
- fs/dcache.c |   39 +++++++++++++++++++--------------------
- 1 file changed, 19 insertions(+), 20 deletions(-)
+ fs/dcache.c |   38 +++++++++++++++++++-------------------
+ 1 file changed, 19 insertions(+), 19 deletions(-)
 
 --- a/fs/dcache.c
 +++ b/fs/dcache.c
@@ -109,16 +109,15 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  	}
  }
  EXPORT_SYMBOL(shrink_dcache_parent);
-@@ -1600,8 +1601,6 @@ void d_invalidate(struct dentry *dentry)
+@@ -1600,7 +1601,6 @@ void d_invalidate(struct dentry *dentry)
  			detach_mounts(data.mountpoint);
  			dput(data.mountpoint);
  		}
--
 -		cond_resched();
  	}
  }
  EXPORT_SYMBOL(d_invalidate);
-@@ -1615,7 +1614,7 @@ EXPORT_SYMBOL(d_invalidate);
+@@ -1614,7 +1614,7 @@ EXPORT_SYMBOL(d_invalidate);
   * available. On a success the dentry is returned. The name passed in is
   * copied and the copy passed in may be reused after this call.
   */
@@ -127,7 +126,7 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  struct dentry *__d_alloc(struct super_block *sb, const struct qstr *name)
  {
  	struct dentry *dentry;
-@@ -1636,7 +1635,7 @@ struct dentry *__d_alloc(struct super_bl
+@@ -1635,7 +1635,7 @@ struct dentry *__d_alloc(struct super_bl
  		size_t size = offsetof(struct external_name, name[1]);
  		struct external_name *p = kmalloc(size + name->len, GFP_KERNEL);
  		if (!p) {
@@ -136,7 +135,7 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  			return NULL;
  		}
  		atomic_set(&p->u.count, 1);
-@@ -1646,7 +1645,7 @@ struct dentry *__d_alloc(struct super_bl
+@@ -1645,7 +1645,7 @@ struct dentry *__d_alloc(struct super_bl
  				round_up(name->len + 1,	sizeof(unsigned long)));
  	} else  {
  		dname = dentry->d_iname;
@@ -145,7 +144,7 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  
  	dentry->d_name.len = name->len;
  	dentry->d_name.hash = name->hash;
-@@ -1844,7 +1843,7 @@ static void __d_instantiate(struct dentr
+@@ -1843,7 +1843,7 @@ static void __d_instantiate(struct dentr
   * (or otherwise set) by the caller to indicate that it is now
   * in use by the dcache.
   */
@@ -154,7 +153,7 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  void d_instantiate(struct dentry *entry, struct inode * inode)
  {
  	BUG_ON(!hlist_unhashed(&entry->d_u.d_alias));
-@@ -2390,7 +2389,7 @@ struct dentry *__d_lookup(const struct d
+@@ -2389,7 +2389,7 @@ struct dentry *__d_lookup(const struct d
  	 * See Documentation/filesystems/path-lookup.txt for more details.
  	 */
  	rcu_read_lock();
@@ -163,7 +162,7 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  	hlist_bl_for_each_entry_rcu(dentry, node, b, d_hash) {
  
  		if (dentry->d_name.hash != hash)
-@@ -2466,7 +2465,7 @@ EXPORT_SYMBOL(d_hash_and_lookup);
+@@ -2465,7 +2465,7 @@ EXPORT_SYMBOL(d_hash_and_lookup);
   * it from the hash queues and waiting for
   * it to be deleted later when it has no users
   */
@@ -172,7 +171,7 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  /**
   * d_delete - delete a dentry
   * @dentry: The dentry to delete
-@@ -2474,7 +2473,7 @@ EXPORT_SYMBOL(d_hash_and_lookup);
+@@ -2473,7 +2473,7 @@ EXPORT_SYMBOL(d_hash_and_lookup);
   * Turn the dentry into a negative dentry if possible, otherwise
   * remove it from the hash queues so it can be deleted later
   */
@@ -181,7 +180,7 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  void d_delete(struct dentry * dentry)
  {
  	struct inode *inode;
-@@ -2526,7 +2525,7 @@ static void _d_rehash(struct dentry * en
+@@ -2525,7 +2525,7 @@ static void _d_rehash(struct dentry * en
   *
   * Adds a dentry to the hash according to its name.
   */
@@ -190,7 +189,7 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  void d_rehash(struct dentry * entry)
  {
  	spin_lock(&entry->d_lock);
-@@ -3226,7 +3225,7 @@ char *simple_dname(struct dentry *dentry
+@@ -3225,7 +3225,7 @@ char *simple_dname(struct dentry *dentry
  	/* these dentries are never renamed, so d_lock is not needed */
  	if (prepend(&end, &buflen, " (deleted)", 11) ||
  	    prepend(&end, &buflen, dentry->d_name.name, dentry->d_name.len) ||
@@ -199,7 +198,7 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  		end = ERR_PTR(-ENAMETOOLONG);
  	return end;
  }
-@@ -3398,7 +3397,7 @@ out:
+@@ -3397,7 +3397,7 @@ out:
   * Returns 0 otherwise.
   * Caller must ensure that "new_dentry" is pinned before calling is_subdir()
   */
@@ -208,7 +207,7 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  int is_subdir(struct dentry *new_dentry, struct dentry *old_dentry)
  {
  	int result;
-@@ -3500,10 +3499,10 @@ static void __init dcache_init(void)
+@@ -3499,10 +3499,10 @@ static void __init dcache_init(void)
  {
  	unsigned int loop;
  
