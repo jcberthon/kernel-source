@@ -1,0 +1,41 @@
+From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Date: Fri, 15 Feb 2019 14:29:26 -0600
+Subject: [PATCH] drm/radeon/evergreen_cs: fix missing break in switch
+ statement
+Patch-mainline: 4.4.177
+References: bnc#1012382 bsc#1106929
+Git-commit: cc5034a5d293dd620484d1d836aa16c6764a1c8c
+
+commit cc5034a5d293dd620484d1d836aa16c6764a1c8c upstream.
+
+Add missing break statement in order to prevent the code from falling
+through to case CB_TARGET_MASK.
+
+This bug was found thanks to the ongoing efforts to enable
+-Wimplicit-fallthrough.
+
+Fixes: dd220a00e8bd ("drm/radeon/kms: add support for streamout v7")
+Cc: stable@vger.kernel.org
+Signed-off-by: Gustavo A. R. Silva <gustavo@embeddedor.com>
+Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/gpu/drm/radeon/evergreen_cs.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/gpu/drm/radeon/evergreen_cs.c b/drivers/gpu/drm/radeon/evergreen_cs.c
+index 46f87d4aaf31..782fee330b4c 100644
+--- a/drivers/gpu/drm/radeon/evergreen_cs.c
++++ b/drivers/gpu/drm/radeon/evergreen_cs.c
+@@ -1299,6 +1299,7 @@ static int evergreen_cs_handle_reg(struct radeon_cs_parser *p, u32 reg, u32 idx)
+ 			return -EINVAL;
+ 		}
+ 		ib[idx] += (u32)((reloc->gpu_offset >> 8) & 0xffffffff);
++		break;
+ 	case CB_TARGET_MASK:
+ 		track->cb_target_mask = radeon_get_ib_value(p, idx);
+ 		track->cb_dirty = true;
+-- 
+2.21.0
+

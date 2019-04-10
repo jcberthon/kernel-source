@@ -1,0 +1,47 @@
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Date: Thu, 7 Mar 2019 17:02:50 +0100
+Subject: [PATCH] ncpfs: fix build warning of strncpy
+References: bnc#1012382
+Patch-mainline: 4.4.177
+Git-commit: eeb234f7f9079648f43e400bd0bfe84a8241a805
+
+Not upstream as ncpfs is long deleted.
+
+Fix up two strncpy build warnings in ncp_get_charsets() by using strscpy
+and the max size of the array.
+
+It's not like anyone uses this code anyway, and this gets rid of two
+build warnings so that we can see real warnings as they pop up over
+time.
+
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ fs/ncpfs/ioctl.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/fs/ncpfs/ioctl.c b/fs/ncpfs/ioctl.c
+index 0a3f9b594602..37779ed3f790 100644
+--- a/fs/ncpfs/ioctl.c
++++ b/fs/ncpfs/ioctl.c
+@@ -233,7 +233,7 @@ ncp_get_charsets(struct ncp_server* server, struct ncp_nls_ioctl __user *arg)
+ 		len = strlen(server->nls_vol->charset);
+ 		if (len > NCP_IOCSNAME_LEN)
+ 			len = NCP_IOCSNAME_LEN;
+-		strncpy(user.codepage, server->nls_vol->charset, len);
++		strscpy(user.codepage, server->nls_vol->charset, NCP_IOCSNAME_LEN);
+ 		user.codepage[len] = 0;
+ 	}
+ 
+@@ -243,7 +243,7 @@ ncp_get_charsets(struct ncp_server* server, struct ncp_nls_ioctl __user *arg)
+ 		len = strlen(server->nls_io->charset);
+ 		if (len > NCP_IOCSNAME_LEN)
+ 			len = NCP_IOCSNAME_LEN;
+-		strncpy(user.iocharset,	server->nls_io->charset, len);
++		strscpy(user.iocharset,	server->nls_io->charset, NCP_IOCSNAME_LEN);
+ 		user.iocharset[len] = 0;
+ 	}
+ 	mutex_unlock(&server->root_setup_lock);
+-- 
+2.21.0
+

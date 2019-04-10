@@ -36,7 +36,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  	bool (*is_oplock_break)(char *, struct TCP_Server_Info *);
  	int (*handle_cancelled_mid)(char *, struct TCP_Server_Info *);
  	void (*downgrade_oplock)(struct TCP_Server_Info *,
-@@ -626,6 +626,7 @@ struct TCP_Server_Info {
+@@ -630,6 +630,7 @@ struct TCP_Server_Info {
  #ifdef CONFIG_CIFS_SMB2
  	unsigned int	max_read;
  	unsigned int	max_write;
@@ -44,7 +44,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  	struct delayed_work reconnect; /* reconnect workqueue job */
  	struct mutex reconnect_mutex; /* prevent simultaneous reconnects */
  #endif /* CONFIG_CIFS_SMB2 */
-@@ -810,7 +811,10 @@ struct cifs_ses {
+@@ -814,7 +815,10 @@ struct cifs_ses {
  	bool need_reconnect:1; /* connection reset, uid now invalid */
  #ifdef CONFIG_CIFS_SMB2
  	__u16 session_flags;
@@ -58,7 +58,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  
 --- a/fs/cifs/cifsproto.h
 +++ b/fs/cifs/cifsproto.h
-@@ -101,7 +101,7 @@ extern int SendReceiveBlockingLock(const
+@@ -102,7 +102,7 @@ extern int SendReceiveBlockingLock(const
  			struct smb_hdr *out_buf,
  			int *bytes_returned);
  extern int cifs_reconnect(struct TCP_Server_Info *server);
@@ -67,7 +67,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  extern bool is_valid_oplock_break(char *, struct TCP_Server_Info *);
  extern bool backup_cred(struct cifs_sb_info *);
  extern bool is_size_safe_to_change(struct cifsInodeInfo *, __u64 eof);
-@@ -440,7 +440,8 @@ extern int setup_ntlm_response(struct ci
+@@ -442,7 +442,8 @@ extern int setup_ntlm_response(struct ci
  extern int setup_ntlmv2_rsp(struct cifs_ses *, const struct nls_table *);
  extern void cifs_crypto_shash_release(struct TCP_Server_Info *);
  extern int calc_seckey(struct cifs_ses *);
@@ -79,7 +79,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  extern int calc_lanman_hash(const char *password, const char *cryptkey,
 --- a/fs/cifs/connect.c
 +++ b/fs/cifs/connect.c
-@@ -787,7 +787,7 @@ standard_receive3(struct TCP_Server_Info
+@@ -898,7 +898,7 @@ standard_receive3(struct TCP_Server_Info
  	 * 48 bytes is enough to display the header and a little bit
  	 * into the payload for debugging purposes.
  	 */
@@ -90,7 +90,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  			min_t(unsigned int, server->total_read, 48));
 --- a/fs/cifs/misc.c
 +++ b/fs/cifs/misc.c
-@@ -311,7 +311,7 @@ check_smb_hdr(struct smb_hdr *smb)
+@@ -305,7 +305,7 @@ check_smb_hdr(struct smb_hdr *smb)
  }
  
  int
@@ -167,7 +167,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  	if (length < sizeof(struct smb2_pdu)) {
  		if ((length >= sizeof(struct smb2_hdr)) && (hdr->Status != 0)) {
  			pdu->StructureSize2 = 0;
-@@ -322,7 +346,7 @@ smb2_get_data_area_len(int *off, int *le
+@@ -329,7 +353,7 @@ smb2_get_data_area_len(int *off, int *le
  
  	/* return pointer to beginning of data area, ie offset from SMB start */
  	if ((*off != 0) && (*len != 0))
@@ -190,7 +190,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  	spin_lock(&GlobalMid_Lock);
  	list_for_each_entry(mid, &server->pending_mid_q, qhead) {
  		if ((mid->mid == wire_mid) &&
-@@ -1723,7 +1728,7 @@ struct smb_version_operations smb30_oper
+@@ -1738,7 +1743,7 @@ struct smb_version_operations smb30_oper
  	.get_lease_key = smb2_get_lease_key,
  	.set_lease_key = smb2_set_lease_key,
  	.new_lease_key = smb2_new_lease_key,
@@ -199,7 +199,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  	.calc_signature = smb3_calc_signature,
  	.set_integrity  = smb3_set_integrity,
  	.is_read_op = smb21_is_read_op,
-@@ -1811,7 +1816,7 @@ struct smb_version_operations smb311_ope
+@@ -1827,7 +1832,7 @@ struct smb_version_operations smb311_ope
  	.get_lease_key = smb2_get_lease_key,
  	.set_lease_key = smb2_set_lease_key,
  	.new_lease_key = smb2_new_lease_key,
@@ -208,7 +208,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  	.calc_signature = smb3_calc_signature,
  	.set_integrity  = smb3_set_integrity,
  	.is_read_op = smb21_is_read_op,
-@@ -1870,7 +1875,7 @@ struct smb_version_values smb21_values =
+@@ -1886,7 +1891,7 @@ struct smb_version_values smb21_values =
  struct smb_version_values smb30_values = {
  	.version_string = SMB30_VERSION_STRING,
  	.protocol_id = SMB30_PROT_ID,
@@ -217,7 +217,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  	.large_lock_type = 0,
  	.exclusive_lock_type = SMB2_LOCKFLAG_EXCLUSIVE_LOCK,
  	.shared_lock_type = SMB2_LOCKFLAG_SHARED_LOCK,
-@@ -1890,7 +1895,7 @@ struct smb_version_values smb30_values =
+@@ -1906,7 +1911,7 @@ struct smb_version_values smb30_values =
  struct smb_version_values smb302_values = {
  	.version_string = SMB302_VERSION_STRING,
  	.protocol_id = SMB302_PROT_ID,
@@ -240,7 +240,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  	hdr->StructureSize = cpu_to_le16(64);
  	hdr->Command = smb2_cmd;
  	if (tcon && tcon->ses && tcon->ses->server) {
-@@ -1597,7 +1594,8 @@ SMB2_ioctl(const unsigned int xid, struc
+@@ -1610,7 +1607,8 @@ SMB2_ioctl(const unsigned int xid, struc
  		goto ioctl_exit;
  	}
  
@@ -250,7 +250,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  	       *plen);
  ioctl_exit:
  	free_rsp_buf(resp_buftype, rsp);
-@@ -2172,7 +2170,7 @@ SMB2_read(const unsigned int xid, struct
+@@ -2185,7 +2183,7 @@ SMB2_read(const unsigned int xid, struct
  	}
  
  	if (*buf) {
@@ -262,7 +262,7 @@ Acked-by: David Mulder <dmulder@suse.com>
 --- a/fs/cifs/smb2pdu.h
 +++ b/fs/cifs/smb2pdu.h
 @@ -86,6 +86,7 @@
- #define MAX_SMB2_HDR_SIZE 0x00b0
+ #define MAX_SMB2_HDR_SIZE 204
  
  #define SMB2_PROTO_NUMBER cpu_to_le32(0x424d53fe)
 +#define SMB2_TRANSFORM_PROTO_NUM cpu_to_le32(0x424d53fd)
@@ -306,7 +306,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  extern __le16 *cifs_convert_path_to_utf16(const char *from,
 --- a/fs/cifs/smb2transport.c
 +++ b/fs/cifs/smb2transport.c
-@@ -225,8 +225,8 @@ smb2_calc_signature(struct smb_rqst *rqs
+@@ -268,8 +268,8 @@ smb2_calc_signature(struct smb_rqst *rqs
  	return rc;
  }
  
@@ -317,7 +317,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  {
  	unsigned char zero = 0x0;
  	__u8 i[4] = {0, 0, 0, 1};
-@@ -236,7 +236,7 @@ generate_smb3signingkey(struct cifs_ses
+@@ -279,7 +279,7 @@ generate_smb3signingkey(struct cifs_ses
  	unsigned char *hashptr = prfhash;
  
  	memset(prfhash, 0x0, SMB2_HMACSHA256_SIZE);
@@ -326,7 +326,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  
  	rc = smb3_crypto_shash_allocate(ses->server);
  	if (rc) {
-@@ -265,7 +265,7 @@ generate_smb3signingkey(struct cifs_ses
+@@ -308,7 +308,7 @@ generate_smb3signingkey(struct cifs_ses
  	}
  
  	rc = crypto_shash_update(&ses->server->secmech.sdeschmacsha256->shash,
@@ -335,7 +335,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  	if (rc) {
  		cifs_dbg(VFS, "%s: Could not update with label\n", __func__);
  		goto smb3signkey_ret;
-@@ -279,7 +279,7 @@ generate_smb3signingkey(struct cifs_ses
+@@ -322,7 +322,7 @@ generate_smb3signingkey(struct cifs_ses
  	}
  
  	rc = crypto_shash_update(&ses->server->secmech.sdeschmacsha256->shash,
@@ -344,7 +344,7 @@ Acked-by: David Mulder <dmulder@suse.com>
  	if (rc) {
  		cifs_dbg(VFS, "%s: Could not update with context\n", __func__);
  		goto smb3signkey_ret;
-@@ -299,12 +299,102 @@ generate_smb3signingkey(struct cifs_ses
+@@ -342,12 +342,102 @@ generate_smb3signingkey(struct cifs_ses
  		goto smb3signkey_ret;
  	}
  

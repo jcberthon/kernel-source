@@ -1,0 +1,30 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: kABI: protect struct stm_output
+Patch-mainline: never, kabi
+References: kabi
+
+In 4.4.178, commit f34bc5ad7a8415944a0bfe7dc005f50811651260 (stm class:
+Guard output assignment against concurrency), upstream commit
+cde4ad8368840e414ecf67db258fe1dabaa5fd2e added a lock to struct
+stm_output. It made the kABI checker to complain.
+
+Given the struct is driver's internal only, simply hide the change from
+the kABI checker.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/hwtracing/stm/stm.h |    2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/drivers/hwtracing/stm/stm.h
++++ b/drivers/hwtracing/stm/stm.h
+@@ -57,7 +57,9 @@ struct stm_device {
+ 	container_of((_d), struct stm_device, dev)
+ 
+ struct stm_output {
++#ifndef __GENKSYMS__
+ 	spinlock_t		lock;
++#endif
+ 	unsigned int		master;
+ 	unsigned int		channel;
+ 	unsigned int		nr_chans;

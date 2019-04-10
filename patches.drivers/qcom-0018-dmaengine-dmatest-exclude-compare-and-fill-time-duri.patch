@@ -15,14 +15,12 @@ Signed-off-by: Sinan Kaya <okaya@codeaurora.org>
 Signed-off-by: Vinod Koul <vinod.koul@intel.com>
 Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 ---
- drivers/dma/dmatest.c | 17 +++++++++++++++--
+ drivers/dma/dmatest.c |   17 +++++++++++++++--
  1 file changed, 15 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/dma/dmatest.c b/drivers/dma/dmatest.c
-index 1245db5438e1..738fbd1dd57a 100644
 --- a/drivers/dma/dmatest.c
 +++ b/drivers/dma/dmatest.c
-@@ -426,7 +426,9 @@ static int dmatest_func(void *data)
+@@ -430,7 +430,9 @@ static int dmatest_func(void *data)
  	int			src_cnt;
  	int			dst_cnt;
  	int			i;
@@ -51,7 +49,7 @@ index 1245db5438e1..738fbd1dd57a 100644
  		}
  
  		um = dmaengine_get_unmap_data(dev->dev, src_cnt+dst_cnt,
-@@ -683,6 +689,7 @@ static int dmatest_func(void *data)
+@@ -653,6 +659,7 @@ static int dmatest_func(void *data)
  			continue;
  		}
  
@@ -59,7 +57,7 @@ index 1245db5438e1..738fbd1dd57a 100644
  		pr_debug("%s: verifying source buffer...\n", current->comm);
  		error_count = dmatest_verify(thread->srcs, 0, src_off,
  				0, PATTERN_SRC, true);
-@@ -703,6 +710,9 @@ static int dmatest_func(void *data)
+@@ -673,6 +680,9 @@ static int dmatest_func(void *data)
  				params->buf_size, dst_off + len,
  				PATTERN_DST, false);
  
@@ -69,9 +67,9 @@ index 1245db5438e1..738fbd1dd57a 100644
  		if (error_count) {
  			result("data error", total_tests, src_off, dst_off,
  			       len, error_count);
-@@ -712,7 +722,10 @@ static int dmatest_func(void *data)
- 				       dst_off, len, 0);
- 		}
+@@ -688,7 +698,10 @@ error_unmap_continue:
+ 		dmaengine_unmap_put(um);
+ 		failed_tests++;
  	}
 -	runtime = ktime_us_delta(ktime_get(), ktime);
 +	ktime = ktime_sub(ktime_get(), ktime);
@@ -81,6 +79,3 @@ index 1245db5438e1..738fbd1dd57a 100644
  
  	ret = 0;
  err_dstbuf:
--- 
-2.11.0
-

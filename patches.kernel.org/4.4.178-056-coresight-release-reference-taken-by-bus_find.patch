@@ -1,0 +1,38 @@
+From: Mathieu Poirier <mathieu.poirier@linaro.org>
+Date: Tue, 2 Feb 2016 14:13:58 -0700
+Subject: [PATCH] coresight: release reference taken by 'bus_find_device()'
+References: bnc#1012382
+Patch-mainline: 4.4.178
+Git-commit: f2dfab3568fc32afeac8b698481e80e7ab2dc658
+
+[ Upstream commit f2dfab3568fc32afeac8b698481e80e7ab2dc658 ]
+
+The reference count taken by function bus_find_device() needs
+to be released if a child device is found, something this patch
+is adding.
+
+Reported-by: Rabin Vincent <rabin@rab.in>
+Signed-off-by: Mathieu Poirier <mathieu.poirier@linaro.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/hwtracing/coresight/coresight.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/hwtracing/coresight/coresight.c b/drivers/hwtracing/coresight/coresight.c
+index a7d1edbf3340..5e2a2a5ad601 100644
+--- a/drivers/hwtracing/coresight/coresight.c
++++ b/drivers/hwtracing/coresight/coresight.c
+@@ -573,6 +573,8 @@ static void coresight_fixup_device_conns(struct coresight_device *csdev)
+ 
+ 		if (dev) {
+ 			conn->child_dev = to_coresight_device(dev);
++			/* and put reference from 'bus_find_device()' */
++			put_device(dev);
+ 		} else {
+ 			csdev->orphan = true;
+ 			conn->child_dev = NULL;
+-- 
+2.21.0
+
