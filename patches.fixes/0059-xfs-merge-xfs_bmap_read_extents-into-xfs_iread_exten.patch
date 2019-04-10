@@ -16,16 +16,14 @@ Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 Acked-by: Nikolay Borisov <nborisov@suse.com>
 ---
- fs/xfs/libxfs/xfs_bmap.c       | 79 ++++++++++++++++++++++++------------------
- fs/xfs/libxfs/xfs_bmap.h       |  2 --
- fs/xfs/libxfs/xfs_inode_fork.c | 39 ---------------------
- 3 files changed, 46 insertions(+), 74 deletions(-)
+ fs/xfs/libxfs/xfs_bmap.c       |   78 ++++++++++++++++++++++++-----------------
+ fs/xfs/libxfs/xfs_bmap.h       |    2 -
+ fs/xfs/libxfs/xfs_inode_fork.c |   38 -------------------
+ 3 files changed, 46 insertions(+), 72 deletions(-)
 
-diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
-index a66949a8b57e..7e124959665d 100644
 --- a/fs/xfs/libxfs/xfs_bmap.c
 +++ b/fs/xfs/libxfs/xfs_bmap.c
-@@ -1200,34 +1200,37 @@ xfs_bmap_add_attrfork(
+@@ -1199,34 +1199,37 @@ trans_cancel:
   */
  
  /*
@@ -62,6 +60,11 @@ index a66949a8b57e..7e124959665d 100644
 -	/* REFERENCED */
 -	xfs_extnum_t		room;	/* number of entries there's room for */
 -	int			state = xfs_bmap_fork_to_state(whichfork);
+-
+-	bno = NULLFSBLOCK;
+-	mp = ip->i_mount;
+-	ifp = XFS_IFORK_PTR(ip, whichfork);
+-	block = ifp->if_broot;
 +	int                     state = xfs_bmap_fork_to_state(whichfork);
 +
 +	ASSERT(xfs_isilocked(ip, XFS_ILOCK_EXCL));
@@ -74,15 +77,11 @@ index a66949a8b57e..7e124959665d 100644
 +	ifp->if_bytes = 0;
 +	ifp->if_real_bytes = 0;
 +	xfs_iext_add(ifp, 0, nextents);
- 
--	bno = NULLFSBLOCK;
--	mp = ip->i_mount;
--	ifp = XFS_IFORK_PTR(ip, whichfork);
--	block = ifp->if_broot;
++
  	/*
  	 * Root level must use BMAP_BROOT_PTR_ADDR macro to get ptr out.
  	 */
-@@ -1249,21 +1252,22 @@ xfs_bmap_read_extents(
+@@ -1245,21 +1248,22 @@ xfs_bmap_read_extents(
  		error = xfs_btree_read_bufl(mp, tp, bno, 0, &bp,
  				XFS_BMAP_BTREE_REF, &xfs_bmbt_buf_ops);
  		if (error)
@@ -108,7 +107,7 @@ index a66949a8b57e..7e124959665d 100644
  	/*
  	 * Loop over all leaf nodes.  Copy information to the extent records.
  	 */
-@@ -1274,14 +1278,14 @@ xfs_bmap_read_extents(
+@@ -1270,14 +1274,14 @@ xfs_bmap_read_extents(
  		xfs_extnum_t	start;
  
  		num_recs = xfs_btree_get_numrecs(block);
@@ -127,7 +126,7 @@ index a66949a8b57e..7e124959665d 100644
  		}
  		/*
  		 * Read-ahead the next leaf block, if any.
-@@ -1309,7 +1313,8 @@ xfs_bmap_read_extents(
+@@ -1298,7 +1302,8 @@ xfs_bmap_read_extents(
  			if (!xfs_bmbt_validate_extent(mp, whichfork, trp)) {
  				XFS_ERROR_REPORT("xfs_bmap_read_extents(2)",
  						 XFS_ERRLEVEL_LOW, mp);
@@ -137,7 +136,7 @@ index a66949a8b57e..7e124959665d 100644
  			}
  			trace_xfs_read_extent(ip, i, state, _THIS_IP_);
  		}
-@@ -1325,15 +1329,24 @@ xfs_bmap_read_extents(
+@@ -1312,15 +1317,24 @@ xfs_bmap_read_extents(
  		error = xfs_btree_read_bufl(mp, tp, bno, 0, &bp,
  				XFS_BMAP_BTREE_REF, &xfs_bmbt_buf_ops);
  		if (error)
@@ -166,11 +165,9 @@ index a66949a8b57e..7e124959665d 100644
  }
  
  
-diff --git a/fs/xfs/libxfs/xfs_bmap.h b/fs/xfs/libxfs/xfs_bmap.h
-index 9af6875b3816..44e36f907c64 100644
 --- a/fs/xfs/libxfs/xfs_bmap.h
 +++ b/fs/xfs/libxfs/xfs_bmap.h
-@@ -195,8 +195,6 @@ int	xfs_bmap_last_before(struct xfs_trans *tp, struct xfs_inode *ip,
+@@ -195,8 +195,6 @@ int	xfs_bmap_last_before(struct xfs_tran
  int	xfs_bmap_last_offset(struct xfs_inode *ip, xfs_fileoff_t *unused,
  		int whichfork);
  int	xfs_bmap_one_block(struct xfs_inode *ip, int whichfork);
@@ -179,11 +176,9 @@ index 9af6875b3816..44e36f907c64 100644
  int	xfs_bmapi_read(struct xfs_inode *ip, xfs_fileoff_t bno,
  		xfs_filblks_t len, struct xfs_bmbt_irec *mval,
  		int *nmap, int flags);
-diff --git a/fs/xfs/libxfs/xfs_inode_fork.c b/fs/xfs/libxfs/xfs_inode_fork.c
-index 4e0e14a5e224..267dade5a7a9 100644
 --- a/fs/xfs/libxfs/xfs_inode_fork.c
 +++ b/fs/xfs/libxfs/xfs_inode_fork.c
-@@ -433,45 +433,6 @@ xfs_iformat_btree(
+@@ -405,44 +405,6 @@ xfs_iformat_btree(
  }
  
  /*
@@ -222,13 +217,9 @@ index 4e0e14a5e224..267dade5a7a9 100644
 -		ifp->if_flags &= ~XFS_IFEXTENTS;
 -		return error;
 -	}
--	xfs_validate_extents(ifp, nextents, XFS_EXTFMT_INODE(ip));
 -	return 0;
 -}
 -/*
   * Reallocate the space for if_broot based on the number of records
   * being added or deleted as indicated in rec_diff.  Move the records
   * and pointers in if_broot to fit the new size.  When shrinking this
--- 
-2.7.4
-

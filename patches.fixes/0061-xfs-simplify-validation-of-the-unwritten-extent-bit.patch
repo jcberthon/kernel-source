@@ -28,19 +28,17 @@ Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 Acked-by: Nikolay Borisov <nborisov@suse.com>
 ---
- fs/xfs/libxfs/xfs_bmap.c       | 13 +-----
- fs/xfs/libxfs/xfs_bmap.h       |  4 +-
- fs/xfs/libxfs/xfs_bmap_btree.c | 26 ------------
- fs/xfs/libxfs/xfs_bmap_btree.h | 20 +++++++---
- fs/xfs/libxfs/xfs_format.h     |  8 ----
- fs/xfs/libxfs/xfs_inode_fork.c | 89 ++++++++++++------------------------------
- 6 files changed, 43 insertions(+), 117 deletions(-)
+ fs/xfs/libxfs/xfs_bmap.c       |   16 -------
+ fs/xfs/libxfs/xfs_bmap.h       |    4 -
+ fs/xfs/libxfs/xfs_bmap_btree.c |   26 ------------
+ fs/xfs/libxfs/xfs_bmap_btree.h |   20 ++++++---
+ fs/xfs/libxfs/xfs_format.h     |    8 ---
+ fs/xfs/libxfs/xfs_inode_fork.c |   88 +++++++++++------------------------------
+ 6 files changed, 43 insertions(+), 119 deletions(-)
 
-diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
-index ac13cfe26375..db78c16dc181 100644
 --- a/fs/xfs/libxfs/xfs_bmap.c
 +++ b/fs/xfs/libxfs/xfs_bmap.c
-@@ -1211,7 +1211,6 @@ xfs_iread_extents(
+@@ -1249,7 +1249,6 @@ xfs_bmap_read_extents(
  	xfs_fsblock_t		bno;	/* block # of "block" */
  	xfs_buf_t		*bp;	/* buffer for "block" */
  	int			error;	/* error return value */
@@ -48,7 +46,7 @@ index ac13cfe26375..db78c16dc181 100644
  	xfs_extnum_t		i, j;	/* index into the extents list */
  	xfs_ifork_t		*ifp;	/* fork structure */
  	int			level;	/* btree level, for checking */
-@@ -1232,8 +1231,6 @@ xfs_iread_extents(
+@@ -1261,8 +1260,6 @@ xfs_bmap_read_extents(
  	bno = NULLFSBLOCK;
  	mp = ip->i_mount;
  	ifp = XFS_IFORK_PTR(ip, whichfork);
@@ -57,7 +55,7 @@ index ac13cfe26375..db78c16dc181 100644
  	block = ifp->if_broot;
  	/*
  	 * Root level must use BMAP_BROOT_PTR_ADDR macro to get ptr out.
-@@ -1303,18 +1300,9 @@ xfs_iread_extents(
+@@ -1332,18 +1329,9 @@ xfs_bmap_read_extents(
  			xfs_bmbt_rec_host_t *trp = xfs_iext_get_ext(ifp, i);
  			trp->l0 = be64_to_cpu(frp->l0);
  			trp->l1 = be64_to_cpu(frp->l1);
@@ -78,11 +76,9 @@ index ac13cfe26375..db78c16dc181 100644
  				goto error0;
  			}
  		}
-diff --git a/fs/xfs/libxfs/xfs_bmap.h b/fs/xfs/libxfs/xfs_bmap.h
-index 44e36f907c64..4963ab6ab6c6 100644
 --- a/fs/xfs/libxfs/xfs_bmap.h
 +++ b/fs/xfs/libxfs/xfs_bmap.h
-@@ -213,8 +213,8 @@ int	xfs_bunmapi(struct xfs_trans *tp, struct xfs_inode *ip,
+@@ -226,8 +226,8 @@ int	xfs_bunmapi(struct xfs_trans *tp, st
  int	xfs_bmap_del_extent_delay(struct xfs_inode *ip, int whichfork,
  		xfs_extnum_t *idx, struct xfs_bmbt_irec *got,
  		struct xfs_bmbt_irec *del);
@@ -93,11 +89,9 @@ index 44e36f907c64..4963ab6ab6c6 100644
  uint	xfs_default_attroffset(struct xfs_inode *ip);
  int	xfs_bmap_shift_extents(struct xfs_trans *tp, struct xfs_inode *ip,
  		xfs_fileoff_t *next_fsb, xfs_fileoff_t offset_shift_fsb,
-diff --git a/fs/xfs/libxfs/xfs_bmap_btree.c b/fs/xfs/libxfs/xfs_bmap_btree.c
-index a1383ad2d0ab..cee37e4d6945 100644
 --- a/fs/xfs/libxfs/xfs_bmap_btree.c
 +++ b/fs/xfs/libxfs/xfs_bmap_btree.c
-@@ -253,32 +253,6 @@ xfs_bmbt_to_bmdr(
+@@ -370,32 +370,6 @@ xfs_bmbt_to_bmdr(
  	memcpy(tpp, fpp, sizeof(*fpp) * dmxr);
  }
  
@@ -130,8 +124,6 @@ index a1383ad2d0ab..cee37e4d6945 100644
  STATIC struct xfs_btree_cur *
  xfs_bmbt_dup_cursor(
  	struct xfs_btree_cur	*cur)
-diff --git a/fs/xfs/libxfs/xfs_bmap_btree.h b/fs/xfs/libxfs/xfs_bmap_btree.h
-index a9c3a4834260..58475737c215 100644
 --- a/fs/xfs/libxfs/xfs_bmap_btree.h
 +++ b/fs/xfs/libxfs/xfs_bmap_btree.h
 @@ -24,12 +24,6 @@ struct xfs_mount;
@@ -147,7 +139,7 @@ index a9c3a4834260..58475737c215 100644
  #define ISUNWRITTEN(x)	((x)->br_state == XFS_EXT_UNWRITTEN)
  
  /*
-@@ -131,4 +125,18 @@ extern int xfs_bmbt_change_owner(struct xfs_trans *tp, struct xfs_inode *ip,
+@@ -140,4 +134,18 @@ extern int xfs_bmbt_change_owner(struct
  extern struct xfs_btree_cur *xfs_bmbt_init_cursor(struct xfs_mount *,
  		struct xfs_trans *, struct xfs_inode *, int);
  
@@ -166,11 +158,9 @@ index a9c3a4834260..58475737c215 100644
 +}
 +
  #endif	/* __XFS_BMAP_BTREE_H__ */
-diff --git a/fs/xfs/libxfs/xfs_format.h b/fs/xfs/libxfs/xfs_format.h
-index bbd38649a670..3c3f8441f25c 100644
 --- a/fs/xfs/libxfs/xfs_format.h
 +++ b/fs/xfs/libxfs/xfs_format.h
-@@ -1366,14 +1366,6 @@ static inline xfs_filblks_t startblockval(xfs_fsblock_t x)
+@@ -1377,14 +1377,6 @@ static inline xfs_filblks_t startblockva
  }
  
  /*
@@ -185,11 +175,9 @@ index bbd38649a670..3c3f8441f25c 100644
   * Possible extent states.
   */
  typedef enum {
-diff --git a/fs/xfs/libxfs/xfs_inode_fork.c b/fs/xfs/libxfs/xfs_inode_fork.c
-index 40e41bf47ac9..e6a3d28a3634 100644
 --- a/fs/xfs/libxfs/xfs_inode_fork.c
 +++ b/fs/xfs/libxfs/xfs_inode_fork.c
-@@ -41,34 +41,6 @@ STATIC int xfs_iformat_local(xfs_inode_t *, xfs_dinode_t *, int, int);
+@@ -41,34 +41,6 @@ STATIC int xfs_iformat_local(xfs_inode_t
  STATIC int xfs_iformat_extents(xfs_inode_t *, xfs_dinode_t *, int);
  STATIC int xfs_iformat_btree(xfs_inode_t *, xfs_dinode_t *, int);
  
@@ -224,7 +212,7 @@ index 40e41bf47ac9..e6a3d28a3634 100644
  
  /*
   * Move inode type and inode format specific information from the
-@@ -302,40 +274,34 @@ xfs_iformat_local(
+@@ -308,40 +280,34 @@ xfs_iformat_local(
  }
  
  /*
@@ -282,7 +270,7 @@ index 40e41bf47ac9..e6a3d28a3634 100644
  		return -EFSCORRUPTED;
  	}
  
-@@ -351,22 +317,17 @@ xfs_iformat_extents(
+@@ -356,22 +322,17 @@ xfs_iformat_extents(
  	ifp->if_bytes = size;
  	if (size) {
  		dp = (xfs_bmbt_rec_t *) XFS_DFORK_PTR(dip, whichfork);
@@ -310,7 +298,15 @@ index 40e41bf47ac9..e6a3d28a3634 100644
  	}
  	ifp->if_flags |= XFS_IFEXTENTS;
  	return 0;
-@@ -746,6 +707,9 @@ xfs_iextents_copy(
+@@ -473,7 +434,6 @@ xfs_iread_extents(
+ 		ifp->if_flags &= ~XFS_IFEXTENTS;
+ 		return error;
+ 	}
+-	xfs_validate_extents(ifp, nextents, XFS_EXTFMT_INODE(ip));
+ 	return 0;
+ }
+ /*
+@@ -788,6 +748,9 @@ xfs_iextents_copy(
  	copied = 0;
  	for (i = 0; i < nrecs; i++) {
  		xfs_bmbt_rec_host_t *ep = xfs_iext_get_ext(ifp, i);
@@ -320,7 +316,7 @@ index 40e41bf47ac9..e6a3d28a3634 100644
  		start_block = xfs_bmbt_get_startblock(ep);
  		if (isnullstartblock(start_block)) {
  			/*
-@@ -764,7 +728,6 @@ xfs_iextents_copy(
+@@ -803,7 +766,6 @@ xfs_iextents_copy(
  		copied++;
  	}
  	ASSERT(copied != 0);
@@ -328,6 +324,3 @@ index 40e41bf47ac9..e6a3d28a3634 100644
  
  	return (copied * (uint)sizeof(xfs_bmbt_rec_t));
  }
--- 
-2.7.4
-
