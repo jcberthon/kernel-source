@@ -20,15 +20,13 @@ Tested-by: Steve Schremmer <steve.schremmer@netapp.com>
 Reviewed-by: Keith Busch <keith.busch@intel.com>
 Reviewed-by: Sagi Grimberg <sagi@gimberg.me>
 ---
- block/genhd.c         | 21 +++++++++++++++++----
- include/linux/genhd.h |  3 +++
+ block/genhd.c         |   21 +++++++++++++++++----
+ include/linux/genhd.h |    3 +++
  2 files changed, 20 insertions(+), 4 deletions(-)
 
-diff --git a/block/genhd.c b/block/genhd.c
-index 84a77b899cdd..f4483b1a0da3 100644
 --- a/block/genhd.c
 +++ b/block/genhd.c
-@@ -506,7 +506,8 @@ static int exact_lock(dev_t devt, void *data)
+@@ -506,7 +506,8 @@ static int exact_lock(dev_t devt, void *
  	return 0;
  }
  
@@ -38,7 +36,7 @@ index 84a77b899cdd..f4483b1a0da3 100644
  {
  	struct device *ddev = disk_to_dev(disk);
  	struct block_device *bdev;
-@@ -532,6 +533,9 @@ static void register_disk(struct device *parent, struct gendisk *disk)
+@@ -532,6 +533,9 @@ static void register_disk(struct device
  		}
  	}
  
@@ -48,8 +46,8 @@ index 84a77b899cdd..f4483b1a0da3 100644
  	/*
  	 * avoid probable deadlock caused by allocating memory with
  	 * GFP_KERNEL in runtime_resume callback of its all ancestor
-@@ -587,16 +591,19 @@ void get_disk_devt(struct disk_devt *disk_devt)
- EXPORT_SYMBOL(get_disk_devt);
+@@ -585,16 +589,19 @@ EXPORT_SYMBOL(get_disk_devt);
+ 
  
  /**
 - * device_add_disk - add partitioning information to kernel list
@@ -70,7 +68,7 @@ index 84a77b899cdd..f4483b1a0da3 100644
  {
  	struct backing_dev_info *bdi;
  	dev_t devt;
-@@ -639,7 +646,7 @@ void device_add_disk(struct device *parent, struct gendisk *disk)
+@@ -630,7 +637,7 @@ void device_add_disk(struct device *pare
  
  	blk_register_region(disk_devt(disk), disk->minors, NULL,
  			    exact_match, exact_lock, disk);
@@ -79,7 +77,7 @@ index 84a77b899cdd..f4483b1a0da3 100644
  	blk_register_queue(disk);
  
  	/*
-@@ -655,6 +662,12 @@ void device_add_disk(struct device *parent, struct gendisk *disk)
+@@ -646,6 +653,12 @@ void device_add_disk(struct device *pare
  	disk_add_events(disk);
  	blk_integrity_add(disk);
  }
@@ -92,11 +90,9 @@ index 84a77b899cdd..f4483b1a0da3 100644
  EXPORT_SYMBOL(device_add_disk);
  
  void del_gendisk(struct gendisk *disk)
-diff --git a/include/linux/genhd.h b/include/linux/genhd.h
-index 62e32b5268e0..b8f5e5a056cc 100644
 --- a/include/linux/genhd.h
 +++ b/include/linux/genhd.h
-@@ -429,6 +429,9 @@ static inline void free_part_info(struct hd_struct *part)
+@@ -431,6 +431,9 @@ static inline void free_part_info(struct
  extern void part_round_stats(int cpu, struct hd_struct *part);
  
  /* block/genhd.c */
@@ -106,4 +102,3 @@ index 62e32b5268e0..b8f5e5a056cc 100644
  extern void device_add_disk(struct device *parent, struct gendisk *disk);
  static inline void add_disk(struct gendisk *disk)
  {
-

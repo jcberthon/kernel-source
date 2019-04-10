@@ -59,11 +59,9 @@ Acked-by: Michal Suchanek <msuchanek@suse.de>
  arch/powerpc/mm/slice.c              | 54 ++++++++++++++++++++++++++++--------
  3 files changed, 60 insertions(+), 19 deletions(-)
 
-diff --git a/arch/powerpc/kernel/setup_64.c b/arch/powerpc/kernel/setup_64.c
-index f16f2ee..94e9580 100644
 --- a/arch/powerpc/kernel/setup_64.c
 +++ b/arch/powerpc/kernel/setup_64.c
-@@ -719,7 +719,7 @@ void __init setup_arch(char **cmdline_p)
+@@ -723,7 +723,7 @@ void __init setup_arch(char **cmdline_p)
  
  #ifdef CONFIG_PPC_MM_SLICES
  #ifdef CONFIG_PPC64
@@ -72,11 +70,9 @@ index f16f2ee..94e9580 100644
  #else
  #error	"context.addr_limit not initialized."
  #endif
-diff --git a/arch/powerpc/mm/mmu_context_hash64.c b/arch/powerpc/mm/mmu_context_hash64.c
-index afc616b..fb10b99 100644
 --- a/arch/powerpc/mm/mmu_context_hash64.c
 +++ b/arch/powerpc/mm/mmu_context_hash64.c
-@@ -99,7 +99,7 @@ static int hash__init_new_context(struct mm_struct *mm)
+@@ -99,7 +99,7 @@ static int hash__init_new_context(struct
  	 * mm->context.addr_limit. Default to max task size so that we copy the
  	 * default values to paca which will help us to handle slb miss early.
  	 */
@@ -85,11 +81,9 @@ index afc616b..fb10b99 100644
  
  	/* The old code would re-promote on fork, we don't do that
  	 * when using slices as it could cause problem promoting slices
-diff --git a/arch/powerpc/include/asm/processor.h b/arch/powerpc/include/asm/processor.h
-index 027dd96..883fbb6 100644
 --- a/arch/powerpc/include/asm/processor.h
 +++ b/arch/powerpc/include/asm/processor.h
-@@ -114,9 +114,9 @@ void release_thread(struct task_struct *);
+@@ -114,9 +114,9 @@ void release_thread(struct task_struct *
  /*
   * Max value currently used:
   */
@@ -101,7 +95,7 @@ index 027dd96..883fbb6 100644
  #endif
  
  /*
-@@ -128,26 +128,37 @@ void release_thread(struct task_struct *);
+@@ -128,26 +128,37 @@ void release_thread(struct task_struct *
  #define TASK_SIZE_OF(tsk) (test_tsk_thread_flag(tsk, TIF_32BIT) ? \
  		TASK_SIZE_USER32 : TASK_SIZE_USER64)
  #define TASK_SIZE	  TASK_SIZE_OF(current)
@@ -143,11 +137,9 @@ index 027dd96..883fbb6 100644
  
  #else /* __powerpc64__ */
  
-diff --git a/arch/powerpc/mm/mmap.c b/arch/powerpc/mm/mmap.c
-index 0f0502e..56c5155 100644
 --- a/arch/powerpc/mm/mmap.c
 +++ b/arch/powerpc/mm/mmap.c
-@@ -75,7 +75,7 @@ static inline unsigned long mmap_base(unsigned long rnd)
+@@ -75,7 +75,7 @@ static inline unsigned long mmap_base(un
  	else if (gap > MAX_GAP)
  		gap = MAX_GAP;
  
@@ -156,11 +148,9 @@ index 0f0502e..56c5155 100644
  }
  
  /*
-diff --git a/arch/powerpc/mm/slice.c b/arch/powerpc/mm/slice.c
-index 174e173..11560fa 100644
 --- a/arch/powerpc/mm/slice.c
 +++ b/arch/powerpc/mm/slice.c
-@@ -267,7 +267,7 @@ static bool slice_scan_available(unsigned long addr,
+@@ -266,7 +266,7 @@ static bool slice_scan_available(unsigne
  static unsigned long slice_find_area_bottomup(struct mm_struct *mm,
  					      unsigned long len,
  					      struct slice_mask available,
@@ -169,7 +159,7 @@ index 174e173..11560fa 100644
  {
  	int pshift = max_t(int, mmu_psize_defs[psize].shift, PAGE_SHIFT);
  	unsigned long addr, found, next_end;
-@@ -279,7 +279,10 @@ static unsigned long slice_find_area_bottomup(struct mm_struct *mm,
+@@ -278,7 +278,10 @@ static unsigned long slice_find_area_bot
  	info.align_offset = 0;
  
  	addr = TASK_UNMAPPED_BASE;
@@ -181,7 +171,7 @@ index 174e173..11560fa 100644
  		info.low_limit = addr;
  		if (!slice_scan_available(addr, available, 1, &addr))
  			continue;
-@@ -310,7 +313,7 @@ static unsigned long slice_find_area_bottomup(struct mm_struct *mm,
+@@ -309,7 +312,7 @@ static unsigned long slice_find_area_bot
  static unsigned long slice_find_area_topdown(struct mm_struct *mm,
  					     unsigned long len,
  					     struct slice_mask available,
@@ -190,7 +180,7 @@ index 174e173..11560fa 100644
  {
  	int pshift = max_t(int, mmu_psize_defs[psize].shift, PAGE_SHIFT);
  	unsigned long addr, found, prev;
-@@ -322,6 +325,15 @@ static unsigned long slice_find_area_topdown(struct mm_struct *mm,
+@@ -321,6 +324,15 @@ static unsigned long slice_find_area_top
  	info.align_offset = 0;
  
  	addr = mm->mmap_base;
@@ -200,13 +190,13 @@ index 174e173..11560fa 100644
 +	 * Only for that request for which high_limit is above
 +	 * DEFAULT_MAP_WINDOW we should apply this.
 +	 */
-+	if (high_limit  > DEFAULT_MAP_WINDOW)
++	if (high_limit > DEFAULT_MAP_WINDOW)
 +		addr += mm->context.addr_limit - DEFAULT_MAP_WINDOW;
 +
  	while (addr > PAGE_SIZE) {
  		info.high_limit = addr;
  		if (!slice_scan_available(addr - 1, available, 0, &addr))
-@@ -353,18 +365,18 @@ static unsigned long slice_find_area_topdown(struct mm_struct *mm,
+@@ -352,18 +364,18 @@ static unsigned long slice_find_area_top
  	 * can happen with large stack limits and large mmap()
  	 * allocations.
  	 */
@@ -229,7 +219,7 @@ index 174e173..11560fa 100644
  }
  
  static inline void slice_or_mask(struct slice_mask *dst, struct slice_mask *src)
-@@ -404,8 +416,23 @@ unsigned long slice_get_unmapped_area(unsigned long addr, unsigned long len,
+@@ -403,8 +415,23 @@ unsigned long slice_get_unmapped_area(un
  	int pshift = max_t(int, mmu_psize_defs[psize].shift, PAGE_SHIFT);
  	struct mm_struct *mm = current->mm;
  	unsigned long newaddr;
@@ -253,7 +243,7 @@ index 174e173..11560fa 100644
  	 * init different masks
  	 */
  	mask.low_slices = 0;
-@@ -495,7 +522,8 @@ unsigned long slice_get_unmapped_area(unsigned long addr, unsigned long len,
+@@ -494,7 +521,8 @@ unsigned long slice_get_unmapped_area(un
  		/* Now let's see if we can find something in the existing
  		 * slices for that size
  		 */
@@ -263,7 +253,7 @@ index 174e173..11560fa 100644
  		if (newaddr != -ENOMEM) {
  			/* Found within the good mask, we don't have to setup,
  			 * we thus return directly
-@@ -527,7 +555,8 @@ unsigned long slice_get_unmapped_area(unsigned long addr, unsigned long len,
+@@ -526,7 +554,8 @@ unsigned long slice_get_unmapped_area(un
  	 * anywhere in the good area.
  	 */
  	if (addr) {
@@ -273,7 +263,7 @@ index 174e173..11560fa 100644
  		if (addr != -ENOMEM) {
  			slice_dbg(" found area at 0x%lx\n", addr);
  			return addr;
-@@ -537,14 +566,15 @@ unsigned long slice_get_unmapped_area(unsigned long addr, unsigned long len,
+@@ -536,14 +565,15 @@ unsigned long slice_get_unmapped_area(un
  	/* Now let's see if we can find something in the existing slices
  	 * for that size plus free slices
  	 */
@@ -292,6 +282,3 @@ index 174e173..11560fa 100644
  	}
  #endif
  
--- 
-2.10.2
-
