@@ -1,0 +1,63 @@
+From a714a3282f091bdaa58cf4a8e8f49c70b31fd177 Mon Sep 17 00:00:00 2001
+From: Michael Ellerman <mpe@ellerman.id.au>
+Date: Sat, 28 Jul 2018 09:06:35 +1000
+Subject: [PATCH 03/10] powerpc/64: Call setup_barrier_nospec() from
+ setup_arch()
+
+References: bsc#1131107
+Patch-mainline: v4.19-rc1
+Git-commit: af375eefbfb27cbb5b831984e66d724a40d26b5c
+
+Currently we require platform code to call setup_barrier_nospec(). But
+if we add an empty definition for the !CONFIG_PPC_BARRIER_NOSPEC case
+then we can call it in setup_arch().
+
+Signed-off-by: Diana Craciun <diana.craciun@nxp.com>
+Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+Acked-by: Michal Suchanek <msuchanek@suse.de>
+---
+ arch/powerpc/kernel/setup_64.c         | 2 ++
+ arch/powerpc/platforms/powernv/setup.c | 1 -
+ arch/powerpc/platforms/pseries/setup.c | 1 -
+ 3 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/powerpc/kernel/setup_64.c b/arch/powerpc/kernel/setup_64.c
+index 50e6083f74eb..dd41a3a1d7ce 100644
+--- a/arch/powerpc/kernel/setup_64.c
++++ b/arch/powerpc/kernel/setup_64.c
+@@ -772,6 +772,8 @@ void __init setup_arch(char **cmdline_p)
+ 	if (ppc_md.setup_arch)
+ 		ppc_md.setup_arch();
+ 
++	setup_barrier_nospec();
++
+ 	paging_init();
+ 
+ 	/* Initialize the MMU context management stuff */
+diff --git a/arch/powerpc/platforms/powernv/setup.c b/arch/powerpc/platforms/powernv/setup.c
+index 355586aeebe3..e9cc132faf11 100644
+--- a/arch/powerpc/platforms/powernv/setup.c
++++ b/arch/powerpc/platforms/powernv/setup.c
+@@ -123,7 +123,6 @@ static void pnv_setup_rfi_flush(void)
+ 		  security_ftr_enabled(SEC_FTR_L1D_FLUSH_HV));
+ 
+ 	setup_rfi_flush(type, enable);
+-	setup_barrier_nospec();
+ }
+ 
+ static void __init pnv_setup_arch(void)
+diff --git a/arch/powerpc/platforms/pseries/setup.c b/arch/powerpc/platforms/pseries/setup.c
+index be8e1c55b648..189735e60b19 100644
+--- a/arch/powerpc/platforms/pseries/setup.c
++++ b/arch/powerpc/platforms/pseries/setup.c
+@@ -649,7 +649,6 @@ void pseries_setup_rfi_flush(void)
+ 		 security_ftr_enabled(SEC_FTR_L1D_FLUSH_PR);
+ 
+ 	setup_rfi_flush(types, enable);
+-	setup_barrier_nospec();
+ }
+ 
+ static void __init pSeries_setup_arch(void)
+-- 
+2.20.1
+

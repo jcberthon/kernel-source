@@ -1,0 +1,75 @@
+From: Johannes Thumshirn <jthumshirn@suse.de>
+Date: Tue  9 Apr 11:02:02 CEST 2019
+Subject: kabi fixup gendisk disk_devt revert
+References: bsc#1020989
+Patch-mainline: Never, kabi fixup
+
+patches.fixes/revert-scsi-block-fix-duplicate-bdi-name-registration-crashes.patch
+removed put_disk_devt()/get_disk_devt() as well as the disk_devt member of
+struct gendisk and struct request_queue. This kabi fixup resurects them but
+converts put_disk_devt()/get_disk_devt() into NOPs.
+
+Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
+---
+ block/genhd.c          |   12 ++++++++++++
+ include/linux/blkdev.h |    1 +
+ include/linux/genhd.h  |   10 ++++++++++
+ 3 files changed, 23 insertions(+)
+
+--- a/block/genhd.c
++++ b/block/genhd.c
+@@ -572,6 +572,18 @@ exit:
+ 	disk_part_iter_exit(&piter);
+ }
+ 
++void put_disk_devt(struct disk_devt *disk_devt)
++{
++}
++EXPORT_SYMBOL(put_disk_devt);
++
++void get_disk_devt(struct disk_devt *disk_devt)
++{
++}
++EXPORT_SYMBOL(get_disk_devt);
++
++
++
+ /**
+  * device_add_disk - add partitioning information to kernel list
+  * @parent: parent device for the disk
+--- a/include/linux/blkdev.h
++++ b/include/linux/blkdev.h
+@@ -433,6 +433,7 @@ struct request_queue {
+ 	struct delayed_work	delay_work;
+ 
+ 	struct backing_dev_info	*backing_dev_info;
++	struct disk_devt        *disk_devt;
+ 
+ 	/*
+ 	 * The queue owner gets to use this for whatever they like.
+--- a/include/linux/genhd.h
++++ b/include/linux/genhd.h
+@@ -167,6 +167,14 @@ struct blk_integrity {
+ 
+ #endif	/* CONFIG_BLK_DEV_INTEGRITY */
+ 
++struct disk_devt {
++	atomic_t count;
++	void (*release)(struct disk_devt *disk_devt);
++};
++
++void put_disk_devt(struct disk_devt *disk_devt);
++void get_disk_devt(struct disk_devt *disk_devt);
++
+ struct gendisk {
+ 	/* major, first_minor and minors are input parameters only,
+ 	 * don't use directly.  Use disk_devt() and disk_max_parts().
+@@ -176,6 +184,8 @@ struct gendisk {
+ 	int minors;                     /* maximum number of minors, =1 for
+                                          * disks that can't be partitioned. */
+ 
++	struct disk_devt *disk_devt;
++
+ 	char disk_name[DISK_NAME_LEN];	/* name of major driver */
+ 	char *(*devnode)(struct gendisk *gd, umode_t *mode);
+ 
