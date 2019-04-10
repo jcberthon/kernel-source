@@ -1,0 +1,103 @@
+From: Mathieu Malaterre <malat@debian.org>
+Date: Thu, 7 Jun 2018 17:07:43 -0700
+Subject: mm: move is_pageblock_removable_nolock() to mm/memory_hotplug.c
+Git-commit: fb52bbaee598f58352d8732637ebe7013b2df79f
+Patch-mainline: v4.18-rc1
+References: git-fixes prerequisity
+
+is_pageblock_removable_nolock() is not used outside of
+mm/memory_hotplug.c.  Move it next to unique caller
+is_mem_section_removable() and make it static.
+
+Remove prototype in <linux/memory_hotplug.h> to silence gcc warning (W=1):
+
+  mm/page_alloc.c:7704:6: warning: no previous prototype for `is_pageblock_removable_nolock' [-Wmissing-prototypes]
+
+Link: http://lkml.kernel.org/r/20180509190001.24789-1-malat@debian.org
+Signed-off-by: Mathieu Malaterre <malat@debian.org>
+Suggested-by: Michal Hocko <mhocko@kernel.org>
+Reviewed-by: Andrew Morton <akpm@linux-foundation.org>
+Acked-by: Michal Hocko <mhocko@suse.com>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ include/linux/memory_hotplug.h |    1 -
+ mm/memory_hotplug.c            |   23 +++++++++++++++++++++++
+ mm/page_alloc.c                |   23 -----------------------
+ 3 files changed, 23 insertions(+), 24 deletions(-)
+
+--- a/include/linux/memory_hotplug.h
++++ b/include/linux/memory_hotplug.h
+@@ -101,7 +101,6 @@ extern void __online_page_free(struct pa
+ extern int try_online_node(int nid);
+ 
+ #ifdef CONFIG_MEMORY_HOTREMOVE
+-extern bool is_pageblock_removable_nolock(struct page *page);
+ extern int arch_remove_memory(u64 start, u64 size);
+ extern int __remove_pages(struct zone *zone, unsigned long start_pfn,
+ 	unsigned long nr_pages);
+--- a/mm/memory_hotplug.c
++++ b/mm/memory_hotplug.c
+@@ -1315,6 +1315,29 @@ static struct page *next_active_pagebloc
+ 	return page + pageblock_nr_pages;
+ }
+ 
++static bool is_pageblock_removable_nolock(struct page *page)
++{
++	struct zone *zone;
++	unsigned long pfn;
++
++	/*
++	 * We have to be careful here because we are iterating over memory
++	 * sections which are not zone aware so we might end up outside of
++	 * the zone but still within the section.
++	 * We have to take care about the node as well. If the node is offline
++	 * its NODE_DATA will be NULL - see page_zone.
++	 */
++	if (!node_online(page_to_nid(page)))
++		return false;
++
++	zone = page_zone(page);
++	pfn = page_to_pfn(page);
++	if (!zone_spans_pfn(zone, pfn))
++		return false;
++
++	return !has_unmovable_pages(zone, page, 0, MIGRATE_MOVABLE, true);
++}
++
+ /* Checks if this range of memory is likely to be hot-removable. */
+ int is_mem_section_removable(unsigned long start_pfn, unsigned long nr_pages)
+ {
+--- a/mm/page_alloc.c
++++ b/mm/page_alloc.c
+@@ -7039,29 +7039,6 @@ bool has_unmovable_pages(struct zone *zo
+ 	return false;
+ }
+ 
+-bool is_pageblock_removable_nolock(struct page *page)
+-{
+-	struct zone *zone;
+-	unsigned long pfn;
+-
+-	/*
+-	 * We have to be careful here because we are iterating over memory
+-	 * sections which are not zone aware so we might end up outside of
+-	 * the zone but still within the section.
+-	 * We have to take care about the node as well. If the node is offline
+-	 * its NODE_DATA will be NULL - see page_zone.
+-	 */
+-	if (!node_online(page_to_nid(page)))
+-		return false;
+-
+-	zone = page_zone(page);
+-	pfn = page_to_pfn(page);
+-	if (!zone_spans_pfn(zone, pfn))
+-		return false;
+-
+-	return !has_unmovable_pages(zone, page, 0, MIGRATE_MOVABLE, true);
+-}
+-
+ #if (defined(CONFIG_MEMORY_ISOLATION) && defined(CONFIG_COMPACTION)) || defined(CONFIG_CMA)
+ 
+ static unsigned long pfn_max_align_down(unsigned long pfn)

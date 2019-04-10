@@ -47,8 +47,8 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 
 ---
  include/linux/page-isolation.h |   11 +++++++++--
- mm/memory_hotplug.c            |    3 ++-
- mm/page_alloc.c                |   13 ++++++-------
+ mm/memory_hotplug.c            |    5 +++--
+ mm/page_alloc.c                |   11 +++++------
  mm/page_isolation.c            |   10 ++++------
  4 files changed, 21 insertions(+), 16 deletions(-)
 
@@ -85,7 +85,16 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
   * Changes MIGRATE_ISOLATE to MIGRATE_MOVABLE.
 --- a/mm/memory_hotplug.c
 +++ b/mm/memory_hotplug.c
-@@ -1751,7 +1751,8 @@ static int __ref __offline_pages(unsigne
+@@ -1337,7 +1337,7 @@ static bool is_pageblock_removable_noloc
+ 	if (!zone_spans_pfn(zone, pfn))
+ 		return false;
+ 
+-	return !has_unmovable_pages(zone, page, 0, MIGRATE_MOVABLE, true);
++	return !has_unmovable_pages(zone, page, 0, MIGRATE_MOVABLE, SKIP_HWPOISON);
+ }
+ 
+ /* Checks if this range of memory is likely to be hot-removable. */
+@@ -1778,7 +1778,8 @@ static int __ref __offline_pages(unsigne
  
  	/* set above range as isolated */
  	ret = start_isolate_page_range(start_pfn, end_pfn,
@@ -97,7 +106,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  		goto failed_removal;
 --- a/mm/page_alloc.c
 +++ b/mm/page_alloc.c
-@@ -6958,8 +6958,7 @@ void *__init alloc_large_system_hash(con
+@@ -6943,8 +6943,7 @@ void *__init alloc_large_system_hash(con
   * expect this function should be exact.
   */
  bool has_unmovable_pages(struct zone *zone, struct page *page, int count,
@@ -107,7 +116,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  {
  	unsigned long pfn, iter, found;
  	int mt;
-@@ -7019,7 +7018,7 @@ bool has_unmovable_pages(struct zone *zo
+@@ -7004,7 +7003,7 @@ bool has_unmovable_pages(struct zone *zo
  		 * The HWPoisoned page may be not in buddy system, and
  		 * page_count() is not 0.
  		 */
@@ -116,7 +125,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  			continue;
  
  		if (!PageLRU(page))
-@@ -7042,7 +7041,8 @@ bool has_unmovable_pages(struct zone *zo
+@@ -7027,7 +7026,8 @@ bool has_unmovable_pages(struct zone *zo
  	}
  	return false;
  unmovable:
@@ -126,16 +135,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  	return true;
  }
  
-@@ -7066,7 +7066,7 @@ bool is_pageblock_removable_nolock(struc
- 	if (!zone_spans_pfn(zone, pfn))
- 		return false;
- 
--	return !has_unmovable_pages(zone, page, 0, MIGRATE_MOVABLE, true);
-+	return !has_unmovable_pages(zone, page, 0, MIGRATE_MOVABLE, SKIP_HWPOISON);
- }
- 
- #if (defined(CONFIG_MEMORY_ISOLATION) && defined(CONFIG_COMPACTION)) || defined(CONFIG_CMA)
-@@ -7189,8 +7189,7 @@ int alloc_contig_range(unsigned long sta
+@@ -7151,8 +7151,7 @@ int alloc_contig_range(unsigned long sta
  	 */
  
  	ret = start_isolate_page_range(pfn_max_align_down(start),
