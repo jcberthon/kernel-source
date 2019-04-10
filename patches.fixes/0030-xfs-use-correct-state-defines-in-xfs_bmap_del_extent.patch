@@ -18,14 +18,12 @@ Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 Acked-by: Nikolay Borisov <nborisov@suse.com>
 ---
- fs/xfs/libxfs/xfs_bmap.c | 12 ++++++------
+ fs/xfs/libxfs/xfs_bmap.c |   12 ++++++------
  1 file changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
-index 5236cfbb48e4..737619b0a384 100644
 --- a/fs/xfs/libxfs/xfs_bmap.c
 +++ b/fs/xfs/libxfs/xfs_bmap.c
-@@ -4886,19 +4886,19 @@ xfs_bmap_del_extent_delay(
+@@ -4873,19 +4873,19 @@ xfs_bmap_del_extent_delay(
  	ip->i_delayed_blks -= del->br_blockcount;
  
  	if (got->br_startoff == del->br_startoff)
@@ -50,7 +48,7 @@ index 5236cfbb48e4..737619b0a384 100644
  		/*
  		 * Deleting the first part of the extent.
  		 */
-@@ -4911,7 +4911,7 @@ xfs_bmap_del_extent_delay(
+@@ -4898,7 +4898,7 @@ xfs_bmap_del_extent_delay(
  		xfs_iext_update_extent(ifp, *idx, got);
  		trace_xfs_bmap_post_update(ip, *idx, state, _THIS_IP_);
  		break;
@@ -59,6 +57,3 @@ index 5236cfbb48e4..737619b0a384 100644
  		/*
  		 * Deleting the last part of the extent.
  		 */
--- 
-2.7.4
-

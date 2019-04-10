@@ -19,15 +19,43 @@ Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 Acked-by: Nikolay Borisov <nborisov@suse.com>
 ---
- fs/xfs/libxfs/xfs_inode_fork.c | 12 ++++++++++++
- fs/xfs/libxfs/xfs_inode_fork.h |  2 ++
- 2 files changed, 14 insertions(+)
+ fs/xfs/libxfs/xfs_bmap.c       |    6 +++---
+ fs/xfs/libxfs/xfs_inode_fork.c |   12 ++++++++++++
+ fs/xfs/libxfs/xfs_inode_fork.h |    2 ++
+ 3 files changed, 17 insertions(+), 3 deletions(-)
 
-diff --git a/fs/xfs/libxfs/xfs_inode_fork.c b/fs/xfs/libxfs/xfs_inode_fork.c
-index e48e0dba2385..ee3df429c819 100644
+--- a/fs/xfs/libxfs/xfs_bmap.c
++++ b/fs/xfs/libxfs/xfs_bmap.c
+@@ -4894,7 +4894,7 @@ xfs_bmap_del_extent_delay(
+ 		da_new = XFS_FILBLKS_MIN(xfs_bmap_worst_indlen(ip,
+ 				got->br_blockcount), da_old);
+ 		got->br_startblock = nullstartblock((int)da_new);
+-		xfs_bmbt_set_all(xfs_iext_get_ext(ifp, *idx), got);
++		xfs_iext_update_extent(ifp, *idx, got);
+ 		trace_xfs_bmap_post_update(ip, *idx, state, _THIS_IP_);
+ 		break;
+ 	case BMAP_RIGHT_CONTIG:
+@@ -4906,7 +4906,7 @@ xfs_bmap_del_extent_delay(
+ 		da_new = XFS_FILBLKS_MIN(xfs_bmap_worst_indlen(ip,
+ 				got->br_blockcount), da_old);
+ 		got->br_startblock = nullstartblock((int)da_new);
+-		xfs_bmbt_set_all(xfs_iext_get_ext(ifp, *idx), got);
++		xfs_iext_update_extent(ifp, *idx, got);
+ 		trace_xfs_bmap_post_update(ip, *idx, state, _THIS_IP_);
+ 		break;
+ 	case 0:
+@@ -4932,7 +4932,7 @@ xfs_bmap_del_extent_delay(
+ 						       del->br_blockcount);
+ 
+ 		got->br_startblock = nullstartblock((int)got_indlen);
+-		xfs_bmbt_set_all(xfs_iext_get_ext(ifp, *idx), got);
++		xfs_iext_update_extent(ifp, *idx, got);
+ 		trace_xfs_bmap_post_update(ip, *idx, 0, _THIS_IP_);
+ 
+ 		new.br_startoff = del_endoff;
 --- a/fs/xfs/libxfs/xfs_inode_fork.c
 +++ b/fs/xfs/libxfs/xfs_inode_fork.c
-@@ -1966,3 +1966,15 @@ xfs_iext_get_extent(
+@@ -1936,3 +1936,15 @@ xfs_iext_get_extent(
  	xfs_bmbt_get_all(xfs_iext_get_ext(ifp, idx), gotp);
  	return true;
  }
@@ -43,11 +71,9 @@ index e48e0dba2385..ee3df429c819 100644
 +
 +	xfs_bmbt_set_all(xfs_iext_get_ext(ifp, idx), gotp);
 +}
-diff --git a/fs/xfs/libxfs/xfs_inode_fork.h b/fs/xfs/libxfs/xfs_inode_fork.h
-index 061986428032..db6380f6350a 100644
 --- a/fs/xfs/libxfs/xfs_inode_fork.h
 +++ b/fs/xfs/libxfs/xfs_inode_fork.h
-@@ -172,6 +172,8 @@ bool		xfs_iext_lookup_extent(struct xfs_inode *ip,
+@@ -173,6 +173,8 @@ bool		xfs_iext_lookup_extent(struct xfs_
  			xfs_extnum_t *idxp, struct xfs_bmbt_irec *gotp);
  bool		xfs_iext_get_extent(struct xfs_ifork *ifp, xfs_extnum_t idx,
  			struct xfs_bmbt_irec *gotp);
@@ -56,6 +82,3 @@ index 061986428032..db6380f6350a 100644
  
  extern struct kmem_zone	*xfs_ifork_zone;
  
--- 
-2.7.4
-
