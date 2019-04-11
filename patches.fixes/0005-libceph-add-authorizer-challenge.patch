@@ -272,8 +272,8 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
  struct ceph_x_authorize_reply {
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -2125,9 +2125,24 @@ static int process_connect(struct ceph_c
- 	if (con->auth) {
+@@ -2046,9 +2046,24 @@ static int process_connect(struct ceph_c
+ 
  		/*
  		 * Any connection that defines ->get_authorizer()
 -		 * should also define ->verify_authorizer_reply().
@@ -295,12 +295,12 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
 +			return 0;
 +		}
 +
- 		ret = con->ops->verify_authorizer_reply(con);
- 		if (ret < 0) {
- 			con->error_msg = "bad authorize reply";
+ 		if (len) {
+ 			ret = con->ops->verify_authorizer_reply(con);
+ 			if (ret < 0) {
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -5463,6 +5463,16 @@ static struct ceph_auth_handshake *get_a
+@@ -5289,6 +5289,16 @@ static struct ceph_auth_handshake *get_a
  	return auth;
  }
  
@@ -317,7 +317,7 @@ Acked-by: Luis Henriques <lhenriques@suse.com>
  
  static int verify_authorizer_reply(struct ceph_connection *con)
  {
-@@ -5512,6 +5522,7 @@ static const struct ceph_connection_oper
+@@ -5338,6 +5348,7 @@ static const struct ceph_connection_oper
  	.put = put_osd_con,
  	.dispatch = dispatch,
  	.get_authorizer = get_authorizer,

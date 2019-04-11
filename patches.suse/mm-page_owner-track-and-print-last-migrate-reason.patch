@@ -131,7 +131,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  	{0, NULL}
 --- a/mm/migrate.c
 +++ b/mm/migrate.c
-@@ -954,8 +954,10 @@ static ICE_noinline int unmap_and_move(n
+@@ -955,8 +955,10 @@ static ICE_noinline int unmap_and_move(n
  			goto out;
  
  	rc = __unmap_and_move(page, newpage, force, mode);
@@ -143,7 +143,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  
  out:
  	if (rc != -EAGAIN) {
-@@ -1026,7 +1028,7 @@ out:
+@@ -1029,7 +1031,7 @@ out:
  static int unmap_and_move_huge_page(new_page_t get_new_page,
  				free_page_t put_new_page, unsigned long private,
  				struct page *hpage, int force,
@@ -152,15 +152,15 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  {
  	int rc = -EAGAIN;
  	int *result = NULL;
-@@ -1084,6 +1086,7 @@ put_anon:
+@@ -1097,6 +1099,7 @@ put_anon:
  	if (rc == MIGRATEPAGE_SUCCESS) {
  		hugetlb_cgroup_migrate(hpage, new_hpage);
  		put_new_page = NULL;
 +		set_page_owner_migrate_reason(new_hpage, reason);
  	}
  
- 	unlock_page(hpage);
-@@ -1156,7 +1159,7 @@ int migrate_pages(struct list_head *from
+ out_unlock:
+@@ -1170,7 +1173,7 @@ int migrate_pages(struct list_head *from
  			if (PageHuge(page))
  				rc = unmap_and_move_huge_page(get_new_page,
  						put_new_page, private, page,
@@ -169,7 +169,7 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
  			else
  				rc = unmap_and_move(get_new_page, put_new_page,
  						private, page, pass > 2, mode,
-@@ -1840,6 +1843,7 @@ fail_putback:
+@@ -1854,6 +1857,7 @@ fail_putback:
  	set_page_memcg(new_page, page_memcg(page));
  	set_page_memcg(page, NULL);
  	page_remove_rmap(page);

@@ -1,0 +1,35 @@
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
+Date: Tue, 3 Nov 2015 17:01:46 -0500
+Subject: [PATCH] hid-sensor-hub.c: fix wrong do_div() usage
+References: bnc#1012382
+Patch-mainline: 4.4.178
+Git-commit: 8d43b49e7e0070f96ac46d30659a336c0224fa0b
+
+[ Upstream commit 8d43b49e7e0070f96ac46d30659a336c0224fa0b ]
+
+do_div() must only be used with a u64 dividend.
+
+Signed-off-by: Nicolas Pitre <nico@linaro.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/hid/hid-sensor-hub.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/hid/hid-sensor-hub.c b/drivers/hid/hid-sensor-hub.c
+index 92870cdb52d9..8efaa88329aa 100644
+--- a/drivers/hid/hid-sensor-hub.c
++++ b/drivers/hid/hid-sensor-hub.c
+@@ -218,7 +218,8 @@ int sensor_hub_set_feature(struct hid_sensor_hub_device *hsdev, u32 report_id,
+ 		goto done_proc;
+ 	}
+ 
+-	remaining_bytes = do_div(buffer_size, sizeof(__s32));
++	remaining_bytes = buffer_size % sizeof(__s32);
++	buffer_size = buffer_size / sizeof(__s32);
+ 	if (buffer_size) {
+ 		for (i = 0; i < buffer_size; ++i) {
+ 			hid_set_field(report->field[field_index], i,
+-- 
+2.21.0
+

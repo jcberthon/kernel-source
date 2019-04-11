@@ -142,19 +142,17 @@ Link: http://lkml.kernel.org/r/1473978296-20712-3-git-send-email-sukadev@linux.v
 Link: http://lkml.kernel.org/r/20160927141846.GA6589@krava
 Signed-off-by: Arnaldo Carvalho de Melo <acme@redhat.com>
 ---
- tools/perf/Makefile.perf           |  34 +-
- tools/perf/pmu-events/Build        |  13 +
- tools/perf/pmu-events/jevents.c    | 767 +++++++++++++++++++++++++++++++++++++
- tools/perf/pmu-events/jevents.h    |  17 +
- tools/perf/pmu-events/json.h       |   6 +
- tools/perf/pmu-events/pmu-events.h |  36 ++
+ tools/perf/Makefile.perf           |   34 +
+ tools/perf/pmu-events/Build        |   13 
+ tools/perf/pmu-events/jevents.c    |  767 +++++++++++++++++++++++++++++++++++++
+ tools/perf/pmu-events/jevents.h    |   17 
+ tools/perf/pmu-events/json.h       |    6 
+ tools/perf/pmu-events/pmu-events.h |   36 +
  6 files changed, 869 insertions(+), 4 deletions(-)
 
-diff --git a/tools/perf/Makefile.perf b/tools/perf/Makefile.perf
-index d710db16b963..982d6439bb07 100644
 --- a/tools/perf/Makefile.perf
 +++ b/tools/perf/Makefile.perf
-@@ -144,6 +144,10 @@ $(call allow-override,LD,$(CROSS_COMPILE)ld)
+@@ -135,6 +135,10 @@ $(call allow-override,LD,$(CROSS_COMPILE
  
  LD += $(EXTRA_LDFLAGS)
  
@@ -165,7 +163,7 @@ index d710db16b963..982d6439bb07 100644
  PKG_CONFIG = $(CROSS_COMPILE)pkg-config
  
  RM      = rm -f
-@@ -345,8 +349,18 @@ strip: $(PROGRAMS) $(OUTPUT)perf
+@@ -309,8 +313,18 @@ strip: $(PROGRAMS) $(OUTPUT)perf
  PERF_IN := $(OUTPUT)perf-in.o
  
  export srctree OUTPUT RM CC LD AR CFLAGS V BISON FLEX AWK
@@ -182,10 +180,10 @@ index d710db16b963..982d6439bb07 100644
 +build := -f $(srctree)/tools/build/Makefile.build dir=. obj
 +
  $(PERF_IN): prepare FORCE
- 	$(Q)$(MAKE) $(build)=perf
- 
-@@ -443,9 +457,18 @@ $(PERF_IN): prepare FORCE
- $(PERF_IN): prepare FORCE
+ 	@(test -f ../../arch/x86/include/asm/disabled-features.h && ( \
+         (diff -B ../arch/x86/include/asm/disabled-features.h ../../arch/x86/include/asm/disabled-features.h >/dev/null) \
+@@ -329,9 +343,18 @@ $(PERF_IN): prepare FORCE
+         || echo "Warning: tools/arch/x86/lib/memset_64.S differs from kernel" >&2 )) || true
  	$(Q)$(MAKE) $(build)=perf
  
 -$(OUTPUT)perf: $(PERFLIBS) $(PERF_IN) $(LIBTRACEEVENT_DYNAMIC_LIST)
@@ -205,7 +203,7 @@ index d710db16b963..982d6439bb07 100644
  
  $(GTK_IN): fixdep FORCE
  	$(Q)$(MAKE) $(build)=gtk
-@@ -474,6 +497,8 @@ perf.spec $(SCRIPTS) \
+@@ -360,6 +383,8 @@ perf.spec $(SCRIPTS) \
  ifneq ($(OUTPUT),)
  %.o: $(OUTPUT)%.o
  	@echo "    # Redirected target $@ => $(OUTPUT)$@"
@@ -214,7 +212,7 @@ index d710db16b963..982d6439bb07 100644
  util/%.o: $(OUTPUT)util/%.o
  	@echo "    # Redirected target $@ => $(OUTPUT)$@"
  bench/%.o: $(OUTPUT)bench/%.o
-@@ -588,9 +613,10 @@ clean: $(LIBTRACEEVENT)-clean $(LIBAPI)-clean $(LIBBPF)-clean config-clean
+@@ -605,9 +630,10 @@ clean: $(LIBTRACEEVENT)-clean $(LIBAPI)-
  	$(call QUIET_CLEAN, core-objs)  $(RM) $(LIB_FILE) $(OUTPUT)perf-archive $(OUTPUT)perf-with-kcore $(LANG_BINDINGS)
  	$(Q)find . -name '*.o' -delete -o -name '\.*.cmd' -delete -o -name '\.*.d' -delete
  	$(Q)$(RM) $(OUTPUT).config-detected
@@ -227,9 +225,6 @@ index d710db16b963..982d6439bb07 100644
  	$(QUIET_SUBDIR0)Documentation $(QUIET_SUBDIR1) clean
  	$(python-clean)
  
-diff --git a/tools/perf/pmu-events/Build b/tools/perf/pmu-events/Build
-new file mode 100644
-index 000000000000..9213a1273697
 --- /dev/null
 +++ b/tools/perf/pmu-events/Build
 @@ -0,0 +1,13 @@
@@ -246,9 +241,6 @@ index 000000000000..9213a1273697
 +#
 +$(OUTPUT)pmu-events/pmu-events.c: $(JSON) $(JEVENTS)
 +	$(Q)$(call echo-cmd,gen)$(JEVENTS) $(ARCH) pmu-events/arch $(OUTPUT)pmu-events/pmu-events.c $(V)
-diff --git a/tools/perf/pmu-events/jevents.c b/tools/perf/pmu-events/jevents.c
-new file mode 100644
-index 000000000000..c4c074a49b6e
 --- /dev/null
 +++ b/tools/perf/pmu-events/jevents.c
 @@ -0,0 +1,767 @@
@@ -1019,9 +1011,6 @@ index 000000000000..c4c074a49b6e
 +	create_empty_mapping(output_file);
 +	return 0;
 +}
-diff --git a/tools/perf/pmu-events/jevents.h b/tools/perf/pmu-events/jevents.h
-new file mode 100644
-index 000000000000..996601f828b6
 --- /dev/null
 +++ b/tools/perf/pmu-events/jevents.h
 @@ -0,0 +1,17 @@
@@ -1042,11 +1031,9 @@ index 000000000000..996601f828b6
 +#endif
 +
 +#endif
-diff --git a/tools/perf/pmu-events/json.h b/tools/perf/pmu-events/json.h
-index f2745c7a87bc..278ebd32cfb6 100644
 --- a/tools/perf/pmu-events/json.h
 +++ b/tools/perf/pmu-events/json.h
-@@ -20,6 +20,12 @@ extern int eprintf(int level, int var, const char *fmt, ...);
+@@ -20,6 +20,12 @@ extern int eprintf(int level, int var, c
  #define pr_err(fmt, ...) \
  	eprintf(0, verbose, pr_fmt(fmt), ##__VA_ARGS__)
  
@@ -1059,9 +1046,6 @@ index f2745c7a87bc..278ebd32cfb6 100644
  #ifndef roundup
  #define roundup(x, y) (                                \
  {                                                      \
-diff --git a/tools/perf/pmu-events/pmu-events.h b/tools/perf/pmu-events/pmu-events.h
-new file mode 100644
-index 000000000000..70d54794e3cb
 --- /dev/null
 +++ b/tools/perf/pmu-events/pmu-events.h
 @@ -0,0 +1,36 @@
@@ -1101,4 +1085,3 @@ index 000000000000..70d54794e3cb
 +extern struct pmu_events_map pmu_events_map[];
 +
 +#endif
-

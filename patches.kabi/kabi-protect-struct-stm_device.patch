@@ -1,0 +1,30 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: kABI: protect struct stm_device
+Patch-mainline: never, kabi
+References: kabi
+
+In 4.4.178, commit 30e94dc24edd8d028da6a02d1a85028ead2f40ed (stm class:
+Fix link list locking), upstream commit
+c74f7e8281add80bdfa0ad2998b8df287b13df73 added link_mutex to struct
+stm_device. It made the kABI checker to complain.
+
+Given the struct is driver's internal only, simply hide the change from
+the kABI checker.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/hwtracing/stm/stm.h |    2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/drivers/hwtracing/stm/stm.h
++++ b/drivers/hwtracing/stm/stm.h
+@@ -45,7 +45,9 @@ struct stm_device {
+ 	int			major;
+ 	unsigned int		sw_nmasters;
+ 	struct stm_data		*data;
++#ifndef __GENKSYMS__
+ 	struct mutex		link_mutex;
++#endif
+ 	spinlock_t		link_lock;
+ 	struct list_head	link_list;
+ 	/* master allocation */

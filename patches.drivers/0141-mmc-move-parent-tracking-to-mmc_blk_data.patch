@@ -14,14 +14,12 @@ Cc: Bart Van Assche <bart.vanassche@sandisk.com>
 Signed-off-by: Dan Williams <dan.j.williams@intel.com>
 Acked-by: Hannes Reinecke <hare@suse.de>
 ---
- drivers/mmc/card/block.c | 5 +++--
+ drivers/mmc/card/block.c |    5 +++--
  1 file changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 46155f8..5da47cf 100644
 --- a/drivers/mmc/card/block.c
 +++ b/drivers/mmc/card/block.c
-@@ -96,6 +96,7 @@ static DECLARE_BITMAP(name_use, MAX_DEVICES);
+@@ -93,6 +93,7 @@ static DECLARE_BITMAP(name_use, MAX_DEVI
   */
  struct mmc_blk_data {
  	spinlock_t	lock;
@@ -29,16 +27,16 @@ index 46155f8..5da47cf 100644
  	struct gendisk	*disk;
  	struct mmc_queue queue;
  	struct list_head part;
-@@ -2251,7 +2252,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+@@ -2246,7 +2247,7 @@ static struct mmc_blk_data *mmc_blk_allo
  	md->disk->fops = &mmc_bdops;
  	md->disk->private_data = md;
  	md->disk->queue = md->queue.queue;
 -	md->disk->driverfs_dev = parent;
 +	md->parent = parent;
  	set_disk_ro(md->disk, md->read_only || default_ro);
+ 	md->disk->flags = GENHD_FL_EXT_DEVT;
  	if (area_type & (MMC_BLK_DATA_AREA_RPMB | MMC_BLK_DATA_AREA_BOOT))
- 		md->disk->flags |= GENHD_FL_NO_PART_SCAN;
-@@ -2437,7 +2438,7 @@ static int mmc_add_disk(struct mmc_blk_data *md)
+@@ -2433,7 +2434,7 @@ static int mmc_add_disk(struct mmc_blk_d
  	int ret;
  	struct mmc_card *card = md->queue.card;
  
@@ -47,6 +45,3 @@ index 46155f8..5da47cf 100644
  	md->force_ro.show = force_ro_show;
  	md->force_ro.store = force_ro_store;
  	sysfs_attr_init(&md->force_ro.attr);
--- 
-1.8.5.6
-

@@ -14,14 +14,12 @@ Signed-off-by: Caesar Wang <wxt@rock-chips.com>
 Signed-off-by: David S. Miller <davem@davemloft.net>
 Signed-off-by: Matthias Brugger <mbrugger@suse.com>
 ---
- drivers/net/ethernet/stmicro/stmmac/dwmac-rk.c | 19 ++++++++++---------
+ drivers/net/ethernet/stmicro/stmmac/dwmac-rk.c |   19 ++++++++++---------
  1 file changed, 10 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/net/ethernet/stmicro/stmmac/dwmac-rk.c b/drivers/net/ethernet/stmicro/stmmac/dwmac-rk.c
-index 4e6a27088313..e2ba6c4619fd 100644
 --- a/drivers/net/ethernet/stmicro/stmmac/dwmac-rk.c
 +++ b/drivers/net/ethernet/stmicro/stmmac/dwmac-rk.c
-@@ -853,6 +853,16 @@ static struct rk_priv_data *rk_gmac_setup(struct platform_device *pdev,
+@@ -737,6 +737,16 @@ static struct rk_priv_data *rk_gmac_setu
  							"rockchip,grf");
  	bsp_priv->pdev = pdev;
  
@@ -38,7 +36,7 @@ index 4e6a27088313..e2ba6c4619fd 100644
  	/*rmii or rgmii*/
  	if (bsp_priv->phy_iface == PHY_INTERFACE_MODE_RGMII) {
  		dev_info(dev, "init for RGMII\n");
-@@ -865,15 +875,6 @@ static struct rk_priv_data *rk_gmac_setup(struct platform_device *pdev,
+@@ -749,15 +759,6 @@ static struct rk_priv_data *rk_gmac_setu
  		dev_err(dev, "NO interface defined!\n");
  	}
  
@@ -52,8 +50,5 @@ index 4e6a27088313..e2ba6c4619fd 100644
 -	int ret;
 -
  	ret = phy_power_on(bsp_priv, true);
- 	if (ret)
- 		return ret;
--- 
-2.11.0
-
+ 	if (ret) {
+ 		gmac_clk_enable(bsp_priv, false);

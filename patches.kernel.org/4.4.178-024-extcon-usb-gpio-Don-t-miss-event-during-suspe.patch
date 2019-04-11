@@ -1,0 +1,40 @@
+From: Roger Quadros <rogerq@ti.com>
+Date: Mon, 11 Apr 2016 17:04:45 +0300
+Subject: [PATCH] extcon: usb-gpio: Don't miss event during suspend/resume
+References: bnc#1012382
+Patch-mainline: 4.4.178
+Git-commit: 04c080080855ce84dcd490a2e04805608a21085d
+
+commit 04c080080855ce84dcd490a2e04805608a21085d upstream.
+
+Pin state might have changed during suspend/resume while
+our interrupts were disabled and if device doesn't support wakeup.
+
+Scan for change during resume for such case.
+
+Signed-off-by: Roger Quadros <rogerq@ti.com>
+Signed-off-by: Chanwoo Choi <cw00.choi@samsung.com>
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/extcon/extcon-usb-gpio.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/extcon/extcon-usb-gpio.c b/drivers/extcon/extcon-usb-gpio.c
+index 2b2fecffb1ad..c6a7c9ddf0ac 100644
+--- a/drivers/extcon/extcon-usb-gpio.c
++++ b/drivers/extcon/extcon-usb-gpio.c
+@@ -192,6 +192,9 @@ static int usb_extcon_resume(struct device *dev)
+ 	}
+ 
+ 	enable_irq(info->id_irq);
++	if (!device_may_wakeup(dev))
++		queue_delayed_work(system_power_efficient_wq,
++				   &info->wq_detcable, 0);
+ 
+ 	return ret;
+ }
+-- 
+2.21.0
+

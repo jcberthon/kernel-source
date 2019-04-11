@@ -34,7 +34,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
 
 --- a/mm/memory_hotplug.c
 +++ b/mm/memory_hotplug.c
-@@ -1468,11 +1468,8 @@ do_migrate_range(unsigned long start_pfn
+@@ -1511,11 +1511,8 @@ do_migrate_range(unsigned long start_pfn
  					    page_is_file_cache(page));
  
  		} else {
@@ -47,7 +47,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  			put_page(page);
  			/* Because we don't have big zone->lock. we should
  			   check this again here. */
-@@ -1492,8 +1489,14 @@ do_migrate_range(unsigned long start_pfn
+@@ -1535,8 +1532,14 @@ do_migrate_range(unsigned long start_pfn
  		/* Allocate a new page from the nearest neighbor node */
  		ret = migrate_pages(&source, new_node_page, NULL, 0,
  					MIGRATE_SYNC, MR_MEMORY_HOTPLUG);
@@ -65,7 +65,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  	return ret;
 --- a/mm/page_alloc.c
 +++ b/mm/page_alloc.c
-@@ -7025,7 +7025,7 @@ bool has_unmovable_pages(struct zone *zo
+@@ -6982,7 +6982,7 @@ bool has_unmovable_pages(struct zone *zo
  		if (PageHuge(page)) {
  
  			if (!hugepage_migration_supported(page_hstate(page)))
@@ -74,7 +74,7 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
  
  			iter = round_up(iter + 1, 1<<compound_order(page)) - 1;
  			continue;
-@@ -7066,9 +7066,12 @@ bool has_unmovable_pages(struct zone *zo
+@@ -7023,9 +7023,12 @@ bool has_unmovable_pages(struct zone *zo
  		 * page at boot.
  		 */
  		if (found > count)
@@ -87,4 +87,4 @@ Signed-off-by: Michal Hocko <mhocko@suse.com>
 +	return true;
  }
  
- bool is_pageblock_removable_nolock(struct page *page)
+ #if (defined(CONFIG_MEMORY_ISOLATION) && defined(CONFIG_COMPACTION)) || defined(CONFIG_CMA)

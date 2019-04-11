@@ -1,0 +1,37 @@
+From: Ken-ichirou MATSUZAWA <chamaken@gmail.com>
+Date: Tue, 5 Jan 2016 09:34:34 +0900
+Subject: [PATCH] netfilter: nfnetlink_log: just returns error for unknown
+ command
+References: bnc#1012382
+Patch-mainline: 4.4.177
+Git-commit: eb075954e9fde114f57adc39a9ea6d379c13f81e
+
+commit eb075954e9fde114f57adc39a9ea6d379c13f81e upstream.
+
+This patch stops processing options for unknown command.
+
+Signed-off-by: Ken-ichirou MATSUZAWA <chamas@h4.dion.ne.jp>
+Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+Cc: Zubin Mithra <zsm@chromium.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ net/netfilter/nfnetlink_log.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/netfilter/nfnetlink_log.c b/net/netfilter/nfnetlink_log.c
+index 740cce4685ac..85b4f7902b49 100644
+--- a/net/netfilter/nfnetlink_log.c
++++ b/net/netfilter/nfnetlink_log.c
+@@ -895,7 +895,7 @@ nfulnl_recv_config(struct sock *ctnl, struct sk_buff *skb,
+ 			goto out_put;
+ 		default:
+ 			ret = -ENOTSUPP;
+-			break;
++			goto out_put;
+ 		}
+ 	} else if (!inst) {
+ 		ret = -ENODEV;
+-- 
+2.21.0
+

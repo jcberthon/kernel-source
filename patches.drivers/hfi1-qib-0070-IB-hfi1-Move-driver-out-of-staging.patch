@@ -15,135 +15,135 @@ Signed-off-by: Dennis Dalessandro <dennis.dalessandro@intel.com>
 Signed-off-by: Doug Ledford <dledford@redhat.com>
 Acked-by: Thomas Bogendoerfer <tbogendoerfer@suse.de>
 ---
- MAINTAINERS                                 |    13 +-
- drivers/infiniband/Kconfig                  |     2 +
- drivers/infiniband/hw/Makefile              |     1 +
- drivers/infiniband/hw/hfi1/Kconfig          |    29 +
- drivers/infiniband/hw/hfi1/Makefile         |    21 +
- drivers/infiniband/hw/hfi1/affinity.c       |   431 +
- drivers/infiniband/hw/hfi1/affinity.h       |   108 +
- drivers/infiniband/hw/hfi1/aspm.h           |   309 +
- drivers/infiniband/hw/hfi1/chip.c           | 14703 ++++++++++++++++++++++++++
- drivers/infiniband/hw/hfi1/chip.h           |  1374 +++
- drivers/infiniband/hw/hfi1/chip_registers.h |  1307 +++
- drivers/infiniband/hw/hfi1/common.h         |   411 +
- drivers/infiniband/hw/hfi1/debugfs.c        |  1145 ++
- drivers/infiniband/hw/hfi1/debugfs.h        |    75 +
- drivers/infiniband/hw/hfi1/device.c         |   183 +
- drivers/infiniband/hw/hfi1/device.h         |    60 +
- drivers/infiniband/hw/hfi1/dma.c            |   183 +
- drivers/infiniband/hw/hfi1/driver.c         |  1404 +++
- drivers/infiniband/hw/hfi1/efivar.c         |   164 +
- drivers/infiniband/hw/hfi1/efivar.h         |    57 +
- drivers/infiniband/hw/hfi1/eprom.c          |   102 +
- drivers/infiniband/hw/hfi1/eprom.h          |    52 +
- drivers/infiniband/hw/hfi1/file_ops.c       |  1498 +++
- drivers/infiniband/hw/hfi1/firmware.c       |  2056 ++++
- drivers/infiniband/hw/hfi1/hfi.h            |  1950 ++++
- drivers/infiniband/hw/hfi1/init.c           |  1818 ++++
- drivers/infiniband/hw/hfi1/intr.c           |   200 +
- drivers/infiniband/hw/hfi1/iowait.h         |   300 +
- drivers/infiniband/hw/hfi1/mad.c            |  4443 ++++++++
- drivers/infiniband/hw/hfi1/mad.h            |   437 +
- drivers/infiniband/hw/hfi1/mmu_rb.c         |   325 +
- drivers/infiniband/hw/hfi1/mmu_rb.h         |    76 +
- drivers/infiniband/hw/hfi1/opa_compat.h     |   111 +
- drivers/infiniband/hw/hfi1/pcie.c           |  1338 +++
- drivers/infiniband/hw/hfi1/pio.c            |  2073 ++++
- drivers/infiniband/hw/hfi1/pio.h            |   328 +
- drivers/infiniband/hw/hfi1/pio_copy.c       |   867 ++
- drivers/infiniband/hw/hfi1/platform.c       |   909 ++
- drivers/infiniband/hw/hfi1/platform.h       |   305 +
- drivers/infiniband/hw/hfi1/qp.c             |   974 ++
- drivers/infiniband/hw/hfi1/qp.h             |   160 +
- drivers/infiniband/hw/hfi1/qsfp.c           |   632 ++
- drivers/infiniband/hw/hfi1/qsfp.h           |   240 +
- drivers/infiniband/hw/hfi1/rc.c             |  2580 +++++
- drivers/infiniband/hw/hfi1/ruc.c            |   979 ++
- drivers/infiniband/hw/hfi1/sdma.c           |  3054 ++++++
- drivers/infiniband/hw/hfi1/sdma.h           |  1082 ++
- drivers/infiniband/hw/hfi1/sdma_txreq.h     |   135 +
- drivers/infiniband/hw/hfi1/sysfs.c          |   785 ++
- drivers/infiniband/hw/hfi1/trace.c          |   236 +
- drivers/infiniband/hw/hfi1/trace.h          |  1370 +++
- drivers/infiniband/hw/hfi1/twsi.c           |   489 +
- drivers/infiniband/hw/hfi1/twsi.h           |    65 +
- drivers/infiniband/hw/hfi1/uc.c             |   604 ++
- drivers/infiniband/hw/hfi1/ud.c             |   911 ++
- drivers/infiniband/hw/hfi1/user_exp_rcv.c   |  1050 ++
- drivers/infiniband/hw/hfi1/user_exp_rcv.h   |    79 +
- drivers/infiniband/hw/hfi1/user_pages.c     |   135 +
- drivers/infiniband/hw/hfi1/user_sdma.c      |  1625 +++
- drivers/infiniband/hw/hfi1/user_sdma.h      |    84 +
- drivers/infiniband/hw/hfi1/verbs.c          |  1762 +++
- drivers/infiniband/hw/hfi1/verbs.h          |   530 +
- drivers/infiniband/hw/hfi1/verbs_txreq.c    |   149 +
- drivers/infiniband/hw/hfi1/verbs_txreq.h    |   116 +
- drivers/staging/rdma/Kconfig                |     2 -
- drivers/staging/rdma/Makefile               |     1 -
- drivers/staging/rdma/hfi1/Kconfig           |    29 -
- drivers/staging/rdma/hfi1/Makefile          |    21 -
- drivers/staging/rdma/hfi1/TODO              |     6 -
- drivers/staging/rdma/hfi1/affinity.c        |   431 -
- drivers/staging/rdma/hfi1/affinity.h        |   108 -
- drivers/staging/rdma/hfi1/aspm.h            |   309 -
- drivers/staging/rdma/hfi1/chip.c            | 14703 --------------------------
- drivers/staging/rdma/hfi1/chip.h            |  1374 ---
- drivers/staging/rdma/hfi1/chip_registers.h  |  1307 ---
- drivers/staging/rdma/hfi1/common.h          |   411 -
- drivers/staging/rdma/hfi1/debugfs.c         |  1145 --
- drivers/staging/rdma/hfi1/debugfs.h         |    75 -
- drivers/staging/rdma/hfi1/device.c          |   183 -
- drivers/staging/rdma/hfi1/device.h          |    60 -
- drivers/staging/rdma/hfi1/dma.c             |   183 -
- drivers/staging/rdma/hfi1/driver.c          |  1404 ---
- drivers/staging/rdma/hfi1/efivar.c          |   164 -
- drivers/staging/rdma/hfi1/efivar.h          |    57 -
- drivers/staging/rdma/hfi1/eprom.c           |   102 -
- drivers/staging/rdma/hfi1/eprom.h           |    52 -
- drivers/staging/rdma/hfi1/file_ops.c        |  1498 ---
- drivers/staging/rdma/hfi1/firmware.c        |  2056 ----
- drivers/staging/rdma/hfi1/hfi.h             |  1950 ----
- drivers/staging/rdma/hfi1/init.c            |  1818 ----
- drivers/staging/rdma/hfi1/intr.c            |   200 -
- drivers/staging/rdma/hfi1/iowait.h          |   300 -
- drivers/staging/rdma/hfi1/mad.c             |  4443 --------
- drivers/staging/rdma/hfi1/mad.h             |   437 -
- drivers/staging/rdma/hfi1/mmu_rb.c          |   325 -
- drivers/staging/rdma/hfi1/mmu_rb.h          |    76 -
- drivers/staging/rdma/hfi1/opa_compat.h      |   111 -
- drivers/staging/rdma/hfi1/pcie.c            |  1338 ---
- drivers/staging/rdma/hfi1/pio.c             |  2073 ----
- drivers/staging/rdma/hfi1/pio.h             |   328 -
- drivers/staging/rdma/hfi1/pio_copy.c        |   867 --
- drivers/staging/rdma/hfi1/platform.c        |   909 --
- drivers/staging/rdma/hfi1/platform.h        |   305 -
- drivers/staging/rdma/hfi1/qp.c              |   974 --
- drivers/staging/rdma/hfi1/qp.h              |   160 -
- drivers/staging/rdma/hfi1/qsfp.c            |   632 --
- drivers/staging/rdma/hfi1/qsfp.h            |   240 -
- drivers/staging/rdma/hfi1/rc.c              |  2580 -----
- drivers/staging/rdma/hfi1/ruc.c             |   979 --
- drivers/staging/rdma/hfi1/sdma.c            |  3054 ------
- drivers/staging/rdma/hfi1/sdma.h            |  1082 --
- drivers/staging/rdma/hfi1/sdma_txreq.h      |   135 -
- drivers/staging/rdma/hfi1/sysfs.c           |   785 --
- drivers/staging/rdma/hfi1/trace.c           |   236 -
- drivers/staging/rdma/hfi1/trace.h           |  1370 ---
- drivers/staging/rdma/hfi1/twsi.c            |   489 -
- drivers/staging/rdma/hfi1/twsi.h            |    65 -
- drivers/staging/rdma/hfi1/uc.c              |   604 --
- drivers/staging/rdma/hfi1/ud.c              |   911 --
- drivers/staging/rdma/hfi1/user_exp_rcv.c    |  1050 --
- drivers/staging/rdma/hfi1/user_exp_rcv.h    |    79 -
- drivers/staging/rdma/hfi1/user_pages.c      |   135 -
- drivers/staging/rdma/hfi1/user_sdma.c       |  1625 ---
- drivers/staging/rdma/hfi1/user_sdma.h       |    84 -
- drivers/staging/rdma/hfi1/verbs.c           |  1762 ---
- drivers/staging/rdma/hfi1/verbs.h           |   530 -
- drivers/staging/rdma/hfi1/verbs_txreq.c     |   149 -
- drivers/staging/rdma/hfi1/verbs_txreq.h     |   116 -
- 128 files changed, 60988 insertions(+), 60993 deletions(-)
+ MAINTAINERS                                 |   13 
+ drivers/infiniband/Kconfig                  |    2 
+ drivers/infiniband/hw/Makefile              |    1 
+ drivers/infiniband/hw/hfi1/Kconfig          |   29 
+ drivers/infiniband/hw/hfi1/Makefile         |   21 
+ drivers/infiniband/hw/hfi1/affinity.c       |  431 
+ drivers/infiniband/hw/hfi1/affinity.h       |  108 
+ drivers/infiniband/hw/hfi1/aspm.h           |  309 
+ drivers/infiniband/hw/hfi1/chip.c           |14703 ++++++++++++++++++++++++++++
+ drivers/infiniband/hw/hfi1/chip.h           | 1368 ++
+ drivers/infiniband/hw/hfi1/chip_registers.h | 1307 ++
+ drivers/infiniband/hw/hfi1/common.h         |  411 
+ drivers/infiniband/hw/hfi1/debugfs.c        | 1145 ++
+ drivers/infiniband/hw/hfi1/debugfs.h        |   75 
+ drivers/infiniband/hw/hfi1/device.c         |  183 
+ drivers/infiniband/hw/hfi1/device.h         |   60 
+ drivers/infiniband/hw/hfi1/dma.c            |  183 
+ drivers/infiniband/hw/hfi1/driver.c         | 1404 ++
+ drivers/infiniband/hw/hfi1/efivar.c         |  164 
+ drivers/infiniband/hw/hfi1/efivar.h         |   57 
+ drivers/infiniband/hw/hfi1/eprom.c          |  102 
+ drivers/infiniband/hw/hfi1/eprom.h          |   52 
+ drivers/infiniband/hw/hfi1/file_ops.c       | 1498 ++
+ drivers/infiniband/hw/hfi1/firmware.c       | 2056 +++
+ drivers/infiniband/hw/hfi1/hfi.h            | 1950 +++
+ drivers/infiniband/hw/hfi1/init.c           | 1818 +++
+ drivers/infiniband/hw/hfi1/intr.c           |  200 
+ drivers/infiniband/hw/hfi1/iowait.h         |  300 
+ drivers/infiniband/hw/hfi1/mad.c            | 4443 ++++++++
+ drivers/infiniband/hw/hfi1/mad.h            |  437 
+ drivers/infiniband/hw/hfi1/mmu_rb.c         |  325 
+ drivers/infiniband/hw/hfi1/mmu_rb.h         |   76 
+ drivers/infiniband/hw/hfi1/opa_compat.h     |  111 
+ drivers/infiniband/hw/hfi1/pcie.c           | 1338 ++
+ drivers/infiniband/hw/hfi1/pio.c            | 2073 +++
+ drivers/infiniband/hw/hfi1/pio.h            |  328 
+ drivers/infiniband/hw/hfi1/pio_copy.c       |  867 +
+ drivers/infiniband/hw/hfi1/platform.c       |  907 +
+ drivers/infiniband/hw/hfi1/platform.h       |  305 
+ drivers/infiniband/hw/hfi1/qp.c             |  973 +
+ drivers/infiniband/hw/hfi1/qp.h             |  160 
+ drivers/infiniband/hw/hfi1/qsfp.c           |  632 +
+ drivers/infiniband/hw/hfi1/qsfp.h           |  240 
+ drivers/infiniband/hw/hfi1/rc.c             | 2580 ++++
+ drivers/infiniband/hw/hfi1/ruc.c            |  979 +
+ drivers/infiniband/hw/hfi1/sdma.c           | 3054 +++++
+ drivers/infiniband/hw/hfi1/sdma.h           | 1082 ++
+ drivers/infiniband/hw/hfi1/sdma_txreq.h     |  135 
+ drivers/infiniband/hw/hfi1/sysfs.c          |  785 +
+ drivers/infiniband/hw/hfi1/trace.c          |  236 
+ drivers/infiniband/hw/hfi1/trace.h          | 1370 ++
+ drivers/infiniband/hw/hfi1/twsi.c           |  489 
+ drivers/infiniband/hw/hfi1/twsi.h           |   65 
+ drivers/infiniband/hw/hfi1/uc.c             |  604 +
+ drivers/infiniband/hw/hfi1/ud.c             |  910 +
+ drivers/infiniband/hw/hfi1/user_exp_rcv.c   | 1050 +
+ drivers/infiniband/hw/hfi1/user_exp_rcv.h   |   79 
+ drivers/infiniband/hw/hfi1/user_pages.c     |  135 
+ drivers/infiniband/hw/hfi1/user_sdma.c      | 1625 +++
+ drivers/infiniband/hw/hfi1/user_sdma.h      |   84 
+ drivers/infiniband/hw/hfi1/verbs.c          | 1762 +++
+ drivers/infiniband/hw/hfi1/verbs.h          |  530 +
+ drivers/infiniband/hw/hfi1/verbs_txreq.c    |  149 
+ drivers/infiniband/hw/hfi1/verbs_txreq.h    |  116 
+ drivers/staging/rdma/Kconfig                |    2 
+ drivers/staging/rdma/Makefile               |    1 
+ drivers/staging/rdma/hfi1/Kconfig           |   29 
+ drivers/staging/rdma/hfi1/Makefile          |   21 
+ drivers/staging/rdma/hfi1/TODO              |    6 
+ drivers/staging/rdma/hfi1/affinity.c        |  431 
+ drivers/staging/rdma/hfi1/affinity.h        |  108 
+ drivers/staging/rdma/hfi1/aspm.h            |  309 
+ drivers/staging/rdma/hfi1/chip.c            |14703 ----------------------------
+ drivers/staging/rdma/hfi1/chip.h            | 1368 --
+ drivers/staging/rdma/hfi1/chip_registers.h  | 1307 --
+ drivers/staging/rdma/hfi1/common.h          |  411 
+ drivers/staging/rdma/hfi1/debugfs.c         | 1145 --
+ drivers/staging/rdma/hfi1/debugfs.h         |   75 
+ drivers/staging/rdma/hfi1/device.c          |  183 
+ drivers/staging/rdma/hfi1/device.h          |   60 
+ drivers/staging/rdma/hfi1/dma.c             |  183 
+ drivers/staging/rdma/hfi1/driver.c          | 1404 --
+ drivers/staging/rdma/hfi1/efivar.c          |  164 
+ drivers/staging/rdma/hfi1/efivar.h          |   57 
+ drivers/staging/rdma/hfi1/eprom.c           |  102 
+ drivers/staging/rdma/hfi1/eprom.h           |   52 
+ drivers/staging/rdma/hfi1/file_ops.c        | 1498 --
+ drivers/staging/rdma/hfi1/firmware.c        | 2056 ---
+ drivers/staging/rdma/hfi1/hfi.h             | 1950 ---
+ drivers/staging/rdma/hfi1/init.c            | 1818 ---
+ drivers/staging/rdma/hfi1/intr.c            |  200 
+ drivers/staging/rdma/hfi1/iowait.h          |  300 
+ drivers/staging/rdma/hfi1/mad.c             | 4443 --------
+ drivers/staging/rdma/hfi1/mad.h             |  437 
+ drivers/staging/rdma/hfi1/mmu_rb.c          |  325 
+ drivers/staging/rdma/hfi1/mmu_rb.h          |   76 
+ drivers/staging/rdma/hfi1/opa_compat.h      |  111 
+ drivers/staging/rdma/hfi1/pcie.c            | 1338 --
+ drivers/staging/rdma/hfi1/pio.c             | 2073 ---
+ drivers/staging/rdma/hfi1/pio.h             |  328 
+ drivers/staging/rdma/hfi1/pio_copy.c        |  867 -
+ drivers/staging/rdma/hfi1/platform.c        |  907 -
+ drivers/staging/rdma/hfi1/platform.h        |  305 
+ drivers/staging/rdma/hfi1/qp.c              |  973 -
+ drivers/staging/rdma/hfi1/qp.h              |  160 
+ drivers/staging/rdma/hfi1/qsfp.c            |  632 -
+ drivers/staging/rdma/hfi1/qsfp.h            |  240 
+ drivers/staging/rdma/hfi1/rc.c              | 2580 ----
+ drivers/staging/rdma/hfi1/ruc.c             |  979 -
+ drivers/staging/rdma/hfi1/sdma.c            | 3054 -----
+ drivers/staging/rdma/hfi1/sdma.h            | 1082 --
+ drivers/staging/rdma/hfi1/sdma_txreq.h      |  135 
+ drivers/staging/rdma/hfi1/sysfs.c           |  785 -
+ drivers/staging/rdma/hfi1/trace.c           |  236 
+ drivers/staging/rdma/hfi1/trace.h           | 1370 --
+ drivers/staging/rdma/hfi1/twsi.c            |  489 
+ drivers/staging/rdma/hfi1/twsi.h            |   65 
+ drivers/staging/rdma/hfi1/uc.c              |  604 -
+ drivers/staging/rdma/hfi1/ud.c              |  910 -
+ drivers/staging/rdma/hfi1/user_exp_rcv.c    | 1050 -
+ drivers/staging/rdma/hfi1/user_exp_rcv.h    |   79 
+ drivers/staging/rdma/hfi1/user_pages.c      |  135 
+ drivers/staging/rdma/hfi1/user_sdma.c       | 1625 ---
+ drivers/staging/rdma/hfi1/user_sdma.h       |   84 
+ drivers/staging/rdma/hfi1/verbs.c           | 1762 ---
+ drivers/staging/rdma/hfi1/verbs.h           |  530 -
+ drivers/staging/rdma/hfi1/verbs_txreq.c     |  149 
+ drivers/staging/rdma/hfi1/verbs_txreq.h     |  116 
+ 128 files changed, 60978 insertions(+), 60983 deletions(-)
  create mode 100644 drivers/infiniband/hw/hfi1/Kconfig
  create mode 100644 drivers/infiniband/hw/hfi1/Makefile
  create mode 100644 drivers/infiniband/hw/hfi1/affinity.c
@@ -268,11 +268,9 @@ Acked-by: Thomas Bogendoerfer <tbogendoerfer@suse.de>
  delete mode 100644 drivers/staging/rdma/hfi1/verbs_txreq.c
  delete mode 100644 drivers/staging/rdma/hfi1/verbs_txreq.h
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 2588757..6eb86f1 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -4990,6 +4990,13 @@ F:	drivers/block/cciss*
+@@ -4960,6 +4960,13 @@ F:	drivers/block/cciss*
  F:	include/linux/cciss_ioctl.h
  F:	include/uapi/linux/cciss_ioctl.h
  
@@ -286,7 +284,7 @@ index 2588757..6eb86f1 100644
  HFS FILESYSTEM
  L:	linux-fsdevel@vger.kernel.org
  S:	Orphan
-@@ -10402,12 +10409,6 @@ M:	Arnaud Patard <arnaud.patard@rtp-net.org>
+@@ -10304,12 +10311,6 @@ M:	Arnaud Patard <arnaud.patard@rtp-net.
  S:	Odd Fixes
  F:	drivers/staging/xgifb/
  
@@ -299,19 +297,15 @@ index 2588757..6eb86f1 100644
  STARFIRE/DURALAN NETWORK DRIVER
  M:	Ion Badulescu <ionut@badula.org>
  S:	Odd Fixes
-diff --git a/drivers/infiniband/Kconfig b/drivers/infiniband/Kconfig
-index dbed6ad..19a418a 100644
 --- a/drivers/infiniband/Kconfig
 +++ b/drivers/infiniband/Kconfig
-@@ -87,4 +87,6 @@ source "drivers/infiniband/ulp/isert/Kconfig"
+@@ -97,4 +97,6 @@ source "drivers/infiniband/ulp/isert/Kco
  
  source "drivers/infiniband/sw/rdmavt/Kconfig"
  
 +source "drivers/infiniband/hw/hfi1/Kconfig"
 +
  endif # INFINIBAND
-diff --git a/drivers/infiniband/hw/Makefile b/drivers/infiniband/hw/Makefile
-index 05aac90..21fe401 100644
 --- a/drivers/infiniband/hw/Makefile
 +++ b/drivers/infiniband/hw/Makefile
 @@ -8,3 +8,4 @@ obj-$(CONFIG_MLX5_INFINIBAND)		+= mlx5/
@@ -319,9 +313,6 @@ index 05aac90..21fe401 100644
  obj-$(CONFIG_INFINIBAND_OCRDMA)		+= ocrdma/
  obj-$(CONFIG_INFINIBAND_USNIC)		+= usnic/
 +obj-$(CONFIG_INFINIBAND_HFI1)		+= hfi1/
-diff --git a/drivers/infiniband/hw/hfi1/Kconfig b/drivers/infiniband/hw/hfi1/Kconfig
-new file mode 100644
-index 0000000..a925fb0
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/Kconfig
 @@ -0,0 +1,29 @@
@@ -354,9 +345,6 @@ index 0000000..a925fb0
 +	---help---
 +	This is a configuration flag to enable verbose
 +	SDMA debug
-diff --git a/drivers/infiniband/hw/hfi1/Makefile b/drivers/infiniband/hw/hfi1/Makefile
-new file mode 100644
-index 0000000..9b5382c
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/Makefile
 @@ -0,0 +1,21 @@
@@ -381,9 +369,6 @@ index 0000000..9b5382c
 +ifdef MVERSION
 +CFLAGS_driver.o = -DHFI_DRIVER_VERSION_BASE=\"$(MVERSION)\"
 +endif
-diff --git a/drivers/infiniband/hw/hfi1/affinity.c b/drivers/infiniband/hw/hfi1/affinity.c
-new file mode 100644
-index 0000000..6e7050a
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/affinity.c
 @@ -0,0 +1,431 @@
@@ -818,9 +803,6 @@ index 0000000..6e7050a
 +	spin_unlock(&dd->affinity->lock);
 +}
 +
-diff --git a/drivers/infiniband/hw/hfi1/affinity.h b/drivers/infiniband/hw/hfi1/affinity.h
-new file mode 100644
-index 0000000..20f52fe
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/affinity.h
 @@ -0,0 +1,108 @@
@@ -932,9 +914,6 @@ index 0000000..20f52fe
 +void hfi1_put_proc_affinity(struct hfi1_devdata *, int);
 +
 +#endif /* _HFI1_AFFINITY_H */
-diff --git a/drivers/infiniband/hw/hfi1/aspm.h b/drivers/infiniband/hw/hfi1/aspm.h
-new file mode 100644
-index 0000000..0d58fe3
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/aspm.h
 @@ -0,0 +1,309 @@
@@ -1247,9 +1226,6 @@ index 0000000..0d58fe3
 +}
 +
 +#endif /* _ASPM_H */
-diff --git a/drivers/infiniband/hw/hfi1/chip.c b/drivers/infiniband/hw/hfi1/chip.c
-new file mode 100644
-index 0000000..d8cc329
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/chip.c
 @@ -0,0 +1,14703 @@
@@ -15956,9 +15932,6 @@ index 0000000..d8cc329
 +	 */
 +	dc_shutdown(dd);
 +}
-diff --git a/drivers/infiniband/hw/hfi1/chip.h b/drivers/infiniband/hw/hfi1/chip.h
-new file mode 100644
-index 0000000..66a3279
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/chip.h
 @@ -0,0 +1,1368 @@
@@ -17330,9 +17303,6 @@ index 0000000..66a3279
 +};
 +
 +#endif /* _CHIP_H */
-diff --git a/drivers/infiniband/hw/hfi1/chip_registers.h b/drivers/infiniband/hw/hfi1/chip_registers.h
-new file mode 100644
-index 0000000..8744de6
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/chip_registers.h
 @@ -0,0 +1,1307 @@
@@ -18643,9 +18613,6 @@ index 0000000..8744de6
 +#define CCE_MSIX_PBA_OFFSET 0X0110000
 +
 +#endif          /* DEF_CHIP_REG */
-diff --git a/drivers/infiniband/hw/hfi1/common.h b/drivers/infiniband/hw/hfi1/common.h
-new file mode 100644
-index 0000000..fcc9c21
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/common.h
 @@ -0,0 +1,411 @@
@@ -19060,9 +19027,6 @@ index 0000000..fcc9c21
 +	return (rhf >> RHF_EGR_OFFSET_SHIFT) & RHF_EGR_OFFSET_MASK;
 +}
 +#endif /* _COMMON_H */
-diff --git a/drivers/infiniband/hw/hfi1/debugfs.c b/drivers/infiniband/hw/hfi1/debugfs.c
-new file mode 100644
-index 0000000..dbab9d9
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/debugfs.c
 @@ -0,0 +1,1145 @@
@@ -20211,9 +20175,6 @@ index 0000000..dbab9d9
 +}
 +
 +#endif
-diff --git a/drivers/infiniband/hw/hfi1/debugfs.h b/drivers/infiniband/hw/hfi1/debugfs.h
-new file mode 100644
-index 0000000..b6fb681
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/debugfs.h
 @@ -0,0 +1,75 @@
@@ -20292,9 +20253,6 @@ index 0000000..b6fb681
 +#endif
 +
 +#endif                          /* _HFI1_DEBUGFS_H */
-diff --git a/drivers/infiniband/hw/hfi1/device.c b/drivers/infiniband/hw/hfi1/device.c
-new file mode 100644
-index 0000000..bf64b5a
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/device.c
 @@ -0,0 +1,183 @@
@@ -20481,9 +20439,6 @@ index 0000000..bf64b5a
 +
 +	unregister_chrdev_region(hfi1_dev, HFI1_NMINORS);
 +}
-diff --git a/drivers/infiniband/hw/hfi1/device.h b/drivers/infiniband/hw/hfi1/device.h
-new file mode 100644
-index 0000000..c3ec19c
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/device.h
 @@ -0,0 +1,60 @@
@@ -20547,9 +20502,6 @@ index 0000000..c3ec19c
 +void dev_cleanup(void);
 +
 +#endif                          /* _HFI1_DEVICE_H */
-diff --git a/drivers/infiniband/hw/hfi1/dma.c b/drivers/infiniband/hw/hfi1/dma.c
-new file mode 100644
-index 0000000..7e8dab8
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/dma.c
 @@ -0,0 +1,183 @@
@@ -20736,9 +20688,6 @@ index 0000000..7e8dab8
 +	.alloc_coherent = hfi1_dma_alloc_coherent,
 +	.free_coherent = hfi1_dma_free_coherent
 +};
-diff --git a/drivers/infiniband/hw/hfi1/driver.c b/drivers/infiniband/hw/hfi1/driver.c
-new file mode 100644
-index 0000000..c75b0ae
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/driver.c
 @@ -0,0 +1,1404 @@
@@ -22146,9 +22095,6 @@ index 0000000..c75b0ae
 +		   rhf_rcv_type(packet->rhf));
 +	return RHF_RCV_CONTINUE;
 +}
-diff --git a/drivers/infiniband/hw/hfi1/efivar.c b/drivers/infiniband/hw/hfi1/efivar.c
-new file mode 100644
-index 0000000..106349f
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/efivar.c
 @@ -0,0 +1,164 @@
@@ -22316,9 +22262,6 @@ index 0000000..106349f
 +
 +	return read_efi_var(name, size, return_data);
 +}
-diff --git a/drivers/infiniband/hw/hfi1/efivar.h b/drivers/infiniband/hw/hfi1/efivar.h
-new file mode 100644
-index 0000000..94e9e70
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/efivar.h
 @@ -0,0 +1,57 @@
@@ -22379,9 +22322,6 @@ index 0000000..94e9e70
 +		      unsigned long *size, void **return_data);
 +
 +#endif /* _HFI1_EFIVAR_H */
-diff --git a/drivers/infiniband/hw/hfi1/eprom.c b/drivers/infiniband/hw/hfi1/eprom.c
-new file mode 100644
-index 0000000..36b7794
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/eprom.c
 @@ -0,0 +1,102 @@
@@ -22487,9 +22427,6 @@ index 0000000..36b7794
 +done_asic:
 +	return ret;
 +}
-diff --git a/drivers/infiniband/hw/hfi1/eprom.h b/drivers/infiniband/hw/hfi1/eprom.h
-new file mode 100644
-index 0000000..d41f0b1
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/eprom.h
 @@ -0,0 +1,52 @@
@@ -22545,9 +22482,6 @@ index 0000000..d41f0b1
 +
 +int eprom_init(struct hfi1_devdata *dd);
 +int handle_eprom_command(struct file *fp, const struct hfi1_cmd *cmd);
-diff --git a/drivers/infiniband/hw/hfi1/file_ops.c b/drivers/infiniband/hw/hfi1/file_ops.c
-new file mode 100644
-index 0000000..7a5b0e6
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/file_ops.c
 @@ -0,0 +1,1498 @@
@@ -24049,9 +23983,6 @@ index 0000000..7a5b0e6
 +{
 +	user_remove(dd);
 +}
-diff --git a/drivers/infiniband/hw/hfi1/firmware.c b/drivers/infiniband/hw/hfi1/firmware.c
-new file mode 100644
-index 0000000..ed680fd
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/firmware.c
 @@ -0,0 +1,2056 @@
@@ -26111,9 +26042,6 @@ index 0000000..ed680fd
 +	dd_dev_info(dd, "GUID %llx",
 +		    (unsigned long long)dd->base_guid);
 +}
-diff --git a/drivers/infiniband/hw/hfi1/hfi.h b/drivers/infiniband/hw/hfi1/hfi.h
-new file mode 100644
-index 0000000..4417a0f
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/hfi.h
 @@ -0,0 +1,1950 @@
@@ -28067,9 +27995,6 @@ index 0000000..4417a0f
 +int hfi1_tempsense_rd(struct hfi1_devdata *dd, struct hfi1_temp *temp);
 +
 +#endif                          /* _HFI1_KERNEL_H */
-diff --git a/drivers/infiniband/hw/hfi1/init.c b/drivers/infiniband/hw/hfi1/init.c
-new file mode 100644
-index 0000000..5cc492e
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/init.c
 @@ -0,0 +1,1818 @@
@@ -29891,9 +29816,6 @@ index 0000000..5cc492e
 +bail:
 +	return ret;
 +}
-diff --git a/drivers/infiniband/hw/hfi1/intr.c b/drivers/infiniband/hw/hfi1/intr.c
-new file mode 100644
-index 0000000..65348d1
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/intr.c
 @@ -0,0 +1,200 @@
@@ -30097,9 +30019,6 @@ index 0000000..65348d1
 +done:
 +	spin_unlock_irqrestore(&dd->uctxt_lock, flags);
 +}
-diff --git a/drivers/infiniband/hw/hfi1/iowait.h b/drivers/infiniband/hw/hfi1/iowait.h
-new file mode 100644
-index 0000000..2ec6ef3
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/iowait.h
 @@ -0,0 +1,300 @@
@@ -30403,9 +30322,6 @@ index 0000000..2ec6ef3
 +}
 +
 +#endif
-diff --git a/drivers/infiniband/hw/hfi1/mad.c b/drivers/infiniband/hw/hfi1/mad.c
-new file mode 100644
-index 0000000..17882dc
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/mad.c
 @@ -0,0 +1,4443 @@
@@ -34852,9 +34768,6 @@ index 0000000..17882dc
 +
 +	return IB_MAD_RESULT_FAILURE;
 +}
-diff --git a/drivers/infiniband/hw/hfi1/mad.h b/drivers/infiniband/hw/hfi1/mad.h
-new file mode 100644
-index 0000000..55ee086
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/mad.h
 @@ -0,0 +1,437 @@
@@ -35295,9 +35208,6 @@ index 0000000..55ee086
 +		    COUNTER_MASK(1, 4))
 +
 +#endif				/* _HFI1_MAD_H */
-diff --git a/drivers/infiniband/hw/hfi1/mmu_rb.c b/drivers/infiniband/hw/hfi1/mmu_rb.c
-new file mode 100644
-index 0000000..b7a80aa
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/mmu_rb.c
 @@ -0,0 +1,325 @@
@@ -35626,9 +35536,6 @@ index 0000000..b7a80aa
 +	}
 +	spin_unlock_irqrestore(&handler->lock, flags);
 +}
-diff --git a/drivers/infiniband/hw/hfi1/mmu_rb.h b/drivers/infiniband/hw/hfi1/mmu_rb.h
-new file mode 100644
-index 0000000..7a57b9c
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/mmu_rb.h
 @@ -0,0 +1,76 @@
@@ -35708,9 +35615,6 @@ index 0000000..7a57b9c
 +					unsigned long);
 +
 +#endif /* _HFI1_MMU_RB_H */
-diff --git a/drivers/infiniband/hw/hfi1/opa_compat.h b/drivers/infiniband/hw/hfi1/opa_compat.h
-new file mode 100644
-index 0000000..6ef3c1c
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/opa_compat.h
 @@ -0,0 +1,111 @@
@@ -35825,9 +35729,6 @@ index 0000000..6ef3c1c
 +};
 +
 +#endif /* _LINUX_H */
-diff --git a/drivers/infiniband/hw/hfi1/pcie.c b/drivers/infiniband/hw/hfi1/pcie.c
-new file mode 100644
-index 0000000..0bac21e
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/pcie.c
 @@ -0,0 +1,1338 @@
@@ -37169,9 +37070,6 @@ index 0000000..0bac21e
 +	dd_dev_info(dd, "%s: done\n", __func__);
 +	return ret;
 +}
-diff --git a/drivers/infiniband/hw/hfi1/pio.c b/drivers/infiniband/hw/hfi1/pio.c
-new file mode 100644
-index 0000000..c67b9ad
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/pio.c
 @@ -0,0 +1,2073 @@
@@ -39248,9 +39146,6 @@ index 0000000..c67b9ad
 +	kfree(dd->cr_base);
 +	dd->cr_base = NULL;
 +}
-diff --git a/drivers/infiniband/hw/hfi1/pio.h b/drivers/infiniband/hw/hfi1/pio.h
-new file mode 100644
-index 0000000..464cbd2
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/pio.h
 @@ -0,0 +1,328 @@
@@ -39582,9 +39477,6 @@ index 0000000..464cbd2
 +void seg_pio_copy_end(struct pio_buf *pbuf);
 +
 +#endif /* _PIO_H */
-diff --git a/drivers/infiniband/hw/hfi1/pio_copy.c b/drivers/infiniband/hw/hfi1/pio_copy.c
-new file mode 100644
-index 0000000..8c25e1b
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/pio_copy.c
 @@ -0,0 +1,867 @@
@@ -40455,9 +40347,6 @@ index 0000000..8c25e1b
 +	this_cpu_dec(*pbuf->sc->buffers_allocated);
 +	preempt_enable();
 +}
-diff --git a/drivers/infiniband/hw/hfi1/platform.c b/drivers/infiniband/hw/hfi1/platform.c
-new file mode 100644
-index 0000000..03df932
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/platform.c
 @@ -0,0 +1,907 @@
@@ -41368,9 +41257,6 @@ index 0000000..03df932
 +bail:
 +	ppd->driver_link_ready = 0;
 +}
-diff --git a/drivers/infiniband/hw/hfi1/platform.h b/drivers/infiniband/hw/hfi1/platform.h
-new file mode 100644
-index 0000000..e2c2161
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/platform.h
 @@ -0,0 +1,305 @@
@@ -41679,9 +41565,6 @@ index 0000000..e2c2161
 +void tune_serdes(struct hfi1_pportdata *ppd);
 +
 +#endif			/*__PLATFORM_H*/
-diff --git a/drivers/infiniband/hw/hfi1/qp.c b/drivers/infiniband/hw/hfi1/qp.c
-new file mode 100644
-index 0000000..1a942ff
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/qp.c
 @@ -0,0 +1,973 @@
@@ -42658,9 +42541,6 @@ index 0000000..1a942ff
 +
 +	rcu_read_unlock();
 +}
-diff --git a/drivers/infiniband/hw/hfi1/qp.h b/drivers/infiniband/hw/hfi1/qp.h
-new file mode 100644
-index 0000000..e7bc8d6
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/qp.h
 @@ -0,0 +1,160 @@
@@ -42824,9 +42704,6 @@ index 0000000..e7bc8d6
 +int mtu_to_path_mtu(u32 mtu);
 +void hfi1_error_port_qps(struct hfi1_ibport *ibp, u8 sl);
 +#endif /* _QP_H */
-diff --git a/drivers/infiniband/hw/hfi1/qsfp.c b/drivers/infiniband/hw/hfi1/qsfp.c
-new file mode 100644
-index 0000000..2441669
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/qsfp.c
 @@ -0,0 +1,632 @@
@@ -43462,9 +43339,6 @@ index 0000000..2441669
 +	}
 +	return sofar;
 +}
-diff --git a/drivers/infiniband/hw/hfi1/qsfp.h b/drivers/infiniband/hw/hfi1/qsfp.h
-new file mode 100644
-index 0000000..dadc66c
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/qsfp.h
 @@ -0,0 +1,240 @@
@@ -43708,9 +43582,6 @@ index 0000000..dadc66c
 +		   int len);
 +int one_qsfp_read(struct hfi1_pportdata *ppd, u32 target, int addr, void *bp,
 +		  int len);
-diff --git a/drivers/infiniband/hw/hfi1/rc.c b/drivers/infiniband/hw/hfi1/rc.c
-new file mode 100644
-index 0000000..792f15e
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/rc.c
 @@ -0,0 +1,2580 @@
@@ -46294,9 +46165,6 @@ index 0000000..792f15e
 +		} /* Out of sequence NAK */
 +	} /* QP Request NAKs */
 +}
-diff --git a/drivers/infiniband/hw/hfi1/ruc.c b/drivers/infiniband/hw/hfi1/ruc.c
-new file mode 100644
-index 0000000..a659aec
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/ruc.c
 @@ -0,0 +1,979 @@
@@ -47279,9 +47147,6 @@ index 0000000..a659aec
 +	if (qp->state == IB_QPS_SQD && last == qp->s_cur)
 +		qp->s_draining = 0;
 +}
-diff --git a/drivers/infiniband/hw/hfi1/sdma.c b/drivers/infiniband/hw/hfi1/sdma.c
-new file mode 100644
-index 0000000..f9befc0
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/sdma.c
 @@ -0,0 +1,3054 @@
@@ -50339,9 +50204,6 @@ index 0000000..f9befc0
 +		  CCE_INT_FORCE + (8 * (IS_SDMA_START / 64)),
 +		  sde->progress_mask);
 +}
-diff --git a/drivers/infiniband/hw/hfi1/sdma.h b/drivers/infiniband/hw/hfi1/sdma.h
-new file mode 100644
-index 0000000..8f50c99
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/sdma.h
 @@ -0,0 +1,1082 @@
@@ -51427,9 +51289,6 @@ index 0000000..8f50c99
 +void sdma_update_lmc(struct hfi1_devdata *dd, u64 mask, u32 lid);
 +
 +#endif
-diff --git a/drivers/infiniband/hw/hfi1/sdma_txreq.h b/drivers/infiniband/hw/hfi1/sdma_txreq.h
-new file mode 100644
-index 0000000..bf7d777
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/sdma_txreq.h
 @@ -0,0 +1,135 @@
@@ -51568,9 +51427,6 @@ index 0000000..bf7d777
 +}
 +
 +#endif                          /* HFI1_SDMA_TXREQ_H */
-diff --git a/drivers/infiniband/hw/hfi1/sysfs.c b/drivers/infiniband/hw/hfi1/sysfs.c
-new file mode 100644
-index 0000000..91fc2ae
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/sysfs.c
 @@ -0,0 +1,785 @@
@@ -52359,9 +52215,6 @@ index 0000000..91fc2ae
 +		kobject_put(&ppd->sc2vl_kobj);
 +	}
 +}
-diff --git a/drivers/infiniband/hw/hfi1/trace.c b/drivers/infiniband/hw/hfi1/trace.c
-new file mode 100644
-index 0000000..caddb2a
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/trace.c
 @@ -0,0 +1,236 @@
@@ -52601,9 +52454,6 @@ index 0000000..caddb2a
 +__hfi1_trace_fn(TID);
 +__hfi1_trace_fn(MMU);
 +__hfi1_trace_fn(IOCTL);
-diff --git a/drivers/infiniband/hw/hfi1/trace.h b/drivers/infiniband/hw/hfi1/trace.h
-new file mode 100644
-index 0000000..a6c1adf
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/trace.h
 @@ -0,0 +1,1370 @@
@@ -53977,9 +53827,6 @@ index 0000000..a6c1adf
 +#define TRACE_INCLUDE_PATH .
 +#define TRACE_INCLUDE_FILE trace
 +#include <trace/define_trace.h>
-diff --git a/drivers/infiniband/hw/hfi1/twsi.c b/drivers/infiniband/hw/hfi1/twsi.c
-new file mode 100644
-index 0000000..e82e52a
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/twsi.c
 @@ -0,0 +1,489 @@
@@ -54472,9 +54319,6 @@ index 0000000..e82e52a
 +bail:
 +	return ret;
 +}
-diff --git a/drivers/infiniband/hw/hfi1/twsi.h b/drivers/infiniband/hw/hfi1/twsi.h
-new file mode 100644
-index 0000000..5b8a5b5
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/twsi.h
 @@ -0,0 +1,65 @@
@@ -54543,9 +54387,6 @@ index 0000000..5b8a5b5
 +		     const void *buffer, int len);
 +
 +#endif /* _TWSI_H */
-diff --git a/drivers/infiniband/hw/hfi1/uc.c b/drivers/infiniband/hw/hfi1/uc.c
-new file mode 100644
-index 0000000..df773d4
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/uc.c
 @@ -0,0 +1,604 @@
@@ -55153,12 +54994,9 @@ index 0000000..df773d4
 +op_err:
 +	hfi1_rc_error(qp, IB_WC_LOC_QP_OP_ERR);
 +}
-diff --git a/drivers/infiniband/hw/hfi1/ud.c b/drivers/infiniband/hw/hfi1/ud.c
-new file mode 100644
-index 0000000..1e503ad
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/ud.c
-@@ -0,0 +1,911 @@
+@@ -0,0 +1,910 @@
 +/*
 + * Copyright(c) 2015, 2016 Intel Corporation.
 + *
@@ -55976,7 +55814,6 @@ index 0000000..1e503ad
 +	    opcode == IB_OPCODE_UD_SEND_ONLY_WITH_IMMEDIATE) {
 +		wc.ex.imm_data = ohdr->u.ud.imm_data;
 +		wc.wc_flags = IB_WC_WITH_IMM;
-+		tlen -= sizeof(u32);
 +	} else if (opcode == IB_OPCODE_UD_SEND_ONLY) {
 +		wc.ex.imm_data = 0;
 +		wc.wc_flags = 0;
@@ -56070,9 +55907,6 @@ index 0000000..1e503ad
 +drop:
 +	ibp->rvp.n_pkt_drops++;
 +}
-diff --git a/drivers/infiniband/hw/hfi1/user_exp_rcv.c b/drivers/infiniband/hw/hfi1/user_exp_rcv.c
-new file mode 100644
-index 0000000..1b640a3
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/user_exp_rcv.c
 @@ -0,0 +1,1050 @@
@@ -57126,9 +56960,6 @@ index 0000000..1b640a3
 +
 +	fdata->entry_to_rb[tnode->rcventry - base] = NULL;
 +}
-diff --git a/drivers/infiniband/hw/hfi1/user_exp_rcv.h b/drivers/infiniband/hw/hfi1/user_exp_rcv.h
-new file mode 100644
-index 0000000..9bc8d9f
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/user_exp_rcv.h
 @@ -0,0 +1,79 @@
@@ -57211,9 +57042,6 @@ index 0000000..9bc8d9f
 +int hfi1_user_exp_rcv_invalid(struct file *, struct hfi1_tid_info *);
 +
 +#endif /* _HFI1_USER_EXP_RCV_H */
-diff --git a/drivers/infiniband/hw/hfi1/user_pages.c b/drivers/infiniband/hw/hfi1/user_pages.c
-new file mode 100644
-index 0000000..88e10b5f
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/user_pages.c
 @@ -0,0 +1,135 @@
@@ -57352,9 +57180,6 @@ index 0000000..88e10b5f
 +		up_write(&mm->mmap_sem);
 +	}
 +}
-diff --git a/drivers/infiniband/hw/hfi1/user_sdma.c b/drivers/infiniband/hw/hfi1/user_sdma.c
-new file mode 100644
-index 0000000..29f4795
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/user_sdma.c
 @@ -0,0 +1,1625 @@
@@ -58983,9 +58808,6 @@ index 0000000..29f4795
 +		return 1;
 +	return 0;
 +}
-diff --git a/drivers/infiniband/hw/hfi1/user_sdma.h b/drivers/infiniband/hw/hfi1/user_sdma.h
-new file mode 100644
-index 0000000..b9240e3
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/user_sdma.h
 @@ -0,0 +1,84 @@
@@ -59073,9 +58895,6 @@ index 0000000..b9240e3
 +int hfi1_user_sdma_free_queues(struct hfi1_filedata *);
 +int hfi1_user_sdma_process_request(struct file *, struct iovec *, unsigned long,
 +				   unsigned long *);
-diff --git a/drivers/infiniband/hw/hfi1/verbs.c b/drivers/infiniband/hw/hfi1/verbs.c
-new file mode 100644
-index 0000000..ae92ac5
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/verbs.c
 @@ -0,0 +1,1762 @@
@@ -60841,9 +60660,6 @@ index 0000000..ae92ac5
 +
 +	process_becn(ppd, sl, rlid, lqpn, rqpn, svc_type);
 +}
-diff --git a/drivers/infiniband/hw/hfi1/verbs.h b/drivers/infiniband/hw/hfi1/verbs.h
-new file mode 100644
-index 0000000..3ee2239
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/verbs.h
 @@ -0,0 +1,530 @@
@@ -61377,9 +61193,6 @@ index 0000000..3ee2239
 +extern const u32 ib_hfi1_rnr_table[];
 +
 +#endif                          /* HFI1_VERBS_H */
-diff --git a/drivers/infiniband/hw/hfi1/verbs_txreq.c b/drivers/infiniband/hw/hfi1/verbs_txreq.c
-new file mode 100644
-index 0000000..bc95c41
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/verbs_txreq.c
 @@ -0,0 +1,149 @@
@@ -61532,9 +61345,6 @@ index 0000000..bc95c41
 +	kmem_cache_destroy(dev->verbs_txreq_cache);
 +	dev->verbs_txreq_cache = NULL;
 +}
-diff --git a/drivers/infiniband/hw/hfi1/verbs_txreq.h b/drivers/infiniband/hw/hfi1/verbs_txreq.h
-new file mode 100644
-index 0000000..1cf69b2
 --- /dev/null
 +++ b/drivers/infiniband/hw/hfi1/verbs_txreq.h
 @@ -0,0 +1,116 @@
@@ -61654,11 +61464,9 @@ index 0000000..1cf69b2
 +void verbs_txreq_exit(struct hfi1_ibdev *dev);
 +
 +#endif                         /* HFI1_VERBS_TXREQ_H */
-diff --git a/drivers/staging/rdma/Kconfig b/drivers/staging/rdma/Kconfig
-index ba87650..a10a42a 100644
 --- a/drivers/staging/rdma/Kconfig
 +++ b/drivers/staging/rdma/Kconfig
-@@ -26,8 +26,6 @@ source "drivers/staging/rdma/amso1100/Kconfig"
+@@ -26,8 +26,6 @@ source "drivers/staging/rdma/amso1100/Kc
  
  source "drivers/staging/rdma/ehca/Kconfig"
  
@@ -61667,8 +61475,6 @@ index ba87650..a10a42a 100644
  source "drivers/staging/rdma/ipath/Kconfig"
  
  endif
-diff --git a/drivers/staging/rdma/Makefile b/drivers/staging/rdma/Makefile
-index 139d78e..30bd63a 100644
 --- a/drivers/staging/rdma/Makefile
 +++ b/drivers/staging/rdma/Makefile
 @@ -1,5 +1,4 @@
@@ -61677,9 +61483,6 @@ index 139d78e..30bd63a 100644
  obj-$(CONFIG_INFINIBAND_EHCA)	+= ehca/
 -obj-$(CONFIG_INFINIBAND_HFI1)	+= hfi1/
  obj-$(CONFIG_INFINIBAND_IPATH)	+= ipath/
-diff --git a/drivers/staging/rdma/hfi1/Kconfig b/drivers/staging/rdma/hfi1/Kconfig
-deleted file mode 100644
-index a925fb0..0000000
 --- a/drivers/staging/rdma/hfi1/Kconfig
 +++ /dev/null
 @@ -1,29 +0,0 @@
@@ -61712,9 +61515,6 @@ index a925fb0..0000000
 -	---help---
 -	This is a configuration flag to enable verbose
 -	SDMA debug
-diff --git a/drivers/staging/rdma/hfi1/Makefile b/drivers/staging/rdma/hfi1/Makefile
-deleted file mode 100644
-index 9b5382c..0000000
 --- a/drivers/staging/rdma/hfi1/Makefile
 +++ /dev/null
 @@ -1,21 +0,0 @@
@@ -61739,9 +61539,6 @@ index 9b5382c..0000000
 -ifdef MVERSION
 -CFLAGS_driver.o = -DHFI_DRIVER_VERSION_BASE=\"$(MVERSION)\"
 -endif
-diff --git a/drivers/staging/rdma/hfi1/TODO b/drivers/staging/rdma/hfi1/TODO
-deleted file mode 100644
-index 4c6f1d7..0000000
 --- a/drivers/staging/rdma/hfi1/TODO
 +++ /dev/null
 @@ -1,6 +0,0 @@
@@ -61751,9 +61548,6 @@ index 4c6f1d7..0000000
 -- Remove software processing of IB protocol and place in library for use
 -  by qib, ipath (if still present), hfi1, and eventually soft-roce
 -- Replace incorrect uAPI
-diff --git a/drivers/staging/rdma/hfi1/affinity.c b/drivers/staging/rdma/hfi1/affinity.c
-deleted file mode 100644
-index 6e7050a..0000000
 --- a/drivers/staging/rdma/hfi1/affinity.c
 +++ /dev/null
 @@ -1,431 +0,0 @@
@@ -62188,9 +61982,6 @@ index 6e7050a..0000000
 -	spin_unlock(&dd->affinity->lock);
 -}
 -
-diff --git a/drivers/staging/rdma/hfi1/affinity.h b/drivers/staging/rdma/hfi1/affinity.h
-deleted file mode 100644
-index 20f52fe..0000000
 --- a/drivers/staging/rdma/hfi1/affinity.h
 +++ /dev/null
 @@ -1,108 +0,0 @@
@@ -62302,9 +62093,6 @@ index 20f52fe..0000000
 -void hfi1_put_proc_affinity(struct hfi1_devdata *, int);
 -
 -#endif /* _HFI1_AFFINITY_H */
-diff --git a/drivers/staging/rdma/hfi1/aspm.h b/drivers/staging/rdma/hfi1/aspm.h
-deleted file mode 100644
-index 0d58fe3..0000000
 --- a/drivers/staging/rdma/hfi1/aspm.h
 +++ /dev/null
 @@ -1,309 +0,0 @@
@@ -62617,9 +62405,6 @@ index 0d58fe3..0000000
 -}
 -
 -#endif /* _ASPM_H */
-diff --git a/drivers/staging/rdma/hfi1/chip.c b/drivers/staging/rdma/hfi1/chip.c
-deleted file mode 100644
-index d8cc329..0000000
 --- a/drivers/staging/rdma/hfi1/chip.c
 +++ /dev/null
 @@ -1,14703 +0,0 @@
@@ -77326,9 +77111,6 @@ index d8cc329..0000000
 -	 */
 -	dc_shutdown(dd);
 -}
-diff --git a/drivers/staging/rdma/hfi1/chip.h b/drivers/staging/rdma/hfi1/chip.h
-deleted file mode 100644
-index 66a3279..0000000
 --- a/drivers/staging/rdma/hfi1/chip.h
 +++ /dev/null
 @@ -1,1368 +0,0 @@
@@ -78700,9 +78482,6 @@ index 66a3279..0000000
 -};
 -
 -#endif /* _CHIP_H */
-diff --git a/drivers/staging/rdma/hfi1/chip_registers.h b/drivers/staging/rdma/hfi1/chip_registers.h
-deleted file mode 100644
-index 8744de6..0000000
 --- a/drivers/staging/rdma/hfi1/chip_registers.h
 +++ /dev/null
 @@ -1,1307 +0,0 @@
@@ -80013,9 +79792,6 @@ index 8744de6..0000000
 -#define CCE_MSIX_PBA_OFFSET 0X0110000
 -
 -#endif          /* DEF_CHIP_REG */
-diff --git a/drivers/staging/rdma/hfi1/common.h b/drivers/staging/rdma/hfi1/common.h
-deleted file mode 100644
-index fcc9c21..0000000
 --- a/drivers/staging/rdma/hfi1/common.h
 +++ /dev/null
 @@ -1,411 +0,0 @@
@@ -80430,9 +80206,6 @@ index fcc9c21..0000000
 -	return (rhf >> RHF_EGR_OFFSET_SHIFT) & RHF_EGR_OFFSET_MASK;
 -}
 -#endif /* _COMMON_H */
-diff --git a/drivers/staging/rdma/hfi1/debugfs.c b/drivers/staging/rdma/hfi1/debugfs.c
-deleted file mode 100644
-index dbab9d9..0000000
 --- a/drivers/staging/rdma/hfi1/debugfs.c
 +++ /dev/null
 @@ -1,1145 +0,0 @@
@@ -81581,9 +81354,6 @@ index dbab9d9..0000000
 -}
 -
 -#endif
-diff --git a/drivers/staging/rdma/hfi1/debugfs.h b/drivers/staging/rdma/hfi1/debugfs.h
-deleted file mode 100644
-index b6fb681..0000000
 --- a/drivers/staging/rdma/hfi1/debugfs.h
 +++ /dev/null
 @@ -1,75 +0,0 @@
@@ -81662,9 +81432,6 @@ index b6fb681..0000000
 -#endif
 -
 -#endif                          /* _HFI1_DEBUGFS_H */
-diff --git a/drivers/staging/rdma/hfi1/device.c b/drivers/staging/rdma/hfi1/device.c
-deleted file mode 100644
-index bf64b5a..0000000
 --- a/drivers/staging/rdma/hfi1/device.c
 +++ /dev/null
 @@ -1,183 +0,0 @@
@@ -81851,9 +81618,6 @@ index bf64b5a..0000000
 -
 -	unregister_chrdev_region(hfi1_dev, HFI1_NMINORS);
 -}
-diff --git a/drivers/staging/rdma/hfi1/device.h b/drivers/staging/rdma/hfi1/device.h
-deleted file mode 100644
-index c3ec19c..0000000
 --- a/drivers/staging/rdma/hfi1/device.h
 +++ /dev/null
 @@ -1,60 +0,0 @@
@@ -81917,9 +81681,6 @@ index c3ec19c..0000000
 -void dev_cleanup(void);
 -
 -#endif                          /* _HFI1_DEVICE_H */
-diff --git a/drivers/staging/rdma/hfi1/dma.c b/drivers/staging/rdma/hfi1/dma.c
-deleted file mode 100644
-index 7e8dab8..0000000
 --- a/drivers/staging/rdma/hfi1/dma.c
 +++ /dev/null
 @@ -1,183 +0,0 @@
@@ -82106,9 +81867,6 @@ index 7e8dab8..0000000
 -	.alloc_coherent = hfi1_dma_alloc_coherent,
 -	.free_coherent = hfi1_dma_free_coherent
 -};
-diff --git a/drivers/staging/rdma/hfi1/driver.c b/drivers/staging/rdma/hfi1/driver.c
-deleted file mode 100644
-index c75b0ae..0000000
 --- a/drivers/staging/rdma/hfi1/driver.c
 +++ /dev/null
 @@ -1,1404 +0,0 @@
@@ -83516,9 +83274,6 @@ index c75b0ae..0000000
 -		   rhf_rcv_type(packet->rhf));
 -	return RHF_RCV_CONTINUE;
 -}
-diff --git a/drivers/staging/rdma/hfi1/efivar.c b/drivers/staging/rdma/hfi1/efivar.c
-deleted file mode 100644
-index 106349f..0000000
 --- a/drivers/staging/rdma/hfi1/efivar.c
 +++ /dev/null
 @@ -1,164 +0,0 @@
@@ -83686,9 +83441,6 @@ index 106349f..0000000
 -
 -	return read_efi_var(name, size, return_data);
 -}
-diff --git a/drivers/staging/rdma/hfi1/efivar.h b/drivers/staging/rdma/hfi1/efivar.h
-deleted file mode 100644
-index 94e9e70..0000000
 --- a/drivers/staging/rdma/hfi1/efivar.h
 +++ /dev/null
 @@ -1,57 +0,0 @@
@@ -83749,9 +83501,6 @@ index 94e9e70..0000000
 -		      unsigned long *size, void **return_data);
 -
 -#endif /* _HFI1_EFIVAR_H */
-diff --git a/drivers/staging/rdma/hfi1/eprom.c b/drivers/staging/rdma/hfi1/eprom.c
-deleted file mode 100644
-index 36b7794..0000000
 --- a/drivers/staging/rdma/hfi1/eprom.c
 +++ /dev/null
 @@ -1,102 +0,0 @@
@@ -83857,9 +83606,6 @@ index 36b7794..0000000
 -done_asic:
 -	return ret;
 -}
-diff --git a/drivers/staging/rdma/hfi1/eprom.h b/drivers/staging/rdma/hfi1/eprom.h
-deleted file mode 100644
-index d41f0b1..0000000
 --- a/drivers/staging/rdma/hfi1/eprom.h
 +++ /dev/null
 @@ -1,52 +0,0 @@
@@ -83915,9 +83661,6 @@ index d41f0b1..0000000
 -
 -int eprom_init(struct hfi1_devdata *dd);
 -int handle_eprom_command(struct file *fp, const struct hfi1_cmd *cmd);
-diff --git a/drivers/staging/rdma/hfi1/file_ops.c b/drivers/staging/rdma/hfi1/file_ops.c
-deleted file mode 100644
-index 7a5b0e6..0000000
 --- a/drivers/staging/rdma/hfi1/file_ops.c
 +++ /dev/null
 @@ -1,1498 +0,0 @@
@@ -85419,9 +85162,6 @@ index 7a5b0e6..0000000
 -{
 -	user_remove(dd);
 -}
-diff --git a/drivers/staging/rdma/hfi1/firmware.c b/drivers/staging/rdma/hfi1/firmware.c
-deleted file mode 100644
-index ed680fd..0000000
 --- a/drivers/staging/rdma/hfi1/firmware.c
 +++ /dev/null
 @@ -1,2056 +0,0 @@
@@ -87481,9 +87221,6 @@ index ed680fd..0000000
 -	dd_dev_info(dd, "GUID %llx",
 -		    (unsigned long long)dd->base_guid);
 -}
-diff --git a/drivers/staging/rdma/hfi1/hfi.h b/drivers/staging/rdma/hfi1/hfi.h
-deleted file mode 100644
-index 4417a0f..0000000
 --- a/drivers/staging/rdma/hfi1/hfi.h
 +++ /dev/null
 @@ -1,1950 +0,0 @@
@@ -89437,9 +89174,6 @@ index 4417a0f..0000000
 -int hfi1_tempsense_rd(struct hfi1_devdata *dd, struct hfi1_temp *temp);
 -
 -#endif                          /* _HFI1_KERNEL_H */
-diff --git a/drivers/staging/rdma/hfi1/init.c b/drivers/staging/rdma/hfi1/init.c
-deleted file mode 100644
-index 5cc492e..0000000
 --- a/drivers/staging/rdma/hfi1/init.c
 +++ /dev/null
 @@ -1,1818 +0,0 @@
@@ -91261,9 +90995,6 @@ index 5cc492e..0000000
 -bail:
 -	return ret;
 -}
-diff --git a/drivers/staging/rdma/hfi1/intr.c b/drivers/staging/rdma/hfi1/intr.c
-deleted file mode 100644
-index 65348d1..0000000
 --- a/drivers/staging/rdma/hfi1/intr.c
 +++ /dev/null
 @@ -1,200 +0,0 @@
@@ -91467,9 +91198,6 @@ index 65348d1..0000000
 -done:
 -	spin_unlock_irqrestore(&dd->uctxt_lock, flags);
 -}
-diff --git a/drivers/staging/rdma/hfi1/iowait.h b/drivers/staging/rdma/hfi1/iowait.h
-deleted file mode 100644
-index 2ec6ef3..0000000
 --- a/drivers/staging/rdma/hfi1/iowait.h
 +++ /dev/null
 @@ -1,300 +0,0 @@
@@ -91773,9 +91501,6 @@ index 2ec6ef3..0000000
 -}
 -
 -#endif
-diff --git a/drivers/staging/rdma/hfi1/mad.c b/drivers/staging/rdma/hfi1/mad.c
-deleted file mode 100644
-index 17882dc..0000000
 --- a/drivers/staging/rdma/hfi1/mad.c
 +++ /dev/null
 @@ -1,4443 +0,0 @@
@@ -96222,9 +95947,6 @@ index 17882dc..0000000
 -
 -	return IB_MAD_RESULT_FAILURE;
 -}
-diff --git a/drivers/staging/rdma/hfi1/mad.h b/drivers/staging/rdma/hfi1/mad.h
-deleted file mode 100644
-index 55ee086..0000000
 --- a/drivers/staging/rdma/hfi1/mad.h
 +++ /dev/null
 @@ -1,437 +0,0 @@
@@ -96665,9 +96387,6 @@ index 55ee086..0000000
 -		    COUNTER_MASK(1, 4))
 -
 -#endif				/* _HFI1_MAD_H */
-diff --git a/drivers/staging/rdma/hfi1/mmu_rb.c b/drivers/staging/rdma/hfi1/mmu_rb.c
-deleted file mode 100644
-index b7a80aa..0000000
 --- a/drivers/staging/rdma/hfi1/mmu_rb.c
 +++ /dev/null
 @@ -1,325 +0,0 @@
@@ -96996,9 +96715,6 @@ index b7a80aa..0000000
 -	}
 -	spin_unlock_irqrestore(&handler->lock, flags);
 -}
-diff --git a/drivers/staging/rdma/hfi1/mmu_rb.h b/drivers/staging/rdma/hfi1/mmu_rb.h
-deleted file mode 100644
-index 7a57b9c..0000000
 --- a/drivers/staging/rdma/hfi1/mmu_rb.h
 +++ /dev/null
 @@ -1,76 +0,0 @@
@@ -97078,9 +96794,6 @@ index 7a57b9c..0000000
 -					unsigned long);
 -
 -#endif /* _HFI1_MMU_RB_H */
-diff --git a/drivers/staging/rdma/hfi1/opa_compat.h b/drivers/staging/rdma/hfi1/opa_compat.h
-deleted file mode 100644
-index 6ef3c1c..0000000
 --- a/drivers/staging/rdma/hfi1/opa_compat.h
 +++ /dev/null
 @@ -1,111 +0,0 @@
@@ -97195,9 +96908,6 @@ index 6ef3c1c..0000000
 -};
 -
 -#endif /* _LINUX_H */
-diff --git a/drivers/staging/rdma/hfi1/pcie.c b/drivers/staging/rdma/hfi1/pcie.c
-deleted file mode 100644
-index 0bac21e..0000000
 --- a/drivers/staging/rdma/hfi1/pcie.c
 +++ /dev/null
 @@ -1,1338 +0,0 @@
@@ -98539,9 +98249,6 @@ index 0bac21e..0000000
 -	dd_dev_info(dd, "%s: done\n", __func__);
 -	return ret;
 -}
-diff --git a/drivers/staging/rdma/hfi1/pio.c b/drivers/staging/rdma/hfi1/pio.c
-deleted file mode 100644
-index c67b9ad..0000000
 --- a/drivers/staging/rdma/hfi1/pio.c
 +++ /dev/null
 @@ -1,2073 +0,0 @@
@@ -100618,9 +100325,6 @@ index c67b9ad..0000000
 -	kfree(dd->cr_base);
 -	dd->cr_base = NULL;
 -}
-diff --git a/drivers/staging/rdma/hfi1/pio.h b/drivers/staging/rdma/hfi1/pio.h
-deleted file mode 100644
-index 464cbd2..0000000
 --- a/drivers/staging/rdma/hfi1/pio.h
 +++ /dev/null
 @@ -1,328 +0,0 @@
@@ -100952,9 +100656,6 @@ index 464cbd2..0000000
 -void seg_pio_copy_end(struct pio_buf *pbuf);
 -
 -#endif /* _PIO_H */
-diff --git a/drivers/staging/rdma/hfi1/pio_copy.c b/drivers/staging/rdma/hfi1/pio_copy.c
-deleted file mode 100644
-index 8c25e1b..0000000
 --- a/drivers/staging/rdma/hfi1/pio_copy.c
 +++ /dev/null
 @@ -1,867 +0,0 @@
@@ -101825,9 +101526,6 @@ index 8c25e1b..0000000
 -	this_cpu_dec(*pbuf->sc->buffers_allocated);
 -	preempt_enable();
 -}
-diff --git a/drivers/staging/rdma/hfi1/platform.c b/drivers/staging/rdma/hfi1/platform.c
-deleted file mode 100644
-index 03df932..0000000
 --- a/drivers/staging/rdma/hfi1/platform.c
 +++ /dev/null
 @@ -1,907 +0,0 @@
@@ -102738,9 +102436,6 @@ index 03df932..0000000
 -bail:
 -	ppd->driver_link_ready = 0;
 -}
-diff --git a/drivers/staging/rdma/hfi1/platform.h b/drivers/staging/rdma/hfi1/platform.h
-deleted file mode 100644
-index e2c2161..0000000
 --- a/drivers/staging/rdma/hfi1/platform.h
 +++ /dev/null
 @@ -1,305 +0,0 @@
@@ -103049,9 +102744,6 @@ index e2c2161..0000000
 -void tune_serdes(struct hfi1_pportdata *ppd);
 -
 -#endif			/*__PLATFORM_H*/
-diff --git a/drivers/staging/rdma/hfi1/qp.c b/drivers/staging/rdma/hfi1/qp.c
-deleted file mode 100644
-index 1a942ff..0000000
 --- a/drivers/staging/rdma/hfi1/qp.c
 +++ /dev/null
 @@ -1,973 +0,0 @@
@@ -104028,9 +103720,6 @@ index 1a942ff..0000000
 -
 -	rcu_read_unlock();
 -}
-diff --git a/drivers/staging/rdma/hfi1/qp.h b/drivers/staging/rdma/hfi1/qp.h
-deleted file mode 100644
-index e7bc8d6..0000000
 --- a/drivers/staging/rdma/hfi1/qp.h
 +++ /dev/null
 @@ -1,160 +0,0 @@
@@ -104194,9 +103883,6 @@ index e7bc8d6..0000000
 -int mtu_to_path_mtu(u32 mtu);
 -void hfi1_error_port_qps(struct hfi1_ibport *ibp, u8 sl);
 -#endif /* _QP_H */
-diff --git a/drivers/staging/rdma/hfi1/qsfp.c b/drivers/staging/rdma/hfi1/qsfp.c
-deleted file mode 100644
-index 2441669..0000000
 --- a/drivers/staging/rdma/hfi1/qsfp.c
 +++ /dev/null
 @@ -1,632 +0,0 @@
@@ -104832,9 +104518,6 @@ index 2441669..0000000
 -	}
 -	return sofar;
 -}
-diff --git a/drivers/staging/rdma/hfi1/qsfp.h b/drivers/staging/rdma/hfi1/qsfp.h
-deleted file mode 100644
-index dadc66c..0000000
 --- a/drivers/staging/rdma/hfi1/qsfp.h
 +++ /dev/null
 @@ -1,240 +0,0 @@
@@ -105078,9 +104761,6 @@ index dadc66c..0000000
 -		   int len);
 -int one_qsfp_read(struct hfi1_pportdata *ppd, u32 target, int addr, void *bp,
 -		  int len);
-diff --git a/drivers/staging/rdma/hfi1/rc.c b/drivers/staging/rdma/hfi1/rc.c
-deleted file mode 100644
-index 792f15e..0000000
 --- a/drivers/staging/rdma/hfi1/rc.c
 +++ /dev/null
 @@ -1,2580 +0,0 @@
@@ -107664,9 +107344,6 @@ index 792f15e..0000000
 -		} /* Out of sequence NAK */
 -	} /* QP Request NAKs */
 -}
-diff --git a/drivers/staging/rdma/hfi1/ruc.c b/drivers/staging/rdma/hfi1/ruc.c
-deleted file mode 100644
-index a659aec..0000000
 --- a/drivers/staging/rdma/hfi1/ruc.c
 +++ /dev/null
 @@ -1,979 +0,0 @@
@@ -108649,9 +108326,6 @@ index a659aec..0000000
 -	if (qp->state == IB_QPS_SQD && last == qp->s_cur)
 -		qp->s_draining = 0;
 -}
-diff --git a/drivers/staging/rdma/hfi1/sdma.c b/drivers/staging/rdma/hfi1/sdma.c
-deleted file mode 100644
-index f9befc0..0000000
 --- a/drivers/staging/rdma/hfi1/sdma.c
 +++ /dev/null
 @@ -1,3054 +0,0 @@
@@ -111709,9 +111383,6 @@ index f9befc0..0000000
 -		  CCE_INT_FORCE + (8 * (IS_SDMA_START / 64)),
 -		  sde->progress_mask);
 -}
-diff --git a/drivers/staging/rdma/hfi1/sdma.h b/drivers/staging/rdma/hfi1/sdma.h
-deleted file mode 100644
-index 8f50c99..0000000
 --- a/drivers/staging/rdma/hfi1/sdma.h
 +++ /dev/null
 @@ -1,1082 +0,0 @@
@@ -112797,9 +112468,6 @@ index 8f50c99..0000000
 -void sdma_update_lmc(struct hfi1_devdata *dd, u64 mask, u32 lid);
 -
 -#endif
-diff --git a/drivers/staging/rdma/hfi1/sdma_txreq.h b/drivers/staging/rdma/hfi1/sdma_txreq.h
-deleted file mode 100644
-index bf7d777..0000000
 --- a/drivers/staging/rdma/hfi1/sdma_txreq.h
 +++ /dev/null
 @@ -1,135 +0,0 @@
@@ -112938,9 +112606,6 @@ index bf7d777..0000000
 -}
 -
 -#endif                          /* HFI1_SDMA_TXREQ_H */
-diff --git a/drivers/staging/rdma/hfi1/sysfs.c b/drivers/staging/rdma/hfi1/sysfs.c
-deleted file mode 100644
-index 91fc2ae..0000000
 --- a/drivers/staging/rdma/hfi1/sysfs.c
 +++ /dev/null
 @@ -1,785 +0,0 @@
@@ -113729,9 +113394,6 @@ index 91fc2ae..0000000
 -		kobject_put(&ppd->sc2vl_kobj);
 -	}
 -}
-diff --git a/drivers/staging/rdma/hfi1/trace.c b/drivers/staging/rdma/hfi1/trace.c
-deleted file mode 100644
-index caddb2a..0000000
 --- a/drivers/staging/rdma/hfi1/trace.c
 +++ /dev/null
 @@ -1,236 +0,0 @@
@@ -113971,9 +113633,6 @@ index caddb2a..0000000
 -__hfi1_trace_fn(TID);
 -__hfi1_trace_fn(MMU);
 -__hfi1_trace_fn(IOCTL);
-diff --git a/drivers/staging/rdma/hfi1/trace.h b/drivers/staging/rdma/hfi1/trace.h
-deleted file mode 100644
-index a6c1adf..0000000
 --- a/drivers/staging/rdma/hfi1/trace.h
 +++ /dev/null
 @@ -1,1370 +0,0 @@
@@ -115347,9 +115006,6 @@ index a6c1adf..0000000
 -#define TRACE_INCLUDE_PATH .
 -#define TRACE_INCLUDE_FILE trace
 -#include <trace/define_trace.h>
-diff --git a/drivers/staging/rdma/hfi1/twsi.c b/drivers/staging/rdma/hfi1/twsi.c
-deleted file mode 100644
-index e82e52a..0000000
 --- a/drivers/staging/rdma/hfi1/twsi.c
 +++ /dev/null
 @@ -1,489 +0,0 @@
@@ -115842,9 +115498,6 @@ index e82e52a..0000000
 -bail:
 -	return ret;
 -}
-diff --git a/drivers/staging/rdma/hfi1/twsi.h b/drivers/staging/rdma/hfi1/twsi.h
-deleted file mode 100644
-index 5b8a5b5..0000000
 --- a/drivers/staging/rdma/hfi1/twsi.h
 +++ /dev/null
 @@ -1,65 +0,0 @@
@@ -115913,9 +115566,6 @@ index 5b8a5b5..0000000
 -		     const void *buffer, int len);
 -
 -#endif /* _TWSI_H */
-diff --git a/drivers/staging/rdma/hfi1/uc.c b/drivers/staging/rdma/hfi1/uc.c
-deleted file mode 100644
-index df773d4..0000000
 --- a/drivers/staging/rdma/hfi1/uc.c
 +++ /dev/null
 @@ -1,604 +0,0 @@
@@ -116523,12 +116173,9 @@ index df773d4..0000000
 -op_err:
 -	hfi1_rc_error(qp, IB_WC_LOC_QP_OP_ERR);
 -}
-diff --git a/drivers/staging/rdma/hfi1/ud.c b/drivers/staging/rdma/hfi1/ud.c
-deleted file mode 100644
-index 1e503ad..0000000
 --- a/drivers/staging/rdma/hfi1/ud.c
 +++ /dev/null
-@@ -1,911 +0,0 @@
+@@ -1,910 +0,0 @@
 -/*
 - * Copyright(c) 2015, 2016 Intel Corporation.
 - *
@@ -117346,7 +116993,6 @@ index 1e503ad..0000000
 -	    opcode == IB_OPCODE_UD_SEND_ONLY_WITH_IMMEDIATE) {
 -		wc.ex.imm_data = ohdr->u.ud.imm_data;
 -		wc.wc_flags = IB_WC_WITH_IMM;
--		tlen -= sizeof(u32);
 -	} else if (opcode == IB_OPCODE_UD_SEND_ONLY) {
 -		wc.ex.imm_data = 0;
 -		wc.wc_flags = 0;
@@ -117440,9 +117086,6 @@ index 1e503ad..0000000
 -drop:
 -	ibp->rvp.n_pkt_drops++;
 -}
-diff --git a/drivers/staging/rdma/hfi1/user_exp_rcv.c b/drivers/staging/rdma/hfi1/user_exp_rcv.c
-deleted file mode 100644
-index 1b640a3..0000000
 --- a/drivers/staging/rdma/hfi1/user_exp_rcv.c
 +++ /dev/null
 @@ -1,1050 +0,0 @@
@@ -118496,9 +118139,6 @@ index 1b640a3..0000000
 -
 -	fdata->entry_to_rb[tnode->rcventry - base] = NULL;
 -}
-diff --git a/drivers/staging/rdma/hfi1/user_exp_rcv.h b/drivers/staging/rdma/hfi1/user_exp_rcv.h
-deleted file mode 100644
-index 9bc8d9f..0000000
 --- a/drivers/staging/rdma/hfi1/user_exp_rcv.h
 +++ /dev/null
 @@ -1,79 +0,0 @@
@@ -118581,9 +118221,6 @@ index 9bc8d9f..0000000
 -int hfi1_user_exp_rcv_invalid(struct file *, struct hfi1_tid_info *);
 -
 -#endif /* _HFI1_USER_EXP_RCV_H */
-diff --git a/drivers/staging/rdma/hfi1/user_pages.c b/drivers/staging/rdma/hfi1/user_pages.c
-deleted file mode 100644
-index 88e10b5f..0000000
 --- a/drivers/staging/rdma/hfi1/user_pages.c
 +++ /dev/null
 @@ -1,135 +0,0 @@
@@ -118722,9 +118359,6 @@ index 88e10b5f..0000000
 -		up_write(&mm->mmap_sem);
 -	}
 -}
-diff --git a/drivers/staging/rdma/hfi1/user_sdma.c b/drivers/staging/rdma/hfi1/user_sdma.c
-deleted file mode 100644
-index 29f4795..0000000
 --- a/drivers/staging/rdma/hfi1/user_sdma.c
 +++ /dev/null
 @@ -1,1625 +0,0 @@
@@ -120353,9 +119987,6 @@ index 29f4795..0000000
 -		return 1;
 -	return 0;
 -}
-diff --git a/drivers/staging/rdma/hfi1/user_sdma.h b/drivers/staging/rdma/hfi1/user_sdma.h
-deleted file mode 100644
-index b9240e3..0000000
 --- a/drivers/staging/rdma/hfi1/user_sdma.h
 +++ /dev/null
 @@ -1,84 +0,0 @@
@@ -120443,9 +120074,6 @@ index b9240e3..0000000
 -int hfi1_user_sdma_free_queues(struct hfi1_filedata *);
 -int hfi1_user_sdma_process_request(struct file *, struct iovec *, unsigned long,
 -				   unsigned long *);
-diff --git a/drivers/staging/rdma/hfi1/verbs.c b/drivers/staging/rdma/hfi1/verbs.c
-deleted file mode 100644
-index ae92ac5..0000000
 --- a/drivers/staging/rdma/hfi1/verbs.c
 +++ /dev/null
 @@ -1,1762 +0,0 @@
@@ -122211,9 +121839,6 @@ index ae92ac5..0000000
 -
 -	process_becn(ppd, sl, rlid, lqpn, rqpn, svc_type);
 -}
-diff --git a/drivers/staging/rdma/hfi1/verbs.h b/drivers/staging/rdma/hfi1/verbs.h
-deleted file mode 100644
-index 3ee2239..0000000
 --- a/drivers/staging/rdma/hfi1/verbs.h
 +++ /dev/null
 @@ -1,530 +0,0 @@
@@ -122747,9 +122372,6 @@ index 3ee2239..0000000
 -extern const u32 ib_hfi1_rnr_table[];
 -
 -#endif                          /* HFI1_VERBS_H */
-diff --git a/drivers/staging/rdma/hfi1/verbs_txreq.c b/drivers/staging/rdma/hfi1/verbs_txreq.c
-deleted file mode 100644
-index bc95c41..0000000
 --- a/drivers/staging/rdma/hfi1/verbs_txreq.c
 +++ /dev/null
 @@ -1,149 +0,0 @@
@@ -122902,9 +122524,6 @@ index bc95c41..0000000
 -	kmem_cache_destroy(dev->verbs_txreq_cache);
 -	dev->verbs_txreq_cache = NULL;
 -}
-diff --git a/drivers/staging/rdma/hfi1/verbs_txreq.h b/drivers/staging/rdma/hfi1/verbs_txreq.h
-deleted file mode 100644
-index 1cf69b2..0000000
 --- a/drivers/staging/rdma/hfi1/verbs_txreq.h
 +++ /dev/null
 @@ -1,116 +0,0 @@
@@ -123024,6 +122643,3 @@ index 1cf69b2..0000000
 -void verbs_txreq_exit(struct hfi1_ibdev *dev);
 -
 -#endif                         /* HFI1_VERBS_TXREQ_H */
--- 
-1.8.5.6
-

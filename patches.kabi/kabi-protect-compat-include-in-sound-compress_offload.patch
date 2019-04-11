@@ -1,0 +1,30 @@
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: kABI: protect linux/compat.h include in sound compress_offload.c
+Patch-mainline: never, kabi
+References: kabi
+
+In 4.4.178, commit e162927cd1617028a3e2e775a24a89fccb7f67fd (ALSA:
+compress: add support for 32bit calls in a 64bit kernel), upstream
+commit c10368897e104c008c610915a218f0fe5fa4ec96 added linux/compat.h
+include to sound/core/compress_offload.c and it made some of the symbols
+defined.
+
+Protect the include by __GENKSYMS__ to satisfy the kABI checker.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ sound/core/compress_offload.c |    2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/sound/core/compress_offload.c
++++ b/sound/core/compress_offload.c
+@@ -38,7 +38,9 @@
+ #include <linux/uio.h>
+ #include <linux/uaccess.h>
+ #include <linux/module.h>
++#ifndef __GENKSYMS__
+ #include <linux/compat.h>
++#endif
+ #include <sound/core.h>
+ #include <sound/initval.h>
+ #include <sound/compress_params.h>

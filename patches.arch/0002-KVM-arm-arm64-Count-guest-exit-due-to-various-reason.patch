@@ -17,18 +17,16 @@ Signed-off-by: Amit Singh Tomar <amittomer25@gmail.com>
 Signed-off-by: Christoffer Dall <christoffer.dall@linaro.org>
 Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 ---
- arch/arm/include/asm/kvm_host.h   | 6 ++++++
- arch/arm/kvm/arm.c                | 1 +
- arch/arm/kvm/guest.c              | 6 ++++++
- arch/arm/kvm/handle_exit.c        | 3 +++
- arch/arm/kvm/mmio.c               | 3 +++
- arch/arm64/include/asm/kvm_host.h | 6 ++++++
- arch/arm64/kvm/guest.c            | 9 +++++++++
- arch/arm64/kvm/handle_exit.c      | 3 +++
- 8 files changed, 37 insertions(+)
+ arch/arm/include/asm/kvm_host.h   |    6 ++++++
+ arch/arm/kvm/arm.c                |    1 +
+ arch/arm/kvm/guest.c              |    6 ++++++
+ arch/arm/kvm/handle_exit.c        |    3 +++
+ arch/arm/kvm/mmio.c               |    2 ++
+ arch/arm64/include/asm/kvm_host.h |    6 ++++++
+ arch/arm64/kvm/guest.c            |    9 +++++++++
+ arch/arm64/kvm/handle_exit.c      |    3 +++
+ 8 files changed, 36 insertions(+)
 
-diff --git a/arch/arm/include/asm/kvm_host.h b/arch/arm/include/asm/kvm_host.h
-index 6692982..f9f2779 100644
 --- a/arch/arm/include/asm/kvm_host.h
 +++ b/arch/arm/include/asm/kvm_host.h
 @@ -150,6 +150,12 @@ struct kvm_vcpu_stat {
@@ -44,11 +42,9 @@ index 6692982..f9f2779 100644
  };
  
  int kvm_vcpu_preferred_target(struct kvm_vcpu_init *init);
-diff --git a/arch/arm/kvm/arm.c b/arch/arm/kvm/arm.c
-index a521552..0fb4a0e 100644
 --- a/arch/arm/kvm/arm.c
 +++ b/arch/arm/kvm/arm.c
-@@ -601,6 +601,7 @@ int kvm_arch_vcpu_ioctl_run(struct kvm_vcpu *vcpu, struct kvm_run *run)
+@@ -601,6 +601,7 @@ int kvm_arch_vcpu_ioctl_run(struct kvm_v
  		ret = kvm_call_hyp(__kvm_vcpu_run, vcpu);
  
  		vcpu->mode = OUTSIDE_GUEST_MODE;
@@ -56,8 +52,6 @@ index a521552..0fb4a0e 100644
  		/*
  		 * Back from guest
  		 *************************************************************/
-diff --git a/arch/arm/kvm/guest.c b/arch/arm/kvm/guest.c
-index 3705fc2..99361f1 100644
 --- a/arch/arm/kvm/guest.c
 +++ b/arch/arm/kvm/guest.c
 @@ -33,6 +33,12 @@
@@ -73,11 +67,9 @@ index 3705fc2..99361f1 100644
  	{ NULL }
  };
  
-diff --git a/arch/arm/kvm/handle_exit.c b/arch/arm/kvm/handle_exit.c
-index 95f12b2..3ede90d 100644
 --- a/arch/arm/kvm/handle_exit.c
 +++ b/arch/arm/kvm/handle_exit.c
-@@ -42,6 +42,7 @@ static int handle_hvc(struct kvm_vcpu *vcpu, struct kvm_run *run)
+@@ -42,6 +42,7 @@ static int handle_hvc(struct kvm_vcpu *v
  
  	trace_kvm_hvc(*vcpu_pc(vcpu), *vcpu_reg(vcpu, 0),
  		      kvm_vcpu_hvc_get_imm(vcpu));
@@ -85,7 +77,7 @@ index 95f12b2..3ede90d 100644
  
  	ret = kvm_psci_call(vcpu);
  	if (ret < 0) {
-@@ -89,9 +90,11 @@ static int kvm_handle_wfx(struct kvm_vcpu *vcpu, struct kvm_run *run)
+@@ -98,9 +99,11 @@ static int kvm_handle_wfx(struct kvm_vcp
  {
  	if (kvm_vcpu_get_hsr(vcpu) & HSR_WFI_IS_WFE) {
  		trace_kvm_wfx(*vcpu_pc(vcpu), true);
@@ -97,24 +89,23 @@ index 95f12b2..3ede90d 100644
  		kvm_vcpu_block(vcpu);
  	}
  
-diff --git a/arch/arm/kvm/mmio.c b/arch/arm/kvm/mmio.c
-index 3a10c9f..7f33b20 100644
 --- a/arch/arm/kvm/mmio.c
 +++ b/arch/arm/kvm/mmio.c
-@@ -210,8 +210,11 @@ int io_mem_abort(struct kvm_vcpu *vcpu, struct kvm_run *run,
- 
- 	if (!ret) {
+@@ -211,12 +211,14 @@ int io_mem_abort(struct kvm_vcpu *vcpu,
  		/* We handled the access successfully in the kernel. */
+ 		if (!is_write)
+ 			memcpy(run->mmio.data, data_buf, len);
 +		vcpu->stat.mmio_exit_kernel++;
  		kvm_handle_mmio_return(vcpu, run);
  		return 1;
-+	} else {
-+		vcpu->stat.mmio_exit_user++;
  	}
  
+ 	if (is_write)
+ 		memcpy(run->mmio.data, data_buf, len);
++	vcpu->stat.mmio_exit_user++;
  	run->exit_reason	= KVM_EXIT_MMIO;
-diff --git a/arch/arm64/include/asm/kvm_host.h b/arch/arm64/include/asm/kvm_host.h
-index a35ce72..19504aa 100644
+ 	return 0;
+ }
 --- a/arch/arm64/include/asm/kvm_host.h
 +++ b/arch/arm64/include/asm/kvm_host.h
 @@ -197,6 +197,12 @@ struct kvm_vcpu_stat {
@@ -130,8 +121,6 @@ index a35ce72..19504aa 100644
  };
  
  int kvm_vcpu_preferred_target(struct kvm_vcpu_init *init);
-diff --git a/arch/arm64/kvm/guest.c b/arch/arm64/kvm/guest.c
-index 3039f08..2c6bc17 100644
 --- a/arch/arm64/kvm/guest.c
 +++ b/arch/arm64/kvm/guest.c
 @@ -34,7 +34,16 @@
@@ -151,11 +140,9 @@ index 3039f08..2c6bc17 100644
  	{ NULL }
  };
  
-diff --git a/arch/arm64/kvm/handle_exit.c b/arch/arm64/kvm/handle_exit.c
-index 15f0477..8bddae1 100644
 --- a/arch/arm64/kvm/handle_exit.c
 +++ b/arch/arm64/kvm/handle_exit.c
-@@ -39,6 +39,7 @@ static int handle_hvc(struct kvm_vcpu *vcpu, struct kvm_run *run)
+@@ -39,6 +39,7 @@ static int handle_hvc(struct kvm_vcpu *v
  
  	trace_kvm_hvc_arm64(*vcpu_pc(vcpu), vcpu_get_reg(vcpu, 0),
  			    kvm_vcpu_hvc_get_imm(vcpu));
@@ -163,7 +150,7 @@ index 15f0477..8bddae1 100644
  
  	ret = kvm_psci_call(vcpu);
  	if (ret < 0) {
-@@ -71,9 +72,11 @@ static int kvm_handle_wfx(struct kvm_vcpu *vcpu, struct kvm_run *run)
+@@ -71,9 +72,11 @@ static int kvm_handle_wfx(struct kvm_vcp
  {
  	if (kvm_vcpu_get_hsr(vcpu) & ESR_ELx_WFx_ISS_WFE) {
  		trace_kvm_wfx_arm64(*vcpu_pc(vcpu), true);
@@ -175,6 +162,3 @@ index 15f0477..8bddae1 100644
  		kvm_vcpu_block(vcpu);
  	}
  
--- 
-2.11.0
-

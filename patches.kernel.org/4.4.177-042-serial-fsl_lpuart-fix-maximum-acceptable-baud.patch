@@ -1,0 +1,37 @@
+From: Tomonori Sakita <tomonori.sakita@sord.co.jp>
+Date: Mon, 21 Jan 2019 17:34:16 +0900
+Subject: [PATCH] serial: fsl_lpuart: fix maximum acceptable baud rate with
+ over-sampling
+References: bnc#1012382
+Patch-mainline: 4.4.177
+Git-commit: 815d835b7ba46685c316b000013367dacb2b461b
+
+[ Upstream commit 815d835b7ba46685c316b000013367dacb2b461b ]
+
+Using over-sampling ratio, lpuart can accept baud rate upto uartclk / 4.
+
+Signed-off-by: Tomonori Sakita <tomonori.sakita@sord.co.jp>
+Signed-off-by: Atsushi Nemoto <atsushi.nemoto@sord.co.jp>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/tty/serial/fsl_lpuart.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/tty/serial/fsl_lpuart.c b/drivers/tty/serial/fsl_lpuart.c
+index 8b5ec9386f0f..1544a7cc76ff 100644
+--- a/drivers/tty/serial/fsl_lpuart.c
++++ b/drivers/tty/serial/fsl_lpuart.c
+@@ -1409,7 +1409,7 @@ lpuart32_set_termios(struct uart_port *port, struct ktermios *termios,
+ 	}
+ 
+ 	/* ask the core to calculate the divisor */
+-	baud = uart_get_baud_rate(port, termios, old, 50, port->uartclk / 16);
++	baud = uart_get_baud_rate(port, termios, old, 50, port->uartclk / 4);
+ 
+ 	spin_lock_irqsave(&sport->port.lock, flags);
+ 
+-- 
+2.21.0
+
