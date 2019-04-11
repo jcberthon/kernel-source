@@ -41,27 +41,23 @@ Cc: Jisheng Zhang <jszhang@marvell.com>
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 Signed-off-by: Mian Yousaf Kaukab <yousaf.kaukab@suse.com>
 ---
- arch/arm/Kconfig         |   2 +-
- arch/arm64/kernel/psci.c |  99 +-------------------------------------
- drivers/firmware/psci.c  | 120 +++++++++++++++++++++++++++++++++++++++++++++++
- include/linux/psci.h     |   3 ++
+ arch/arm/Kconfig         |    2 
+ arch/arm64/kernel/psci.c |   99 --------------------------------------
+ drivers/firmware/psci.c  |  120 +++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/psci.h     |    3 +
  4 files changed, 126 insertions(+), 98 deletions(-)
 
-diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 7c51d844f57d..b0c3d0bcb1f5 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -2144,7 +2144,7 @@ config ARCH_SUSPEND_POSSIBLE
+@@ -2160,7 +2160,7 @@ config ARCH_SUSPEND_POSSIBLE
  	def_bool y
  
  config ARM_CPU_SUSPEND
--	def_bool PM_SLEEP
-+	def_bool PM_SLEEP || ARM_PSCI_FW
+-	def_bool PM_SLEEP || BL_SWITCHER
++	def_bool PM_SLEEP || BL_SWITCHER || ARM_PSCI_FW
+ 	depends on ARCH_SUSPEND_POSSIBLE
  
  config ARCH_HIBERNATION_POSSIBLE
- 	bool
-diff --git a/arch/arm64/kernel/psci.c b/arch/arm64/kernel/psci.c
-index f67f35b6edb1..42816bebb1e0 100644
 --- a/arch/arm64/kernel/psci.c
 +++ b/arch/arm64/kernel/psci.c
 @@ -20,7 +20,6 @@
@@ -146,7 +142,7 @@ index f67f35b6edb1..42816bebb1e0 100644
  
  static int __init cpu_psci_cpu_init(unsigned int cpu)
  {
-@@ -178,38 +110,11 @@ static int cpu_psci_cpu_kill(unsigned int cpu)
+@@ -178,38 +110,11 @@ static int cpu_psci_cpu_kill(unsigned in
  }
  #endif
  
@@ -187,8 +183,6 @@ index f67f35b6edb1..42816bebb1e0 100644
  #endif
  	.cpu_init	= cpu_psci_cpu_init,
  	.cpu_prepare	= cpu_psci_cpu_prepare,
-diff --git a/drivers/firmware/psci.c b/drivers/firmware/psci.c
-index f25cd79c8a79..11bfee8b79a9 100644
 --- a/drivers/firmware/psci.c
 +++ b/drivers/firmware/psci.c
 @@ -14,6 +14,7 @@
@@ -212,7 +206,7 @@ index f25cd79c8a79..11bfee8b79a9 100644
  #include <asm/cputype.h>
  #include <asm/system_misc.h>
  #include <asm/smp_plat.h>
-@@ -244,6 +247,123 @@ static int __init psci_features(u32 psci_func_id)
+@@ -244,6 +247,123 @@ static int __init psci_features(u32 psci
  			      psci_func_id, 0, 0);
  }
  
@@ -336,8 +330,6 @@ index f25cd79c8a79..11bfee8b79a9 100644
  static int psci_system_suspend(unsigned long unused)
  {
  	return invoke_psci_fn(PSCI_FN_NATIVE(1_0, SYSTEM_SUSPEND),
-diff --git a/include/linux/psci.h b/include/linux/psci.h
-index 12c4865457ad..393efe2edf9a 100644
 --- a/include/linux/psci.h
 +++ b/include/linux/psci.h
 @@ -24,6 +24,9 @@ bool psci_tos_resident_on(int cpu);
@@ -350,6 +342,3 @@ index 12c4865457ad..393efe2edf9a 100644
  struct psci_operations {
  	int (*cpu_suspend)(u32 state, unsigned long entry_point);
  	int (*cpu_off)(u32 state);
--- 
-2.11.0
-

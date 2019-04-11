@@ -267,7 +267,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	.config_init	= &ip101a_g_config_init,
 --- a/drivers/net/phy/micrel.c
 +++ b/drivers/net/phy/micrel.c
-@@ -636,7 +636,7 @@ static struct phy_driver ksphy_driver[]
+@@ -666,7 +666,7 @@ static struct phy_driver ksphy_driver[]
  	.phy_id		= PHY_ID_KS8737,
  	.phy_id_mask	= 0x00fffff0,
  	.name		= "Micrel KS8737",
@@ -276,7 +276,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
  	.driver_data	= &ks8737_type,
  	.config_init	= kszphy_config_init,
-@@ -650,8 +650,7 @@ static struct phy_driver ksphy_driver[]
+@@ -680,8 +680,7 @@ static struct phy_driver ksphy_driver[]
  	.phy_id		= PHY_ID_KSZ8021,
  	.phy_id_mask	= 0x00ffffff,
  	.name		= "Micrel KSZ8021 or KSZ8031",
@@ -286,7 +286,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
  	.driver_data	= &ksz8021_type,
  	.probe		= kszphy_probe,
-@@ -666,8 +665,7 @@ static struct phy_driver ksphy_driver[]
+@@ -696,8 +695,7 @@ static struct phy_driver ksphy_driver[]
  	.phy_id		= PHY_ID_KSZ8031,
  	.phy_id_mask	= 0x00ffffff,
  	.name		= "Micrel KSZ8031",
@@ -296,7 +296,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
  	.driver_data	= &ksz8021_type,
  	.probe		= kszphy_probe,
-@@ -682,8 +680,7 @@ static struct phy_driver ksphy_driver[]
+@@ -712,8 +710,7 @@ static struct phy_driver ksphy_driver[]
  	.phy_id		= PHY_ID_KSZ8041,
  	.phy_id_mask	= 0x00fffff0,
  	.name		= "Micrel KSZ8041",
@@ -306,7 +306,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
  	.driver_data	= &ksz8041_type,
  	.probe		= kszphy_probe,
-@@ -698,8 +695,7 @@ static struct phy_driver ksphy_driver[]
+@@ -728,8 +725,7 @@ static struct phy_driver ksphy_driver[]
  	.phy_id		= PHY_ID_KSZ8041RNLI,
  	.phy_id_mask	= 0x00fffff0,
  	.name		= "Micrel KSZ8041RNLI",
@@ -316,7 +316,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
  	.driver_data	= &ksz8041_type,
  	.probe		= kszphy_probe,
-@@ -714,8 +710,7 @@ static struct phy_driver ksphy_driver[]
+@@ -744,8 +740,7 @@ static struct phy_driver ksphy_driver[]
  	.phy_id		= PHY_ID_KSZ8051,
  	.phy_id_mask	= 0x00fffff0,
  	.name		= "Micrel KSZ8051",
@@ -326,7 +326,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
  	.driver_data	= &ksz8051_type,
  	.probe		= kszphy_probe,
-@@ -730,7 +725,7 @@ static struct phy_driver ksphy_driver[]
+@@ -760,7 +755,7 @@ static struct phy_driver ksphy_driver[]
  	.phy_id		= PHY_ID_KSZ8001,
  	.name		= "Micrel KSZ8001 or KS8721",
  	.phy_id_mask	= 0x00ffffff,
@@ -335,7 +335,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
  	.driver_data	= &ksz8041_type,
  	.probe		= kszphy_probe,
-@@ -745,7 +740,7 @@ static struct phy_driver ksphy_driver[]
+@@ -775,7 +770,7 @@ static struct phy_driver ksphy_driver[]
  	.phy_id		= PHY_ID_KSZ8081,
  	.name		= "Micrel KSZ8081 or KSZ8091",
  	.phy_id_mask	= 0x00fffff0,
@@ -344,16 +344,16 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
  	.driver_data	= &ksz8081_type,
  	.probe		= kszphy_probe,
-@@ -760,7 +755,7 @@ static struct phy_driver ksphy_driver[]
+@@ -790,7 +785,7 @@ static struct phy_driver ksphy_driver[]
  	.phy_id		= PHY_ID_KSZ8061,
  	.name		= "Micrel KSZ8061",
  	.phy_id_mask	= 0x00fffff0,
 -	.features	= (PHY_BASIC_FEATURES | SUPPORTED_Pause),
 +	.features	= PHY_BASIC_FEATURES,
  	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
- 	.config_init	= kszphy_config_init,
+ 	.config_init	= ksz8061_config_init,
  	.config_aneg	= genphy_config_aneg,
-@@ -773,7 +768,7 @@ static struct phy_driver ksphy_driver[]
+@@ -803,7 +798,7 @@ static struct phy_driver ksphy_driver[]
  	.phy_id		= PHY_ID_KSZ9021,
  	.phy_id_mask	= 0x000ffffe,
  	.name		= "Micrel KSZ9021 Gigabit PHY",
@@ -362,7 +362,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
  	.driver_data	= &ksz9021_type,
  	.config_init	= ksz9021_config_init,
-@@ -789,7 +784,7 @@ static struct phy_driver ksphy_driver[]
+@@ -819,7 +814,7 @@ static struct phy_driver ksphy_driver[]
  	.phy_id		= PHY_ID_KSZ9031,
  	.phy_id_mask	= 0x00fffff0,
  	.name		= "Micrel KSZ9031 Gigabit PHY",
@@ -371,7 +371,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
  	.driver_data	= &ksz9021_type,
  	.config_init	= ksz9031_config_init,
-@@ -803,7 +798,6 @@ static struct phy_driver ksphy_driver[]
+@@ -833,7 +828,6 @@ static struct phy_driver ksphy_driver[]
  	.phy_id		= PHY_ID_KSZ8873MLL,
  	.phy_id_mask	= 0x00fffff0,
  	.name		= "Micrel KSZ8873MLL Switch",
@@ -379,7 +379,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	.flags		= PHY_HAS_MAGICANEG,
  	.config_init	= kszphy_config_init,
  	.config_aneg	= ksz8873mll_config_aneg,
-@@ -814,7 +808,7 @@ static struct phy_driver ksphy_driver[]
+@@ -844,7 +838,7 @@ static struct phy_driver ksphy_driver[]
  	.phy_id		= PHY_ID_KSZ886X,
  	.phy_id_mask	= 0x00fffff0,
  	.name		= "Micrel KSZ886X Switch",
@@ -413,7 +413,7 @@ Signed-off-by: Matthias Brugger <mbrugger@suse.com>
  	.config_aneg = genphy_config_aneg,
 --- a/drivers/net/phy/phy_device.c
 +++ b/drivers/net/phy/phy_device.c
-@@ -1587,6 +1587,25 @@ static int phy_probe(struct device *dev)
+@@ -1591,6 +1591,25 @@ static int phy_probe(struct device *dev)
  	of_set_phy_supported(phydev);
  	phydev->advertising = phydev->supported;
  

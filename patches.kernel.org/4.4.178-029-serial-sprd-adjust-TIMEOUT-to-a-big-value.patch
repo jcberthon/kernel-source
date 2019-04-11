@@ -1,0 +1,38 @@
+From: Wei Qiao <wei.qiao@spreadtrum.com>
+Date: Mon, 27 Mar 2017 14:06:42 +0800
+Subject: [PATCH] serial: sprd: adjust TIMEOUT to a big value
+References: bnc#1012382
+Patch-mainline: 4.4.178
+Git-commit: e1dc9b08051a2c2e694edf48d1e704f07c7c143c
+
+commit e1dc9b08051a2c2e694edf48d1e704f07c7c143c upstream.
+
+SPRD_TIMEOUT was 256, which is too small to wait until the status
+switched to workable in a while loop, so that the earlycon could
+not work correctly.
+
+Signed-off-by: Wei Qiao <wei.qiao@spreadtrum.com>
+Signed-off-by: Chunyan Zhang <chunyan.zhang@spreadtrum.com>
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/tty/serial/sprd_serial.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/tty/serial/sprd_serial.c b/drivers/tty/serial/sprd_serial.c
+index 1e302caaa450..176f0a2bf9d9 100644
+--- a/drivers/tty/serial/sprd_serial.c
++++ b/drivers/tty/serial/sprd_serial.c
+@@ -36,7 +36,7 @@
+ #define SPRD_FIFO_SIZE		128
+ #define SPRD_DEF_RATE		26000000
+ #define SPRD_BAUD_IO_LIMIT	3000000
+-#define SPRD_TIMEOUT		256
++#define SPRD_TIMEOUT		256000
+ 
+ /* the offset of serial registers and BITs for them */
+ /* data registers */
+-- 
+2.21.0
+

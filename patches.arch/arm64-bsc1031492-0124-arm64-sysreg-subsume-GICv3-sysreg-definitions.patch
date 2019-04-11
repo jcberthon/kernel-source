@@ -25,13 +25,11 @@ Cc: Will Deacon <will.deacon@arm.com>
 Signed-off-by: Alexander Graf <agraf@suse.de>
 
 ---
- arch/arm64/include/asm/arch_gicv3.h | 81 ++++++-------------------------------
- arch/arm64/include/asm/sysreg.h     | 52 ++++++++++++++++++++++++
- arch/arm64/kernel/head.S            |  8 ++--
+ arch/arm64/include/asm/arch_gicv3.h |   81 +++++-------------------------------
+ arch/arm64/include/asm/sysreg.h     |   52 +++++++++++++++++++++++
+ arch/arm64/kernel/head.S            |    8 +--
  3 files changed, 69 insertions(+), 72 deletions(-)
 
-diff --git a/arch/arm64/include/asm/arch_gicv3.h b/arch/arm64/include/asm/arch_gicv3.h
-index f37e3a2..1a98bc8 100644
 --- a/arch/arm64/include/asm/arch_gicv3.h
 +++ b/arch/arm64/include/asm/arch_gicv3.h
 @@ -20,69 +20,14 @@
@@ -122,7 +120,7 @@ index f37e3a2..1a98bc8 100644
  	isb();
  }
  
-@@ -107,7 +52,7 @@ static inline u64 gic_read_iar_common(void)
+@@ -107,7 +52,7 @@ static inline u64 gic_read_iar_common(vo
  {
  	u64 irqstat;
  
@@ -131,7 +129,7 @@ index f37e3a2..1a98bc8 100644
  	dsb(sy);
  	return irqstat;
  }
-@@ -124,7 +69,7 @@ static inline u64 gic_read_iar_cavium_thunderx(void)
+@@ -124,7 +69,7 @@ static inline u64 gic_read_iar_cavium_th
  	u64 irqstat;
  
  	nops(8);
@@ -140,7 +138,7 @@ index f37e3a2..1a98bc8 100644
  	nops(4);
  	mb();
  
-@@ -133,40 +78,40 @@ static inline u64 gic_read_iar_cavium_thunderx(void)
+@@ -133,40 +78,40 @@ static inline u64 gic_read_iar_cavium_th
  
  static inline void gic_write_pmr(u32 val)
  {
@@ -188,8 +186,6 @@ index f37e3a2..1a98bc8 100644
  }
  
  #define gic_read_typer(c)		readq_relaxed(c)
-diff --git a/arch/arm64/include/asm/sysreg.h b/arch/arm64/include/asm/sysreg.h
-index 616c958..fced1c7 100644
 --- a/arch/arm64/include/asm/sysreg.h
 +++ b/arch/arm64/include/asm/sysreg.h
 @@ -149,9 +149,20 @@
@@ -261,13 +257,11 @@ index 616c958..fced1c7 100644
  /* Common SCTLR_ELx flags. */
  #define SCTLR_ELx_EE    (1 << 25)
  #define SCTLR_ELx_I	(1 << 12)
-diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index 361a24a..fdb77e2 100644
 --- a/arch/arm64/kernel/head.S
 +++ b/arch/arm64/kernel/head.S
-@@ -551,14 +551,14 @@ CPU_LE(	bic	x0, x0, #(3 << 24)	)	// Clear the EE and E0E bits for EL1
- 	cmp	x0, #1
- 	b.ne	3f
+@@ -548,14 +548,14 @@ CPU_LE(	bic	x0, x0, #(3 << 24)	)	// Clea
+ 	ubfx	x0, x0, #24, #4
+ 	cbz	x0, 3f
  
 -	mrs_s	x0, ICC_SRE_EL2
 +	mrs_s	x0, SYS_ICC_SRE_EL2
@@ -284,6 +278,3 @@ index 361a24a..fdb77e2 100644
  
  3:
  #endif
--- 
-1.8.5.6
-

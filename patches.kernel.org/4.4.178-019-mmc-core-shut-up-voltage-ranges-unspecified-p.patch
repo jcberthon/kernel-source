@@ -1,0 +1,51 @@
+From: Russell King <rmk+kernel@arm.linux.org.uk>
+Date: Fri, 29 Jan 2016 09:43:50 +0000
+Subject: [PATCH] mmc: core: shut up "voltage-ranges unspecified" pr_info()
+References: bnc#1012382
+Patch-mainline: 4.4.178
+Git-commit: 10a16a01d8f72e80f4780e40cf3122f4caffa411
+
+commit 10a16a01d8f72e80f4780e40cf3122f4caffa411 upstream.
+
+Each time a driver such as sdhci-esdhc-imx is probed, we get a info
+printk complaining that the DT voltage-ranges property has not been
+specified.
+
+However, the DT binding specifically says that the voltage-ranges
+property is optional.  That means we should not be complaining that
+DT hasn't specified this property: by indicating that it's optional,
+it is valid not to have the property in DT.
+
+Silence the warning if the property is missing.
+
+Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/mmc/core/core.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index e2e927d1f7e4..df074f8c7cb7 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1220,8 +1220,12 @@ int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
+ 
+ 	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
+ 	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
+-	if (!voltage_ranges || !num_ranges) {
+-		pr_info("%s: voltage-ranges unspecified\n", np->full_name);
++	if (!voltage_ranges) {
++		pr_debug("%s: voltage-ranges unspecified\n", np->full_name);
++		return -EINVAL;
++	}
++	if (!num_ranges) {
++		pr_err("%s: voltage-ranges empty\n", np->full_name);
+ 		return -EINVAL;
+ 	}
+ 
+-- 
+2.21.0
+

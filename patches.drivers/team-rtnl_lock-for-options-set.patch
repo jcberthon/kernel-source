@@ -17,9 +17,9 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
 
 --- a/drivers/net/team/team.c
 +++ b/drivers/net/team/team.c
-@@ -2427,9 +2427,13 @@ static int team_nl_cmd_options_set(struc
+@@ -2439,9 +2439,13 @@ static int team_nl_cmd_options_set(struc
+ 	int i;
  	struct nlattr *nl_option;
- 	LIST_HEAD(opt_inst_list);
  
 +	rtnl_lock();
 +
@@ -33,7 +33,7 @@ Acked-by: Benjamin Poirier <bpoirier@suse.com>
  
  	err = -EINVAL;
  	if (!info->attrs[TEAM_ATTR_LIST_OPTION]) {
-@@ -2556,7 +2560,8 @@ static int team_nl_cmd_options_set(struc
+@@ -2571,7 +2575,8 @@ static int team_nl_cmd_options_set(struc
  
  team_put:
  	team_nl_team_put(team);

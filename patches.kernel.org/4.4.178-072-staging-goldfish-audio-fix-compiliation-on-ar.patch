@@ -1,0 +1,37 @@
+From: Greg Hackmann <ghackmann@google.com>
+Date: Fri, 26 Feb 2016 19:00:18 +0000
+Subject: [PATCH] staging: goldfish: audio: fix compiliation on arm
+References: bnc#1012382
+Patch-mainline: 4.4.178
+Git-commit: 4532150762ceb0d6fd765ebcb3ba6966fbb8faab
+
+[ Upstream commit 4532150762ceb0d6fd765ebcb3ba6966fbb8faab ]
+
+We do actually need slab.h, by luck we get it on other platforms but not
+always on ARM. Include it properly.
+
+Signed-off-by: Greg Hackmann <ghackmann@google.com>
+Signed-off-by: Jin Qian <jinqian@android.com>
+Signed-off-by: Alan <alan@linux.intel.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ drivers/staging/goldfish/goldfish_audio.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/staging/goldfish/goldfish_audio.c b/drivers/staging/goldfish/goldfish_audio.c
+index b0927e49d0a8..6ca288bf4059 100644
+--- a/drivers/staging/goldfish/goldfish_audio.c
++++ b/drivers/staging/goldfish/goldfish_audio.c
+@@ -26,6 +26,7 @@
+ #include <linux/sched.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/uaccess.h>
++#include <linux/slab.h>
+ #include <linux/goldfish.h>
+ 
+ MODULE_AUTHOR("Google, Inc.");
+-- 
+2.21.0
+
